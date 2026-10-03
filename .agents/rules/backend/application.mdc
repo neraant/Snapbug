@@ -7,6 +7,10 @@ globs: packages/server/src/modules/**/application/**
 
 One use-case per file: `{verb}.use-case.ts`, `{Verb}UseCase.execute`. Tests: [tdd](./tdd.mdc).
 
+Every use-case is an endpoint. The same `{verb}` is a procedure on `{context}.contract.ts`, a handler on `{context}.router.ts`, and a function in `{context}.api.ts` that calls `execute`. Another module may still call it through your port; the endpoint stays.
+
+Every use-case is an endpoint. The same `{verb}` is a procedure on `{context}.contract.ts`, a handler on `{context}.router.ts`, and a function in `{context}.api.ts` that calls `execute`. Another module may still call it through your port; the endpoint stays.
+
 ## Logic
 
 - Policy & workflow (uniqueness, order of steps)
@@ -18,12 +22,14 @@ Repo reports facts; use-case turns them into policy.
 
 ## Do
 
-- Inject collaborator types (`AuthService`, `UserPort`)
-- Cross-module via port only
+- Inject collaborator types (`AuthService`, `UserPort`, your repository)
+- Cross-module via port only. The port returns **their** DTO; you load **your** rows and `Mapper.toDto`
+- No foreign ids → `[]` and skip your query
 
 ## Don't
 
 - Drizzle / tables / oRPC / other module's repo
+- Ask another module to query or return your aggregate
 - `create({ email, password })` on a repo that has an entity — that is `Factory` + `save` in the **provider** use-case (or service), not in the [port adapter](./port-adapter.mdc)
 
 ```ts
@@ -33,5 +39,15 @@ async execute(input: CreateUserInputDtoType): Promise<CreateUserOutputDtoType> {
 
   const passwordHash = await this.authService.hashPassword(input.password);
   return await this.userPort.create({ email: input.email, name: input.name, passwordHash });
+}
+```
+
+```ts
+async execute(input: FindOrdersInputDtoType): Promise<FindOrdersOutputDtoType> {
+  const users = await this.userPort.findManyByOrganizationId({ organizationId: input.organizationId });
+  if (users.length === 0) return [];
+
+  const orders = await this.orderRepository.findManyByUserIds(users.map((user) => user.id));
+  return orders.map((order) => OrderMapper.toDto(order));
 }
 ```

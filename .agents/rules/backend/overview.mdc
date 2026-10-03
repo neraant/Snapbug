@@ -28,7 +28,10 @@ contract → router → api → use-case → repository | service | port→adapt
 
 ## Rules
 
+- Every use-case is an endpoint: same verb on contract, router, and api. See [application](./application.mdc).
+- Every use-case is an endpoint: same verb on contract, router, and api. See [application](./application.mdc).
 - Depend inward only (table, top → bottom).
+- One aggregate per repository. Another module's data comes through its port (its DTO); then your repository loads your rows.
 - No cross-module repo imports — use a port.
 - Zod: `@workspace/validation`. Routers `implement` the contract; lower layers do not import oRPC.
 - Naming: [naming](../common/naming.mdc) (singular).
@@ -40,6 +43,7 @@ contract → router → api → use-case → repository | service | port→adapt
 | Workflow, policy, AppError       | [application](./application.mdc) |
 | Invariants of one model (no I/O) | [entity](./entity.mdc)           |
 | Hash, crypto                     | [service](./service.mdc)         |
-| Persist / load                   | [repository](./repository.mdc)   |
+| Persist / load this aggregate    | [repository](./repository.mdc)   |
+| Read that needs another module   | their port, then your use-case   |
 
 Never in router or api.

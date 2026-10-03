@@ -16,6 +16,7 @@
     "@workspace/server": "workspace:*",
     "@workspace/validation": "workspace:*",
     "@workspace/analytics": "workspace:*",
+    "@workspace/sdk": "workspace:*",
     "@orpc/server": "1.14.14",
     "lucide-react": "1.40.0",
     "next": "16.2.6",

@@ -12,7 +12,8 @@ globs: packages/server/src/modules/**/{port,adapter}/**
 
 ## Return types
 
-- Port methods return **shared DTOs** from `@workspace/validation` where possible (e.g. `UserModelType`). Consumer-only shapes (e.g. `UserCredentials` on the port) stay on the port — no extra validation type if it is just an intersection.
+- A port method is the **provider's** model and returns that shared DTO (`UserModelType`). The consumer loads its own aggregate.
+- Consumer-only shapes (e.g. `UserCredentials` on the port) stay on the port — no extra validation type if it is just an intersection.
 - No entity pass-through (`independent-modules`: consumer must not import `*.entity.ts`).
 - No provider `PersistedType` + `toPersistence` on the port boundary — mapping belongs in the provider application layer.
 
@@ -26,6 +27,7 @@ globs: packages/server/src/modules/**/{port,adapter}/**
 
 - Consumer importing provider repo / use-case / entity
 - Port importing adapter
+- A port method whose result is another module's list
 - Logic in the adapter (lazy shortcut — add a use-case or service method instead)
 
 ```ts
@@ -33,6 +35,7 @@ globs: packages/server/src/modules/**/{port,adapter}/**
 export type UserPort = {
   create: (input: CreateUserData) => Promise<UserModelType>;
   findByEmail: (email: string) => Promise<UserModelType | null>;
+  findManyByOrganizationId: (input: FindUsersInputDtoType) => Promise<UserModelType[]>;
 };
 
 // identity/adapter/user.adapter.ts

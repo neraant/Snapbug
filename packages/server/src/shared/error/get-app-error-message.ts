@@ -8,6 +8,8 @@ const ERROR_MESSAGES: Record<ErrorCode, string> = {
   [ERROR_CODES.EMAIL_ALREADY_TAKEN]: "This email is already taken",
   [ERROR_CODES.USER_NOT_FOUND]: "User not found",
   [ERROR_CODES.UNAUTHORIZED]: "You need to sign in to continue",
+  [ERROR_CODES.INVALID_API_KEY]: "This API key is invalid",
+  [ERROR_CODES.ORGANIZATION_NOT_FOUND]: "Organization not found",
   [ERROR_CODES.INTERNAL_SERVER_ERROR]: "Something went wrong. Please try again",
 };
 

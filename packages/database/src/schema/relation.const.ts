@@ -4,52 +4,66 @@ import { membershipTable } from "@workspace/database/schema/membership.const";
 import { organizationTable } from "@workspace/database/schema/organization.const";
 import { projectTable } from "@workspace/database/schema/project.const";
 import { userTable } from "@workspace/database/schema/user.const";
-import { relations } from "drizzle-orm/_relations";
+import { defineRelations } from "drizzle-orm";
 
-export const userRelations = relations(userTable, ({ many }) => ({
-  memberships: many(membershipTable),
-  assignedBugReports: many(bugReportTable),
-}));
+const tables = {
+  apiKeyTable,
+  bugReportTable,
+  membershipTable,
+  organizationTable,
+  projectTable,
+  userTable,
+};
 
-export const organizationRelations = relations(organizationTable, ({ many }) => ({
-  memberships: many(membershipTable),
-  projects: many(projectTable),
-}));
-
-export const membershipRelations = relations(membershipTable, ({ one }) => ({
-  user: one(userTable, {
-    fields: [membershipTable.userId],
-    references: [userTable.id],
-  }),
-  organization: one(organizationTable, {
-    fields: [membershipTable.organizationId],
-    references: [organizationTable.id],
-  }),
-}));
-
-export const projectRelations = relations(projectTable, ({ one, many }) => ({
-  organization: one(organizationTable, {
-    fields: [projectTable.organizationId],
-    references: [organizationTable.id],
-  }),
-  apiKeys: many(apiKeyTable),
-  bugReports: many(bugReportTable),
-}));
-
-export const apiKeyRelations = relations(apiKeyTable, ({ one }) => ({
-  project: one(projectTable, {
-    fields: [apiKeyTable.projectId],
-    references: [projectTable.id],
-  }),
-}));
-
-export const bugReportRelations = relations(bugReportTable, ({ one }) => ({
-  project: one(projectTable, {
-    fields: [bugReportTable.projectId],
-    references: [projectTable.id],
-  }),
-  assignee: one(userTable, {
-    fields: [bugReportTable.assignedTo],
-    references: [userTable.id],
-  }),
+export const relations = defineRelations(tables, (relation) => ({
+  userTable: {
+    memberships: relation.many.membershipTable(),
+    assignedBugReports: relation.many.bugReportTable({
+      from: relation.userTable.id,
+      to: relation.bugReportTable.assignedTo,
+    }),
+  },
+  organizationTable: {
+    memberships: relation.many.membershipTable(),
+    projects: relation.many.projectTable(),
+  },
+  membershipTable: {
+    user: relation.one.userTable({
+      from: relation.membershipTable.userId,
+      to: relation.userTable.id,
+      optional: false,
+    }),
+    organization: relation.one.organizationTable({
+      from: relation.membershipTable.organizationId,
+      to: relation.organizationTable.id,
+      optional: false,
+    }),
+  },
+  projectTable: {
+    organization: relation.one.organizationTable({
+      from: relation.projectTable.organizationId,
+      to: relation.organizationTable.id,
+      optional: false,
+    }),
+    apiKeys: relation.many.apiKeyTable(),
+    bugReports: relation.many.bugReportTable(),
+  },
+  apiKeyTable: {
+    project: relation.one.projectTable({
+      from: relation.apiKeyTable.projectId,
+      to: relation.projectTable.id,
+      optional: false,
+    }),
+  },
+  bugReportTable: {
+    project: relation.one.projectTable({
+      from: relation.bugReportTable.projectId,
+      to: relation.projectTable.id,
+      optional: false,
+    }),
+    assignee: relation.one.userTable({
+      from: relation.bugReportTable.assignedTo,
+      to: relation.userTable.id,
+    }),
+  },
 }));

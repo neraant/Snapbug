@@ -11,8 +11,9 @@ export type CreateUserInputDtoType = z.infer<typeof createUserInputDtoSchema>;
 export const createUserOutputDtoSchema = userModelSchema;
 export type CreateUserOutputDtoType = z.infer<typeof createUserOutputDtoSchema>;
 
-export type CreateUserWithPasswordHashDtoType = {
-  email: string;
-  name: string;
-  passwordHash: string;
-};
+export const createUserWithPasswordHashInputDtoSchema = z.object({
+  email: z.email(),
+  name: z.string().min(1),
+  passwordHash: z.string().min(1),
+});
+export type CreateUserWithPasswordHashDtoType = z.infer<typeof createUserWithPasswordHashInputDtoSchema>;

@@ -26,6 +26,7 @@ In-memory aggregate. `{aggregate}.entity.ts`, `.factory.ts`, `.mapper.ts`, `.typ
 ## Don't
 
 - DB, HTTP, oRPC
+- A second mapper that copies a raw row to a DTO. The owner maps: `fromPersistence`, then `toDto`
 
 ```ts
 static fromPersistence(row: UserPersistedType): User {

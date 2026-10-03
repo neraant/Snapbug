@@ -29,7 +29,9 @@ Module folder = bounded context (`identity`, `auth`). Files inside = aggregate /
 
 `.router.ts` · `.contract.ts` · `.api.ts` · `.use-case.ts` · `.repository.ts` · `.service.ts` · `.entity.ts` · `.factory.ts` · `.mapper.ts` · `.types.ts` · `.port.ts` · `.adapter.ts` · `.middleware.ts` · `.const.ts` · `.schema.ts`
 
-## New RPC procedure
+## Use-case is an endpoint
+
+`application/{verb}.use-case.ts` is reachable as `{context}.{verb}`:
 
 `{context}.contract.ts` → `{context}.router.ts` → `{context}.api.ts` → `application/{verb}.use-case.ts`
 

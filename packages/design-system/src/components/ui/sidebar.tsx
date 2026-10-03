@@ -164,7 +164,7 @@ function Sidebar({
       <Column
         data-slot="sidebar"
         gap="none"
-        className={cn("h-full w-(--sidebar-width) bg-sidebar text-sidebar-foreground", className)}
+        className={cn("h-full w-(--sidebar-width) bg-sidebar p-2 text-sidebar-foreground", className)}
         {...props}
       >
         {children}
@@ -192,7 +192,7 @@ function Sidebar({
             <SheetTitle>Sidebar</SheetTitle>
             <SheetDescription>Displays the mobile sidebar.</SheetDescription>
           </SheetHeader>
-          <Column className="size-full gap-0">{children}</Column>
+          <Column className="size-full gap-0 p-2">{children}</Column>
         </SheetContent>
       </Sheet>
     );
@@ -236,7 +236,7 @@ function Sidebar({
           data-sidebar="sidebar"
           data-slot="sidebar-inner"
           gap="none"
-          className="size-full bg-sidebar group-data-[variant=floating]:rounded-none group-data-[variant=floating]:shadow-sm group-data-[variant=floating]:ring-1 group-data-[variant=floating]:ring-sidebar-border"
+          className="size-full bg-sidebar p-2 group-data-[collapsible=icon]:p-0 group-data-[variant=floating]:rounded-none group-data-[variant=floating]:shadow-sm group-data-[variant=floating]:ring-1 group-data-[variant=floating]:ring-sidebar-border"
         >
           {children}
         </Column>

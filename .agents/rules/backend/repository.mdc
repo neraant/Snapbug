@@ -5,30 +5,37 @@ globs: packages/server/src/modules/**/repository/**
 
 # Repository
 
-Drizzle only. `{Aggregate}Repository`. Speaks **entity**, not DTO. See [entity](./entity.mdc).
+Drizzle only. `{Aggregate}Repository`. One table. Speaks **entity**, not DTO. See [entity](./entity.mdc).
 
 ## Logic
 
-- Persist / load. Missing row → `NotFoundError`. Failed write → `InternalServerError`.
+- Persist / load **this** aggregate. Missing row → `NotFoundError`. Failed write → `InternalServerError`.
 - No policy (uniqueness, “may create if…”) — that is the use-case.
 
 ## Do
 
 - `constructor(private readonly db: DbClient = defaultDb)`
-- `find*` → entity via `Mapper.fromPersistence`
+- `find*` → entity via `Mapper.fromPersistence`. Order in this query.
+- A foreign id filters **your** column (`inArray(orderTable.userId, ids)`)
 - `save(entity)` → `Mapper.toPersistence` then insert/update
 - Transactions: `new UserRepository(tx)`; methods use `this.db`
 
 ## Don't
 
+- `with` / join that returns another aggregate's rows
+- Map a row to a DTO, or map a table you do not own
 - `create(plain object)` while an entity exists
 - Use-case rules, oRPC, other modules' repos
 - `db` / `tx` on public method params
 
 ```ts
-async findByEmail(email: string): Promise<User | null> {
-  const [row] = await this.db.select().from(userTable).where(eq(userTable.email, email));
-  return row ? UserMapper.fromPersistence(row) : null;
+async findManyByUserIds(userIds: string[]): Promise<Order[]> {
+  const rows = await this.db
+    .select()
+    .from(orderTable)
+    .where(inArray(orderTable.userId, userIds))
+    .orderBy(desc(orderTable.createdAt));
+  return rows.map((row) => OrderMapper.fromPersistence(row));
 }
 
 async save(user: User): Promise<void> {
