@@ -1,0 +1,25 @@
+---
+description: Module composition root ({context}.api.ts)
+globs: packages/server/src/modules/**/*.api.ts
+---
+
+# API
+
+Wire deps, call use-case. See [application](./application.mdc).
+
+## Do
+
+- Export async functions named like contract procedures (`signUp`)
+- `new UseCase(new AuthService(), new UserAdapter())` then `execute`
+- Shared dto types
+
+## Don't
+
+- Business logic, Drizzle, oRPC/contracts
+
+```ts
+export async function signUp(input: CreateUserInputDtoType): Promise<CreateUserOutputDtoType> {
+  const useCase = new SignUpUseCase(new AuthService(), new UserAdapter());
+  return await useCase.execute(input);
+}
+```

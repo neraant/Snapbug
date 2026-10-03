@@ -1,0 +1,41 @@
+{
+  "name": "@workspace/server",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "typecheck": "tsc --noEmit",
+    "test:unit": "vitest run"
+  },
+  "dependencies": {
+    "@flags-sdk/vercel": "1.4.9",
+    "@orpc/client": "1.14.14",
+    "@orpc/contract": "1.14.14",
+    "@orpc/openapi": "1.14.14",
+    "@orpc/server": "1.14.14",
+    "@orpc/zod": "1.14.14",
+    "@workspace/database": "workspace:*",
+    "@workspace/validation": "workspace:*",
+    "bcryptjs": "3.0.3",
+    "drizzle-orm": "1.0.0-rc.4",
+    "flags": "4.3.1",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@workspace/eslint-config": "workspace:*",
+    "@workspace/typescript-config": "workspace:*",
+    "eslint": "9",
+    "prettier": "3.8.3",
+    "typescript": "5",
+    "vitest": "4.1.10"
+  },
+  "exports": {
+    "./router": "./src/shared/router.const.ts",
+    "./orpc/*": "./src/shared/orpc/*.ts",
+    "./error/*": "./src/shared/error/*.ts",
+    "./modules/*": "./src/modules/*.ts",
+    "./shared/*": "./src/shared/*.ts"
+  }
+}

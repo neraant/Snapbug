@@ -1,0 +1,30 @@
+---
+description: Domain service conventions
+globs: packages/server/src/modules/**/service/**
+---
+
+# Service
+
+Tech capability, no SQL. `{Context}Service`. Wired in [api](./api.mdc).
+
+## Logic
+
+- How: hash, crypto, format
+- Not: policy (“email must be unique”) → [application](./application.mdc)
+
+## Do
+
+- Methods like `hashPassword`, `verifyPassword`
+
+## Don't
+
+- DB / repository / oRPC
+- Call from [router](./router.mdc)
+
+```ts
+export class AuthService {
+  async hashPassword(plain: string): Promise<string> {
+    return await bcrypt.hash(plain, ROUNDS);
+  }
+}
+```

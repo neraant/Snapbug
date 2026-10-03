@@ -1,0 +1,37 @@
+---
+description: Application use-case conventions
+globs: packages/server/src/modules/**/application/**
+---
+
+# Application
+
+One use-case per file: `{verb}.use-case.ts`, `{Verb}UseCase.execute`. Tests: [tdd](./tdd.mdc).
+
+## Logic
+
+- Policy & workflow (uniqueness, order of steps)
+- `AppError` + `ERROR_CODES`
+- Service for hash/crypto; repo or **port** for I/O
+- Input/output = shared dto types, not local aliases
+
+Repo reports facts; use-case turns them into policy.
+
+## Do
+
+- Inject collaborator types (`AuthService`, `UserPort`)
+- Cross-module via port only
+
+## Don't
+
+- Drizzle / tables / oRPC / other module's repo
+- `create({ email, password })` on a repo that has an entity — that is `Factory` + `save` in the **provider** use-case (or service), not in the [port adapter](./port-adapter.mdc)
+
+```ts
+async execute(input: CreateUserInputDtoType): Promise<CreateUserOutputDtoType> {
+  const existing = await this.userPort.findByEmail(input.email);
+  if (existing) throw new ConflictError(ERROR_CODES.EMAIL_ALREADY_TAKEN);
+
+  const passwordHash = await this.authService.hashPassword(input.password);
+  return await this.userPort.create({ email: input.email, name: input.name, passwordHash });
+}
+```

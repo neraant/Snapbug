@@ -1,0 +1,40 @@
+{
+  "name": "@workspace/database",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "typecheck": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio",
+    "db:seed": "tsx src/seed/index.ts"
+  },
+  "dependencies": {
+    "@workspace/validation": "workspace:*",
+    "bcryptjs": "3.0.3",
+    "dotenv": "17.4.2",
+    "drizzle-orm": "1.0.0-rc.4",
+    "pg": "8.23.0",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@workspace/eslint-config": "workspace:*",
+    "@workspace/typescript-config": "workspace:*",
+    "@types/pg": "8.23.1",
+    "drizzle-kit": "1.0.0-rc.4",
+    "eslint": "9",
+    "prettier": "3.8.3",
+    "tsx": "4.23.5",
+    "typescript": "5"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./schema": "./src/schema/index.ts",
+    "./schema/*": "./src/schema/*.ts",
+    "./env/*": "./src/env/*.ts",
+    "./seed/*": "./src/seed/*.ts"
+  }
+}

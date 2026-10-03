@@ -1,0 +1,41 @@
+---
+description: Entity, factory, mapper, types
+globs: packages/server/src/modules/**/entity/**
+---
+
+# Entity
+
+In-memory aggregate. `{aggregate}.entity.ts`, `.factory.ts`, `.mapper.ts`, `.types.ts`. See [repository](./repository.mdc).
+
+## Logic
+
+- OK: pure methods on this object
+- Not here: workflows, DB → [application](./application.mdc)
+
+## Do
+
+- Types: `{Aggregate}PersistedType` (full row, including secrets)
+- Entity: fields from persisted, `toObject()` → persisted snapshot
+- Factory: `create(input)` assigns id/dates **before** DB
+- Mapper:
+  - `fromPersistence(row)` → entity (load)
+  - `toPersistence(entity)` → row (`toObject()`)
+  - `toDto(entity)` → shared dto, strip secrets (`UserModelType`)
+- Do not **define** public DTOs here; import them from `@workspace/validation`
+
+## Don't
+
+- DB, HTTP, oRPC
+
+```ts
+static fromPersistence(row: UserPersistedType): User {
+  return new User(row);
+}
+static toPersistence(user: User): UserPersistedType {
+  return user.toObject();
+}
+static toDto(user: User): UserModelType {
+  const { id, name, email } = user.toObject();
+  return { id, name, email };
+}
+```

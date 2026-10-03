@@ -1,0 +1,25 @@
+{
+  "name": "@workspace/validation",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@workspace/eslint-config": "workspace:*",
+    "@workspace/typescript-config": "workspace:*",
+    "eslint": "9",
+    "prettier": "3.8.3",
+    "typescript": "5"
+  },
+  "exports": {
+    "./validation-texts": "./src/validation-texts.const.ts",
+    "./modules/*": "./src/modules/*.ts"
+  }
+}

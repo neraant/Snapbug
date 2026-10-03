@@ -1,0 +1,218 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+@source "../../../apps/**/*.{ts,tsx}";
+@source "../**/*.{ts,tsx}";
+
+:root {
+  /* Snapbug Warm Stone Neutral Palette (Light) */
+  --background: oklch(0.978 0.007 75); /* #FAF7F2 - Warm Stone-50 Canvas */
+  --foreground: oklch(0.215 0.006 56); /* #1C1917 - Stone-900 Primary Text */
+  --card: oklch(1 0 0); /* #FFFFFF - Pure Card Surface */
+  --card-foreground: oklch(0.215 0.006 56); /* #1C1917 - Stone-900 */
+  --popover: oklch(1 0 0); /* #FFFFFF - Popover & Menus */
+  --popover-foreground: oklch(0.215 0.006 56); /* #1C1917 - Stone-900 */
+
+  /* Snapbug Signature Brand Accent: Vibrant Warm Orange (Tailwind orange-500 #F97316) */
+  --primary: oklch(0.693 0.207 42.5); /* #F97316 - Brand Primary 500 */
+  --primary-foreground: oklch(1 0 0); /* #FFFFFF - On-brand text */
+
+  /* Secondary & Subtle Surfaces */
+  --secondary: oklch(0.965 0.003 75); /* #F5F5F4 - Stone-100 */
+  --secondary-foreground: oklch(0.442 0.008 56); /* #57534E - Stone-600 */
+  --muted: oklch(0.965 0.003 75); /* #F5F5F4 - Stone-100 */
+  --muted-foreground: oklch(0.553 0.012 56); /* #78716C - Stone-500 Muted Text */
+  --accent: oklch(0.982 0.022 65); /* #FFF7ED - Orange-50 Subtle Tint */
+  --accent-foreground: oklch(0.472 0.155 42); /* #9A3412 - Orange-800 Active Text */
+
+  /* Semantic Statuses (WCAG AA compliant) */
+  --destructive: oklch(0.627 0.222 25.5); /* #EF4444 - Critical Error / Bug Red */
+  --destructive-foreground: oklch(1 0 0);
+  --warning: oklch(0.755 0.178 72); /* #F59E0B - Amber Warning */
+  --warning-foreground: oklch(0.38 0.125 55); /* #92400E - Amber Text */
+  --success: oklch(0.704 0.165 158); /* #10B981 - Emerald Resolved */
+  --success-foreground: oklch(0.355 0.11 160); /* #065F46 - Emerald Text */
+  --info: oklch(0.672 0.168 238); /* #0EA5E9 - Sky Telemetry / New */
+  --info-foreground: oklch(0.382 0.108 235); /* #075985 - Sky Text */
+
+  /* Borders, Inputs, Focus Rings */
+  --border: oklch(0.92 0.005 60); /* #E7E5E4 - Stone-200 Subtle Border */
+  --input: oklch(0.92 0.005 60); /* #E7E5E4 - Stone-200 */
+  --ring: oklch(0.693 0.207 42.5); /* #F97316 - Orange Focus Ring */
+
+  /* Charts & Telemetry */
+  --chart-1: oklch(0.693 0.207 42.5); /* Brand Orange */
+  --chart-2: oklch(0.704 0.165 158); /* Emerald Success */
+  --chart-3: oklch(0.672 0.168 238); /* Sky Telemetry */
+  --chart-4: oklch(0.755 0.178 72); /* Amber High Severity */
+  --chart-5: oklch(0.627 0.222 25.5); /* Critical Red */
+
+  /* Navigation & Sidebar */
+  --sidebar: oklch(0.978 0.007 75);
+  --sidebar-foreground: oklch(0.215 0.006 56);
+  --sidebar-primary: oklch(0.693 0.207 42.5);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.982 0.022 65);
+  --sidebar-accent-foreground: oklch(0.472 0.155 42);
+  --sidebar-border: oklch(0.92 0.005 60);
+  --sidebar-ring: oklch(0.693 0.207 42.5);
+
+  /* Typography */
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-heading: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* Layout, Radius & Warm Elevation Shadows */
+  --radius: 0.625rem;
+  --spacing: 0.25rem;
+  --tracking-normal: -0.011em;
+
+  --shadow-2xs: 0 1px 2px 0 rgb(60 40 20 / 0.04);
+  --shadow-xs: 0 1px 2px 0 rgb(60 40 20 / 0.05);
+  --shadow-sm: 0 1px 3px 0 rgb(60 40 20 / 0.06), 0 1px 2px -1px rgb(60 40 20 / 0.04);
+  --shadow: 0 3px 6px -1px rgb(60 40 20 / 0.07), 0 2px 4px -2px rgb(60 40 20 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(60 40 20 / 0.07), 0 2px 4px -2px rgb(60 40 20 / 0.05);
+  --shadow-lg: 0 10px 15px -3px rgb(60 40 20 / 0.08), 0 4px 6px -4px rgb(60 40 20 / 0.05);
+  --shadow-xl: 0 20px 25px -5px rgb(60 40 20 / 0.1), 0 8px 10px -6px rgb(60 40 20 / 0.05);
+  --shadow-2xl: 0 25px 50px -12px rgb(60 40 20 / 0.18);
+}
+
+.dark {
+  /* Snapbug Deep Dark Stone Neutral Palette */
+  --background: oklch(0.185 0.006 50); /* #141210 - Deep Warm Dark Canvas */
+  --foreground: oklch(0.965 0.003 75); /* #F5F5F4 - Stone-100 Primary Text */
+  --card: oklch(0.215 0.006 56); /* #1C1917 - Stone-900 Card Surface */
+  --card-foreground: oklch(0.965 0.003 75); /* #F5F5F4 - Stone-100 */
+  --popover: oklch(0.215 0.006 56); /* #1C1917 - Stone-900 Surface */
+  --popover-foreground: oklch(0.965 0.003 75); /* #F5F5F4 - Stone-100 */
+
+  /* Dark Brand Primary (Enhanced contrast) */
+  --primary: oklch(0.693 0.207 42.5); /* #F97316 - Brand Orange 500 */
+  --primary-foreground: oklch(0.185 0.006 50); /* Dark text on bright orange */
+
+  /* Dark Neutral Surfaces */
+  --secondary: oklch(0.268 0.006 56); /* #292524 - Stone-800 Subtle Surface */
+  --secondary-foreground: oklch(0.85 0.005 60); /* #D6D3D1 - Stone-300 */
+  --muted: oklch(0.268 0.006 56); /* #292524 - Stone-800 */
+  --muted-foreground: oklch(0.695 0.008 60); /* #A8A29E - Stone-400 */
+  --accent: oklch(0.3 0.045 42); /* Dark Orange Subtle Tint */
+  --accent-foreground: oklch(0.88 0.08 65); /* #FED7AA - Warm Light Orange */
+
+  /* Dark Semantic Statuses */
+  --destructive: oklch(0.68 0.215 25); /* Bright Red for Dark Mode */
+  --destructive-foreground: oklch(1 0 0);
+  --warning: oklch(0.795 0.17 75); /* Bright Amber */
+  --warning-foreground: oklch(0.25 0.08 55);
+  --success: oklch(0.745 0.16 158); /* Bright Emerald */
+  --success-foreground: oklch(0.22 0.08 160);
+  --info: oklch(0.72 0.155 238); /* Bright Sky */
+  --info-foreground: oklch(0.22 0.075 235);
+
+  /* Dark Borders & Focus Rings */
+  --border: oklch(0.268 0.006 56); /* #292524 - Stone-800 */
+  --input: oklch(0.268 0.006 56); /* #292524 - Stone-800 */
+  --ring: oklch(0.693 0.207 42.5); /* Orange Focus Ring */
+
+  /* Dark Charts */
+  --chart-1: oklch(0.693 0.207 42.5);
+  --chart-2: oklch(0.745 0.16 158);
+  --chart-3: oklch(0.72 0.155 238);
+  --chart-4: oklch(0.795 0.17 75);
+  --chart-5: oklch(0.68 0.215 25);
+
+  /* Dark Sidebar */
+  --sidebar: oklch(0.185 0.006 50);
+  --sidebar-foreground: oklch(0.965 0.003 75);
+  --sidebar-primary: oklch(0.693 0.207 42.5);
+  --sidebar-primary-foreground: oklch(0.185 0.006 50);
+  --sidebar-accent: oklch(0.3 0.045 42);
+  --sidebar-accent-foreground: oklch(0.88 0.08 65);
+  --sidebar-border: oklch(0.268 0.006 56);
+  --sidebar-ring: oklch(0.693 0.207 42.5);
+
+  /* Dark Elevation Shadows */
+  --shadow-2xs: 0 1px 2px 0 rgb(0 0 0 / 0.25);
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.35), 0 1px 2px -1px rgb(0 0 0 / 0.25);
+  --shadow: 0 3px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.45), 0 2px 4px -2px rgb(0 0 0 / 0.35);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.35);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.55), 0 8px 10px -6px rgb(0 0 0 / 0.45);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.65);
+}
+
+@theme inline {
+  --font-heading: var(--font-heading);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --shadow-2xs: var(--shadow-2xs);
+  --shadow-xs: var(--shadow-xs);
+  --shadow-sm: var(--shadow-sm);
+  --shadow: var(--shadow);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-xl: var(--shadow-xl);
+  --shadow-2xl: var(--shadow-2xl);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}

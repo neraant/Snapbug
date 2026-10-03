@@ -1,0 +1,42 @@
+---
+description: TDD for application use-cases
+globs: packages/server/src/modules/**/application/**
+---
+
+# Application TDD
+
+Red → green → refactor. `{verb}.test.ts` next to `{verb}.use-case.ts`.
+
+## Cycle
+
+1. Failing `it` named by the **business outcome**
+2. Minimum in `execute`
+3. Refactor; no tests for wiring or lower layers
+
+## What to test
+
+- Policy branches the use-case owns
+- Thin use-case: one success (public dto, no secrets) + failure if `execute` surfaces a fact
+- Side effects that must **not** run on failure
+- Not: mapper fields, SQL, Zod, oRPC
+
+## How
+
+- Mock I/O only (port, service). Real mapper / entity
+- AAA with a blank line between arrange, act, assert
+- Assert `errorCode`, dto, collaborator args — not error classes
+
+```ts
+it("throws when email is taken", async () => {
+  const userPort = { findByEmail: vi.fn().mockResolvedValue(user), create: vi.fn() };
+  const authService = { hashPassword: vi.fn() };
+  const useCase = new SignUpUseCase(authService, userPort);
+
+  await expect(useCase.execute(input)).rejects.toMatchObject({
+    errorCode: ERROR_CODES.EMAIL_ALREADY_TAKEN,
+  });
+
+  expect(authService.hashPassword).not.toHaveBeenCalled();
+  expect(userPort.create).not.toHaveBeenCalled();
+});
+```

@@ -1,0 +1,10 @@
+import { validationText } from "@workspace/validation/validation-texts";
+import { z } from "zod";
+
+import { texts } from "@/client/modules/auth/consts/texts";
+
+export const signInSchema = z.object({
+  email: z.email(),
+  password: z.string().min(1, validationText.required(texts.field.password.label)),
+});
+export type SignInSchemaType = z.infer<typeof signInSchema>;

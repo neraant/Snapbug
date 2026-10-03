@@ -1,0 +1,27 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "tui",
+  "globalPassThroughEnv": ["NODE_ENV", "VERCEL_ENV"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": [".next/**", "!.next/cache/**"],
+      "env": ["DATABASE_URL", "AUTH_SECRET", "NEXT_PUBLIC_APP_URL"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true,
+      "env": ["DATABASE_URL", "AUTH_SECRET", "NEXT_PUBLIC_APP_URL"]
+    },
+    "lint": {
+      "dependsOn": ["^lint"]
+    },
+    "format": {
+      "cache": false
+    },
+    "typecheck": {
+      "dependsOn": ["^typecheck"]
+    }
+  }
+}

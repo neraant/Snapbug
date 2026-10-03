@@ -1,0 +1,28 @@
+---
+description: oRPC module router conventions
+globs: packages/server/src/modules/**/*.{router,contract}.ts
+---
+
+# Router
+
+Thin transport: `{context}.contract.ts` → middleware → [api](./api.mdc).
+
+## Do
+
+- Contract: `oc.input` / `oc.output`, Zod from `@workspace/validation`
+- `implement({context}Contract).$context<OrpcContext>()`
+- Always `.use(mapAppErrorMiddleware)`
+- Auth: `.use(authedMiddleware)` when needed
+- Handler only calls `{context}.api.ts`
+
+## Don't
+
+- New Repository / UseCase / SQL / rules
+
+```ts
+const os = implement(authContract).$context<OrpcContext>().use(mapAppErrorMiddleware);
+
+export const authRouter = os.router({
+  signUp: os.signUp.handler(async ({ input }) => await signUp(input)),
+});
+```

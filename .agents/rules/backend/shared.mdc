@@ -1,0 +1,45 @@
+---
+description: Shared server infra (orpc, error)
+globs: packages/server/src/shared/**
+---
+
+# Shared
+
+Cross-cutting only. No module business rules.
+
+## Zod / DTO
+
+Zod lives in `@workspace/validation` (`user/`, `auth/`). Use-case and contract import those types; do not declare input/output types in the use-case file and do not duplicate schemas in `src/shared/dto/`.
+
+## orpc/
+
+- `authed.middleware.ts` — require `context.user`
+- `map-app-error.middleware.ts` — `AppError` → `ORPCError` + `data.errorCode`
+- `context.const.ts` — `OrpcContext`
+
+Root router: `src/shared/router.const.ts` (`router.auth`, `AppRouter`).
+
+## error/
+
+- `AppError` subclasses + `ERROR_CODES` from `@workspace/server/shared/error/`
+
+## DB
+
+- `@workspace/database` — not inside the server package
+
+```ts
+export const mapAppErrorMiddleware = os.middleware(async ({ next }) => {
+  try {
+    return await next();
+  } catch (error) {
+    if (error instanceof AppError) {
+      throw new ORPCError(error.code, {
+        message: error.message,
+        data: { errorCode: error.errorCode },
+        cause: error,
+      });
+    }
+    throw error;
+  }
+});
+```

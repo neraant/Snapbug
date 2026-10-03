@@ -1,0 +1,36 @@
+---
+description: File and symbol naming conventions
+alwaysApply: true
+---
+
+# Naming
+
+**Singular** everywhere: folders, files, symbols (`user`, not `users`). File name matches export: `user.repository.ts` → `UserRepository`. SQL table string may be plural (`pgTable("users")`). Array locals (`users.map`) are fine.
+
+Module folder = bounded context (`identity`, `auth`). Files inside = aggregate / capability (`user.entity.ts`, `user.port.ts`), not the context name.
+
+| Kind           | Example                                                |
+| -------------- | ------------------------------------------------------ |
+| Module         | `modules/identity/`, `modules/auth/`                   |
+| Files          | `auth.router.ts`, `user.repository.ts`, `user.port.ts` |
+| Symbols        | `authRouter`, `UserRepository`, `UserPort`             |
+| Registry       | `router.auth`                                          |
+| DTO folder     | `@workspace/validation` (`user/`, `auth/`)             |
+| Drizzle export | `userTable`                                            |
+| SQL table      | `pgTable("users")`                                     |
+
+## Paths
+
+- **Apps** (`apps/customer`, `apps/admin`): `@/*` → app `src/`; workspace packages only via `@workspace/{package}/…` (no `paths` into `packages/*/src`).
+- **`packages/server`**, **`packages/design-system`**, **`packages/database`**, **`packages/validation`**: `@workspace/{package}/…` via `package.json` `exports` (same as consumers). Package `tsconfig` `paths` may mirror that for the IDE (autocomplete / auto-import). Do not invent `@/design-system` or `@server` aliases.
+- Do not rename: `auth.ts`, `proxy.ts`, Next `page` / `layout` / `route` / `error` / `loading` / `not-found`
+
+## Suffixes
+
+`.router.ts` · `.contract.ts` · `.api.ts` · `.use-case.ts` · `.repository.ts` · `.service.ts` · `.entity.ts` · `.factory.ts` · `.mapper.ts` · `.types.ts` · `.port.ts` · `.adapter.ts` · `.middleware.ts` · `.const.ts` · `.schema.ts`
+
+## New RPC procedure
+
+`{context}.contract.ts` → `{context}.router.ts` → `{context}.api.ts` → `application/{verb}.use-case.ts`
+
+Layers: [backend overview](../backend/overview.mdc).

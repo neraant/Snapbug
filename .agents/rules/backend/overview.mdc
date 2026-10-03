@@ -1,0 +1,45 @@
+---
+description: Backend module layout and layer flow
+globs: packages/server/src/**
+---
+
+# Backend overview
+
+Vertical slice: `packages/server/src/modules/{context}/`.
+
+```text
+contract → router → api → use-case → repository | service | port→adapter
+                              ↓
+                     entity / factory / mapper
+```
+
+| Layer       | Path                                      | Rule                               |
+| ----------- | ----------------------------------------- | ---------------------------------- |
+| Contract    | `{context}.contract.ts`                   | [router](./router.mdc)             |
+| Router      | `{context}.router.ts`                     | [router](./router.mdc)             |
+| API         | `{context}.api.ts`                        | [api](./api.mdc)                   |
+| Application | `application/{verb}.use-case.ts`          | [application](./application.mdc)   |
+| Entity      | `entity/{aggregate}.*`                    | [entity](./entity.mdc)             |
+| Repository  | `repository/{aggregate}.repository.ts`    | [repository](./repository.mdc)     |
+| Service     | `service/{context}.service.ts`            | [service](./service.mdc)           |
+| Port        | consumer `port/{aggregate}.port.ts`       | [port-adapter](./port-adapter.mdc) |
+| Adapter     | provider `adapter/{aggregate}.adapter.ts` | [port-adapter](./port-adapter.mdc) |
+| Shared      | `src/shared/`                             | [shared](./shared.mdc)             |
+
+## Rules
+
+- Depend inward only (table, top → bottom).
+- No cross-module repo imports — use a port.
+- Zod: `@workspace/validation`. Routers `implement` the contract; lower layers do not import oRPC.
+- Naming: [naming](../common/naming.mdc) (singular).
+
+## Where logic goes
+
+| Kind                             | Put in                           |
+| -------------------------------- | -------------------------------- |
+| Workflow, policy, AppError       | [application](./application.mdc) |
+| Invariants of one model (no I/O) | [entity](./entity.mdc)           |
+| Hash, crypto                     | [service](./service.mdc)         |
+| Persist / load                   | [repository](./repository.mdc)   |
+
+Never in router or api.

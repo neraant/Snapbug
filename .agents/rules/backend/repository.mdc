@@ -1,0 +1,41 @@
+---
+description: Repository persistence conventions
+globs: packages/server/src/modules/**/repository/**
+---
+
+# Repository
+
+Drizzle only. `{Aggregate}Repository`. Speaks **entity**, not DTO. See [entity](./entity.mdc).
+
+## Logic
+
+- Persist / load. Missing row → `NotFoundError`. Failed write → `InternalServerError`.
+- No policy (uniqueness, “may create if…”) — that is the use-case.
+
+## Do
+
+- `constructor(private readonly db: DbClient = defaultDb)`
+- `find*` → entity via `Mapper.fromPersistence`
+- `save(entity)` → `Mapper.toPersistence` then insert/update
+- Transactions: `new UserRepository(tx)`; methods use `this.db`
+
+## Don't
+
+- `create(plain object)` while an entity exists
+- Use-case rules, oRPC, other modules' repos
+- `db` / `tx` on public method params
+
+```ts
+async findByEmail(email: string): Promise<User | null> {
+  const [row] = await this.db.select().from(userTable).where(eq(userTable.email, email));
+  return row ? UserMapper.fromPersistence(row) : null;
+}
+
+async save(user: User): Promise<void> {
+  try {
+    await this.db.insert(userTable).values(UserMapper.toPersistence(user));
+  } catch (error) {
+    throw new InternalServerError(ERROR_CODES.INTERNAL_SERVER_ERROR, undefined, { cause: error });
+  }
+}
+```

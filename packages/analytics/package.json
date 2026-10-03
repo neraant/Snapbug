@@ -1,0 +1,42 @@
+{
+  "name": "@workspace/analytics",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@vercel/analytics": "2.0.1",
+    "@vercel/speed-insights": "2.0.0",
+    "posthog-js": "1.430.2",
+    "posthog-node": "5.52.1"
+  },
+  "devDependencies": {
+    "@types/node": "20.19.41",
+    "@types/react": "19",
+    "@types/react-dom": "19",
+    "@workspace/eslint-config": "workspace:*",
+    "@workspace/typescript-config": "workspace:*",
+    "eslint": "9",
+    "prettier": "3.8.3",
+    "tsx": "4.23.5",
+    "typescript": "5"
+  },
+  "peerDependencies": {
+    "next": "*",
+    "react": "*"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./client": "./src/shared/posthog/client.ts",
+    "./server": "./src/shared/posthog/server.ts",
+    "./provider": "./src/shared/posthog/provider.tsx",
+    "./speed-insights": "./src/shared/speed-insights/speed-insights.tsx",
+    "./web-analytics": "./src/shared/web-analytics/web-analytics.tsx",
+    "./types": "./src/shared/posthog/types.ts",
+    "./modules/*/events": "./src/modules/*/events.ts"
+  }
+}

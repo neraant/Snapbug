@@ -1,0 +1,34 @@
+{
+  "name": "snapbug",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "lint": "turbo lint",
+    "format": "prettier --write .",
+    "typecheck": "turbo typecheck",
+    "check": "pnpm typecheck && pnpm lint && pnpm format",
+    "quality": "pnpm check && pnpm test:unit",
+    "db:start": "docker compose up -d",
+    "db:stop": "docker compose down",
+    "db:generate": "pnpm --filter @workspace/database db:generate",
+    "db:migrate": "pnpm --filter @workspace/database db:migrate",
+    "db:seed": "pnpm --filter @workspace/database db:seed",
+    "db:studio": "pnpm --filter @workspace/database db:studio",
+    "db:reset": "docker compose down -v && docker compose up -d && pnpm db:migrate && pnpm db:seed",
+    "test:unit": "pnpm --filter @workspace/server test:unit"
+  },
+  "devDependencies": {
+    "@workspace/eslint-config": "workspace:*",
+    "@workspace/typescript-config": "workspace:*",
+    "prettier": "3.8.3",
+    "prettier-plugin-tailwindcss": "0.8.0",
+    "turbo": "2.9.18",
+    "typescript": "5"
+  },
+  "packageManager": "pnpm@10.33.4",
+  "engines": {
+    "node": ">=20"
+  }
+}
