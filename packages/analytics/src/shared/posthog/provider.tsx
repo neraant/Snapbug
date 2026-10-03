@@ -16,7 +16,7 @@ type AnalyticsUser = {
 
 type Props = {
   children: ReactNode;
-  appName: "customer" | "admin";
+  appName: "web" | "admin";
   user?: AnalyticsUser | null;
 };
 

@@ -33,7 +33,7 @@ export default function Layout({ children }: PropsWithChildren) {
     >
       <body>
         {/* @disabled posthog
-        <AnalyticsProvider appName="customer" user={session?.user}>
+        <AnalyticsProvider appName="web" user={session?.user}>
         */}
         <ThemeProvider>
           <Toaster />
