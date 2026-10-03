@@ -1,4 +1,5 @@
 import { oc } from "@orpc/contract";
+import { sessionAuthSpec } from "@workspace/server/shared/openapi/session-auth.const";
 import {
   createBugReportInputDtoSchema,
   createBugReportOutputDtoSchema,
@@ -8,13 +9,22 @@ import {
   findBugReportsOutputDtoSchema,
 } from "@workspace/validation/modules/bug-report/dto/find-bug-reports.schema";
 
+const bugReport = oc.$meta<{ mcp?: boolean }>({});
+
 export const bugReportContract = {
-  create: oc
+  create: bugReport
+    .meta({ mcp: true })
     .input(createBugReportInputDtoSchema)
     .output(createBugReportOutputDtoSchema)
     .route({ method: "POST", path: "/bug-reports", tags: ["bug-report"], summary: "Create bug report" }),
-  findMany: oc
+  findMany: bugReport
     .input(findBugReportsInputDtoSchema)
     .output(findBugReportsOutputDtoSchema)
-    .route({ method: "GET", path: "/bug-reports", tags: ["bug-report"], summary: "List bug reports" }),
+    .route({
+      method: "GET",
+      path: "/bug-reports",
+      tags: ["bug-report"],
+      summary: "List bug reports",
+      spec: sessionAuthSpec,
+    }),
 };

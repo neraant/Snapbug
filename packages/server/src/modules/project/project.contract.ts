@@ -1,4 +1,5 @@
 import { oc } from "@orpc/contract";
+import { sessionAuthSpec } from "@workspace/server/shared/openapi/session-auth.const";
 import {
   findProjectsInputDtoSchema,
   findProjectsOutputDtoSchema,
@@ -8,5 +9,5 @@ export const projectContract = {
   findProjects: oc
     .input(findProjectsInputDtoSchema)
     .output(findProjectsOutputDtoSchema)
-    .route({ method: "GET", path: "/projects", tags: ["project"], summary: "List projects" }),
+    .route({ method: "GET", path: "/projects", tags: ["project"], summary: "List projects", spec: sessionAuthSpec }),
 };

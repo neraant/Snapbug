@@ -1,4 +1,4 @@
-## FightFuel conventions
+## Snapbug conventions
 
 - **Naming (files, folders, suffixes):** [naming.mdc](.agents/rules/common/naming.mdc)
 - **Backend layers:** [overview.mdc](.agents/rules/backend/overview.mdc)
