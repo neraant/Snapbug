@@ -2,6 +2,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { PasswordField } from "@workspace/design-system/components/forms/password-field";
 import { TextField } from "@workspace/design-system/components/forms/text-field";
 import { Column } from "@workspace/design-system/components/layout/column";
+import { Row } from "@workspace/design-system/components/layout/row";
+import { Button } from "@workspace/design-system/components/ui/button";
 import { FieldGroup } from "@workspace/design-system/components/ui/field";
 import { SubmitButton } from "@workspace/design-system/components/ui/submit-button";
 import { toast } from "@workspace/design-system/components/ui/toast";
@@ -20,9 +22,10 @@ export function SignInForm() {
     defaultValues: { email: "", password: "" },
   });
 
-  const onSubmit = async (values: SignInSchemaType) => {
+  const onSubmit = async ({ email, password }: SignInSchemaType) => {
     const result = await signIn("credentials", {
-      ...values,
+      email,
+      password,
       redirect: false,
     });
 
@@ -41,15 +44,14 @@ export function SignInForm() {
   };
 
   return (
-    <Column as="form" gap="none" onSubmit={handleSubmit(onSubmit)} noValidate>
+    <Column as="form" gap="none" width="full" onSubmit={handleSubmit(onSubmit)}>
       <FieldGroup>
         <TextField
           control={control}
           name="email"
           type="email"
-          label={texts.field.email.label}
-          placeholder={texts.field.email.placeholder}
-          className="h-10 text-base md:text-base"
+          label={texts.field.workEmail.label}
+          placeholder={texts.field.workEmail.placeholder}
           autoComplete="email"
         />
         <PasswordField
@@ -57,10 +59,14 @@ export function SignInForm() {
           name="password"
           label={texts.field.password.label}
           placeholder={texts.field.password.placeholder}
-          className="h-10 text-base md:text-base"
           autoComplete="current-password"
         />
-        <SubmitButton loading={formState.isSubmitting} size="lg" className="h-11 w-full text-base">
+        <Row justify="end" width="full">
+          <Button type="button" variant="link">
+            {texts.signIn.forgotPassword}
+          </Button>
+        </Row>
+        <SubmitButton loading={formState.isSubmitting} size="lg" className="w-full">
           {texts.signIn.submit}
         </SubmitButton>
       </FieldGroup>

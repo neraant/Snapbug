@@ -12,6 +12,12 @@ const avatarVariants = cva(
         default: "rounded-full bg-muted text-muted-foreground",
         brand: "rounded-lg bg-sidebar-primary text-sidebar-primary-foreground",
       },
+      size: {
+        xs: "size-5 text-[10px]",
+        sm: "size-6 text-xs",
+        md: "size-7 text-sm",
+        lg: "size-8 text-base",
+      },
     },
     defaultVariants: {
       variant: "default",
@@ -22,9 +28,12 @@ const avatarVariants = cva(
 function Avatar({
   className,
   variant = "default",
+  size = "md",
   ...props
 }: AvatarPrimitive.Root.Props & VariantProps<typeof avatarVariants>) {
-  return <AvatarPrimitive.Root data-slot="avatar" className={cn(avatarVariants({ variant }), className)} {...props} />;
+  return (
+    <AvatarPrimitive.Root data-slot="avatar" className={cn(avatarVariants({ variant, size }), className)} {...props} />
+  );
 }
 
 function AvatarImage({ className, ...props }: AvatarPrimitive.Image.Props) {

@@ -1,13 +1,46 @@
 export const texts = {
-  brand: "Boot05",
+  brand: {
+    name: "Snapbug",
+    tagline: "Developer Triage",
+  },
+  auth: {
+    copyright: (year: string) => `© ${year} Snapbug Inc.`,
+    aside: {
+      preview: {
+        title: "Checkout button does nothing on Safari 17.4",
+        severity: "Critical",
+        error: "Uncaught TypeError: window.__queue",
+        statusCode: "500",
+        assigneeInitials: "AR",
+        assigneeLabel: "Assigned to Alex",
+        replayStatus: "● Replay Ready",
+      },
+      card: {
+        title: "Did you know?",
+        description: "Clicking the browser stack trace jumps straight to the culprit source code line.",
+      },
+      badge: {
+        liveIngestion: "Live Bug Ingestion",
+        developerFirst: "Developer-First",
+      },
+    },
+  },
   field: {
     email: {
       label: "Email",
       placeholder: "Email",
     },
+    workEmail: {
+      label: "Work Email",
+      placeholder: "you@company.com",
+    },
     name: {
-      label: "Name",
-      placeholder: "Name",
+      label: "Full Name",
+      placeholder: "Sarah Jenkins",
+    },
+    signUpWorkEmail: {
+      label: "Work Email",
+      placeholder: "sarah@acme.com",
     },
     password: {
       label: "Password",
@@ -15,22 +48,23 @@ export const texts = {
     },
   },
   signIn: {
-    title: "Sign in",
-    description: "Continue to your orders and catalog.",
-    submit: "Sign in",
-    footerPrompt: "Don't have an account?",
-    footerLink: "Sign up",
+    title: "Welcome back",
+    description: "Let's catch some bugs.",
+    submit: "Log in",
+    forgotPassword: "Forgot password?",
+    footerPrompt: "New to Snapbug?",
+    footerLink: "Create an account",
     toast: {
       invalidCredentials: "Invalid email or password",
       success: "Signed in successfully",
     },
   },
   signUp: {
-    title: "Sign up",
-    description: "Create a workspace for orders and catalog.",
-    submit: "Sign up",
+    title: "Create your Snapbug account",
+    description: "Free to start. Takes about a minute.",
+    submit: "Create account",
     footerPrompt: "Already have an account?",
-    footerLink: "Sign in",
+    footerLink: "Log in",
     toast: {
       success: "Signed up successfully",
       signInAfterSignUpFailed:

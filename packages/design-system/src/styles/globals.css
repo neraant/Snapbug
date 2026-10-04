@@ -16,7 +16,7 @@
   --popover-foreground: oklch(0.215 0.006 56); /* #1C1917 - Stone-900 */
 
   /* Snapbug Signature Brand Accent: Vibrant Warm Orange (Tailwind orange-500 #F97316) */
-  --primary: oklch(0.693 0.207 42.5); /* #F97316 - Brand Primary 500 */
+  --primary: oklch(71.965% 0.18737 46.791); /* #ff7119 - Brand Primary 500 */
   --primary-foreground: oklch(1 0 0); /* #FFFFFF - On-brand text */
 
   /* Secondary & Subtle Surfaces */
@@ -29,13 +29,23 @@
 
   /* Semantic Statuses (WCAG AA compliant) */
   --destructive: oklch(0.627 0.222 25.5); /* #EF4444 - Critical Error / Bug Red */
-  --destructive-foreground: oklch(1 0 0);
+  --destructive-foreground: oklch(0.396 0.141 25.5); /* #991B1B - Red Text */
   --warning: oklch(0.755 0.178 72); /* #F59E0B - Amber Warning */
   --warning-foreground: oklch(0.38 0.125 55); /* #92400E - Amber Text */
   --success: oklch(0.704 0.165 158); /* #10B981 - Emerald Resolved */
   --success-foreground: oklch(0.355 0.11 160); /* #065F46 - Emerald Text */
   --info: oklch(0.672 0.168 238); /* #0EA5E9 - Sky Telemetry / New */
   --info-foreground: oklch(0.382 0.108 235); /* #075985 - Sky Text */
+
+  /* Opaque status surfaces (toasts, alerts) */
+  --destructive-surface: oklch(0.936 0.031 17.7); /* #FEE2E2 */
+  --warning-surface: oklch(0.962 0.058 95.6); /* #FEF3C7 */
+  --success-surface: oklch(0.95 0.051 163.1); /* #D1FAE5 */
+  --info-surface: oklch(0.951 0.025 236.8); /* #E0F2FE */
+  --destructive-surface-foreground: var(--destructive-foreground);
+  --warning-surface-foreground: var(--warning-foreground);
+  --success-surface-foreground: var(--success-foreground);
+  --info-surface-foreground: var(--info-foreground);
 
   /* Borders, Inputs, Focus Rings */
   --border: oklch(0.92 0.005 60); /* #E7E5E4 - Stone-200 Subtle Border */
@@ -89,7 +99,7 @@
   --popover-foreground: oklch(0.965 0.003 75); /* #F5F5F4 - Stone-100 */
 
   /* Dark Brand Primary (Enhanced contrast) */
-  --primary: oklch(0.693 0.207 42.5); /* #F97316 - Brand Orange 500 */
+  --primary: oklch(71.965% 0.18737 46.791); /* #ff7119 - Brand Orange 500 */
   --primary-foreground: oklch(0.185 0.006 50); /* Dark text on bright orange */
 
   /* Dark Neutral Surfaces */
@@ -102,13 +112,22 @@
 
   /* Dark Semantic Statuses */
   --destructive: oklch(0.68 0.215 25); /* Bright Red for Dark Mode */
-  --destructive-foreground: oklch(1 0 0);
+  --destructive-foreground: oklch(0.22 0.085 25); /* Dark Red Text */
   --warning: oklch(0.795 0.17 75); /* Bright Amber */
   --warning-foreground: oklch(0.25 0.08 55);
   --success: oklch(0.745 0.16 158); /* Bright Emerald */
   --success-foreground: oklch(0.22 0.08 160);
   --info: oklch(0.72 0.155 238); /* Bright Sky */
   --info-foreground: oklch(0.22 0.075 235);
+
+  --destructive-surface: oklch(0.396 0.141 25.5); /* #991B1B */
+  --warning-surface: oklch(0.38 0.125 55); /* #92400E */
+  --success-surface: oklch(0.355 0.11 160); /* #065F46 */
+  --info-surface: oklch(0.382 0.108 235); /* #075985 */
+  --destructive-surface-foreground: oklch(0.885 0.059 18.3); /* #FECACA */
+  --warning-surface-foreground: oklch(0.962 0.058 95.6); /* #FEF3C7 */
+  --success-surface-foreground: oklch(0.95 0.051 163.1); /* #D1FAE5 */
+  --info-surface-foreground: oklch(0.951 0.025 236.8); /* #E0F2FE */
 
   /* Dark Borders & Focus Rings */
   --border: oklch(0.268 0.006 56); /* #292524 - Stone-800 */
@@ -170,6 +189,14 @@
   --color-success-foreground: var(--success-foreground);
   --color-info: var(--info);
   --color-info-foreground: var(--info-foreground);
+  --color-destructive-surface: var(--destructive-surface);
+  --color-warning-surface: var(--warning-surface);
+  --color-success-surface: var(--success-surface);
+  --color-info-surface: var(--info-surface);
+  --color-destructive-surface-foreground: var(--destructive-surface-foreground);
+  --color-warning-surface-foreground: var(--warning-surface-foreground);
+  --color-success-surface-foreground: var(--success-surface-foreground);
+  --color-info-surface-foreground: var(--info-surface-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);

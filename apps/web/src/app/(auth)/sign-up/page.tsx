@@ -1,6 +1,6 @@
 "use client";
 
-import { Center } from "@workspace/design-system/components/layout/center";
+import { Column } from "@workspace/design-system/components/layout/column";
 import { Button } from "@workspace/design-system/components/ui/button";
 import { Typography } from "@workspace/design-system/components/ui/typography";
 import Link from "next/link";
@@ -11,17 +11,20 @@ import { path } from "@/shared/path.const";
 
 export default function Page() {
   return (
-    <Center>
-      <Typography variant="heading-md" align="center">
-        {texts.signUp.title}
-      </Typography>
+    <Column width="full" gap="lg">
+      <Column width="full" gap="xs">
+        <Typography variant="heading-lg">{texts.signUp.title}</Typography>
+        <Typography variant="text-md" color="muted">
+          {texts.signUp.description}
+        </Typography>
+      </Column>
       <SignUpForm />
-      <Typography variant="text-md" color="muted" align="center">
+      <Typography variant="text-sm" color="muted" align="center">
         {texts.signUp.footerPrompt}{" "}
         <Button nativeButton={false} variant="link" render={<Link href={path.signIn} />}>
           {texts.signUp.footerLink}
         </Button>
       </Typography>
-    </Center>
+    </Column>
   );
 }

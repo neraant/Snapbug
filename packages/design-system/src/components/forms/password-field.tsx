@@ -1,8 +1,10 @@
+import { Row } from "@workspace/design-system/components/layout/row";
+import { Badge } from "@workspace/design-system/components/ui/badge";
 import { Button } from "@workspace/design-system/components/ui/button";
-import { Field, FieldDescription, FieldError, FieldLabel } from "@workspace/design-system/components/ui/field";
+import { Field, FieldDescription, FieldLabel } from "@workspace/design-system/components/ui/field";
 import { Input } from "@workspace/design-system/components/ui/input";
 import { cn } from "@workspace/design-system/lib/utils";
-import { EyeIcon, EyeOffIcon } from "lucide-react";
+import { EyeIcon, EyeOffIcon, InfoIcon } from "lucide-react";
 import type { ComponentProps } from "react";
 import { useState } from "react";
 import type { Control, FieldPath, FieldValues } from "react-hook-form";
@@ -31,7 +33,16 @@ export function PasswordField<TFieldValues extends FieldValues>({
       control={control}
       render={({ field, fieldState }) => (
         <Field data-invalid={fieldState.invalid}>
-          <FieldLabel htmlFor={field.name}>{label}</FieldLabel>
+          <Row justify="between" className="h-5.5">
+            <FieldLabel htmlFor={field.name}>{label}</FieldLabel>
+
+            {fieldState.invalid && (
+              <Badge variant="destructive">
+                <InfoIcon />
+                {fieldState.error?.message}
+              </Badge>
+            )}
+          </Row>
           <div className="relative">
             <Input
               {...field}
@@ -54,7 +65,6 @@ export function PasswordField<TFieldValues extends FieldValues>({
             </Button>
           </div>
           {description && <FieldDescription>{description}</FieldDescription>}
-          {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
         </Field>
       )}
     />

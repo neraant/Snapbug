@@ -11,6 +11,7 @@ const typographyVariants = cva("", {
       "text-lg": "text-lg font-normal",
       "text-md": "text-base font-normal",
       "text-sm": "text-sm font-normal",
+      "text-xs": "text-xs font-normal",
       label: "text-sm font-medium",
     },
     color: {
@@ -23,6 +24,12 @@ const typographyVariants = cva("", {
       left: "text-left",
       center: "text-center",
       right: "text-right",
+    },
+    weight: {
+      normal: "font-normal",
+      medium: "font-medium",
+      semibold: "font-semibold",
+      bold: "font-bold",
     },
   },
   defaultVariants: {
@@ -40,6 +47,7 @@ const DEFAULT_TAG: Record<TypographyVariant, ElementType> = {
   "text-lg": "p",
   "text-md": "p",
   "text-sm": "p",
+  "text-xs": "p",
   label: "label",
 };
 
@@ -47,6 +55,7 @@ type TypographyProps = PropsWithChildren<{
   variant?: TypographyVariant;
   color?: "default" | "inherit" | "destructive" | "muted";
   align?: "left" | "center" | "right";
+  weight?: NonNullable<VariantProps<typeof typographyVariants>["weight"]>;
   truncate?: boolean;
   className?: string;
   as?: ElementType;
@@ -56,6 +65,7 @@ export function Typography({
   variant = "text-md",
   color = "default",
   align = "left",
+  weight,
   truncate = false,
   className,
   as,
@@ -64,7 +74,9 @@ export function Typography({
   const Tag = as || DEFAULT_TAG[variant];
 
   return (
-    <Tag className={cn(typographyVariants({ variant, color, align }), truncate && "min-w-0 truncate", className)}>
+    <Tag
+      className={cn(typographyVariants({ variant, color, align, weight }), truncate && "min-w-0 truncate", className)}
+    >
       {children}
     </Tag>
   );

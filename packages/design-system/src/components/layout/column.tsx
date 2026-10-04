@@ -30,10 +30,15 @@ const columnVariants = cva("flex flex-col", {
       "0": "min-w-0",
       sm: "min-w-40",
       md: "min-w-60",
+      lg: "min-w-80",
+      xl: "min-w-96",
     },
     width: {
       full: "w-full",
       sm: "w-full max-w-sm",
+      md: "w-full max-w-md",
+      lg: "w-full max-w-lg",
+      xl: "w-full max-w-xl",
     },
     padding: {
       none: "p-0",

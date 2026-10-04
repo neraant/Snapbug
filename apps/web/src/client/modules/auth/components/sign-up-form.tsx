@@ -55,35 +55,32 @@ export function SignUpForm() {
   };
 
   return (
-    <Column as="form" gap="none" onSubmit={handleSubmit(onSubmit)} noValidate>
+    <Column as="form" gap="none" width="full" onSubmit={handleSubmit(onSubmit)}>
       <FieldGroup>
-        <TextField
-          control={control}
-          name="email"
-          type="email"
-          label={texts.field.email.label}
-          placeholder={texts.field.email.placeholder}
-          className="h-10 text-base md:text-base"
-          autoComplete="email"
-        />
         <TextField
           control={control}
           name="name"
           type="text"
           label={texts.field.name.label}
           placeholder={texts.field.name.placeholder}
-          className="h-10 text-base md:text-base"
           autoComplete="name"
+        />
+        <TextField
+          control={control}
+          name="email"
+          type="email"
+          label={texts.field.signUpWorkEmail.label}
+          placeholder={texts.field.signUpWorkEmail.placeholder}
+          autoComplete="email"
         />
         <PasswordField
           control={control}
           name="password"
           label={texts.field.password.label}
           placeholder={texts.field.password.placeholder}
-          className="h-10 text-base md:text-base"
           autoComplete="new-password"
         />
-        <SubmitButton loading={formState.isSubmitting} size="lg" className="h-11 w-full text-base">
+        <SubmitButton loading={formState.isSubmitting} size="lg" className="w-full">
           {texts.signUp.submit}
         </SubmitButton>
       </FieldGroup>
