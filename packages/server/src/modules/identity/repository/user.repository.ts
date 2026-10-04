@@ -15,9 +15,36 @@ export class UserRepository {
     return row ? UserMapper.fromPersistence(row) : null;
   }
 
+  async findById(id: string): Promise<User | null> {
+    const [row] = await this.db.select().from(userTable).where(eq(userTable.id, id));
+    return row ? UserMapper.fromPersistence(row) : null;
+  }
+
   async save(user: User): Promise<void> {
+    const values = UserMapper.toPersistence(user);
+
     try {
-      await this.db.insert(userTable).values(UserMapper.toPersistence(user));
+      await this.db
+        .insert(userTable)
+        .values({
+          id: values.id,
+          name: values.name,
+          email: values.email,
+          passwordHash: values.passwordHash,
+          passwordChangedAt: values.passwordChangedAt,
+          createdAt: values.createdAt,
+          updatedAt: values.updatedAt,
+        })
+        .onConflictDoUpdate({
+          target: userTable.id,
+          set: {
+            name: values.name,
+            email: values.email,
+            passwordHash: values.passwordHash,
+            passwordChangedAt: values.passwordChangedAt,
+            updatedAt: values.updatedAt,
+          },
+        });
     } catch (error) {
       throw new InternalServerError(ERROR_CODES.INTERNAL_SERVER_ERROR, undefined, { cause: error });
     }

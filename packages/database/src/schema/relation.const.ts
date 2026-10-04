@@ -3,6 +3,7 @@ import { bugReportTable } from "@workspace/database/schema/bug-report.const";
 import { membershipTable } from "@workspace/database/schema/membership.const";
 import { organizationTable } from "@workspace/database/schema/organization.const";
 import { projectTable } from "@workspace/database/schema/project.const";
+import { resetPasswordTokenTable } from "@workspace/database/schema/reset-password-token.const";
 import { userTable } from "@workspace/database/schema/user.const";
 import { defineRelations } from "drizzle-orm";
 
@@ -13,6 +14,7 @@ const tables = {
   organizationTable,
   projectTable,
   userTable,
+  resetPasswordTokenTable,
 };
 
 export const relations = defineRelations(tables, (relation) => ({
@@ -21,6 +23,14 @@ export const relations = defineRelations(tables, (relation) => ({
     assignedBugReports: relation.many.bugReportTable({
       from: relation.userTable.id,
       to: relation.bugReportTable.assignedTo,
+    }),
+    resetPasswordTokens: relation.many.resetPasswordTokenTable(),
+  },
+  resetPasswordTokenTable: {
+    user: relation.one.userTable({
+      from: relation.resetPasswordTokenTable.userId,
+      to: relation.userTable.id,
+      optional: false,
     }),
   },
   organizationTable: {

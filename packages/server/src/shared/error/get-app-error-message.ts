@@ -11,6 +11,9 @@ const ERROR_MESSAGES: Record<ErrorCode, string> = {
   [ERROR_CODES.INVALID_API_KEY]: "This API key is invalid",
   [ERROR_CODES.ORGANIZATION_NOT_FOUND]: "Organization not found",
   [ERROR_CODES.INTERNAL_SERVER_ERROR]: "Something went wrong. Please try again",
+  [ERROR_CODES.EMAIL_SEND_FAILED]: "Failed to send email. Please try again",
+  [ERROR_CODES.RATE_LIMITED]: "You have exceeded the rate limit. Please try again later",
+  [ERROR_CODES.INVALID_RESET_PASSWORD_TOKEN]: "This reset link is invalid or has expired",
 };
 
 function isErrorCode(value: unknown): value is ErrorCode {

@@ -18,7 +18,7 @@ Drizzle only. `{Aggregate}Repository`. One table. Speaks **entity**, not DTO. Se
 - `find*` → entity via `Mapper.fromPersistence`. Order in this query.
 - A foreign id filters **your** column (`inArray(orderTable.userId, ids)`)
 - `save(entity)` → `Mapper.toPersistence` then insert/update
-- Transactions: `new UserRepository(tx)`; methods use `this.db`
+- Transactions: `withTx(tx)` returns a new repository on that client; methods use `this.db`
 
 ## Don't
 

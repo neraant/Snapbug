@@ -7,7 +7,11 @@ import { path } from "@/shared/path.const";
 // import { customerFlagRouteRules } from "@/shared/flag/flag-route.const";
 
 export default auth(async (req) => {
-  const isAuthPage = req.nextUrl.pathname.startsWith(path.signIn) || req.nextUrl.pathname.startsWith(path.signUp);
+  const isAuthPage =
+    req.nextUrl.pathname.startsWith(path.signIn) ||
+    req.nextUrl.pathname.startsWith(path.signUp) ||
+    req.nextUrl.pathname.startsWith(path.forgotPassword) ||
+    req.nextUrl.pathname.startsWith(path.resetPassword);
 
   if (!req.auth && !isAuthPage) {
     return Response.redirect(new URL(path.signIn, req.nextUrl));

@@ -8,7 +8,7 @@ import type { PropsWithChildren } from "react";
 import { signOutUser } from "@/client/modules/auth/components/sign-out-button";
 import { texts as authTexts } from "@/client/modules/auth/consts/texts";
 import { appSidebarItems } from "@/client/modules/shared/app-sidebar/consts/app-sidebar.const";
-import { texts as sidebarTexts } from "@/client/modules/shared/app-sidebar/consts/texts";
+import { texts as siteTexts } from "@/shared/consts/texts";
 
 // @disabled flag
 // import { useFindFlags } from "@/client/shared/queries/use-find-flags";
@@ -32,7 +32,7 @@ export function AppSidebar({ user, children }: AppSidebarProps) {
 
   return (
     <SidebarLayout
-      title={sidebarTexts.title}
+      title={siteTexts.brand.name}
       items={items}
       pathname={pathname}
       user={{ name: user?.name ?? user?.email ?? "User", image: user?.image }}

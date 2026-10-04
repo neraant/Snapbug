@@ -12,7 +12,7 @@ async function handleRequest(request: Request) {
     return new Response("Not found", { status: 404 });
   }
 
-  const context = isOpenApiDocsRequest(request) ? { user: null } : await createContext();
+  const context = isOpenApiDocsRequest(request) ? { user: null, ip: "unknown" } : await createContext();
   const { matched, response } = await openAPIHandler.handle(request, {
     prefix: "/api",
     context,

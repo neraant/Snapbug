@@ -2,7 +2,9 @@
   "extends": "@workspace/typescript-config/nextjs.json",
   "compilerOptions": {
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@workspace/server/modules/*": ["../../packages/server/src/modules/*"],
+      "@workspace/server/shared/*": ["../../packages/server/src/shared/*"]
     },
     "plugins": [
       {

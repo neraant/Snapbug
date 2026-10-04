@@ -17,14 +17,20 @@
     "@orpc/openapi": "1.14.14",
     "@orpc/server": "1.14.14",
     "@orpc/zod": "1.14.14",
+    "@react-email/render": "^2.1.0",
     "@workspace/database": "workspace:*",
     "@workspace/validation": "workspace:*",
     "bcryptjs": "3.0.3",
     "drizzle-orm": "1.0.0-rc.4",
     "flags": "4.3.1",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "resend": "6.32.0",
     "zod": "4.4.3"
   },
   "devDependencies": {
+    "@types/react": "19",
+    "@types/react-dom": "19",
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
     "eslint": "9",
@@ -36,7 +42,7 @@
     "./router": "./src/shared/router.const.ts",
     "./orpc/*": "./src/shared/orpc/*.ts",
     "./error/*": "./src/shared/error/*.ts",
-    "./modules/*": "./src/modules/*.ts",
-    "./shared/*": "./src/shared/*.ts"
+    "./modules/*": "./src/modules/*",
+    "./shared/*": "./src/shared/*"
   }
 }

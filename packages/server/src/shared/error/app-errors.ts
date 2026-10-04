@@ -2,7 +2,13 @@ import type { CommonORPCErrorCode } from "@orpc/client";
 
 type AppErrorCode = Extract<
   CommonORPCErrorCode,
-  "BAD_REQUEST" | "UNAUTHORIZED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT" | "INTERNAL_SERVER_ERROR"
+  | "BAD_REQUEST"
+  | "UNAUTHORIZED"
+  | "FORBIDDEN"
+  | "NOT_FOUND"
+  | "CONFLICT"
+  | "TOO_MANY_REQUESTS"
+  | "INTERNAL_SERVER_ERROR"
 >;
 
 export class AppError extends Error {
@@ -56,5 +62,12 @@ export class InternalServerError extends AppError {
   constructor(errorCode: string, message = "Internal server error", options?: ErrorOptions) {
     super("INTERNAL_SERVER_ERROR", errorCode, message, options);
     this.name = "InternalServerError";
+  }
+}
+
+export class RateLimitedError extends AppError {
+  constructor(errorCode: string, message = "Rate limited", options?: ErrorOptions) {
+    super("TOO_MANY_REQUESTS", errorCode, message, options);
+    this.name = "RateLimitedError";
   }
 }

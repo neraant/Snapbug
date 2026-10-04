@@ -14,7 +14,7 @@ async function handleRequest(request: Request) {
     return Response.json({ message: "This API key is invalid" }, { status: 401 });
   }
 
-  const { response } = await mcpHandler.handle(request, { context: { user: null } });
+  const { response } = await mcpHandler.handle(request, { context: { user: null, ip: "unknown" } });
   return response;
 }
 

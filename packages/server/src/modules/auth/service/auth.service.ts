@@ -10,4 +10,9 @@ export class AuthService {
   async verifyPassword(plain: string, hash: string): Promise<boolean> {
     return await bcrypt.compare(plain, hash);
   }
+
+  async generatePasswordResetToken(): Promise<string> {
+    const token = crypto.randomUUID();
+    return token;
+  }
 }

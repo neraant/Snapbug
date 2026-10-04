@@ -2,13 +2,11 @@ import { SignUpUseCase } from "@workspace/server/modules/auth/application/sign-u
 import type { UserPort } from "@workspace/server/modules/auth/port/user.port";
 import type { AuthService } from "@workspace/server/modules/auth/service/auth.service";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
-import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
 import { describe, expect, it, vi } from "vitest";
 
 const input = {
   email: "ada@example.com",
   name: "Ada",
-  role: UserRole.USER,
   password: "password1",
 };
 

@@ -3,10 +3,20 @@ import "@workspace/design-system/globals.css";
 import { ThemeProvider } from "@workspace/design-system/components/theme-provider";
 import { Toaster } from "@workspace/design-system/components/ui/toast";
 import { cn } from "@workspace/design-system/lib/utils";
+import type { Metadata } from "next";
 import { Figtree, Geist_Mono } from "next/font/google";
 import type { PropsWithChildren } from "react";
 
 import { QueryProvider } from "@/client/shared/query-client/provider";
+import { texts } from "@/shared/consts/texts";
+
+export const metadata: Metadata = {
+  title: {
+    default: texts.brand.name,
+    template: `%s | ${texts.brand.name}`,
+  },
+  description: texts.brand.tagline,
+};
 
 // @disabled posthog
 // import { AnalyticsProvider } from "@workspace/analytics/provider";

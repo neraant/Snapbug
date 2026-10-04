@@ -1,6 +1,5 @@
 import { User } from "@workspace/server/modules/identity/entity/user.entity";
 import type { CreateUserType } from "@workspace/server/modules/identity/entity/user.types";
-import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
 import { randomUUID } from "crypto";
 
 export abstract class UserFactory {
@@ -10,7 +9,7 @@ export abstract class UserFactory {
       name: user.name,
       email: user.email,
       passwordHash: user.passwordHash,
-      role: UserRole.USER,
+      passwordChangedAt: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });

@@ -1,11 +1,13 @@
 import type { UserPersistedType } from "@workspace/server/modules/identity/entity/user.types";
 
+type UpdateUserType = Partial<Pick<UserPersistedType, "name" | "email" | "passwordHash" | "passwordChangedAt">>;
+
 export class User {
   readonly id: UserPersistedType["id"];
   readonly name: UserPersistedType["name"];
   readonly email: UserPersistedType["email"];
   readonly passwordHash: UserPersistedType["passwordHash"];
-  readonly role: UserPersistedType["role"];
+  readonly passwordChangedAt: UserPersistedType["passwordChangedAt"];
   readonly createdAt: UserPersistedType["createdAt"];
   readonly updatedAt: UserPersistedType["updatedAt"];
 
@@ -14,9 +16,19 @@ export class User {
     this.name = user.name;
     this.email = user.email;
     this.passwordHash = user.passwordHash;
-    this.role = user.role;
+    this.passwordChangedAt = user.passwordChangedAt;
     this.createdAt = user.createdAt;
     this.updatedAt = user.updatedAt;
+  }
+
+  update(patch: UpdateUserType): User {
+    return new User({
+      ...this.toObject(),
+      ...patch,
+      id: this.id,
+      createdAt: this.createdAt,
+      updatedAt: new Date(),
+    });
   }
 
   toObject(): UserPersistedType {
@@ -25,7 +37,7 @@ export class User {
       name: this.name,
       email: this.email,
       passwordHash: this.passwordHash,
-      role: this.role,
+      passwordChangedAt: this.passwordChangedAt,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
     };

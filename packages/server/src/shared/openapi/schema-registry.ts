@@ -22,9 +22,7 @@ import { userModelSchema } from "@workspace/validation/modules/user/dto/user.mod
 JSON_SCHEMA_REGISTRY.add(userModelSchema, {
   title: "User",
   description: "Public user profile",
-  examples: [
-    { id: "0a8c69a1-1ab1-45a8-8497-eae1e506d9d4", name: "Jane Doe", email: "user@example.com", role: UserRole.USER },
-  ],
+  examples: [{ id: "0a8c69a1-1ab1-45a8-8497-eae1e506d9d4", name: "Jane Doe", email: "user@example.com" }],
 });
 
 JSON_SCHEMA_REGISTRY.add(createUserInputDtoSchema, {

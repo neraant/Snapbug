@@ -7,6 +7,7 @@ import { Button } from "@workspace/design-system/components/ui/button";
 import { FieldGroup } from "@workspace/design-system/components/ui/field";
 import { SubmitButton } from "@workspace/design-system/components/ui/submit-button";
 import { toast } from "@workspace/design-system/components/ui/toast";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
@@ -62,7 +63,7 @@ export function SignInForm() {
           autoComplete="current-password"
         />
         <Row justify="end" width="full">
-          <Button type="button" variant="link">
+          <Button nativeButton={false} variant="link" render={<Link href={path.forgotPassword} />}>
             {texts.signIn.forgotPassword}
           </Button>
         </Row>
