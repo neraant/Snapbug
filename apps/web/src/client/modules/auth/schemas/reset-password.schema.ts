@@ -1,7 +1,7 @@
 import { validationText } from "@workspace/validation/validation-texts";
 import { z } from "zod";
 
-import { texts } from "@/client/modules/auth/consts/texts";
+import { texts } from "@/client/modules/auth/consts/texts.const";
 
 export const resetPasswordSchema = z
   .object({

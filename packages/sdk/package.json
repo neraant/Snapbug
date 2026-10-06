@@ -8,6 +8,13 @@
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit"
   },
+  "devDependencies": {
+    "@workspace/eslint-config": "workspace:*",
+    "@workspace/typescript-config": "workspace:*",
+    "eslint": "9",
+    "prettier": "3.8.3",
+    "typescript": "5"
+  },
   "exports": {
     ".": "./src/index.ts"
   }

@@ -6,7 +6,7 @@ export abstract class UserFactory {
   static create(user: CreateUserType): User {
     return new User({
       id: randomUUID(),
-      name: user.name,
+      name: user.name ?? null,
       email: user.email,
       passwordHash: user.passwordHash,
       passwordChangedAt: null,

@@ -7,7 +7,7 @@ import { toast } from "@workspace/design-system/components/ui/toast";
 import { getAppErrorMessage } from "@workspace/server/error/get-app-error-message";
 import { useForm } from "react-hook-form";
 
-import { texts } from "@/client/modules/auth/consts/texts";
+import { texts } from "@/client/modules/auth/consts/texts.const";
 import {
   requestPasswordResetSchema,
   type RequestPasswordResetSchemaType,

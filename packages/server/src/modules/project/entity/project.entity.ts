@@ -1,4 +1,4 @@
-import type { ProjectPersistedType } from "@workspace/server/modules/project/entity/project.types";
+import type { ProjectPersistedType, UpdateProjectType } from "@workspace/server/modules/project/entity/project.types";
 
 export class Project {
   readonly id: ProjectPersistedType["id"];
@@ -11,6 +11,16 @@ export class Project {
     this.name = project.name;
     this.organizationId = project.organizationId;
     this.createdAt = project.createdAt;
+  }
+
+  update(patch: UpdateProjectType): Project {
+    return new Project({
+      ...this.toObject(),
+      ...patch,
+      id: this.id,
+      organizationId: this.organizationId,
+      createdAt: this.createdAt,
+    });
   }
 
   toObject(): ProjectPersistedType {

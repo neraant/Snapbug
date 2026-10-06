@@ -6,7 +6,7 @@ import { Typography } from "@workspace/design-system/components/ui/typography";
 import Link from "next/link";
 
 import { SignUpForm } from "@/client/modules/auth/components/sign-up-form";
-import { texts } from "@/client/modules/auth/consts/texts";
+import { texts } from "@/client/modules/auth/consts/texts.const";
 import { path } from "@/shared/path.const";
 
 export default function Page() {

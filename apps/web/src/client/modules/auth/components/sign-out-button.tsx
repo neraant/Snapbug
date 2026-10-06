@@ -1,7 +1,7 @@
 import { Button } from "@workspace/design-system/components/ui/button";
 import { signOut } from "next-auth/react";
 
-import { texts } from "@/client/modules/auth/consts/texts";
+import { texts } from "@/client/modules/auth/consts/texts.const";
 import { path } from "@/shared/path.const";
 
 // @disabled posthog

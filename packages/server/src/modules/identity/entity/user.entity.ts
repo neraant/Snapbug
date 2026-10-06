@@ -1,6 +1,4 @@
-import type { UserPersistedType } from "@workspace/server/modules/identity/entity/user.types";
-
-type UpdateUserType = Partial<Pick<UserPersistedType, "name" | "email" | "passwordHash" | "passwordChangedAt">>;
+import type { UpdateUserType, UserPersistedType } from "@workspace/server/modules/identity/entity/user.types";
 
 export class User {
   readonly id: UserPersistedType["id"];

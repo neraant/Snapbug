@@ -6,7 +6,7 @@ import { BugIcon } from "lucide-react";
 import Link from "next/link";
 
 import { AuthThemeToggle } from "@/client/modules/auth/components/auth-theme-toggle";
-import { texts } from "@/shared/consts/texts";
+import { texts } from "@/shared/consts/texts.const";
 import { path } from "@/shared/path.const";
 
 export function AuthLayoutHeader() {

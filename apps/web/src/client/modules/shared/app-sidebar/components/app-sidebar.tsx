@@ -6,9 +6,9 @@ import { usePathname } from "next/navigation";
 import type { PropsWithChildren } from "react";
 
 import { signOutUser } from "@/client/modules/auth/components/sign-out-button";
-import { texts as authTexts } from "@/client/modules/auth/consts/texts";
+import { texts as authTexts } from "@/client/modules/auth/consts/texts.const";
 import { appSidebarItems } from "@/client/modules/shared/app-sidebar/consts/app-sidebar.const";
-import { texts as siteTexts } from "@/shared/consts/texts";
+import { texts as siteTexts } from "@/shared/consts/texts.const";
 
 // @disabled flag
 // import { useFindFlags } from "@/client/shared/queries/use-find-flags";

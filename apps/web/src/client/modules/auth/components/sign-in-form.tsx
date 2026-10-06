@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
 
-import { texts } from "@/client/modules/auth/consts/texts";
+import { texts } from "@/client/modules/auth/consts/texts.const";
 import { signInSchema, type SignInSchemaType } from "@/client/modules/auth/schemas/sign-in.schema";
 import { path } from "@/shared/path.const";
 

@@ -6,7 +6,7 @@ import { Typography } from "@workspace/design-system/components/ui/typography";
 import Link from "next/link";
 
 import { RequestPasswordResetForm } from "@/client/modules/auth/components/request-password-reset-form";
-import { texts } from "@/client/modules/auth/consts/texts";
+import { texts } from "@/client/modules/auth/consts/texts.const";
 import { path } from "@/shared/path.const";
 
 export default function Page() {

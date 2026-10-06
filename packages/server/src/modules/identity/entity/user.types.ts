@@ -8,8 +8,7 @@ export type UserPersistedType = {
   updatedAt: Date;
 };
 
-export type CreateUserType = {
-  name: string | null;
-  email: string;
-  passwordHash: string;
-};
+export type CreateUserType = Partial<Pick<UserPersistedType, "name">> &
+  Pick<UserPersistedType, "email" | "passwordHash">;
+
+export type UpdateUserType = Partial<Pick<UserPersistedType, "name" | "email" | "passwordHash" | "passwordChangedAt">>;

@@ -7,3 +7,5 @@ export type MembershipPersistedType = {
   role: UserRole;
   createdAt: Date;
 };
+
+export type CreateMembershipType = Pick<MembershipPersistedType, "userId" | "organizationId" | "role">;

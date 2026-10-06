@@ -8,7 +8,7 @@ import { useSearchParams } from "next/navigation";
 import { z } from "zod";
 
 import { ResetPasswordForm } from "@/client/modules/auth/components/reset-password-form";
-import { texts } from "@/client/modules/auth/consts/texts";
+import { texts } from "@/client/modules/auth/consts/texts.const";
 import { path } from "@/shared/path.const";
 
 export default function Page() {

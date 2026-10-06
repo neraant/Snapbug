@@ -1,5 +1,5 @@
 import { implement } from "@orpc/server";
-import { findProjects } from "@workspace/server/modules/project/project.api";
+import { createProject, findProjects, updateProject } from "@workspace/server/modules/project/project.api";
 import { projectContract } from "@workspace/server/modules/project/project.contract";
 import { authedMiddleware } from "@workspace/server/shared/orpc/authed.middleware";
 import type { OrpcContext } from "@workspace/server/shared/orpc/context.const";
@@ -9,5 +9,11 @@ const os = implement(projectContract).$context<OrpcContext>().use(mapAppErrorMid
 const authed = os.use(authedMiddleware);
 
 export const projectRouter = os.router({
+  createProject: authed.createProject.handler(
+    async ({ input, context }) => await createProject(input, context.user.id),
+  ),
   findProjects: authed.findProjects.handler(async ({ input }) => await findProjects(input)),
+  updateProject: authed.updateProject.handler(
+    async ({ input, context }) => await updateProject(input, context.user.id),
+  ),
 });

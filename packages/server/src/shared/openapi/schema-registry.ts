@@ -6,10 +6,21 @@ import { BugReportStatus } from "@workspace/validation/modules/bug-report/consts
 import { bugReportModelSchema } from "@workspace/validation/modules/bug-report/dto/bug-report.model";
 import { createBugReportInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/create-bug-report.schema";
 import { findBugReportsInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-bug-reports.schema";
+import { createMembershipInputDtoSchema } from "@workspace/validation/modules/membership/dto/create-membership.schema";
 import { findMembershipInputDtoSchema } from "@workspace/validation/modules/membership/dto/find-membership.schema";
+import { findMembershipByUserOutputDtoSchema } from "@workspace/validation/modules/membership/dto/find-membership-by-user.schema";
 import { membershipModelSchema } from "@workspace/validation/modules/membership/dto/membership.model";
+import {
+  createOrganizationInputDtoSchema,
+  createOrganizationOutputDtoSchema,
+} from "@workspace/validation/modules/organization/dto/create-organization.schema";
+import { findOnboardingOutputDtoSchema } from "@workspace/validation/modules/organization/dto/find-onboarding.schema";
+import { organizationModelSchema } from "@workspace/validation/modules/organization/dto/organization.model";
+import { updateOrganizationInputDtoSchema } from "@workspace/validation/modules/organization/dto/update-organization.schema";
+import { createProjectInputDtoSchema } from "@workspace/validation/modules/project/dto/create-project.schema";
 import { findProjectsInputDtoSchema } from "@workspace/validation/modules/project/dto/find-projects.schema";
 import { projectModelSchema } from "@workspace/validation/modules/project/dto/project.model";
+import { updateProjectInputDtoSchema } from "@workspace/validation/modules/project/dto/update-project.schema";
 import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
 import {
   createUserInputDtoSchema,
@@ -117,6 +128,60 @@ JSON_SCHEMA_REGISTRY.add(findMembershipInputDtoSchema, {
   ],
 });
 
+JSON_SCHEMA_REGISTRY.add(organizationModelSchema, {
+  title: "Organization",
+  description: "An organization workspace",
+  examples: [
+    {
+      id: "2a8c69a1-1ab1-45a8-8497-eae1e506d9d1",
+      name: "Acme",
+      reports_retention_days: 90,
+      createdAt: "2026-10-03T09:00:00.000Z",
+    },
+  ],
+});
+
+JSON_SCHEMA_REGISTRY.add(createOrganizationInputDtoSchema, {
+  title: "Create organization",
+  description: "Create an organization workspace",
+  examples: [{ name: "Acme" }],
+});
+
+JSON_SCHEMA_REGISTRY.add(createOrganizationOutputDtoSchema, {
+  title: "Created organization workspace",
+  description: "Organization and its default project",
+});
+
+JSON_SCHEMA_REGISTRY.add(createMembershipInputDtoSchema, {
+  title: "Create membership",
+  description: "Admin membership for an organization that has no members yet",
+  examples: [{ organizationId: "2a8c69a1-1ab1-45a8-8497-eae1e506d9d1" }],
+});
+
+JSON_SCHEMA_REGISTRY.add(updateOrganizationInputDtoSchema, {
+  title: "Update organization",
+  description: "Update organization settings",
+  examples: [{ organizationId: "2a8c69a1-1ab1-45a8-8497-eae1e506d9d1", name: "Acme" }],
+});
+
+JSON_SCHEMA_REGISTRY.add(findOnboardingOutputDtoSchema, {
+  title: "Onboarding snapshot",
+  description: "Organization and oldest project for the current user's onboarding",
+  examples: [
+    {
+      organizationId: "2a8c69a1-1ab1-45a8-8497-eae1e506d9d1",
+      organizationName: "Acme",
+      projectId: "4a8c69a1-1ab1-45a8-8497-eae1e506d9d1",
+      projectName: "Default project",
+    },
+  ],
+});
+
+JSON_SCHEMA_REGISTRY.add(findMembershipByUserOutputDtoSchema, {
+  title: "Membership for current user",
+  description: "Membership of the authenticated user, if any",
+});
+
 JSON_SCHEMA_REGISTRY.add(projectModelSchema, {
   title: "Project",
   description: "A project in an organization",
@@ -126,6 +191,23 @@ JSON_SCHEMA_REGISTRY.add(projectModelSchema, {
       name: "Store",
       organizationId: "3a8c69a1-1ab1-45a8-8497-eae1e506d9d1",
       createdAt: "2026-10-03T09:00:00.000Z",
+    },
+  ],
+});
+
+JSON_SCHEMA_REGISTRY.add(createProjectInputDtoSchema, {
+  title: "Create project",
+  description: "Create a project in an organization",
+  examples: [{ organizationId: "2a8c69a1-1ab1-45a8-8497-eae1e506d9d1", name: "Store" }],
+});
+
+JSON_SCHEMA_REGISTRY.add(updateProjectInputDtoSchema, {
+  title: "Update project",
+  description: "Update project settings",
+  examples: [
+    {
+      projectId: "4a8c69a1-1ab1-45a8-8497-eae1e506d9d1",
+      name: "Store",
     },
   ],
 });

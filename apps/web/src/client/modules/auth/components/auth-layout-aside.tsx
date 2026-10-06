@@ -10,13 +10,16 @@ import { DotIcon, SparklesIcon } from "lucide-react";
 import { usePathname } from "next/navigation";
 
 import { AuthAsidePreviewCard } from "@/client/modules/auth/components/auth-aside-preview-card";
-import { texts } from "@/client/modules/auth/consts/texts";
+import { texts } from "@/client/modules/auth/consts/texts.const";
+import { useAuthAsideCard } from "@/client/modules/auth/hooks/use-auth-aside-card";
 import { path } from "@/shared/path.const";
 
 export function AuthLayoutAside() {
   const pathname = usePathname();
+  const card = useAuthAsideCard();
 
   const isSignIn = pathname === path.signIn;
+  const isOnboarding = pathname === path.onboarding;
 
   return (
     <div className="relative hidden h-full overflow-hidden border-l bg-background lg:block" aria-hidden>
@@ -36,6 +39,8 @@ export function AuthLayoutAside() {
           <Column align="center" justify="center" gap="none" className="relative w-full">
             {isSignIn ? (
               <Mascot mood="waving" size="xl" className="relative z-10" />
+            ) : isOnboarding ? (
+              <Mascot mood="celebrating" size="xl" className="relative z-10" />
             ) : (
               <Mascot mood="happy" size="xl" className="relative z-10" />
             )}
@@ -49,9 +54,9 @@ export function AuthLayoutAside() {
                   <SparklesIcon className="text-warning" />
                 </Card.Icon>
                 <Card.Title variant="text-sm" weight="semibold">
-                  {texts.auth.aside.card.title}
+                  {card.title}
                 </Card.Title>
-                <Card.Description variant="text-xs">{texts.auth.aside.card.description}</Card.Description>
+                <Card.Description variant="text-xs">{card.description}</Card.Description>
               </Card.Header>
             </Card>
           </Row>

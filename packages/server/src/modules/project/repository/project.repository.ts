@@ -1,7 +1,10 @@
 import type { DbClient } from "@workspace/database";
 import { db as defaultDb } from "@workspace/database";
+import { projectTable } from "@workspace/database/schema";
 import type { Project } from "@workspace/server/modules/project/entity/project.entity";
 import { ProjectMapper } from "@workspace/server/modules/project/entity/project.mapper";
+import { InternalServerError } from "@workspace/server/shared/error/app-errors";
+import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 
 export class ProjectRepository {
   constructor(private readonly db: DbClient = defaultDb) {}
@@ -18,5 +21,28 @@ export class ProjectRepository {
       where: { organizationId },
     });
     return projects.map((project) => ProjectMapper.fromPersistence(project));
+  }
+
+  async save(project: Project): Promise<void> {
+    const values = ProjectMapper.toPersistence(project);
+
+    try {
+      await this.db
+        .insert(projectTable)
+        .values({
+          id: values.id,
+          name: values.name,
+          organizationId: values.organizationId,
+          createdAt: values.createdAt,
+        })
+        .onConflictDoUpdate({
+          target: projectTable.id,
+          set: {
+            name: values.name,
+          },
+        });
+    } catch (error) {
+      throw new InternalServerError(ERROR_CODES.INTERNAL_SERVER_ERROR, undefined, { cause: error });
+    }
   }
 }

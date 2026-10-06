@@ -4,4 +4,5 @@ export const path = {
   signUp: "/sign-up",
   forgotPassword: "/forgot-password",
   resetPassword: "/reset-password",
+  onboarding: "/onboarding",
 } as const;

@@ -6,7 +6,7 @@ import { Typography } from "@workspace/design-system/components/ui/typography";
 import { cn } from "@workspace/design-system/lib/utils";
 import type { ComponentProps } from "react";
 
-import { texts } from "@/client/modules/auth/consts/texts";
+import { texts } from "@/client/modules/auth/consts/texts.const";
 
 const preview = texts.auth.aside.preview;
 

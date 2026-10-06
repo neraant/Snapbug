@@ -3,6 +3,7 @@ import { authRouter } from "@workspace/server/modules/auth/auth.router";
 import { bugReportRouter } from "@workspace/server/modules/bug-report/bug-report.router";
 import { identityRouter } from "@workspace/server/modules/identity/identity.router";
 import { membershipRouter } from "@workspace/server/modules/membership/membership.router";
+import { organizationRouter } from "@workspace/server/modules/organization/organization.router";
 import { projectRouter } from "@workspace/server/modules/project/project.router";
 
 // @disabled flag
@@ -14,6 +15,7 @@ export const router = {
   bugReport: bugReportRouter,
   identity: identityRouter,
   membership: membershipRouter,
+  organization: organizationRouter,
   project: projectRouter,
   // @disabled flag
   // flag: flagRouter,
