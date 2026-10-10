@@ -4,6 +4,7 @@ export type FindUserOnboardingStateOutput = {
 };
 
 export type UserPort = {
+  withTx: (tx: unknown) => UserPort;
   findOnboardingState: (userId: string) => Promise<FindUserOnboardingStateOutput>;
   markOnboardingComplete: (userId: string) => Promise<void>;
 };

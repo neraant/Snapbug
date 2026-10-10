@@ -1,31 +1,43 @@
-import type { MembershipPort as BugReportMembershipPort } from "@workspace/server/modules/bug-report/port/membership.port";
+import type { DbClient } from "@workspace/database";
 import { CreateMembershipUseCase } from "@workspace/server/modules/membership/application/create-membership.use-case";
-import { FindMembershipByUserUseCase } from "@workspace/server/modules/membership/application/find-membership-by-user.use-case";
 import { FindMembershipUseCase } from "@workspace/server/modules/membership/application/find-membership.use-case";
-import { MembershipRepository } from "@workspace/server/modules/membership/repository/membership.repository";
+import { FindMembershipByUserUseCase } from "@workspace/server/modules/membership/application/find-membership-by-user.use-case";
+import type { MembershipRepository } from "@workspace/server/modules/membership/repository/membership.repository";
 import type { MembershipPort as OrganizationMembershipPort } from "@workspace/server/modules/organization/port/membership.port";
 import type {
   CreateMembershipInputDtoType,
   CreateMembershipOutputDtoType,
 } from "@workspace/validation/modules/membership/dto/create-membership.schema";
-import type { FindMembershipByUserOutputDtoType } from "@workspace/validation/modules/membership/dto/find-membership-by-user.schema";
 import type {
   FindMembershipInputDtoType,
   FindMembershipOutputDtoType,
 } from "@workspace/validation/modules/membership/dto/find-membership.schema";
+import type { FindMembershipByUserOutputDtoType } from "@workspace/validation/modules/membership/dto/find-membership-by-user.schema";
 
-export class MembershipAdapter implements BugReportMembershipPort, OrganizationMembershipPort {
-  constructor(private readonly membershipRepository: MembershipRepository = new MembershipRepository()) {}
+export class MembershipAdapter implements OrganizationMembershipPort {
+  private readonly findMembership: FindMembershipUseCase;
+  private readonly findMembershipByUser: FindMembershipByUserUseCase;
+  private readonly createMembership: CreateMembershipUseCase;
+
+  constructor(private readonly membershipRepository: MembershipRepository) {
+    this.findMembership = new FindMembershipUseCase(membershipRepository);
+    this.findMembershipByUser = new FindMembershipByUserUseCase(membershipRepository);
+    this.createMembership = new CreateMembershipUseCase(membershipRepository);
+  }
+
+  withTx(tx: unknown): MembershipAdapter {
+    return new MembershipAdapter(this.membershipRepository.withTx(tx as DbClient));
+  }
 
   async findByUserAndOrganization(input: FindMembershipInputDtoType): Promise<FindMembershipOutputDtoType> {
-    return await new FindMembershipUseCase(this.membershipRepository).execute(input);
+    return await this.findMembership.execute(input);
   }
 
   async findByUser(userId: string): Promise<FindMembershipByUserOutputDtoType> {
-    return await new FindMembershipByUserUseCase(this.membershipRepository).execute(userId);
+    return await this.findMembershipByUser.execute(userId);
   }
 
   async create(input: CreateMembershipInputDtoType, userId: string): Promise<CreateMembershipOutputDtoType> {
-    return await new CreateMembershipUseCase(this.membershipRepository).execute(input, userId);
+    return await this.createMembership.execute(input, userId);
   }
 }

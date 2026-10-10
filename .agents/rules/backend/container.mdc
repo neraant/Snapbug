@@ -1,0 +1,32 @@
+---
+description: Dependency composition in container.ts
+globs: packages/server/src/container.ts
+---
+
+# Container
+
+`src/container.ts` is the composition root. It instantiates repositories, adapters, and use-cases once, then exports `container`. Routers call `container.{context}.{verb}.execute(...)`.
+
+One repository instance per aggregate is shared by the use-cases and the adapter of that aggregate.
+
+## Do
+
+- `new Repository()`, `new Adapter(repository)`, `new UseCase(...)`
+- Pass an adapter where a use-case expects a port
+- Group use-cases on `container.{context}`
+
+## Don't
+
+- Build port objects in this file
+- `new` in routers or use-cases
+- Rebuild the container inside a transaction — call `port.withTx(tx)` / `repository.withTx(tx)`
+
+```ts
+const membershipRepository = new MembershipRepository();
+const membershipAdapter = new MembershipAdapter(membershipRepository);
+const findMembership = new FindMembershipUseCase(membershipRepository);
+
+export const container = {
+  membership: { findMembership },
+};
+```

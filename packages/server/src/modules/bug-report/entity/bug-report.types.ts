@@ -25,6 +25,7 @@ export type BugReportPersistedType = {
   customContext: Record<string, unknown> | null;
   createdAt: Date;
   updatedAt: Date;
+  resolvedAt: Date | null;
 };
 
 export type CreateBugReportType = {
@@ -32,4 +33,9 @@ export type CreateBugReportType = {
   title: string;
   description: string;
   url: string;
+};
+
+export type DailyMetricRow = {
+  day: string;
+  value: number;
 };

@@ -151,6 +151,7 @@ export async function seedBugReport(projects: ProjectRow[], users: UserRow[]) {
       ],
       createdAt: daysAgo(8, 9),
       updatedAt: daysAgo(2, 18),
+      resolvedAt: daysAgo(2, 18),
     }),
     report({
       id: "6a8c69a1-1ab1-45a8-8497-eae1e506d906",
@@ -169,6 +170,7 @@ export async function seedBugReport(projects: ProjectRow[], users: UserRow[]) {
       networkLogs: [{ method: "GET", url: "https://store.acme.test/careers", status: 404, durationMs: 90 }],
       createdAt: daysAgo(10, 13),
       updatedAt: daysAgo(6, 11),
+      resolvedAt: daysAgo(6, 11),
     }),
     report({
       id: "6a8c69a1-1ab1-45a8-8497-eae1e506d907",
@@ -189,6 +191,7 @@ export async function seedBugReport(projects: ProjectRow[], users: UserRow[]) {
       viewportHeight: 900,
       createdAt: daysAgo(14, 10),
       updatedAt: daysAgo(11, 15),
+      resolvedAt: daysAgo(11, 15),
     }),
     report({
       id: "6a8c69a1-1ab1-45a8-8497-eae1e506d908",
@@ -216,6 +219,7 @@ export async function seedBugReport(projects: ProjectRow[], users: UserRow[]) {
       customContext: { orderId: "ord_1044" },
       createdAt: daysAgo(12, 19),
       updatedAt: daysAgo(6, 8),
+      resolvedAt: daysAgo(6, 8),
     }),
     report({
       id: "6a8c69a1-1ab1-45a8-8497-eae1e506d909",
@@ -287,6 +291,7 @@ export async function seedBugReport(projects: ProjectRow[], users: UserRow[]) {
       ],
       createdAt: daysAgo(9, 17),
       updatedAt: daysAgo(4, 10),
+      resolvedAt: daysAgo(4, 10),
     }),
   ].filter((bugReport) => projectIds.has(bugReport.projectId));
 

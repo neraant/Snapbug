@@ -1,4 +1,4 @@
-import { findOnboarding } from "@workspace/server/modules/organization/organization.api";
+import { container } from "@workspace/server/container";
 
 import { auth } from "@/auth";
 import { path } from "@/shared/path.const";
@@ -23,7 +23,7 @@ export default auth(async (req) => {
     return;
   }
 
-  const snapshot = await findOnboarding(userId);
+  const snapshot = await container.organization.findOnboarding.execute(userId);
   const completed = hasCompletedOnboarding(snapshot);
 
   if (isGuestAuthPage) {

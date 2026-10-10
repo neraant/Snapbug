@@ -1,4 +1,4 @@
-import { findProjectByKey } from "@workspace/server/modules/api-key/api-key.api";
+import { container } from "@workspace/server/container";
 import { mcpHandler } from "@workspace/server/orpc/handler.const";
 
 export const dynamic = "force-dynamic";
@@ -9,7 +9,7 @@ async function handleRequest(request: Request) {
     return Response.json({ message: "This API key is invalid" }, { status: 401 });
   }
 
-  const project = await findProjectByKey({ key });
+  const project = await container.apiKey.findProjectByKey.execute({ key });
   if (!project) {
     return Response.json({ message: "This API key is invalid" }, { status: 401 });
   }

@@ -1,6 +1,5 @@
 import { Column } from "@workspace/design-system/components/layout/column";
 import { Button } from "@workspace/design-system/components/ui/button";
-import { Skeleton } from "@workspace/design-system/components/ui/skeleton";
 import { Typography } from "@workspace/design-system/components/ui/typography";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -25,7 +24,7 @@ export function SignUpContent() {
         </Typography>
       </Column>
       {invitationToken ? (
-        <Suspense fallback={<Skeleton className="h-64 w-full" />}>
+        <Suspense fallback={<SignUpForm.Fallback />}>
           <SignUpForm invitationToken={invitationToken} />
         </Suspense>
       ) : (

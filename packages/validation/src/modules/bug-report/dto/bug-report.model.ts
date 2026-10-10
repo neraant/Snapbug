@@ -25,6 +25,7 @@ export const bugReportModelSchema = z.object({
   customContext: z.record(z.string(), z.unknown()).nullable(),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
+  resolvedAt: z.iso.datetime().nullable(),
 });
 
 export type BugReportModelType = z.infer<typeof bugReportModelSchema>;

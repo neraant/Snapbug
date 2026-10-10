@@ -31,6 +31,7 @@ export abstract class BugReportFactory {
       customContext: null,
       createdAt: now,
       updatedAt: now,
+      resolvedAt: null,
     });
   }
 }

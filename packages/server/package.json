@@ -19,7 +19,9 @@
     "@react-email/render": "^2.1.0",
     "@workspace/database": "workspace:*",
     "@workspace/validation": "workspace:*",
+    "@date-fns/utc": "2.1.1",
     "bcryptjs": "3.0.3",
+    "date-fns": "4.1.0",
     "drizzle-orm": "1.0.0-rc.4",
     "react": "19.2.4",
     "react-dom": "19.2.4",
@@ -37,6 +39,7 @@
     "vitest": "4.1.10"
   },
   "exports": {
+    "./container": "./src/container.ts",
     "./router": "./src/shared/router.const.ts",
     "./orpc/*": "./src/shared/orpc/*.ts",
     "./error/*": "./src/shared/error/*.ts",

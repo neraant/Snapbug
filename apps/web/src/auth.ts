@@ -1,4 +1,4 @@
-import { verifyCredentials } from "@workspace/server/modules/auth/auth.api";
+import { container } from "@workspace/server/container";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 
@@ -16,7 +16,7 @@ export const { handlers, auth } = NextAuth({
         const password = credentials?.password;
         if (typeof email !== "string" || typeof password !== "string") return null;
 
-        const user = await verifyCredentials({ email, password });
+        const user = await container.auth.verifyCredentials.execute({ email, password });
         if (!user) return null;
 
         return {

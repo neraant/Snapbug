@@ -36,6 +36,7 @@ export abstract class BugReportMapper {
       customContext: row.customContext,
       createdAt: row.createdAt.toISOString(),
       updatedAt: row.updatedAt.toISOString(),
+      resolvedAt: row.resolvedAt?.toISOString() ?? null,
     };
   }
 }

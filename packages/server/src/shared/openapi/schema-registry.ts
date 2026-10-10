@@ -1,26 +1,27 @@
 import { JSON_SCHEMA_REGISTRY } from "@orpc/zod/zod4";
 import { findProjectByKeyInputDtoSchema } from "@workspace/validation/modules/api-key/dto/find-project-by-key.schema";
-import { acceptInvitationInputDtoSchema } from "@workspace/validation/modules/invitation/dto/accept-invitation.schema";
-import {
-  findInvitationByTokenInputDtoSchema,
-  findInvitationByTokenOutputDtoSchema,
-} from "@workspace/validation/modules/invitation/dto/find-invitation-by-token.schema";
-import { sendInvitationsInputDtoSchema } from "@workspace/validation/modules/invitation/dto/send-invitation.schema";
 import { verifyCredentialsInputDtoSchema } from "@workspace/validation/modules/auth/dto/verify-credentials.schema";
 import { BugReportSeverity } from "@workspace/validation/modules/bug-report/consts/bug-report-severity.const";
 import { BugReportStatus } from "@workspace/validation/modules/bug-report/consts/bug-report-status.const";
 import { bugReportModelSchema } from "@workspace/validation/modules/bug-report/dto/bug-report.model";
 import { createBugReportInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/create-bug-report.schema";
 import { findBugReportsInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-bug-reports.schema";
+import { findStatsInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-stats.schema";
+import { acceptInvitationInputDtoSchema } from "@workspace/validation/modules/invitation/dto/accept-invitation.schema";
+import {
+  findInvitationByTokenInputDtoSchema,
+  findInvitationByTokenOutputDtoSchema,
+} from "@workspace/validation/modules/invitation/dto/find-invitation-by-token.schema";
+import { sendInvitationsInputDtoSchema } from "@workspace/validation/modules/invitation/dto/send-invitation.schema";
 import { createMembershipInputDtoSchema } from "@workspace/validation/modules/membership/dto/create-membership.schema";
 import { findMembershipInputDtoSchema } from "@workspace/validation/modules/membership/dto/find-membership.schema";
 import { findMembershipByUserOutputDtoSchema } from "@workspace/validation/modules/membership/dto/find-membership-by-user.schema";
 import { membershipModelSchema } from "@workspace/validation/modules/membership/dto/membership.model";
+import { completeOnboardingInputDtoSchema } from "@workspace/validation/modules/organization/dto/complete-onboarding.schema";
 import {
   createOrganizationInputDtoSchema,
   createOrganizationOutputDtoSchema,
 } from "@workspace/validation/modules/organization/dto/create-organization.schema";
-import { completeOnboardingInputDtoSchema } from "@workspace/validation/modules/organization/dto/complete-onboarding.schema";
 import { findOnboardingOutputDtoSchema } from "@workspace/validation/modules/organization/dto/find-onboarding.schema";
 import { organizationModelSchema } from "@workspace/validation/modules/organization/dto/organization.model";
 import { updateOrganizationInputDtoSchema } from "@workspace/validation/modules/organization/dto/update-organization.schema";
@@ -83,6 +84,7 @@ JSON_SCHEMA_REGISTRY.add(bugReportModelSchema, {
       customContext: null,
       createdAt: "2026-10-03T09:00:00.000Z",
       updatedAt: "2026-10-03T09:00:00.000Z",
+      resolvedAt: null,
     },
   ],
 });
@@ -90,6 +92,12 @@ JSON_SCHEMA_REGISTRY.add(bugReportModelSchema, {
 JSON_SCHEMA_REGISTRY.add(findBugReportsInputDtoSchema, {
   title: "List bug reports",
   description: "Bug reports for an organization the caller belongs to",
+  examples: [{ organizationId: "3a8c69a1-1ab1-45a8-8497-eae1e506d9d1" }],
+});
+
+JSON_SCHEMA_REGISTRY.add(findStatsInputDtoSchema, {
+  title: "Bug report stats",
+  description: "Overview stat cards for an organization the caller belongs to",
   examples: [{ organizationId: "3a8c69a1-1ab1-45a8-8497-eae1e506d9d1" }],
 });
 

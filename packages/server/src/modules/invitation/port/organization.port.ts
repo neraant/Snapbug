@@ -1,3 +1,5 @@
+import type { OrganizationModelType } from "@workspace/validation/modules/organization/dto/organization.model";
+
 export type OrganizationPort = {
-  findNameById: (organizationId: string) => Promise<string | null>;
+  findById: (organizationId: string) => Promise<OrganizationModelType | null>;
 };

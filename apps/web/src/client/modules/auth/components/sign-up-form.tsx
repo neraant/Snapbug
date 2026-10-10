@@ -2,6 +2,7 @@ import { PasswordField } from "@workspace/design-system/components/forms/passwor
 import { TextField } from "@workspace/design-system/components/forms/text-field";
 import { Column } from "@workspace/design-system/components/layout/column";
 import { FieldGroup } from "@workspace/design-system/components/ui/field";
+import { Skeleton } from "@workspace/design-system/components/ui/skeleton";
 import { SubmitButton } from "@workspace/design-system/components/ui/submit-button";
 
 import { texts } from "@/client/modules/auth/consts/texts.const";
@@ -23,6 +24,12 @@ export function SignUpForm({ invitationToken }: SignUpFormProps) {
 
   return <SignUpFormFields />;
 }
+
+function SignUpFormFallback() {
+  return <Skeleton className="h-64 w-full" />;
+}
+
+SignUpForm.Fallback = SignUpFormFallback;
 
 type SignUpFormWithInvitationProps = {
   invitationToken: string;

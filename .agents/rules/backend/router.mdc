@@ -5,7 +5,7 @@ globs: packages/server/src/modules/**/*.{router,contract}.ts
 
 # Router
 
-Thin transport: `{context}.contract.ts` → middleware → [api](./api.mdc).
+Thin transport: `{context}.contract.ts` → middleware → [container](./container.mdc).
 
 ## Do
 
@@ -13,16 +13,18 @@ Thin transport: `{context}.contract.ts` → middleware → [api](./api.mdc).
 - `implement({context}Contract).$context<OrpcContext>()`
 - Always `.use(mapAppErrorMiddleware)`
 - Auth: `.use(authedMiddleware)` when needed
-- Handler only calls `{context}.api.ts`
+- Handler calls `container.{context}.{verb}.execute(...)`
 
 ## Don't
 
 - New Repository / UseCase / SQL / rules
 
 ```ts
+import { container } from "@workspace/server/container";
+
 const os = implement(authContract).$context<OrpcContext>().use(mapAppErrorMiddleware);
 
 export const authRouter = os.router({
-  signUp: os.signUp.handler(async ({ input }) => await signUp(input)),
+  signUp: os.signUp.handler(async ({ input }) => await container.auth.signUp.execute(input)),
 });
 ```

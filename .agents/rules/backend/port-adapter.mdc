@@ -7,8 +7,10 @@ globs: packages/server/src/modules/**/{port,adapter}/**
 
 | Piece       | Owner                                         | Role                                      |
 | ----------- | --------------------------------------------- | ----------------------------------------- |
-| **Port**    | consumer (`auth/port/user.port.ts`)           | shared DTO in/out; consumer-owned contract |
-| **Adapter** | provider (`identity/adapter/user.adapter.ts`) | one-line delegate to own use-case/service |
+| **Port**    | consumer (`auth/port/user.port.ts`)           | type only; consumer-owned contract        |
+| **Adapter** | provider (`identity/adapter/user.adapter.ts`) | class; one-line delegate to own use-case  |
+
+Wired in [container](./container.mdc): `new UserAdapter(userRepository)`.
 
 ## Return types
 
@@ -20,26 +22,26 @@ globs: packages/server/src/modules/**/{port,adapter}/**
 ## Do
 
 - Use-case depends on the port type only
-- Adapter: `return await this.createUserUseCase.execute(data)` — no factory, mapper, or repo in the adapter
-- Put factory → save → `Mapper.toDto` (and credential shaping) in provider **use-cases** (or a domain **service** when it fits [service](./service.mdc))
+- Adapter method: `return await this.createUser.execute(data)`
+- DB-bound adapter: `withTx(tx)` returns a new adapter on `repository.withTx(tx)`. The port declares `withTx` when a use-case calls it inside a transaction
+- Put factory → save → `Mapper.toDto` in provider **use-cases** (or a domain **service** when it fits [service](./service.mdc))
 
 ## Don't
 
-- Consumer importing provider repo / use-case / entity
+- Consumer importing provider repo / use-case / entity / adapter
 - Port importing adapter
 - A port method whose result is another module's list
-- Logic in the adapter (lazy shortcut — add a use-case or service method instead)
+- Logic in the adapter (add a use-case instead)
 
 ```ts
 // auth/port/user.port.ts
 export type UserPort = {
   create: (input: CreateUserData) => Promise<UserModelType>;
   findByEmail: (email: string) => Promise<UserModelType | null>;
-  findManyByOrganizationId: (input: FindUsersInputDtoType) => Promise<UserModelType[]>;
 };
 
 // identity/adapter/user.adapter.ts
 async create(data: CreateUserData): Promise<UserModelType> {
-  return await this.createUserUseCase.execute(data);
+  return await this.createUser.execute(data);
 }
 ```

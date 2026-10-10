@@ -1,9 +1,5 @@
 import { implement } from "@orpc/server";
-import {
-  acceptInvitation,
-  findInvitationByToken,
-  sendInvitations,
-} from "@workspace/server/modules/invitation/invitation.api";
+import { container } from "@workspace/server/container";
 import { invitationContract } from "@workspace/server/modules/invitation/invitation.contract";
 import { authedMiddleware } from "@workspace/server/shared/orpc/authed.middleware";
 import type { OrpcContext } from "@workspace/server/shared/orpc/context.const";
@@ -14,10 +10,14 @@ const authed = os.use(authedMiddleware);
 
 export const invitationRouter = os.router({
   sendInvitations: authed.sendInvitations.handler(
-    async ({ input, context }) => await sendInvitations(input, context.user.id, context.user.email),
+    async ({ input, context }) =>
+      await container.invitation.sendInvitations.execute(input, context.user.id, context.user.email),
   ),
-  findInvitationByToken: os.findInvitationByToken.handler(async ({ input }) => await findInvitationByToken(input)),
+  findInvitationByToken: os.findInvitationByToken.handler(
+    async ({ input }) => await container.invitation.findInvitationByToken.execute(input),
+  ),
   acceptInvitation: authed.acceptInvitation.handler(
-    async ({ input, context }) => await acceptInvitation(input, context.user.id, context.user.email),
+    async ({ input, context }) =>
+      await container.invitation.acceptInvitation.execute(input, context.user.id, context.user.email),
   ),
 });

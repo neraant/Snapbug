@@ -8,6 +8,10 @@ import {
   findBugReportsInputDtoSchema,
   findBugReportsOutputDtoSchema,
 } from "@workspace/validation/modules/bug-report/dto/find-bug-reports.schema";
+import {
+  findStatsInputDtoSchema,
+  findStatsOutputDtoSchema,
+} from "@workspace/validation/modules/bug-report/dto/find-stats.schema";
 
 const bugReport = oc.$meta<{ mcp?: boolean }>({});
 
@@ -25,6 +29,16 @@ export const bugReportContract = {
       path: "/bug-reports",
       tags: ["bug-report"],
       summary: "List bug reports",
+      spec: sessionAuthSpec,
+    }),
+  findStats: bugReport
+    .input(findStatsInputDtoSchema)
+    .output(findStatsOutputDtoSchema)
+    .route({
+      method: "GET",
+      path: "/bug-reports/stats",
+      tags: ["bug-report"],
+      summary: "Bug report overview stats",
       spec: sessionAuthSpec,
     }),
 };

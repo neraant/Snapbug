@@ -1,5 +1,11 @@
+import {
+  formatStatTrendPercent,
+  resolveStatTrendTone,
+  type StatTrendPolarity,
+} from "@workspace/design-system/lib/stat-trend.util";
 import { cn } from "@workspace/design-system/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
+import { TrendingDownIcon, TrendingUpIcon } from "lucide-react";
 import type { ComponentProps } from "react";
 
 const badgeVariants = cva(
@@ -12,6 +18,8 @@ const badgeVariants = cva(
         secondary: "bg-secondary text-secondary-foreground",
         outline: "border-border text-muted-foreground",
         destructive: "bg-destructive/10 text-destructive",
+        success: "bg-success/10 text-success",
+        warning: "bg-warning/10 text-warning",
       },
     },
     defaultVariants: {
@@ -26,4 +34,23 @@ function Badge({ className, variant = "default", ...props }: BadgeProps) {
   return <span data-slot="badge" className={cn(badgeVariants({ variant }), className)} {...props} />;
 }
 
-export { Badge, badgeVariants };
+type TrendBadgeProps = {
+  changePercent: number;
+  polarity: StatTrendPolarity;
+  className?: string;
+};
+
+function TrendBadge({ changePercent, polarity, className }: TrendBadgeProps) {
+  const tone = resolveStatTrendTone(changePercent, polarity);
+  const variant = tone === "positive" ? "success" : tone === "negative" ? "warning" : "secondary";
+  const TrendIcon = changePercent < 0 ? TrendingDownIcon : TrendingUpIcon;
+
+  return (
+    <Badge variant={variant} className={cn("font-mono text-[10px]", className)}>
+      {changePercent !== 0 ? <TrendIcon aria-hidden /> : null}
+      {formatStatTrendPercent(changePercent)}
+    </Badge>
+  );
+}
+
+export { Badge, badgeVariants, TrendBadge };

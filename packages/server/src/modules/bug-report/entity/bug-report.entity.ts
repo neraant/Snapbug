@@ -24,6 +24,7 @@ export class BugReport {
   readonly customContext: BugReportPersistedType["customContext"];
   readonly createdAt: BugReportPersistedType["createdAt"];
   readonly updatedAt: BugReportPersistedType["updatedAt"];
+  readonly resolvedAt: BugReportPersistedType["resolvedAt"];
 
   constructor(bugReport: BugReportPersistedType) {
     this.id = bugReport.id;
@@ -49,6 +50,7 @@ export class BugReport {
     this.customContext = bugReport.customContext;
     this.createdAt = bugReport.createdAt;
     this.updatedAt = bugReport.updatedAt;
+    this.resolvedAt = bugReport.resolvedAt;
   }
 
   toObject(): BugReportPersistedType {
@@ -76,6 +78,7 @@ export class BugReport {
       customContext: this.customContext,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
+      resolvedAt: this.resolvedAt,
     };
   }
 }

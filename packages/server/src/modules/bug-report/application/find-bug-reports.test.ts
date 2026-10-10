@@ -56,6 +56,7 @@ const bugReport = new BugReport({
   customContext: null,
   createdAt,
   updatedAt: createdAt,
+  resolvedAt: null,
 });
 
 describe("FindBugReportsUseCase", () => {

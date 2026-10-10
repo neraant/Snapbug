@@ -30,4 +30,5 @@ export const bugReportTable = pgTable("bug_reports", {
   customContext: jsonb("custom_context").$type<Record<string, unknown>>(),
   createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull(),
+  resolvedAt: timestamp("resolved_at", { withTimezone: true, mode: "date" }),
 });

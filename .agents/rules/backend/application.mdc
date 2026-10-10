@@ -7,9 +7,7 @@ globs: packages/server/src/modules/**/application/**
 
 One use-case per file: `{verb}.use-case.ts`, `{Verb}UseCase.execute`. Tests: [tdd](./tdd.mdc).
 
-Every use-case is an endpoint. The same `{verb}` is a procedure on `{context}.contract.ts`, a handler on `{context}.router.ts`, and a function in `{context}.api.ts` that calls `execute`. Another module may still call it through your port; the endpoint stays.
-
-Every use-case is an endpoint. The same `{verb}` is a procedure on `{context}.contract.ts`, a handler on `{context}.router.ts`, and a function in `{context}.api.ts` that calls `execute`. Another module may still call it through your port; the endpoint stays.
+A use-case is either an **endpoint** (same `{verb}` on contract, router, and [container](./container.mdc)) or the **implementation of a port method** (called from the provider adapter, not exposed on the contract).
 
 ## Logic
 
@@ -44,7 +42,7 @@ The client reads `organization.name` off `findOrganizations`.
 
 - Drizzle / tables / oRPC / other module's repo
 - Ask another module to query or return your aggregate
-- `create({ email, password })` on a repo that has an entity — that is `Factory` + `save` in the **provider** use-case (or service), not in the [port adapter](./port-adapter.mdc)
+- `create({ email, password })` on a repo that has an entity — that is `Factory` + `save` in the **provider** use-case (or service), not in the [port impl](./port-adapter.mdc)
 
 ```ts
 async execute(input: CreateUserInputDtoType): Promise<CreateUserOutputDtoType> {

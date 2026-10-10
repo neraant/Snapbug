@@ -8,16 +8,16 @@ globs: packages/server/src/**
 Vertical slice: `packages/server/src/modules/{context}/`.
 
 ```text
-contract → router → api → use-case → repository | service | port→adapter
+contract → router → container → use-case → repository | service | port→adapter
                               ↓
                      entity / factory / mapper
 ```
 
 | Layer       | Path                                      | Rule                               |
 | ----------- | ----------------------------------------- | ---------------------------------- |
+| Container   | `src/container.ts`                        | [container](./container.mdc)       |
 | Contract    | `{context}.contract.ts`                   | [router](./router.mdc)             |
 | Router      | `{context}.router.ts`                     | [router](./router.mdc)             |
-| API         | `{context}.api.ts`                        | [api](./api.mdc)                   |
 | Application | `application/{verb}.use-case.ts`          | [application](./application.mdc)   |
 | Entity      | `entity/{aggregate}.*`                    | [entity](./entity.mdc)             |
 | Repository  | `repository/{aggregate}.repository.ts`    | [repository](./repository.mdc)     |
@@ -28,7 +28,7 @@ contract → router → api → use-case → repository | service | port→adapt
 
 ## Rules
 
-- Every use-case is an endpoint: same verb on contract, router, and api. See [application](./application.mdc).
+- Every **endpoint** use-case matches contract + router: same verb, wired in [container](./container.mdc). Other use-cases exist only as port method implementations. See [application](./application.mdc).
 - Return the aggregate or the list. No endpoint that exists to read one field (`findOrganizationName`). See [application](./application.mdc).
 - Depend inward only (table, top → bottom).
 - One aggregate per repository. Another module's data comes through its port (its DTO); then your repository loads your rows.
@@ -46,4 +46,4 @@ contract → router → api → use-case → repository | service | port→adapt
 | Persist / load this aggregate    | [repository](./repository.mdc)   |
 | Read that needs another module   | their port, then your use-case   |
 
-Never in router or api.
+Never in router or container beyond wiring.

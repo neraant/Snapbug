@@ -1,11 +1,12 @@
+import type { DbClient } from "@workspace/database";
 import type { ProjectPort as ApiKeyProjectPort } from "@workspace/server/modules/api-key/port/project.port";
 import type { ProjectPort as BugReportProjectPort } from "@workspace/server/modules/bug-report/port/project.port";
-import { MembershipAdapter } from "@workspace/server/modules/membership/adapter/membership.adapter";
 import type { ProjectPort as OrganizationProjectPort } from "@workspace/server/modules/organization/port/project.port";
 import { CreateProjectUseCase } from "@workspace/server/modules/project/application/create-project.use-case";
+import { FindProjectByIdUseCase } from "@workspace/server/modules/project/application/find-project-by-id.use-case";
 import { FindProjectsUseCase } from "@workspace/server/modules/project/application/find-projects.use-case";
-import { ProjectMapper } from "@workspace/server/modules/project/entity/project.mapper";
-import { ProjectRepository } from "@workspace/server/modules/project/repository/project.repository";
+import type { MembershipPort } from "@workspace/server/modules/project/port/membership.port";
+import type { ProjectRepository } from "@workspace/server/modules/project/repository/project.repository";
 import type {
   CreateProjectInputDtoType,
   CreateProjectOutputDtoType,
@@ -16,19 +17,33 @@ import type {
 } from "@workspace/validation/modules/project/dto/find-projects.schema";
 import type { ProjectModelType } from "@workspace/validation/modules/project/dto/project.model";
 
-export class ProjectAdapter implements BugReportProjectPort, ApiKeyProjectPort, OrganizationProjectPort {
-  constructor(private readonly projectRepository: ProjectRepository = new ProjectRepository()) {}
+export class ProjectAdapter implements OrganizationProjectPort, BugReportProjectPort, ApiKeyProjectPort {
+  private readonly createProject: CreateProjectUseCase;
+  private readonly findProjects: FindProjectsUseCase;
+  private readonly findProjectById: FindProjectByIdUseCase;
 
-  async create(input: CreateProjectInputDtoType, userId: string): Promise<CreateProjectOutputDtoType> {
-    return await new CreateProjectUseCase(new MembershipAdapter(), this.projectRepository).execute(input, userId);
+  constructor(
+    private readonly projectRepository: ProjectRepository,
+    private readonly membershipPort: MembershipPort,
+  ) {
+    this.createProject = new CreateProjectUseCase(membershipPort, projectRepository);
+    this.findProjects = new FindProjectsUseCase(projectRepository);
+    this.findProjectById = new FindProjectByIdUseCase(projectRepository);
   }
 
-  async findById(id: string): Promise<ProjectModelType | null> {
-    const project = await this.projectRepository.findById(id);
-    return project ? ProjectMapper.toDto(project) : null;
+  withTx(tx: unknown): ProjectAdapter {
+    return new ProjectAdapter(this.projectRepository.withTx(tx as DbClient), this.membershipPort.withTx(tx));
+  }
+
+  async create(input: CreateProjectInputDtoType, userId: string): Promise<CreateProjectOutputDtoType> {
+    return await this.createProject.execute(input, userId);
   }
 
   async findManyByOrganizationId(input: FindProjectsInputDtoType): Promise<FindProjectsOutputDtoType> {
-    return await new FindProjectsUseCase(this.projectRepository).execute(input);
+    return await this.findProjects.execute(input);
+  }
+
+  async findById(id: string): Promise<ProjectModelType | null> {
+    return await this.findProjectById.execute(id);
   }
 }

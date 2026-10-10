@@ -64,10 +64,10 @@
   --sidebar-foreground: oklch(0.215 0.006 56);
   --sidebar-primary: oklch(0.693 0.207 42.5);
   --sidebar-primary-foreground: oklch(1 0 0);
-  --sidebar-accent: oklch(71.965% 0.18737 46.791);
-  --sidebar-accent-foreground: oklch(1 0 0);
-  --sidebar-hover: oklch(0.955 0.01 70);
-  --sidebar-hover-foreground: oklch(0.215 0.006 56);
+  --sidebar-accent: oklch(0.955 0.045 62); /* Orange-100 tint — active (dark: warm orange surface) */
+  --sidebar-accent-foreground: oklch(0.472 0.155 42); /* Orange-800 — active label */
+  --sidebar-hover: oklch(0.965 0.003 75); /* Stone-100 — hover (dark: Stone-800 lift) */
+  --sidebar-hover-foreground: oklch(0.215 0.006 56); /* Stone-900 */
   --sidebar-border: oklch(0.92 0.005 60);
   --sidebar-ring: oklch(0.693 0.207 42.5);
 

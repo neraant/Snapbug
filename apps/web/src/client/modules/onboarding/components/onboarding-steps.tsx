@@ -1,4 +1,5 @@
 import { Column } from "@workspace/design-system/components/layout/column";
+import { Skeleton } from "@workspace/design-system/components/ui/skeleton";
 
 import { OnboardingStepOrganizationForm } from "@/client/modules/onboarding/components/onboarding-step-organization-form";
 import { OnboardingStepProgress } from "@/client/modules/onboarding/components/onboarding-step-progress";
@@ -53,3 +54,9 @@ export function OnboardingSteps() {
     </Column>
   );
 }
+
+function OnboardingStepsFallback() {
+  return <Skeleton className="h-100" />;
+}
+
+OnboardingSteps.Fallback = OnboardingStepsFallback;

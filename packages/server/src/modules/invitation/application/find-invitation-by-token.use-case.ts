@@ -19,14 +19,14 @@ export class FindInvitationByTokenUseCase {
       throw new NotFoundError(ERROR_CODES.INVALID_INVITATION_TOKEN);
     }
 
-    const organizationName = await this.organizationPort.findNameById(invitation.organizationId);
-    if (!organizationName) {
+    const organization = await this.organizationPort.findById(invitation.organizationId);
+    if (!organization) {
       throw new NotFoundError(ERROR_CODES.INVALID_INVITATION_TOKEN);
     }
 
     return {
       email: invitation.email,
-      organizationName,
+      organizationName: organization.name,
     };
   }
 }

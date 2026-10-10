@@ -1,9 +1,5 @@
 import { implement } from "@orpc/server";
-import {
-  createMembership,
-  findMembership,
-  findMembershipByUser,
-} from "@workspace/server/modules/membership/membership.api";
+import { container } from "@workspace/server/container";
 import { membershipContract } from "@workspace/server/modules/membership/membership.contract";
 import { authedMiddleware } from "@workspace/server/shared/orpc/authed.middleware";
 import type { OrpcContext } from "@workspace/server/shared/orpc/context.const";
@@ -14,10 +10,12 @@ const authed = os.use(authedMiddleware);
 
 export const membershipRouter = os.router({
   createMembership: authed.createMembership.handler(
-    async ({ input, context }) => await createMembership(input, context.user.id),
+    async ({ input, context }) => await container.membership.createMembership.execute(input, context.user.id),
   ),
-  findMembership: authed.findMembership.handler(async ({ input }) => await findMembership(input)),
+  findMembership: authed.findMembership.handler(
+    async ({ input }) => await container.membership.findMembership.execute(input),
+  ),
   findMembershipByUser: authed.findMembershipByUser.handler(
-    async ({ context }) => await findMembershipByUser(context.user.id),
+    async ({ context }) => await container.membership.findMembershipByUser.execute(context.user.id),
   ),
 });

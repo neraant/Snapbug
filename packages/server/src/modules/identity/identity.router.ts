@@ -1,9 +1,5 @@
 import { implement } from "@orpc/server";
-import {
-  createUser,
-  findUserByEmail,
-  findUserCredentialsByEmail,
-} from "@workspace/server/modules/identity/identity.api";
+import { container } from "@workspace/server/container";
 import { identityContract } from "@workspace/server/modules/identity/identity.contract";
 import { authedMiddleware } from "@workspace/server/shared/orpc/authed.middleware";
 import type { OrpcContext } from "@workspace/server/shared/orpc/context.const";
@@ -13,9 +9,11 @@ const os = implement(identityContract).$context<OrpcContext>().use(mapAppErrorMi
 const authed = os.use(authedMiddleware);
 
 export const identityRouter = os.router({
-  createUser: authed.createUser.handler(async ({ input }) => await createUser(input)),
-  findUserByEmail: authed.findUserByEmail.handler(async ({ input }) => await findUserByEmail(input)),
+  createUser: authed.createUser.handler(async ({ input }) => await container.identity.createUser.execute(input)),
+  findUserByEmail: authed.findUserByEmail.handler(
+    async ({ input }) => await container.identity.findUserByEmail.execute(input.email),
+  ),
   findUserCredentialsByEmail: authed.findUserCredentialsByEmail.handler(
-    async ({ input }) => await findUserCredentialsByEmail(input),
+    async ({ input }) => await container.identity.findUserCredentialsByEmail.execute(input.email),
   ),
 });
