@@ -1,0 +1,44 @@
+---
+description: React Query reads and writes
+globs: apps/web/src/client/**/{queries,hooks}/**/*.ts
+---
+
+# Query
+
+Reads and mutations: `apps/web/src/client/shared/queries/use-{verb}.ts`, calling `orpcQuery`.
+
+Reads use `useSuspenseQuery`. The page `Suspense` boundary is the loader (`Skeleton` or `app/loading.tsx`); no `isLoading` branch beside a suspense query.
+
+```ts
+export function useFindOnboarding() {
+  return useSuspenseQuery(orpcQuery.organization.findOnboarding.queryOptions());
+}
+```
+
+```ts
+export function useCreateOrganization() {
+  return useMutation(orpcQuery.organization.createOrganization.mutationOptions());
+}
+```
+
+## Resource, not a field
+
+Call the aggregate endpoint and read the field. No `useFindOrganizationName` for a screen that needs the name.
+
+```ts
+const { data: organizations } = useFindOrganizations();
+const name = organizations[0]?.name;
+```
+
+## Paginated lists
+
+`useSuspenseQuery` has no `enabled` and no previous-page placeholder, so paginated lists use `useQuery`.
+
+```ts
+export function useFindIssues(input: { cursor?: string }) {
+  return useQuery({
+    ...orpcQuery.issue.findIssues.queryOptions({ input }),
+    placeholderData: keepPreviousData,
+  });
+}
+```

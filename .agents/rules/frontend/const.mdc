@@ -1,0 +1,19 @@
+---
+description: Module copy and constants
+globs: apps/web/src/client/**/consts/**/*.ts
+---
+
+# Const
+
+Product copy lives in `modules/{context}/consts/texts.const.ts`. Copy shared by several modules lives in `apps/web/src/client/modules/shared/consts/texts.const.ts`. No inline product copy in components.
+
+```ts
+export const texts = {
+  signIn: {
+    title: "Sign in",
+    description: "Use the email you signed up with.",
+  },
+} as const;
+```
+
+Other constants go in the same folder with the `.const.ts` suffix (`onboarding-step.const.ts`).

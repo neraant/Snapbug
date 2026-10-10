@@ -1,0 +1,19 @@
+---
+description: Client-only view types
+globs: apps/web/src/client/**/types/**/*.ts
+---
+
+# Type
+
+`modules/{context}/types/{name}.type.ts`: a view model the screen needs and the API does not return as-is.
+
+```ts
+export type OnboardingWorkspace = FindOnboardingOutputDtoType & {
+  organizationId: string;
+  organizationName: string;
+};
+```
+
+If the shape matches a DTO, use the type from `@workspace/validation`; never alias it locally.
+
+Props types stay above the component ([component](./component.mdc)).

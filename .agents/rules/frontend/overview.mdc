@@ -1,0 +1,36 @@
+---
+description: Frontend module layout and where client code goes
+globs: apps/web/src/**
+---
+
+# Frontend overview
+
+Client code is split by module: `apps/web/src/client/modules/{context}/`.
+
+```text
+app/**/page.tsx → components → hooks | utils
+                      ↓
+              client/shared/queries → orpcQuery
+```
+
+| Kind      | Path                            | Rule                         |
+| --------- | ------------------------------- | ---------------------------- |
+| App route | `apps/web/src/app/**`           | [page](./page.mdc)           |
+| Component | `modules/{context}/components/` | [component](./component.mdc) |
+| Hook      | `modules/{context}/hooks/`      | [hook](./hook.mdc)           |
+| Query     | `client/shared/queries/`        | [query](./query.mdc)         |
+| Schema    | `modules/{context}/schemas/`    | [schema](./schema.mdc)       |
+| Type      | `modules/{context}/types/`      | [type](./type.mdc)           |
+| Const     | `modules/{context}/consts/`     | [const](./const.mdc)         |
+| Util      | `modules/{context}/utils/`      | [util](./util.mdc)           |
+
+## Rules
+
+- A module never imports another module's component. Compose on the page, or duplicate a small component ([page](./page.mdc)).
+- `"use client"`: on the page when the route is client-only (children inherit it). A **server** `layout.tsx` / `page.tsx` imports client UI from `client/modules/`; put `"use client"` on that module file, not on a wrapper in `app/` ([page](./page.mdc)).
+- Pass ids and callbacks. The child reads the record itself ([component](./component.mdc)).
+- Components stay thin: workflow in a hook, pure mapping in a util.
+- Copy lives in the module's `consts/`; generic client copy in `apps/web/src/client/modules/shared/consts/texts.const.ts` ([const](./const.mdc)).
+- A helper used by both server and client lives on the server side; the client imports it ([util](./util.mdc)).
+- API contracts and repeated field shapes (email, etc.) live in `@workspace/validation`. Import shared field schemas, keep them required, relax at the use site ([schema](./schema.mdc)).
+- Reads use `useSuspenseQuery` inside `Suspense`; paginated lists use `useQuery`; fetch the aggregate, not one field ([query](./query.mdc)).

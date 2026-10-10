@@ -1,0 +1,29 @@
+---
+description: Client hook conventions
+globs: apps/web/src/client/**/hooks/**/*.ts
+---
+
+# Hook
+
+`modules/{context}/hooks/use-{name}.ts`, one hook per file. Holds component workflow: form submit, navigation, local step state.
+
+```ts
+export function useOnboardingFlow() {
+  const router = useRouter();
+  const { data: snapshot } = useFindOnboarding();
+  const { mutateAsync: completeOnboarding, isPending } = useCompleteOnboarding();
+
+  const leaveOnboarding = useCallback(async () => {
+    await completeOnboarding({});
+    router.replace(path.home);
+  }, [completeOnboarding, router]);
+
+  return { snapshot, isPending, leaveOnboarding };
+}
+```
+
+## Where it stops
+
+- Data access is a [query](./query.mdc) in `client/shared/queries/`; the module hook calls it.
+- Pure functions (no React) are a [util](./util.mdc).
+- A hook stays in the client. If the server needs the same behavior, move the pure part to the server and import it ([util](./util.mdc)).

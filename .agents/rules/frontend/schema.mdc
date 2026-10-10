@@ -1,0 +1,52 @@
+---
+description: Client form schemas vs shared validation
+globs: apps/web/src/client/**/schemas/**/*.ts, packages/validation/src/**
+---
+
+# Schema
+
+Screen-only form schema: `modules/{context}/schemas/{name}.schema.ts`. Export the schema and its `z.infer` type.
+
+```ts
+export const onboardingOrganizationSchema = z.object({
+  name: z.string().trim().min(1),
+});
+
+export type OnboardingOrganizationSchemaType = z.infer<typeof onboardingOrganizationSchema>;
+```
+
+An API contract, or a shape validated by both server and client, lives in `@workspace/validation` (`packages/validation/src/modules/{context}/dto/`). The client imports it; never copies it into the module.
+
+```ts
+import { completeOnboardingInputDtoSchema } from "@workspace/validation/modules/organization/dto/complete-onboarding.schema";
+```
+
+## Shared field schemas
+
+A field shape used in more than one place (email, password, non-empty name, invitation token, etc.) is defined once in `@workspace/validation`, typically `packages/validation/src/shared/{field}.schema.ts`, and imported by DTOs and client form schemas. Never repeat `z.email()` or the like inline across modules.
+
+The canonical schema is **required** (the strictest common case). Relax it at the call site with `.optional()`, `.nullable()`, `.nullish()`, or `.partial()` on the object. Never fork a second validator with different rules.
+
+```ts
+// packages/validation/src/shared/email.schema.ts
+export const emailSchema = z.email();
+
+// DTO — required
+export const verifyCredentialsInputDtoSchema = z.object({
+  email: emailSchema,
+  password: passwordSchema,
+});
+
+// DTO — optional patch
+export const updateUserInputDtoSchema = z.object({
+  email: emailSchema.optional(),
+  name: z.string().trim().min(1).optional(),
+});
+
+// Model — nullable column
+export const bugReportSchema = z.object({
+  reporterEmail: emailSchema.nullable(),
+});
+```
+
+A new path under `src/shared/` needs a `package.json` `exports` entry.

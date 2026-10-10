@@ -1,0 +1,32 @@
+---
+description: Where pure helpers live
+globs: apps/web/src/client/**/utils/**/*.ts
+---
+
+# Util
+
+Client-only pure helpers: `modules/{context}/utils/{name}.util.ts`. No React.
+
+```ts
+export function toOnboardingWorkspace(
+  snapshot: FindOnboardingOutputDtoType,
+): OnboardingWorkspace | null {
+  if (!snapshot.organizationId || !snapshot.organizationName) return null;
+  return {
+    ...snapshot,
+    organizationId: snapshot.organizationId,
+    organizationName: snapshot.organizationName,
+  };
+}
+```
+
+## Shared with the server
+
+A helper needed by both server and client lives on the server side; the client imports it. Never keep two copies.
+
+| Used by                                    | Put it in                            | Client import           |
+| ------------------------------------------ | ------------------------------------ | ----------------------- |
+| Next server (layout, proxy) and the client | `apps/web/src/shared/{name}.util.ts` | `@/shared/...`          |
+| `packages/server` and the client           | `packages/server`                    | `@workspace/server/...` |
+
+A [hook](./hook.mdc) that only wraps a shared helper stays in the client and calls it.

@@ -2,6 +2,7 @@
 
 - **Naming (files, folders, suffixes):** [naming.mdc](.agents/rules/common/naming.mdc)
 - **Backend layers:** [overview.mdc](.agents/rules/backend/overview.mdc)
+- **Frontend modules:** [overview.mdc](.agents/rules/frontend/overview.mdc)
 
 ## Next.js conventions
 

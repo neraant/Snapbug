@@ -1,0 +1,60 @@
+---
+description: Next.js app router files and page conventions
+globs: apps/web/src/app/**
+---
+
+# App router (`apps/web/src/app`)
+
+Only Next.js route files live here: `page.tsx`, `layout.tsx`, `loading.tsx`, `error.tsx`, `not-found.tsx`, `template.tsx`, `route.ts`, and other [supported route files](https://nextjs.org/docs/app/api-reference/file-conventions).
+
+No module components, hooks, utils, or thin client wrappers under `app/`. UI lives in `client/modules/`; `page.tsx` and `layout.tsx` import it.
+
+```tsx
+// layout.tsx — server layout composes a module client component
+import { AppSidebar } from "@/client/modules/shared/ui/app-sidebar/components/app-sidebar";
+
+export default async function Layout({ children }: PropsWithChildren) {
+  const session = await auth();
+  return <AppSidebar user={session?.user}>{children}</AppSidebar>;
+}
+```
+
+# Page
+
+Default export is `Page`. Put `"use client"` on the page when the route is client-only; module children under it don't repeat it.
+
+```tsx
+"use client";
+
+import { Skeleton } from "@workspace/design-system/components/ui/skeleton";
+import { Suspense } from "react";
+
+import { OnboardingSteps } from "@/client/modules/onboarding/components/onboarding-steps";
+
+export default function Page() {
+  return (
+    <Suspense fallback={<Skeleton className="h-100" />}>
+      <OnboardingSteps />
+    </Suspense>
+  );
+}
+```
+
+## Data
+
+Wrap the part of the tree that suspends. Fallback: a design-system `Skeleton`, or omit it and let `app/loading.tsx` (global spinner) cover the route.
+
+## Composing modules
+
+Modules meet on the page. The page composes them; never re-export a component from another module (no `export { InviteBanner } from "..."` inside `auth`).
+
+```tsx
+export default function Page() {
+  return (
+    <>
+      <SignInForm />
+      <InviteBanner token={token} />
+    </>
+  );
+}
+```

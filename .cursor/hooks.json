@@ -1,9 +1,10 @@
 {
   "version": 1,
   "hooks": {
-    "stop": [
+    "afterFileEdit": [
       {
-        "command": "pnpm exec prettier --write ."
+        "command": "bash .cursor/hooks/format.sh",
+        "timeout": 60
       }
     ]
   }

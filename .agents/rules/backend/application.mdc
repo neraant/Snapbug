@@ -26,6 +26,20 @@ Repo reports facts; use-case turns them into policy.
 - Cross-module via port only. The port returns **their** DTO; you load **your** rows and `Mapper.toDto`
 - No foreign ids → `[]` and skip your query
 
+## Shape
+
+Return the aggregate or the list. Do not add an endpoint whose only job is one field.
+
+```ts
+// find-organization-name.use-case.ts
+execute(): Promise<{ name: string }>;
+
+// find-organizations.use-case.ts
+execute(): Promise<OrganizationDto[]>;
+```
+
+The client reads `organization.name` off `findOrganizations`.
+
 ## Don't
 
 - Drizzle / tables / oRPC / other module's repo

@@ -1,0 +1,53 @@
+---
+description: Client component shape and design-system usage
+globs: apps/web/src/client/**/components/**/*.tsx
+---
+
+# Component
+
+Function declaration (not an arrow function). Props type directly above it. Destructure props in the parameter list.
+
+```tsx
+type SignInFormProps = {
+  invitationToken?: string;
+};
+
+export function SignInForm({ invitationToken }: SignInFormProps) {
+  return <SignInFields token={invitationToken} />;
+}
+```
+
+## Client boundary
+
+- A **client** `page.tsx` already wraps the tree: no `"use client"`.
+- A **server** `layout.tsx` or `page.tsx` imports the file and it uses hooks or browser APIs: add `"use client"` at the top.
+- Never put client-only files under `app/` — see [page](./page.mdc).
+
+## UI
+
+Use `@workspace/design-system` (`layout/`, `forms/`, `ui/`). Prefer its props (`gap`, `width`, `variant`, `size`) over custom classes.
+
+A control reused across screens goes to `packages/design-system` as a primitive with `cva` variants, like shadcn: one file per control. See `packages/design-system/src/components/ui/button.tsx`.
+
+## Exports
+
+Export only the component. Never re-export hooks, utils, or types (neither `export { x } from "..."` nor `export { x }` after a local import). Callers import them from `hooks/`, `utils/`, or `types/`.
+
+## Keep it thin
+
+Move out of the component:
+
+- submit flow, toasts, step state → [hook](./hook.mdc)
+- parsing, mapping, predicates → [util](./util.mdc)
+- copy and strings → [const](./const.mdc)
+
+## Props
+
+Pass ids and callbacks. Never pass a fetched record down: the child reads it itself through the hook.
+
+```tsx
+export function ProjectTitle() {
+  const { data } = useFindProject();
+  return <Typography>{data.name}</Typography>;
+}
+```
