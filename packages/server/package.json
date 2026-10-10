@@ -10,7 +10,6 @@
     "test:unit": "vitest run"
   },
   "dependencies": {
-    "@flags-sdk/vercel": "1.4.9",
     "@modelcontextprotocol/sdk": "1.26.0",
     "@orpc/client": "1.14.14",
     "@orpc/contract": "1.14.14",
@@ -22,7 +21,6 @@
     "@workspace/validation": "workspace:*",
     "bcryptjs": "3.0.3",
     "drizzle-orm": "1.0.0-rc.4",
-    "flags": "4.3.1",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "resend": "6.32.0",

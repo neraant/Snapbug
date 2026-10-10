@@ -1,88 +1,96 @@
+import { TextField } from "@workspace/design-system/components/forms/text-field";
 import { Column } from "@workspace/design-system/components/layout/column";
 import { Row } from "@workspace/design-system/components/layout/row";
 import { Button } from "@workspace/design-system/components/ui/button";
 import { Card } from "@workspace/design-system/components/ui/card";
-import { Input } from "@workspace/design-system/components/ui/input";
+import { FieldGroup } from "@workspace/design-system/components/ui/field";
 import { Typography } from "@workspace/design-system/components/ui/typography";
-import { PlusIcon, RocketIcon, SparklesIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { PlusIcon, RocketIcon, SparklesIcon, XIcon } from "lucide-react";
 
+import { OnboardingStepActions } from "@/client/modules/onboarding/components/onboarding-step-actions";
 import { texts } from "@/client/modules/onboarding/consts/texts.const";
-import { path } from "@/shared/path.const";
+import { useOnboardingTeammateStep } from "@/client/modules/onboarding/hooks/use-onboarding-teammate-step";
 
 type OnboardingStepTeammateFormProps = {
+  organizationId: string;
   onBack: VoidFunction;
+  onSkip: VoidFunction;
 };
 
-export function OnboardingStepTeammateForm({ onBack }: OnboardingStepTeammateFormProps) {
-  const router = useRouter();
-  const [emails, setEmails] = useState<string[]>([""]);
-
-  const launch = () => {
-    // TODO: SAB send invitations when the invitation procedure exists.
-    router.replace(path.home);
-  };
-
-  const updateEmail = (index: number, value: string) => {
-    setEmails((current) => current.map((email, emailIndex) => (emailIndex === index ? value : email)));
-  };
-
-  const addEmail = () => {
-    setEmails((current) => [...current, ""]);
-  };
+export function OnboardingStepTeammateForm({ organizationId, onBack, onSkip }: OnboardingStepTeammateFormProps) {
+  const { control, fields, append, remove, loading, onFinish } = useOnboardingTeammateStep({
+    organizationId,
+  });
 
   return (
-    <Column width="full" gap="lg">
+    <Column as="form" width="full" gap="lg" onSubmit={onFinish}>
       <Column width="full" gap="xs">
         <Typography variant="heading-md">{texts.teammate.title}</Typography>
         <Typography variant="text-sm" color="muted">
           {texts.teammate.description}
         </Typography>
       </Column>
-      <Column width="full" gap="md">
-        {emails.map((email, index) => (
-          <Input
-            key={index}
-            type="email"
-            value={email}
-            placeholder={texts.teammate.field.placeholder}
-            onChange={(event) => updateEmail(index, event.target.value)}
-            autoComplete="email"
-          />
-        ))}
-        <Button type="button" variant="link" className="h-auto w-fit px-0" onClick={addEmail}>
-          <PlusIcon />
-          {texts.teammate.addAnother}
-        </Button>
-      </Column>
-      <Card width="full" className="bg-muted/50">
-        <Card.Header>
-          <Card.Icon>
-            <RocketIcon className="text-primary" />
-          </Card.Icon>
-          <Card.Title variant="text-sm" weight="bold">
-            {texts.teammate.ready.title}
-          </Card.Title>
-          <Card.Description variant="text-xs">{texts.teammate.ready.description}</Card.Description>
-        </Card.Header>
-      </Card>
-      <Column width="full" gap="md">
-        <Row justify="between" align="center" width="full">
-          <Button type="button" variant="outline" size="lg" onClick={onBack}>
-            {texts.action.back}
+      <FieldGroup>
+        <Column width="full" gap="md">
+          {fields.map((field, index) => (
+            <Row key={field.id} align="center" gap="sm" width="full">
+              <Column width="full" className="min-w-0 flex-1">
+                <TextField
+                  control={control}
+                  name={`invites.${index}.email`}
+                  type="email"
+                  label={texts.teammate.field.label}
+                  placeholder={texts.teammate.field.placeholder}
+                  autoComplete="email"
+                />
+              </Column>
+              {fields.length > 1 ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="mt-7 shrink-0"
+                  aria-label={texts.teammate.removeInvite}
+                  onClick={() => remove(index)}
+                  disabled={loading}
+                >
+                  <XIcon />
+                </Button>
+              ) : null}
+            </Row>
+          ))}
+          <Button
+            type="button"
+            variant="link"
+            className="h-auto w-fit px-0"
+            onClick={() => append({ email: "" })}
+            disabled={loading}
+          >
+            <PlusIcon />
+            {texts.teammate.addAnother}
           </Button>
-          <Button type="button" size="lg" onClick={launch}>
-            {texts.teammate.finish}
-            <SparklesIcon />
-          </Button>
-        </Row>
-        <Row justify="center" width="full" className="border-t pt-3">
-          <Button type="button" variant="link" className="text-muted-foreground" onClick={launch}>
-            {texts.teammate.skip}
-          </Button>
-        </Row>
-      </Column>
+        </Column>
+        <Card width="full" className="bg-muted/50">
+          <Card.Header>
+            <Card.Icon>
+              <RocketIcon className="text-primary" />
+            </Card.Icon>
+            <Card.Title variant="text-sm" weight="bold">
+              {texts.teammate.ready.title}
+            </Card.Title>
+            <Card.Description variant="text-xs">{texts.teammate.ready.description}</Card.Description>
+          </Card.Header>
+        </Card>
+        <OnboardingStepActions
+          onBack={onBack}
+          continueLabel={texts.teammate.finish}
+          continueIcon={<SparklesIcon />}
+          onPrimaryClick={onFinish}
+          onSkip={onSkip}
+          skipLabel={texts.teammate.skip}
+          loading={loading}
+        />
+      </FieldGroup>
     </Column>
   );
 }

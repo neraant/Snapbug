@@ -4,6 +4,7 @@ export type UserPersistedType = {
   email: string;
   passwordHash: string;
   passwordChangedAt: Date | null;
+  onboardingCompletedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -11,4 +12,6 @@ export type UserPersistedType = {
 export type CreateUserType = Partial<Pick<UserPersistedType, "name">> &
   Pick<UserPersistedType, "email" | "passwordHash">;
 
-export type UpdateUserType = Partial<Pick<UserPersistedType, "name" | "email" | "passwordHash" | "passwordChangedAt">>;
+export type UpdateUserType = Partial<
+  Pick<UserPersistedType, "name" | "email" | "passwordHash" | "passwordChangedAt" | "onboardingCompletedAt">
+>;

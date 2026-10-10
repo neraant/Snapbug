@@ -18,9 +18,12 @@ function pickRandomCard(current?: AuthAsideCard): AuthAsideCard {
 const CARD_ROTATION_INTERVAL_MS = 5000;
 
 export function useAuthAsideCard(): AuthAsideCard {
-  const [card, setCard] = useState<AuthAsideCard>(() => pickRandomCard());
+  const cards = texts.auth.aside.cards;
+  const [card, setCard] = useState<AuthAsideCard>(() => cards[0]!);
 
   useEffect(() => {
+    setCard(pickRandomCard());
+
     const id = window.setInterval(() => {
       setCard((current) => pickRandomCard(current));
     }, CARD_ROTATION_INTERVAL_MS);

@@ -1,5 +1,6 @@
 export * from "@workspace/database/schema/api-key.const";
 export * from "@workspace/database/schema/bug-report.const";
+export * from "@workspace/database/schema/invitation.const";
 export * from "@workspace/database/schema/membership.const";
 export * from "@workspace/database/schema/organization.const";
 export * from "@workspace/database/schema/project.const";

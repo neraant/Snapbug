@@ -15,7 +15,7 @@ export function useOnboardingFlow() {
 
   const leaveOnboarding = useCallback(async () => {
     await completeOnboarding({});
-    router.replace(path.home);
+    router.replace(path.overview);
   }, [completeOnboarding, router]);
 
   return { snapshot, isPending, leaveOnboarding };

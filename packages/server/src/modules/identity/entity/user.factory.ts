@@ -10,6 +10,7 @@ export abstract class UserFactory {
       email: user.email,
       passwordHash: user.passwordHash,
       passwordChangedAt: null,
+      onboardingCompletedAt: null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });

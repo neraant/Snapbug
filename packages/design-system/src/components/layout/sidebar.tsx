@@ -1,5 +1,6 @@
 "use client";
 
+import { Column } from "@workspace/design-system/components/layout/column";
 import { Avatar, AvatarFallback, AvatarImage } from "@workspace/design-system/components/ui/avatar";
 import {
   DropdownMenu,
@@ -25,11 +26,10 @@ import {
   SidebarMenuItem,
   SidebarProvider,
   SidebarRail,
-  SidebarTrigger,
   useSidebar,
 } from "@workspace/design-system/components/ui/sidebar";
 import { Typography } from "@workspace/design-system/components/ui/typography";
-import { EllipsisVerticalIcon, LogOutIcon, MonitorIcon, MoonIcon, SunIcon } from "lucide-react";
+import { BugIcon, EllipsisVerticalIcon, LogOutIcon, MonitorIcon, MoonIcon, SunIcon } from "lucide-react";
 import { useTheme } from "next-themes";
 import { createElement, type ElementType, type PropsWithChildren } from "react";
 
@@ -46,6 +46,8 @@ export type SidebarUser = {
 
 type SidebarLayoutProps = PropsWithChildren<{
   title: string;
+  description: string;
+  defaultOpen?: boolean;
   items: SidebarItem[];
   pathname: string;
   user: SidebarUser;
@@ -106,11 +108,12 @@ function SidebarAccountMenu({
           variant="text-sm"
           color="inherit"
           truncate
-          className="flex-1 group-data-[collapsible=icon]:hidden"
+          data-sidebar="menu-label"
+          className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden"
         >
           {user.name}
         </Typography>
-        <EllipsisVerticalIcon className="ml-auto group-data-[collapsible=icon]:hidden" />
+        <EllipsisVerticalIcon className="ml-auto shrink-0 group-data-[collapsible=icon]:hidden" />
         <Typography as="span" variant="text-sm" color="inherit" className="sr-only">
           {menuLabel}
         </Typography>
@@ -143,6 +146,8 @@ function SidebarAccountMenu({
 
 export function SidebarLayout({
   title,
+  description,
+  defaultOpen = false,
   items,
   pathname,
   user,
@@ -156,18 +161,27 @@ export function SidebarLayout({
   const LinkComponent = linkAs ?? "a";
 
   return (
-    <SidebarProvider defaultOpen={false}>
+    <SidebarProvider defaultOpen={defaultOpen}>
       <Sidebar collapsible="icon">
         <SidebarHeader>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton size="lg" variant="ghost" render={<div />} aria-label={title}>
-                <Avatar variant="brand">
-                  <AvatarFallback>B</AvatarFallback>
+              <SidebarMenuButton size="lg" variant="ghost" tooltip={title} render={<div />} aria-label={title}>
+                <Avatar variant="brand" size="lg" className="shrink-0">
+                  <BugIcon className="size-5!" />
                 </Avatar>
-                <Typography as="span" variant="label" color="inherit" truncate>
-                  {title}
-                </Typography>
+                <Column
+                  gap="none"
+                  data-sidebar="menu-label"
+                  className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden"
+                >
+                  <Typography as="span" variant="heading-xs" color="inherit" truncate>
+                    {title}
+                  </Typography>
+                  <Typography as="span" variant="text-xs" color="muted" className="font-mono" truncate>
+                    {description}
+                  </Typography>
+                </Column>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
@@ -192,7 +206,13 @@ export function SidebarLayout({
                         aria-label={item.label}
                       >
                         <Icon />
-                        <Typography as="span" variant="text-sm" color="inherit">
+                        <Typography
+                          as="span"
+                          variant="text-sm"
+                          color="inherit"
+                          data-sidebar="menu-label"
+                          className="group-data-[collapsible=icon]:hidden"
+                        >
                           {item.label}
                         </Typography>
                       </SidebarMenuButton>
@@ -218,10 +238,7 @@ export function SidebarLayout({
         </SidebarFooter>
         <SidebarRail />
       </Sidebar>
-      <SidebarInset>
-        <SidebarTrigger className="mb-4 self-start md:hidden" />
-        {children}
-      </SidebarInset>
+      <SidebarInset className="min-h-svh p-0">{children}</SidebarInset>
     </SidebarProvider>
   );
 }

@@ -21,6 +21,9 @@ export class UpdateUserUseCase {
         passwordHash: input.passwordHash,
         passwordChangedAt: new Date(),
       }),
+      ...(input.onboardingCompletedAt !== undefined && {
+        onboardingCompletedAt: user.onboardingCompletedAt ?? input.onboardingCompletedAt,
+      }),
     });
     await this.userRepository.save(updatedUser);
     return UserMapper.toDto(updatedUser);

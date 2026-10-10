@@ -224,4 +224,11 @@ export const texts = {
   signOut: {
     label: "Sign out",
   },
+  invitation: {
+    fieldHint: (organizationName: string) => `You were invited to join ${organizationName}`,
+    lookupError: "This invitation link is invalid or has expired. You can still sign up with any email.",
+    toast: {
+      acceptError: "We could not accept your invitation. Try again from the link in your email.",
+    },
+  },
 } as const;

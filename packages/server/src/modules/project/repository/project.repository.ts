@@ -9,6 +9,10 @@ import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 export class ProjectRepository {
   constructor(private readonly db: DbClient = defaultDb) {}
 
+  withTx(tx: DbClient): ProjectRepository {
+    return new ProjectRepository(tx);
+  }
+
   async findById(id: string): Promise<Project | null> {
     const project = await this.db.query.projectTable.findFirst({
       where: { id },

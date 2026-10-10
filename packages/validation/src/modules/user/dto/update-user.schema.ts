@@ -6,9 +6,17 @@ export const updateUserInputDtoSchema = z
     name: z.string().min(1).nullable().optional(),
     email: z.email().optional(),
     passwordHash: z.string().min(1).optional(),
+    onboardingCompletedAt: z.coerce.date().nullable().optional(),
   })
-  .refine((data) => data.name !== undefined || data.email !== undefined || data.passwordHash !== undefined, {
-    message: "At least one field must be provided",
-  });
+  .refine(
+    (data) =>
+      data.name !== undefined ||
+      data.email !== undefined ||
+      data.passwordHash !== undefined ||
+      data.onboardingCompletedAt !== undefined,
+    {
+      message: "At least one field must be provided",
+    },
+  );
 
 export type UpdateUserInputDtoType = z.infer<typeof updateUserInputDtoSchema>;

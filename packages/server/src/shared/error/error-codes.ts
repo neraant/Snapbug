@@ -11,6 +11,8 @@ export const ERROR_CODES = {
   INTERNAL_SERVER_ERROR: "internal-server-error",
   EMAIL_SEND_FAILED: "email-send-failed",
   INVALID_RESET_PASSWORD_TOKEN: "invalid-reset-password-token",
+  INVALID_INVITATION_TOKEN: "invalid-invitation-token",
+  INVITATION_EMAIL_MISMATCH: "invitation-email-mismatch",
 } as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES];

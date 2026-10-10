@@ -1,21 +1,18 @@
-import { findOnboarding } from "@workspace/server/modules/organization/organization.api";
-import { redirect } from "next/navigation";
+import { parseSidebarOpenState, SIDEBAR_OPEN_STATE_COOKIE } from "@workspace/design-system/lib/sidebar-open-state.util";
+import { cookies } from "next/headers";
 import type { PropsWithChildren } from "react";
 
 import { auth } from "@/auth";
-import { hasCompletedOnboarding } from "@/client/modules/onboarding/utils/has-completed-onboarding.util";
-import { AppSidebar } from "@/client/modules/shared/app-sidebar/components/app-sidebar";
-import { path } from "@/shared/path.const";
+import { AppSidebar } from "@/client/modules/shared/ui/app-sidebar/components/app-sidebar";
 
 export default async function Layout({ children }: PropsWithChildren) {
   const session = await auth();
+  const cookieStore = await cookies();
+  const defaultSidebarOpen = parseSidebarOpenState(cookieStore.get(SIDEBAR_OPEN_STATE_COOKIE)?.value, false);
 
-  if (session?.user?.id) {
-    const snapshot = await findOnboarding(session.user.id);
-    if (!snapshot || !hasCompletedOnboarding(snapshot)) {
-      redirect(path.onboarding);
-    }
-  }
-
-  return <AppSidebar user={session?.user}>{children}</AppSidebar>;
+  return (
+    <AppSidebar user={session?.user} defaultSidebarOpen={defaultSidebarOpen}>
+      {children}
+    </AppSidebar>
+  );
 }

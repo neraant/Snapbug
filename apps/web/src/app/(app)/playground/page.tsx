@@ -1,7 +1,10 @@
 "use client";
 
+import { PageContainer } from "@workspace/design-system/components/layout/page";
 import { snapbug } from "@workspace/sdk";
 import { useEffect } from "react";
+
+import { texts } from "@/client/modules/shared/consts/texts.const";
 
 export default function Page() {
   useEffect(() => {
@@ -13,5 +16,5 @@ export default function Page() {
     return () => snapbug.destroy();
   }, []);
 
-  return <div>Playground</div>;
+  return <PageContainer title={texts.playground.title} description={texts.playground.description} />;
 }

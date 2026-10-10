@@ -11,8 +11,8 @@ export default function NotFound() {
     <Center>
       <Column gap="md" align="center">
         <Typography variant="heading-lg">404 — page not found</Typography>
-        <Button nativeButton={false} render={<Link href={path.home} />}>
-          Go back to the home page
+        <Button nativeButton={false} render={<Link href={path.overview} />}>
+          Go back to the overview page
         </Button>
       </Column>
     </Center>

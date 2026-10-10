@@ -14,6 +14,7 @@ const user = new User({
   email,
   passwordHash: "hashed-secret",
   passwordChangedAt: null,
+  onboardingCompletedAt: null,
   createdAt: persistedAt,
   updatedAt: persistedAt,
 });

@@ -1,61 +1,60 @@
-import { zodResolver } from "@hookform/resolvers/zod";
 import { PasswordField } from "@workspace/design-system/components/forms/password-field";
 import { TextField } from "@workspace/design-system/components/forms/text-field";
 import { Column } from "@workspace/design-system/components/layout/column";
 import { FieldGroup } from "@workspace/design-system/components/ui/field";
 import { SubmitButton } from "@workspace/design-system/components/ui/submit-button";
-import { toast } from "@workspace/design-system/components/ui/toast";
-import { getAppErrorMessage } from "@workspace/server/error/get-app-error-message";
-import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
-import { useForm } from "react-hook-form";
 
 import { texts } from "@/client/modules/auth/consts/texts.const";
-import { signUpSchema, type SignUpSchemaType } from "@/client/modules/auth/schemas/sign-up.schema";
-import { useSignUp } from "@/client/shared/queries/use-sign-up";
-import { path } from "@/shared/path.const";
+import { useSignUpForm } from "@/client/modules/auth/hooks/use-sign-up-form";
+import { useFindInvitationByToken } from "@/client/shared/queries/use-find-invitation-by-token";
 
-export function SignUpForm() {
-  const router = useRouter();
-  const { mutateAsync: signUp } = useSignUp();
-  const { control, handleSubmit, formState } = useForm<SignUpSchemaType>({
-    resolver: zodResolver(signUpSchema),
-    defaultValues: { email: "", name: "", password: "" },
-  });
+type SignUpFormProps = {
+  invitationToken?: string;
+};
 
-  const onSubmit = async (values: SignUpSchemaType) => {
-    try {
-      await signUp(values);
-    } catch (error) {
-      toast.add({
-        title: getAppErrorMessage(error, texts.signUp.toast.genericError),
-        type: "error",
-      });
-      return;
-    }
+type SignUpFormFieldsProps = {
+  invitationToken?: string;
+};
 
-    const result = await signIn("credentials", {
-      email: values.email,
-      password: values.password,
-      redirect: false,
-    });
+export function SignUpForm({ invitationToken }: SignUpFormProps) {
+  if (invitationToken) {
+    return <SignUpFormWithInvitation invitationToken={invitationToken} />;
+  }
 
-    if (result?.error) {
-      toast.add({
-        title: texts.signUp.toast.signInAfterSignUpFailed,
-        type: "error",
-      });
-    } else {
-      toast.add({
-        title: texts.signUp.toast.success,
-        type: "success",
-      });
-      router.replace(path.home);
-    }
-  };
+  return <SignUpFormFields />;
+}
+
+type SignUpFormWithInvitationProps = {
+  invitationToken: string;
+};
+
+function SignUpFormWithInvitation({ invitationToken }: SignUpFormWithInvitationProps) {
+  const { data: invitation } = useFindInvitationByToken(invitationToken);
 
   return (
-    <Column as="form" gap="none" width="full" onSubmit={handleSubmit(onSubmit)}>
+    <SignUpFormFields
+      invitationToken={invitationToken}
+      organizationName={invitation.organizationName}
+      defaultEmail={invitation.email}
+    />
+  );
+}
+
+type SignUpFormFieldsInternalProps = SignUpFormFieldsProps & {
+  defaultEmail?: string;
+  organizationName?: string;
+};
+
+function SignUpFormFields({ invitationToken, defaultEmail = "", organizationName }: SignUpFormFieldsInternalProps) {
+  const { control, onSubmit, formState } = useSignUpForm({
+    invitationToken,
+    defaultEmail,
+  });
+
+  const invitationEmailLocked = organizationName != null;
+
+  return (
+    <Column as="form" gap="none" width="full" onSubmit={onSubmit}>
       <FieldGroup>
         <TextField
           control={control}
@@ -72,6 +71,8 @@ export function SignUpForm() {
           label={texts.field.signUpWorkEmail.label}
           placeholder={texts.field.signUpWorkEmail.placeholder}
           autoComplete="email"
+          readOnly={invitationEmailLocked}
+          description={organizationName ? texts.invitation.fieldHint(organizationName) : undefined}
         />
         <PasswordField
           control={control}

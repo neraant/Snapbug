@@ -17,6 +17,8 @@ const ERROR_MESSAGES: Record<ErrorCode, string> = {
   [ERROR_CODES.EMAIL_SEND_FAILED]: "Failed to send email. Please try again",
   [ERROR_CODES.RATE_LIMITED]: "You have exceeded the rate limit. Please try again later",
   [ERROR_CODES.INVALID_RESET_PASSWORD_TOKEN]: "This reset link is invalid or has expired",
+  [ERROR_CODES.INVALID_INVITATION_TOKEN]: "This invitation link is invalid or has expired",
+  [ERROR_CODES.INVITATION_EMAIL_MISMATCH]: "Sign in with the email address that received the invitation",
 };
 
 function isErrorCode(value: unknown): value is ErrorCode {

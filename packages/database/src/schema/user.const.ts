@@ -8,6 +8,7 @@ export const userTable = pgTable(
     email: text("email").notNull(),
     passwordHash: text("password_hash").notNull(),
     passwordChangedAt: timestamp("password_changed_at", { withTimezone: true, mode: "date" }),
+    onboardingCompletedAt: timestamp("onboarding_completed_at", { withTimezone: true, mode: "date" }),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull(),
   },

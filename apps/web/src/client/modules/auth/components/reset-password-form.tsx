@@ -58,7 +58,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
       title: texts.resetPassword.toast.success,
       type: "success",
     });
-    router.replace(path.home);
+    router.replace(path.overview);
   };
 
   return (

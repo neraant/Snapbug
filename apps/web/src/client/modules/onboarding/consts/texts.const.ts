@@ -8,7 +8,10 @@ export const texts = {
   action: {
     back: "Back",
     continue: "Continue",
-    skip: "Skip for now",
+    skip: "Skip onboarding",
+  },
+  toast: {
+    completeError: "Could not finish onboarding. Try again.",
   },
   organization: {
     title: "Name your organization",
@@ -24,7 +27,7 @@ export const texts = {
   },
   project: {
     title: "Connect your app",
-    description: "Install the SDK to start catching bugs in real time.",
+    description: "Name your first project. You can connect the SDK later from project settings.",
     field: {
       name: {
         label: "Project name",
@@ -32,28 +35,32 @@ export const texts = {
         hint: "Default: Default project (editable later in Project Settings).",
       },
     },
-    install: {
-      title: "Install & initialize",
-      package: "@workspace/sdk",
-      copy: "Copy",
-      copied: "Copied",
-    },
     toast: {
       error: "Could not save your project. Try again.",
     },
   },
   teammate: {
     title: "Invite your teammates",
-    description: "Bugs are caught faster together. You can skip and invite later from Settings.",
+    description: "Bugs are caught faster together. Skip onboarding to invite teammates later from Settings.",
     field: {
+      label: "Email",
       placeholder: "colleague@company.com",
     },
     addAnother: "Add another teammate",
+    removeInvite: "Remove teammate",
     ready: {
       title: "Everything is ready to roll",
       description: "We'll take you to your project's live triage feed.",
     },
     finish: "Finish setup & launch",
-    skip: "Skip for now & launch without invites →",
+    skip: "Skip onboarding",
+    validation: {
+      invalidEmail: "Enter a valid email address",
+      duplicateEmail: "This email is already on the list",
+      tooManyInvites: "You can invite up to 10 teammates at a time",
+    },
+    toast: {
+      sendError: "Could not send invitations. Try again.",
+    },
   },
 } as const;

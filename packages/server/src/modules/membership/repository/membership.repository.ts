@@ -9,6 +9,10 @@ import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 export class MembershipRepository {
   constructor(private readonly db: DbClient = defaultDb) {}
 
+  withTx(tx: DbClient): MembershipRepository {
+    return new MembershipRepository(tx);
+  }
+
   async findByUserAndOrganization(userId: string, organizationId: string): Promise<Membership | null> {
     const membership = await this.db.query.membershipTable.findFirst({
       where: { userId, organizationId },

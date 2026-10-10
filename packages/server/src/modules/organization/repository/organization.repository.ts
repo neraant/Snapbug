@@ -10,6 +10,10 @@ import { eq } from "drizzle-orm";
 export class OrganizationRepository {
   constructor(private readonly db: DbClient = defaultDb) {}
 
+  withTx(tx: DbClient): OrganizationRepository {
+    return new OrganizationRepository(tx);
+  }
+
   async findById(id: string): Promise<Organization | null> {
     const [row] = await this.db.select().from(organizationTable).where(eq(organizationTable.id, id));
     return row ? OrganizationMapper.fromPersistence(row) : null;

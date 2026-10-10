@@ -1,4 +1,3 @@
-import { zodResolver } from "@hookform/resolvers/zod";
 import { PasswordField } from "@workspace/design-system/components/forms/password-field";
 import { TextField } from "@workspace/design-system/components/forms/text-field";
 import { Column } from "@workspace/design-system/components/layout/column";
@@ -6,46 +5,21 @@ import { Row } from "@workspace/design-system/components/layout/row";
 import { Button } from "@workspace/design-system/components/ui/button";
 import { FieldGroup } from "@workspace/design-system/components/ui/field";
 import { SubmitButton } from "@workspace/design-system/components/ui/submit-button";
-import { toast } from "@workspace/design-system/components/ui/toast";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { signIn } from "next-auth/react";
-import { useForm } from "react-hook-form";
 
 import { texts } from "@/client/modules/auth/consts/texts.const";
-import { signInSchema, type SignInSchemaType } from "@/client/modules/auth/schemas/sign-in.schema";
+import { useSignInForm } from "@/client/modules/auth/hooks/use-sign-in-form";
 import { path } from "@/shared/path.const";
 
-export function SignInForm() {
-  const router = useRouter();
-  const { control, handleSubmit, formState } = useForm<SignInSchemaType>({
-    resolver: zodResolver(signInSchema),
-    defaultValues: { email: "", password: "" },
-  });
+type SignInFormProps = {
+  invitationToken?: string;
+};
 
-  const onSubmit = async ({ email, password }: SignInSchemaType) => {
-    const result = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
-
-    if (result?.error) {
-      toast.add({
-        title: texts.signIn.toast.invalidCredentials,
-        type: "error",
-      });
-    } else {
-      toast.add({
-        title: texts.signIn.toast.success,
-        type: "success",
-      });
-      router.replace(path.home);
-    }
-  };
+export function SignInForm({ invitationToken }: SignInFormProps) {
+  const { control, onSubmit, formState } = useSignInForm({ invitationToken });
 
   return (
-    <Column as="form" gap="none" width="full" onSubmit={handleSubmit(onSubmit)}>
+    <Column as="form" gap="none" width="full" onSubmit={onSubmit}>
       <FieldGroup>
         <TextField
           control={control}

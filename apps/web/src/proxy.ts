@@ -1,32 +1,42 @@
+import { findOnboarding } from "@workspace/server/modules/organization/organization.api";
+
 import { auth } from "@/auth";
 import { path } from "@/shared/path.const";
-
-// @disabled flag
-// import { findFlags } from "@workspace/server/shared/flag/flag.api";
-// import { isPathAllowedByFlags } from "@workspace/server/shared/flag/flag-route.util";
-// import { customerFlagRouteRules } from "@/shared/flag/flag-route.const";
+import { hasCompletedOnboarding } from "@/shared/utils/has-completed-onboarding.util";
+import { isGuestAuthPath, isOnboardingPath } from "@/shared/utils/onboarding-gate.util";
 
 export default auth(async (req) => {
-  const isAuthPage =
-    req.nextUrl.pathname.startsWith(path.signIn) ||
-    req.nextUrl.pathname.startsWith(path.signUp) ||
-    req.nextUrl.pathname.startsWith(path.forgotPassword) ||
-    req.nextUrl.pathname.startsWith(path.resetPassword);
+  const pathname = req.nextUrl.pathname;
+  const isGuestAuthPage = isGuestAuthPath(pathname);
+  const isOnboardingPage = isOnboardingPath(pathname);
 
-  if (!req.auth && !isAuthPage) {
+  if (!req.auth && !isGuestAuthPage) {
     return Response.redirect(new URL(path.signIn, req.nextUrl));
   }
-  if (req.auth && isAuthPage) {
-    return Response.redirect(new URL(path.home, req.nextUrl));
+
+  if (!req.auth) {
+    return;
   }
 
-  // @disabled flag
-  // if (req.auth) {
-  //   const flags = await findFlags(req);
-  //   if (!isPathAllowedByFlags(req.nextUrl.pathname, flags, customerFlagRouteRules)) {
-  //     return Response.redirect(new URL(path.home, req.nextUrl));
-  //   }
-  // }
+  const userId = req.auth.user?.id;
+  if (!userId) {
+    return;
+  }
+
+  const snapshot = await findOnboarding(userId);
+  const completed = hasCompletedOnboarding(snapshot);
+
+  if (isGuestAuthPage) {
+    return Response.redirect(new URL(completed ? path.overview : path.onboarding, req.nextUrl));
+  }
+
+  if (completed && isOnboardingPage) {
+    return Response.redirect(new URL(path.overview, req.nextUrl));
+  }
+
+  if (!completed && !isOnboardingPage) {
+    return Response.redirect(new URL(path.onboarding, req.nextUrl));
+  }
 });
 
 export const config = {

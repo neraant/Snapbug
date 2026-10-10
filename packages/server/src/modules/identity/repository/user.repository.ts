@@ -10,6 +10,10 @@ import { eq } from "drizzle-orm";
 export class UserRepository {
   constructor(private readonly db: DbClient = defaultDb) {}
 
+  withTx(tx: DbClient): UserRepository {
+    return new UserRepository(tx);
+  }
+
   async findByEmail(email: string): Promise<User | null> {
     const [row] = await this.db.select().from(userTable).where(eq(userTable.email, email));
     return row ? UserMapper.fromPersistence(row) : null;
@@ -32,6 +36,7 @@ export class UserRepository {
           email: values.email,
           passwordHash: values.passwordHash,
           passwordChangedAt: values.passwordChangedAt,
+          onboardingCompletedAt: values.onboardingCompletedAt,
           createdAt: values.createdAt,
           updatedAt: values.updatedAt,
         })
@@ -42,6 +47,7 @@ export class UserRepository {
             email: values.email,
             passwordHash: values.passwordHash,
             passwordChangedAt: values.passwordChangedAt,
+            onboardingCompletedAt: values.onboardingCompletedAt,
             updatedAt: values.updatedAt,
           },
         });

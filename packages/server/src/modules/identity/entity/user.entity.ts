@@ -6,6 +6,7 @@ export class User {
   readonly email: UserPersistedType["email"];
   readonly passwordHash: UserPersistedType["passwordHash"];
   readonly passwordChangedAt: UserPersistedType["passwordChangedAt"];
+  readonly onboardingCompletedAt: UserPersistedType["onboardingCompletedAt"];
   readonly createdAt: UserPersistedType["createdAt"];
   readonly updatedAt: UserPersistedType["updatedAt"];
 
@@ -15,6 +16,7 @@ export class User {
     this.email = user.email;
     this.passwordHash = user.passwordHash;
     this.passwordChangedAt = user.passwordChangedAt;
+    this.onboardingCompletedAt = user.onboardingCompletedAt;
     this.createdAt = user.createdAt;
     this.updatedAt = user.updatedAt;
   }
@@ -36,6 +38,7 @@ export class User {
       email: this.email,
       passwordHash: this.passwordHash,
       passwordChangedAt: this.passwordChangedAt,
+      onboardingCompletedAt: this.onboardingCompletedAt,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
     };

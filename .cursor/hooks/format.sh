@@ -63,8 +63,10 @@ while true; do
   dir=$(dirname "$dir")
 done
 
+# Skip unused-import removal. The hook runs after each edit, including ones
+# where an import is written before the code that uses it.
 if [[ -n "$eslint_dir" ]]; then
-  (cd "$eslint_dir" && pnpm exec eslint --fix "$file") >/dev/null 2>&1 || true
+  (cd "$eslint_dir" && pnpm exec eslint --fix --rule 'unused-imports/no-unused-imports: off' "$file") >/dev/null 2>&1 || true
 fi
 
 (cd "$root" && pnpm exec prettier --write "$file") >/dev/null 2>&1 || true

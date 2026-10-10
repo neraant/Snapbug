@@ -30,8 +30,8 @@ export default function Error({ error, reset }: ErrorProps) {
         )}
         <Column gap="sm">
           <Button onClick={reset}>Try again</Button>
-          <Button nativeButton={false} variant="outline" render={<Link href={path.home} />}>
-            Go back to the home page
+          <Button nativeButton={false} variant="outline" render={<Link href={path.overview} />}>
+            Go back to the overview page
           </Button>
         </Column>
       </Column>

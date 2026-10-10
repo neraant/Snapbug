@@ -1,5 +1,6 @@
 import { implement } from "@orpc/server";
 import {
+  completeOnboarding,
   createOrganization,
   findOnboarding,
   updateOrganization,
@@ -20,4 +21,7 @@ export const organizationRouter = os.router({
     async ({ input, context }) => await updateOrganization(input, context.user.id),
   ),
   findOnboarding: authed.findOnboarding.handler(async ({ context }) => await findOnboarding(context.user.id)),
+  completeOnboarding: authed.completeOnboarding.handler(
+    async ({ input, context }) => await completeOnboarding(input, context.user.id),
+  ),
 });

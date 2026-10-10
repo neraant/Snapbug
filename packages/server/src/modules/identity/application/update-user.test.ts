@@ -14,6 +14,7 @@ const existingUser = new User({
   email: "alex@company.com",
   passwordHash: "hashed-secret",
   passwordChangedAt: null,
+  onboardingCompletedAt: null,
   createdAt: persistedAt,
   updatedAt: persistedAt,
 });
@@ -51,6 +52,37 @@ describe("UpdateUserUseCase", () => {
     expect(saved.passwordHash).toBe("new-hash");
     expect(saved.passwordChangedAt).toEqual(new Date("2026-10-05T12:00:00.000Z"));
     vi.useRealTimers();
+  });
+
+  it("sets onboardingCompletedAt when it is not set yet", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-10-05T12:00:00.000Z"));
+    const userRepository = {
+      findById: vi.fn().mockResolvedValue(existingUser),
+      save: vi.fn().mockResolvedValue(undefined),
+    };
+    const useCase = new UpdateUserUseCase(userRepository as unknown as UserRepository);
+
+    await useCase.execute({ userId, onboardingCompletedAt: new Date("2026-10-05T12:00:00.000Z") });
+
+    const saved = userRepository.save.mock.calls[0]?.[0];
+    expect(saved.onboardingCompletedAt).toEqual(new Date("2026-10-05T12:00:00.000Z"));
+    vi.useRealTimers();
+  });
+
+  it("does not overwrite onboardingCompletedAt when it is already set", async () => {
+    const completedAt = new Date("2026-10-04T09:00:00.000Z");
+    const completedUser = existingUser.update({ onboardingCompletedAt: completedAt });
+    const userRepository = {
+      findById: vi.fn().mockResolvedValue(completedUser),
+      save: vi.fn().mockResolvedValue(undefined),
+    };
+    const useCase = new UpdateUserUseCase(userRepository as unknown as UserRepository);
+
+    await useCase.execute({ userId, onboardingCompletedAt: new Date("2026-10-05T12:00:00.000Z") });
+
+    const saved = userRepository.save.mock.calls[0]?.[0];
+    expect(saved.onboardingCompletedAt).toEqual(completedAt);
   });
 
   it("throws when the user is missing", async () => {

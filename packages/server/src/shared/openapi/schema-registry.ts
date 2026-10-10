@@ -1,5 +1,11 @@
 import { JSON_SCHEMA_REGISTRY } from "@orpc/zod/zod4";
 import { findProjectByKeyInputDtoSchema } from "@workspace/validation/modules/api-key/dto/find-project-by-key.schema";
+import { acceptInvitationInputDtoSchema } from "@workspace/validation/modules/invitation/dto/accept-invitation.schema";
+import {
+  findInvitationByTokenInputDtoSchema,
+  findInvitationByTokenOutputDtoSchema,
+} from "@workspace/validation/modules/invitation/dto/find-invitation-by-token.schema";
+import { sendInvitationsInputDtoSchema } from "@workspace/validation/modules/invitation/dto/send-invitation.schema";
 import { verifyCredentialsInputDtoSchema } from "@workspace/validation/modules/auth/dto/verify-credentials.schema";
 import { BugReportSeverity } from "@workspace/validation/modules/bug-report/consts/bug-report-severity.const";
 import { BugReportStatus } from "@workspace/validation/modules/bug-report/consts/bug-report-status.const";
@@ -14,6 +20,7 @@ import {
   createOrganizationInputDtoSchema,
   createOrganizationOutputDtoSchema,
 } from "@workspace/validation/modules/organization/dto/create-organization.schema";
+import { completeOnboardingInputDtoSchema } from "@workspace/validation/modules/organization/dto/complete-onboarding.schema";
 import { findOnboardingOutputDtoSchema } from "@workspace/validation/modules/organization/dto/find-onboarding.schema";
 import { organizationModelSchema } from "@workspace/validation/modules/organization/dto/organization.model";
 import { updateOrganizationInputDtoSchema } from "@workspace/validation/modules/organization/dto/update-organization.schema";
@@ -33,7 +40,14 @@ import { userModelSchema } from "@workspace/validation/modules/user/dto/user.mod
 JSON_SCHEMA_REGISTRY.add(userModelSchema, {
   title: "User",
   description: "Public user profile",
-  examples: [{ id: "0a8c69a1-1ab1-45a8-8497-eae1e506d9d4", name: "Jane Doe", email: "user@example.com" }],
+  examples: [
+    {
+      id: "0a8c69a1-1ab1-45a8-8497-eae1e506d9d4",
+      name: "Jane Doe",
+      email: "user@example.com",
+      onboardingCompletedAt: null,
+    },
+  ],
 });
 
 JSON_SCHEMA_REGISTRY.add(createUserInputDtoSchema, {
@@ -166,15 +180,23 @@ JSON_SCHEMA_REGISTRY.add(updateOrganizationInputDtoSchema, {
 
 JSON_SCHEMA_REGISTRY.add(findOnboardingOutputDtoSchema, {
   title: "Onboarding snapshot",
-  description: "Organization and oldest project for the current user's onboarding",
+  description: "Onboarding completion flag, organization, and oldest project for the current user",
   examples: [
     {
+      completedAt: "2026-10-05T12:00:00.000Z",
+      suggestedOrganizationName: "Alex",
       organizationId: "2a8c69a1-1ab1-45a8-8497-eae1e506d9d1",
       organizationName: "Acme",
       projectId: "4a8c69a1-1ab1-45a8-8497-eae1e506d9d1",
       projectName: "Default project",
     },
   ],
+});
+
+JSON_SCHEMA_REGISTRY.add(completeOnboardingInputDtoSchema, {
+  title: "Complete onboarding",
+  description: "Ensure a workspace exists and mark onboarding complete",
+  examples: [{ organizationName: "Acme", projectName: "Default project" }],
 });
 
 JSON_SCHEMA_REGISTRY.add(findMembershipByUserOutputDtoSchema, {
@@ -222,6 +244,35 @@ JSON_SCHEMA_REGISTRY.add(findProjectByKeyInputDtoSchema, {
   title: "Find project by key",
   description: "Project for a key that is still active",
   examples: [{ key: "ff_live_example" }],
+});
+
+JSON_SCHEMA_REGISTRY.add(sendInvitationsInputDtoSchema, {
+  title: "Send invitations",
+  description: "Email organization invitations to teammates",
+  examples: [
+    {
+      organizationId: "2a8c69a1-1ab1-45a8-8497-eae1e506d9d1",
+      emails: ["teammate@example.com"],
+    },
+  ],
+});
+
+JSON_SCHEMA_REGISTRY.add(findInvitationByTokenInputDtoSchema, {
+  title: "Find invitation by token",
+  description: "Public invitation details for sign-up",
+  examples: [{ token: "550e8400-e29b-41d4-a716-446655440000" }],
+});
+
+JSON_SCHEMA_REGISTRY.add(findInvitationByTokenOutputDtoSchema, {
+  title: "Invitation preview",
+  description: "Invited email and organization name",
+  examples: [{ email: "teammate@example.com", organizationName: "Acme" }],
+});
+
+JSON_SCHEMA_REGISTRY.add(acceptInvitationInputDtoSchema, {
+  title: "Accept invitation",
+  description: "Join an organization with a valid invitation token",
+  examples: [{ token: "550e8400-e29b-41d4-a716-446655440000" }],
 });
 
 JSON_SCHEMA_REGISTRY.add(createBugReportInputDtoSchema, {

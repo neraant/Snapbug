@@ -12,12 +12,12 @@ export abstract class UserMapper {
   }
 
   static toDto(user: User): UserModelType {
-    const { id, name, email } = user.toObject();
-    return { id, name, email };
+    const { id, name, email, onboardingCompletedAt } = user.toObject();
+    return { id, name, email, onboardingCompletedAt };
   }
 
   static toCredentialsDto(user: User): UserModelType & { passwordHash: string } {
-    const { id, name, email, passwordHash } = user.toObject();
-    return { id, name, email, passwordHash };
+    const { id, name, email, passwordHash, onboardingCompletedAt } = user.toObject();
+    return { id, name, email, passwordHash, onboardingCompletedAt };
   }
 }

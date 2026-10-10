@@ -4,6 +4,10 @@ import {
   createOrganizationInputDtoSchema,
   createOrganizationOutputDtoSchema,
 } from "@workspace/validation/modules/organization/dto/create-organization.schema";
+import {
+  completeOnboardingInputDtoSchema,
+  completeOnboardingOutputDtoSchema,
+} from "@workspace/validation/modules/organization/dto/complete-onboarding.schema";
 import { findOnboardingOutputDtoSchema } from "@workspace/validation/modules/organization/dto/find-onboarding.schema";
 import { organizationModelSchema } from "@workspace/validation/modules/organization/dto/organization.model";
 import { updateOrganizationInputDtoSchema } from "@workspace/validation/modules/organization/dto/update-organization.schema";
@@ -36,4 +40,14 @@ export const organizationContract = {
     summary: "Find onboarding snapshot for the current user",
     spec: sessionAuthSpec,
   }),
+  completeOnboarding: oc
+    .input(completeOnboardingInputDtoSchema)
+    .output(completeOnboardingOutputDtoSchema)
+    .route({
+      method: "POST",
+      path: "/organizations/onboarding/complete",
+      tags: ["organization"],
+      summary: "Finish onboarding and ensure a workspace exists",
+      spec: sessionAuthSpec,
+    }),
 };

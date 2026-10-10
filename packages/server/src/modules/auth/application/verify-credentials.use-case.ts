@@ -16,6 +16,11 @@ export class VerifyCredentialsUseCase {
     const isValid = await this.authService.verifyPassword(input.password, stored.passwordHash);
     if (!isValid) return null;
 
-    return { id: stored.id, email: stored.email, name: stored.name };
+    return {
+      id: stored.id,
+      email: stored.email,
+      name: stored.name,
+      onboardingCompletedAt: stored.onboardingCompletedAt,
+    };
   }
 }
