@@ -3,15 +3,18 @@ import { Skeleton } from "@workspace/design-system/components/ui/skeleton";
 
 import { OverviewBySeverityCard } from "@/client/modules/overview/components/overview-by-severity-card";
 import { OverviewReportsOverTimeCard } from "@/client/modules/overview/components/overview-reports-over-time-card";
-import { useOverviewChartSection } from "@/client/modules/overview/hooks/use-overview-chart-section";
 import type { OverviewStatFilters } from "@/client/modules/overview/types/overview-stat-filter.type";
+import { useFindBugReportCharts } from "@/client/shared/queries/use-find-bug-report-charts";
 
 type OverviewChartSectionProps = {
   filters: OverviewStatFilters;
 };
 
 export function OverviewChartSection({ filters }: OverviewChartSectionProps) {
-  const charts = useOverviewChartSection(filters);
+  const { data: charts } = useFindBugReportCharts({
+    projectId: filters.projectId ?? undefined,
+    periodDays: filters.periodDays,
+  });
 
   return (
     <Grid columns="responsive-3" gap="xl">

@@ -13,7 +13,7 @@ const userId = "0a8c69a1-1ab1-45a8-8497-eae1e506d9d4";
 const organizationId = "3a8c69a1-1ab1-45a8-8497-eae1e506d9d1";
 const projectId = "4a8c69a1-1ab1-45a8-8497-eae1e506d9d1";
 
-const input = { organizationId, periodDays: 30 as const };
+const input = { periodDays: 30 as const };
 
 const membership = {
   id: "5a8c69a1-1ab1-45a8-8497-eae1e506d9d1",
@@ -52,7 +52,7 @@ function createAuditLogRepositoryMock(overrides: Partial<AuditLogRepository> = {
 
 describe("FindStatsUseCase", () => {
   it("throws when the user is not a member", async () => {
-    const membershipPort = { findByUserAndOrganization: vi.fn().mockResolvedValue(null) };
+    const membershipPort = { findByUser: vi.fn().mockResolvedValue(null) };
     const projectPort = { findManyByOrganizationId: vi.fn(), findById: vi.fn() };
     const bugReportRepository = createRepositoryMock();
     const useCase = new FindStatsUseCase(
@@ -72,7 +72,7 @@ describe("FindStatsUseCase", () => {
   });
 
   it("returns zeroed stats when the organization has no projects", async () => {
-    const membershipPort = { findByUserAndOrganization: vi.fn().mockResolvedValue(membership) };
+    const membershipPort = { findByUser: vi.fn().mockResolvedValue(membership) };
     const projectPort = { findManyByOrganizationId: vi.fn().mockResolvedValue([]), findById: vi.fn() };
     const bugReportRepository = createRepositoryMock();
     const useCase = new FindStatsUseCase(
@@ -97,7 +97,7 @@ describe("FindStatsUseCase", () => {
   });
 
   it("returns new report stats from repository aggregates", async () => {
-    const membershipPort = { findByUserAndOrganization: vi.fn().mockResolvedValue(membership) };
+    const membershipPort = { findByUser: vi.fn().mockResolvedValue(membership) };
     const projectPort = { findManyByOrganizationId: vi.fn().mockResolvedValue([project]), findById: vi.fn() };
     const bugReportRepository = createRepositoryMock({
       countCreatedBetween: vi.fn().mockResolvedValueOnce(5).mockResolvedValueOnce(2),
@@ -125,7 +125,7 @@ describe("FindStatsUseCase", () => {
   });
 
   it("derives open-issue deltas from audit replay when history is empty", async () => {
-    const membershipPort = { findByUserAndOrganization: vi.fn().mockResolvedValue(membership) };
+    const membershipPort = { findByUser: vi.fn().mockResolvedValue(membership) };
     const projectPort = { findManyByOrganizationId: vi.fn().mockResolvedValue([project]), findById: vi.fn() };
     const bugReportRepository = createRepositoryMock({
       countOpen: vi.fn().mockResolvedValue(9),

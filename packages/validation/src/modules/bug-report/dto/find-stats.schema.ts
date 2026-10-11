@@ -18,7 +18,6 @@ export const bugReportStatItemSchema = z.object({
 });
 
 export const findStatsInputDtoSchema = z.object({
-  organizationId: z.uuid(),
   projectId: z.uuid().optional(),
   periodDays: bugReportStatPeriodDaysSchema,
 });

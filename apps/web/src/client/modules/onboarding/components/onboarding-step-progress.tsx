@@ -25,7 +25,7 @@ export function OnboardingStepProgress({ currentStep, totalSteps, stepLabel }: O
             — {stepLabel}
           </Typography>
         </Row>
-        <Typography variant="text-xs" weight="semibold" className="font-mono text-primary">
+        <Typography variant="text-xs" weight="semibold" font="mono" color="primary">
           {percent}%
         </Typography>
       </Row>

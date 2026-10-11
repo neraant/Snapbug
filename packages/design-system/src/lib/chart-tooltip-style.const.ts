@@ -15,3 +15,7 @@ export const chartTooltipContentStyle: CSSProperties = {
 export const chartTooltipItemStyle: CSSProperties = chartTooltipTextStyle;
 
 export const chartTooltipLabelStyle: CSSProperties = chartTooltipTextStyle;
+
+export const chartTooltipWrapperStyle: CSSProperties = {
+  zIndex: 100,
+};

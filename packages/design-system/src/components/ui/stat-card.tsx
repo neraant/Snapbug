@@ -59,7 +59,7 @@ type StatCardValueProps = {
 function StatCardValue({ value, hint }: StatCardValueProps) {
   return (
     <Row align="end" gap="xs" wrap={false} minWidth="0" className="pt-1">
-      <Typography variant="heading-md" className="font-heading font-extrabold tracking-tight">
+      <Typography variant="heading-md" font="heading" className="font-extrabold tracking-tight">
         {value}
       </Typography>
       {hint ? (

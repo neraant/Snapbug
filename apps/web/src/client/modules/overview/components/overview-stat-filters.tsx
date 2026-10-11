@@ -17,7 +17,6 @@ import {
 } from "@/client/modules/overview/consts/overview-stat-filter.const";
 import { texts } from "@/client/modules/overview/consts/texts.const";
 import type { OverviewStatFilters } from "@/client/modules/overview/types/overview-stat-filter.type";
-import { useFindMembershipByUser } from "@/client/shared/queries/use-find-membership-by-user";
 import { useFindProjects } from "@/client/shared/queries/use-find-projects";
 
 const periodLabelByDays = {
@@ -35,12 +34,7 @@ export function OverviewStatFilterToolbarContainer({
   filters,
   onFiltersChange,
 }: OverviewStatFilterToolbarContainerProps) {
-  const { data: membership } = useFindMembershipByUser();
-  if (!membership) {
-    throw new Error("Membership is required to load overview filters");
-  }
-
-  const { data: projects } = useFindProjects({ organizationId: membership.organizationId });
+  const { data: projects } = useFindProjects();
 
   return <OverviewStatFilterToolbar projects={projects} filters={filters} onFiltersChange={onFiltersChange} />;
 }

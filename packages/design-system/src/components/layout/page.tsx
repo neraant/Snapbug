@@ -39,7 +39,7 @@ export function PageContainer({ title, description, badge, actions, children }: 
           leading={
             <Column gap="none">
               <Row align="center" gap="md" wrap={false}>
-                <Typography variant="heading-lg" weight="bold" className="font-heading tracking-tight">
+                <Typography variant="heading-lg" weight="bold" font="heading" className="tracking-tight">
                   {title}
                 </Typography>
                 {badge}

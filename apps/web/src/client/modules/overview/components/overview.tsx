@@ -1,6 +1,7 @@
 import { Column } from "@workspace/design-system/components/layout/column";
 import { Suspense } from "react";
 
+import { OverviewBreakdownSection } from "@/client/modules/overview/components/overview-breakdown-section";
 import { OverviewChartSection } from "@/client/modules/overview/components/overview-chart-section";
 import { OverviewStatSection } from "@/client/modules/overview/components/overview-stat-section";
 import type { OverviewStatFilters } from "@/client/modules/overview/types/overview-stat-filter.type";
@@ -17,6 +18,9 @@ export function Overview({ filters }: OverviewProps) {
       </Suspense>
       <Suspense fallback={<OverviewChartSection.Fallback />}>
         <OverviewChartSection filters={filters} />
+      </Suspense>
+      <Suspense fallback={<OverviewBreakdownSection.Fallback />}>
+        <OverviewBreakdownSection filters={filters} />
       </Suspense>
     </Column>
   );

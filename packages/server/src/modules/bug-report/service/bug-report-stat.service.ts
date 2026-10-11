@@ -1,9 +1,16 @@
 import { UTCDate } from "@date-fns/utc";
-import type { DailyMetricRow, SeverityCountRow } from "@workspace/server/modules/bug-report/entity/bug-report.types";
+import type {
+  DailyMetricRow,
+  NullableStringCountRow,
+  SeverityCountRow,
+  StatusCountRow,
+} from "@workspace/server/modules/bug-report/entity/bug-report.types";
 import type { OpenMetricsAtInstant } from "@workspace/server/shared/audit/audit-log.types";
 import { bugReportSeverities } from "@workspace/validation/modules/bug-report/consts/bug-report-severity.const";
 import { BugReportStatId } from "@workspace/validation/modules/bug-report/consts/bug-report-stat-id.const";
 import type { BugReportStatPeriodDaysType } from "@workspace/validation/modules/bug-report/consts/bug-report-stat-period-days.const";
+import { bugReportStatuses } from "@workspace/validation/modules/bug-report/consts/bug-report-status.const";
+import type { FindBreakdownsOutputDtoType } from "@workspace/validation/modules/bug-report/dto/find-breakdowns.schema";
 import type { FindChartsOutputDtoType } from "@workspace/validation/modules/bug-report/dto/find-charts.schema";
 import type { FindStatsOutputDtoType } from "@workspace/validation/modules/bug-report/dto/find-stats.schema";
 import { addDays, formatISO, startOfDay, subDays } from "date-fns";
@@ -33,6 +40,65 @@ export class BugReportStatService {
     const queryTo = addDays(dayStarts[dayStarts.length - 1]!, 1);
 
     return { dayStarts, queryFrom, queryTo };
+  }
+
+  buildZeroBreakdowns(): FindBreakdownsOutputDtoType {
+    return {
+      status: bugReportStatuses.map((status) => ({ status, count: 0 })),
+      pages: [],
+      browser: { total: 0, items: [] },
+      os: { total: 0, items: [] },
+      device: { total: 0, items: [] },
+    };
+  }
+
+  buildBreakdownsFromAggregates(input: {
+    statusCounts: StatusCountRow[];
+    urlCounts: NullableStringCountRow[];
+    browserCounts: NullableStringCountRow[];
+    osCounts: NullableStringCountRow[];
+    deviceCounts: NullableStringCountRow[];
+  }): FindBreakdownsOutputDtoType {
+    const { statusCounts, urlCounts, browserCounts, osCounts, deviceCounts } = input;
+
+    const statusByKey = new Map(statusCounts.map((row) => [row.status, row.count]));
+
+    return {
+      status: bugReportStatuses.map((status) => ({
+        status,
+        count: statusByKey.get(status) ?? 0,
+      })),
+      pages: this.buildTopPageBreakdown(urlCounts),
+      browser: this.buildEnvironmentBreakdown(browserCounts),
+      os: this.buildEnvironmentBreakdown(osCounts),
+      device: this.buildEnvironmentBreakdown(deviceCounts),
+    };
+  }
+
+  normalizeBugReportPageLabel(url: string | null): string | null {
+    if (!url?.trim()) return null;
+
+    try {
+      const parsed = new URL(url.includes("://") ? url : `https://${url}`);
+      if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return null;
+
+      let host = parsed.hostname.toLowerCase();
+      const port = parsed.port;
+      if (port && port !== "80" && port !== "443") {
+        host = `${host}:${port}`;
+      }
+
+      let pathname = parsed.pathname;
+      if (pathname.length > 1 && pathname.endsWith("/")) {
+        pathname = pathname.slice(0, -1);
+      }
+
+      if (!host || !this.isRecognizedPageHost(host)) return null;
+
+      return `${host}${pathname}`;
+    } catch {
+      return null;
+    }
   }
 
   buildZeroCharts(periodDays: BugReportStatPeriodDaysType, reference = new UTCDate()): FindChartsOutputDtoType {
@@ -230,5 +296,47 @@ export class BugReportStatService {
   private utcDayKey(date: Date | string): string {
     const normalized = typeof date === "string" ? new Date(date) : date;
     return formatISO(normalized, { representation: "date" });
+  }
+
+  private buildTopPageBreakdown(urlCounts: NullableStringCountRow[]) {
+    const merged = new Map<string, number>();
+
+    for (const row of urlCounts) {
+      const label = this.normalizeBugReportPageLabel(row.value);
+      if (!label) continue;
+      merged.set(label, (merged.get(label) ?? 0) + row.count);
+    }
+
+    return this.rankTopFive(Array.from(merged.entries()).map(([label, count]) => ({ label, count })));
+  }
+
+  private buildEnvironmentBreakdown(rows: NullableStringCountRow[]) {
+    const merged = new Map<string, number>();
+
+    for (const row of rows) {
+      const label = row.value?.trim();
+      if (!label) continue;
+      merged.set(label, (merged.get(label) ?? 0) + row.count);
+    }
+
+    const items = Array.from(merged.entries()).map(([label, count]) => ({ label, count }));
+    const total = items.reduce((sum, item) => sum + item.count, 0);
+
+    return {
+      total,
+      items: this.rankTopFive(items),
+    };
+  }
+
+  private rankTopFive(items: { label: string; count: number }[]) {
+    return [...items]
+      .sort((left, right) => right.count - left.count || left.label.localeCompare(right.label))
+      .slice(0, 5);
+  }
+
+  private isRecognizedPageHost(host: string) {
+    if (host === "localhost") return true;
+    if (/^\d{1,3}(?:\.\d{1,3}){3}$/.test(host)) return true;
+    return host.includes(".");
   }
 }

@@ -13,12 +13,15 @@ export const bugReportRouter = os.router({
     async ({ input, context }) => await container.bugReport.createBugReport.execute(input, context.actor),
   ),
   findMany: authed.findMany.handler(
-    async ({ input, context }) => await container.bugReport.findBugReports.execute(input, context.user.id),
+    async ({ context }) => await container.bugReport.findBugReports.execute(context.user.id),
   ),
   findStats: authed.findStats.handler(
     async ({ input, context }) => await container.bugReport.findStats.execute(input, context.user.id),
   ),
   findCharts: authed.findCharts.handler(
     async ({ input, context }) => await container.bugReport.findCharts.execute(input, context.user.id),
+  ),
+  findBreakdowns: authed.findBreakdowns.handler(
+    async ({ input, context }) => await container.bugReport.findBreakdowns.execute(input, context.user.id),
   ),
 });

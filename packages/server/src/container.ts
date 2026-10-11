@@ -9,6 +9,7 @@ import { VerifyCredentialsUseCase } from "@workspace/server/modules/auth/applica
 import { ResetPasswordRepository } from "@workspace/server/modules/auth/repository/reset-password.repository";
 import { AuthService } from "@workspace/server/modules/auth/service/auth.service";
 import { CreateBugReportUseCase } from "@workspace/server/modules/bug-report/application/create-bug-report.use-case";
+import { FindBreakdownsUseCase } from "@workspace/server/modules/bug-report/application/find-breakdowns.use-case";
 import { FindBugReportsUseCase } from "@workspace/server/modules/bug-report/application/find-bug-reports.use-case";
 import { FindChartsUseCase } from "@workspace/server/modules/bug-report/application/find-charts.use-case";
 import { FindStatsUseCase } from "@workspace/server/modules/bug-report/application/find-stats.use-case";
@@ -79,7 +80,7 @@ const findUserByEmail = new FindUserByEmailUseCase(userRepository);
 const findUserCredentialsByEmail = new FindUserCredentialsByEmailUseCase(userRepository);
 
 const createProject = new CreateProjectUseCase(membershipAdapter, projectRepository);
-const findProjects = new FindProjectsUseCase(projectRepository);
+const findProjects = new FindProjectsUseCase(membershipAdapter, projectRepository);
 const updateProject = new UpdateProjectUseCase(membershipAdapter, projectRepository);
 
 const findOnboarding = new FindOnboardingUseCase(
@@ -136,6 +137,12 @@ const findStats = new FindStatsUseCase(
   auditLogRepository,
 );
 const findCharts = new FindChartsUseCase(membershipAdapter, projectAdapter, bugReportRepository, bugReportStatService);
+const findBreakdowns = new FindBreakdownsUseCase(
+  membershipAdapter,
+  projectAdapter,
+  bugReportRepository,
+  bugReportStatService,
+);
 
 export const container = {
   membership: { createMembership, findMembership, findMembershipByUser },
@@ -145,5 +152,5 @@ export const container = {
   apiKey: { findProjectByKey },
   auth: { signUp, verifyCredentials, requestResetPassword, resetPassword },
   invitation: { sendInvitations, findInvitationByToken, acceptInvitation },
-  bugReport: { createBugReport, findBugReports, findStats, findCharts },
+  bugReport: { createBugReport, findBugReports, findStats, findCharts, findBreakdowns },
 };

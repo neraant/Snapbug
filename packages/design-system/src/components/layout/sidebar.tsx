@@ -178,7 +178,7 @@ export function SidebarLayout({
                   <Typography as="span" variant="heading-xs" color="inherit" truncate>
                     {title}
                   </Typography>
-                  <Typography as="span" variant="text-xs" color="muted" className="font-mono" truncate>
+                  <Typography as="span" variant="text-xs" color="muted" font="mono" truncate>
                     {description}
                   </Typography>
                 </Column>

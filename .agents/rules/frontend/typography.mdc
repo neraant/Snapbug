@@ -5,7 +5,7 @@ globs: apps/web/**/*.tsx,packages/design-system/**/*.{tsx,css}
 
 # Typography
 
-One scale, the same steps as Tailwind. Product copy uses `Typography`. Primitives (`Button`, `Field`, `Badge`) may use the same Tailwind steps. Do not add `text-[…]`, a numeric `fontSize`, or a size class on top of a `Typography` variant.
+One scale, the same steps as Tailwind. Product copy uses `Typography`. Primitives (`Button`, `Field`, `Badge`) may use the same Tailwind steps. Do not add `text-[…]`, a numeric `fontSize`, or a size class on top of a `Typography` variant. Set the family with `font` (`sans` | `heading` | `mono` from `typography-font.const.ts`), not `className="font-*"`.
 
 | Variant    | Size             | Use                          |
 | ---------- | ---------------- | ---------------------------- |

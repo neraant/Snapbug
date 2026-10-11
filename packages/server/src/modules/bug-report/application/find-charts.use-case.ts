@@ -18,13 +18,10 @@ export class FindChartsUseCase {
   ) {}
 
   async execute(input: FindChartsInputDtoType, userId: string): Promise<FindChartsOutputDtoType> {
-    const membership = await this.membershipPort.findByUserAndOrganization({
-      userId,
-      organizationId: input.organizationId,
-    });
+    const membership = await this.membershipPort.findByUser(userId);
     if (!membership) throw new NotFoundError(ERROR_CODES.ORGANIZATION_NOT_FOUND);
 
-    const projectIds = await this.resolveProjectIds(input);
+    const projectIds = await this.resolveProjectIds(input, membership.organizationId);
     if (projectIds.length === 0) {
       return this.bugReportStatService.buildZeroCharts(input.periodDays);
     }
@@ -45,16 +42,16 @@ export class FindChartsUseCase {
     });
   }
 
-  private async resolveProjectIds(input: FindChartsInputDtoType): Promise<string[]> {
+  private async resolveProjectIds(input: FindChartsInputDtoType, organizationId: string): Promise<string[]> {
     if (input.projectId) {
       const project = await this.projectPort.findById(input.projectId);
-      if (!project || project.organizationId !== input.organizationId) {
+      if (!project || project.organizationId !== organizationId) {
         throw new NotFoundError(ERROR_CODES.PROJECT_NOT_FOUND);
       }
       return [project.id];
     }
 
-    const projects = await this.projectPort.findManyByOrganizationId({ organizationId: input.organizationId });
+    const projects = await this.projectPort.findManyByOrganizationId({ organizationId });
     return projects.map((project) => project.id);
   }
 }

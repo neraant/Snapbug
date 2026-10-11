@@ -5,7 +5,8 @@ import { BugReportSeverity } from "@workspace/validation/modules/bug-report/cons
 import { BugReportStatus } from "@workspace/validation/modules/bug-report/consts/bug-report-status.const";
 import { bugReportModelSchema } from "@workspace/validation/modules/bug-report/dto/bug-report.model";
 import { createBugReportInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/create-bug-report.schema";
-import { findBugReportsInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-bug-reports.schema";
+import { findBreakdownsInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-breakdowns.schema";
+import { findBugReportsOutputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-bug-reports.schema";
 import { findChartsInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-charts.schema";
 import { findStatsInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-stats.schema";
 import { acceptInvitationInputDtoSchema } from "@workspace/validation/modules/invitation/dto/accept-invitation.schema";
@@ -27,7 +28,7 @@ import { findOnboardingOutputDtoSchema } from "@workspace/validation/modules/org
 import { organizationModelSchema } from "@workspace/validation/modules/organization/dto/organization.model";
 import { updateOrganizationInputDtoSchema } from "@workspace/validation/modules/organization/dto/update-organization.schema";
 import { createProjectInputDtoSchema } from "@workspace/validation/modules/project/dto/create-project.schema";
-import { findProjectsInputDtoSchema } from "@workspace/validation/modules/project/dto/find-projects.schema";
+import { findProjectsOutputDtoSchema } from "@workspace/validation/modules/project/dto/find-projects.schema";
 import { projectModelSchema } from "@workspace/validation/modules/project/dto/project.model";
 import { updateProjectInputDtoSchema } from "@workspace/validation/modules/project/dto/update-project.schema";
 import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
@@ -90,22 +91,27 @@ JSON_SCHEMA_REGISTRY.add(bugReportModelSchema, {
   ],
 });
 
-JSON_SCHEMA_REGISTRY.add(findBugReportsInputDtoSchema, {
+JSON_SCHEMA_REGISTRY.add(findBugReportsOutputDtoSchema, {
   title: "List bug reports",
-  description: "Bug reports for an organization the caller belongs to",
-  examples: [{ organizationId: "3a8c69a1-1ab1-45a8-8497-eae1e506d9d1" }],
+  description: "Bug reports for the caller's organization",
 });
 
 JSON_SCHEMA_REGISTRY.add(findStatsInputDtoSchema, {
   title: "Bug report stats",
-  description: "Overview stat cards for an organization the caller belongs to",
-  examples: [{ organizationId: "3a8c69a1-1ab1-45a8-8497-eae1e506d9d1", periodDays: 30 }],
+  description: "Overview stat cards for the caller's organization",
+  examples: [{ periodDays: 30 }],
 });
 
 JSON_SCHEMA_REGISTRY.add(findChartsInputDtoSchema, {
   title: "Bug report charts",
-  description: "Overview charts for an organization the caller belongs to",
-  examples: [{ organizationId: "3a8c69a1-1ab1-45a8-8497-eae1e506d9d1", periodDays: 30 }],
+  description: "Overview charts for the caller's organization",
+  examples: [{ periodDays: 30 }],
+});
+
+JSON_SCHEMA_REGISTRY.add(findBreakdownsInputDtoSchema, {
+  title: "Bug report breakdowns",
+  description: "Overview breakdown cards for the caller's organization",
+  examples: [{ periodDays: 30 }],
 });
 
 JSON_SCHEMA_REGISTRY.add(verifyCredentialsInputDtoSchema, {
@@ -249,10 +255,9 @@ JSON_SCHEMA_REGISTRY.add(updateProjectInputDtoSchema, {
   ],
 });
 
-JSON_SCHEMA_REGISTRY.add(findProjectsInputDtoSchema, {
+JSON_SCHEMA_REGISTRY.add(findProjectsOutputDtoSchema, {
   title: "List projects",
-  description: "Projects in an organization",
-  examples: [{ organizationId: "3a8c69a1-1ab1-45a8-8497-eae1e506d9d1" }],
+  description: "Projects in the caller's organization",
 });
 
 JSON_SCHEMA_REGISTRY.add(findProjectByKeyInputDtoSchema, {

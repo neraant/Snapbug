@@ -27,10 +27,10 @@ export function AuthAsidePreviewCard({ className, ...props }: AuthAsidePreviewCa
 
         <Card.Content className="rounded-lg border border-border bg-muted p-3">
           <Row justify="between" align="center" gap="sm" wrap={false} minWidth="0">
-            <Typography variant="text-xs" color="muted" truncate className="font-mono">
+            <Typography variant="text-xs" color="muted" font="mono" truncate>
               {preview.error}
             </Typography>
-            <Typography variant="text-xs" weight="bold" color="destructive" className="font-mono">
+            <Typography variant="text-xs" weight="bold" color="destructive" font="mono">
               {preview.statusCode}
             </Typography>
           </Row>
@@ -45,7 +45,7 @@ export function AuthAsidePreviewCard({ className, ...props }: AuthAsidePreviewCa
               {preview.assigneeLabel}
             </Typography>
           </Row>
-          <Typography variant="text-xs" className="font-mono text-success">
+          <Typography variant="text-xs" font="mono" className="text-success">
             {preview.replayStatus}
           </Typography>
         </Card.Footer>

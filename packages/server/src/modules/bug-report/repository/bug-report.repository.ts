@@ -3,7 +3,12 @@ import { db as defaultDb } from "@workspace/database";
 import { bugReportTable } from "@workspace/database/schema";
 import type { BugReport } from "@workspace/server/modules/bug-report/entity/bug-report.entity";
 import { BugReportMapper } from "@workspace/server/modules/bug-report/entity/bug-report.mapper";
-import type { DailyMetricRow, SeverityCountRow } from "@workspace/server/modules/bug-report/entity/bug-report.types";
+import type {
+  DailyMetricRow,
+  NullableStringCountRow,
+  SeverityCountRow,
+  StatusCountRow,
+} from "@workspace/server/modules/bug-report/entity/bug-report.types";
 import { InternalServerError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import { BugReportSeverity } from "@workspace/validation/modules/bug-report/consts/bug-report-severity.const";
@@ -185,6 +190,89 @@ export class BugReportRepository {
 
     return rows.map((row) => ({
       severity: row.severity,
+      count: Number(row.count),
+    }));
+  }
+
+  async countCreatedByStatus(projectIds: string[], from: Date, to: Date): Promise<StatusCountRow[]> {
+    const rows = await this.db
+      .select({
+        status: bugReportTable.status,
+        count: count(),
+      })
+      .from(bugReportTable)
+      .where(
+        and(
+          inArray(bugReportTable.projectId, projectIds),
+          gte(bugReportTable.createdAt, from),
+          lt(bugReportTable.createdAt, to),
+        ),
+      )
+      .groupBy(bugReportTable.status);
+
+    return rows.map((row) => ({
+      status: row.status,
+      count: Number(row.count),
+    }));
+  }
+
+  async countCreatedByUrl(projectIds: string[], from: Date, to: Date): Promise<NullableStringCountRow[]> {
+    const rows = await this.db
+      .select({
+        value: bugReportTable.url,
+        count: count(),
+      })
+      .from(bugReportTable)
+      .where(
+        and(
+          inArray(bugReportTable.projectId, projectIds),
+          gte(bugReportTable.createdAt, from),
+          lt(bugReportTable.createdAt, to),
+        ),
+      )
+      .groupBy(bugReportTable.url);
+
+    return rows.map((row) => ({
+      value: row.value,
+      count: Number(row.count),
+    }));
+  }
+
+  async countCreatedByBrowser(projectIds: string[], from: Date, to: Date): Promise<NullableStringCountRow[]> {
+    return this.countCreatedByStringColumn(bugReportTable.browser, projectIds, from, to);
+  }
+
+  async countCreatedByOs(projectIds: string[], from: Date, to: Date): Promise<NullableStringCountRow[]> {
+    return this.countCreatedByStringColumn(bugReportTable.os, projectIds, from, to);
+  }
+
+  async countCreatedByDevice(projectIds: string[], from: Date, to: Date): Promise<NullableStringCountRow[]> {
+    return this.countCreatedByStringColumn(bugReportTable.device, projectIds, from, to);
+  }
+
+  private async countCreatedByStringColumn(
+    column: typeof bugReportTable.browser,
+    projectIds: string[],
+    from: Date,
+    to: Date,
+  ): Promise<NullableStringCountRow[]> {
+    const rows = await this.db
+      .select({
+        value: column,
+        count: count(),
+      })
+      .from(bugReportTable)
+      .where(
+        and(
+          inArray(bugReportTable.projectId, projectIds),
+          gte(bugReportTable.createdAt, from),
+          lt(bugReportTable.createdAt, to),
+        ),
+      )
+      .groupBy(column);
+
+    return rows.map((row) => ({
+      value: row.value,
       count: Number(row.count),
     }));
   }

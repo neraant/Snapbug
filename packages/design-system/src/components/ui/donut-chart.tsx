@@ -6,6 +6,7 @@ import {
   chartTooltipContentStyle,
   chartTooltipItemStyle,
   chartTooltipLabelStyle,
+  chartTooltipWrapperStyle,
 } from "@workspace/design-system/lib/chart-tooltip-style.const";
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 
@@ -37,7 +38,6 @@ export function DonutChart({ slices, centerCaption }: DonutChartProps) {
             paddingAngle={2}
             stroke="var(--color-card)"
             strokeWidth={2}
-            isAnimationActive={false}
           >
             {slices.map((slice) => (
               <Cell key={slice.key} fill={slice.color} />
@@ -47,13 +47,14 @@ export function DonutChart({ slices, centerCaption }: DonutChartProps) {
             contentStyle={chartTooltipContentStyle}
             itemStyle={chartTooltipItemStyle}
             labelStyle={chartTooltipLabelStyle}
+            wrapperStyle={chartTooltipWrapperStyle}
           />
           <Legend verticalAlign="bottom" height={36} />
         </PieChart>
       </ResponsiveContainer>
       <Column align="center" justify="center" className="pointer-events-none absolute inset-0 pb-9">
         <Typography variant="heading-sm">{total}</Typography>
-        <Typography variant="text-xs" color="muted" className="font-mono tracking-wide uppercase">
+        <Typography variant="text-xs" color="muted" font="mono" className="tracking-wide uppercase">
           {centerCaption}
         </Typography>
       </Column>

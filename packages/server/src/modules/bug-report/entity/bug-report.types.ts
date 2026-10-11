@@ -44,3 +44,13 @@ export type SeverityCountRow = {
   severity: BugReportSeverity;
   count: number;
 };
+
+export type StatusCountRow = {
+  status: BugReportStatus;
+  count: number;
+};
+
+export type NullableStringCountRow = {
+  value: string | null;
+  count: number;
+};

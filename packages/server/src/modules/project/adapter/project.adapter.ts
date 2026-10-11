@@ -27,7 +27,7 @@ export class ProjectAdapter implements OrganizationProjectPort, BugReportProject
     private readonly membershipPort: MembershipPort,
   ) {
     this.createProject = new CreateProjectUseCase(membershipPort, projectRepository);
-    this.findProjects = new FindProjectsUseCase(projectRepository);
+    this.findProjects = new FindProjectsUseCase(membershipPort, projectRepository);
     this.findProjectById = new FindProjectByIdUseCase(projectRepository);
   }
 

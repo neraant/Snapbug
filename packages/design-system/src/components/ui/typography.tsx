@@ -20,6 +20,7 @@ const typographyVariants = cva("", {
       inherit: "text-inherit",
       destructive: "text-destructive",
       muted: "text-muted-foreground",
+      primary: "text-primary",
     },
     align: {
       left: "text-left",
@@ -32,12 +33,21 @@ const typographyVariants = cva("", {
       semibold: "font-semibold",
       bold: "font-bold",
     },
+    font: {
+      sans: "font-sans",
+      heading: "font-heading",
+      mono: "font-mono",
+    },
   },
   defaultVariants: {
     variant: "text-md",
     align: "left",
   },
 });
+
+export const typographyFonts = ["sans", "heading", "mono"] as const;
+
+export type TypographyFont = (typeof typographyFonts)[number];
 
 type TypographyVariant = NonNullable<VariantProps<typeof typographyVariants>["variant"]>;
 
@@ -55,9 +65,10 @@ const DEFAULT_TAG: Record<TypographyVariant, ElementType> = {
 
 type TypographyProps = PropsWithChildren<{
   variant?: TypographyVariant;
-  color?: "default" | "inherit" | "destructive" | "muted";
+  color?: "default" | "inherit" | "destructive" | "muted" | "primary";
   align?: "left" | "center" | "right";
   weight?: NonNullable<VariantProps<typeof typographyVariants>["weight"]>;
+  font?: TypographyFont;
   truncate?: boolean;
   className?: string;
   as?: ElementType;
@@ -68,6 +79,7 @@ export function Typography({
   color = "default",
   align = "left",
   weight,
+  font,
   truncate = false,
   className,
   as,
@@ -77,7 +89,11 @@ export function Typography({
 
   return (
     <Tag
-      className={cn(typographyVariants({ variant, color, align, weight }), truncate && "min-w-0 truncate", className)}
+      className={cn(
+        typographyVariants({ variant, color, align, weight, font }),
+        truncate && "min-w-0 truncate",
+        className,
+      )}
     >
       {children}
     </Tag>

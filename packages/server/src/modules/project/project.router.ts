@@ -12,7 +12,9 @@ export const projectRouter = os.router({
   createProject: authed.createProject.handler(
     async ({ input, context }) => await container.project.createProject.execute(input, context.user.id),
   ),
-  findProjects: authed.findProjects.handler(async ({ input }) => await container.project.findProjects.execute(input)),
+  findProjects: authed.findProjects.handler(
+    async ({ context }) => await container.project.findProjects.executeForUser(context.user.id),
+  ),
   updateProject: authed.updateProject.handler(
     async ({ input, context }) => await container.project.updateProject.execute(input, context.user.id),
   ),

@@ -4,7 +4,6 @@ import type { BugReportStatPeriodDaysType } from "@workspace/validation/modules/
 import { orpcQuery } from "@/client/shared/orpc/query-utils";
 
 type UseFindBugReportChartsInputType = {
-  organizationId: string;
   projectId?: string;
   periodDays: BugReportStatPeriodDaysType;
 };

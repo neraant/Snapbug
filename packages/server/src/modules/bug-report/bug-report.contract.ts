@@ -5,9 +5,10 @@ import {
   createBugReportOutputDtoSchema,
 } from "@workspace/validation/modules/bug-report/dto/create-bug-report.schema";
 import {
-  findBugReportsInputDtoSchema,
-  findBugReportsOutputDtoSchema,
-} from "@workspace/validation/modules/bug-report/dto/find-bug-reports.schema";
+  findBreakdownsInputDtoSchema,
+  findBreakdownsOutputDtoSchema,
+} from "@workspace/validation/modules/bug-report/dto/find-breakdowns.schema";
+import { findBugReportsOutputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-bug-reports.schema";
 import {
   findChartsInputDtoSchema,
   findChartsOutputDtoSchema,
@@ -25,16 +26,13 @@ export const bugReportContract = {
     .input(createBugReportInputDtoSchema)
     .output(createBugReportOutputDtoSchema)
     .route({ method: "POST", path: "/bug-reports", tags: ["bug-report"], summary: "Create bug report" }),
-  findMany: bugReport
-    .input(findBugReportsInputDtoSchema)
-    .output(findBugReportsOutputDtoSchema)
-    .route({
-      method: "GET",
-      path: "/bug-reports",
-      tags: ["bug-report"],
-      summary: "List bug reports",
-      spec: sessionAuthSpec,
-    }),
+  findMany: bugReport.output(findBugReportsOutputDtoSchema).route({
+    method: "GET",
+    path: "/bug-reports",
+    tags: ["bug-report"],
+    summary: "List bug reports",
+    spec: sessionAuthSpec,
+  }),
   findStats: bugReport
     .input(findStatsInputDtoSchema)
     .output(findStatsOutputDtoSchema)
@@ -53,6 +51,16 @@ export const bugReportContract = {
       path: "/bug-reports/charts",
       tags: ["bug-report"],
       summary: "Bug report overview charts",
+      spec: sessionAuthSpec,
+    }),
+  findBreakdowns: bugReport
+    .input(findBreakdownsInputDtoSchema)
+    .output(findBreakdownsOutputDtoSchema)
+    .route({
+      method: "GET",
+      path: "/bug-reports/breakdowns",
+      tags: ["bug-report"],
+      summary: "Bug report overview breakdowns",
       spec: sessionAuthSpec,
     }),
 };

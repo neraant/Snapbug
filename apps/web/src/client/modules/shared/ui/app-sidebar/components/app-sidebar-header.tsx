@@ -25,7 +25,7 @@ export function AppSidebarHeader({ pageTitle }: AppSidebarHeaderProps) {
     >
       <Row align="center" gap="sm" wrap={false} className="min-w-0 flex-1">
         <SidebarTrigger className="md:hidden" />
-        <Typography as="h1" variant="label" truncate className="min-w-0 font-heading font-semibold">
+        <Typography as="h1" variant="label" weight="semibold" font="heading" truncate className="min-w-0">
           {pageTitle}
         </Typography>
       </Row>

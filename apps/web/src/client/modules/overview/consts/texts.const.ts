@@ -56,4 +56,36 @@ export const texts = {
       },
     },
   },
+  breakdown: {
+    emptyList: "No reports in this period",
+    byStatus: {
+      title: "By status",
+      description: "New reports in the selected period, grouped by status.",
+      statusLabels: {
+        new: "New",
+        in_progress: "In progress",
+        resolved: "Resolved",
+        closed: "Closed",
+      },
+    },
+    topPages: {
+      title: "Top pages",
+      description: "Pages with the most new reports in the selected period.",
+      formatBugCount: (count: number) => (count === 1 ? "1 bug" : `${count} bugs`),
+    },
+    environment: {
+      title: "Environment",
+      description: "Where new reports came from in the selected period.",
+      segmentAriaLabel: "Environment dimension",
+      segmentLabels: {
+        browser: "Browser",
+        os: "OS",
+        device: "Device",
+      },
+      formatShare: (count: number, total: number) => {
+        const percent = total > 0 ? Math.round((count / total) * 100) : 0;
+        return `${count} (${percent}%)`;
+      },
+    },
+  },
 } as const;

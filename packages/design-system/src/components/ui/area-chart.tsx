@@ -4,6 +4,7 @@ import {
   chartTooltipContentStyle,
   chartTooltipItemStyle,
   chartTooltipLabelStyle,
+  chartTooltipWrapperStyle,
 } from "@workspace/design-system/lib/chart-tooltip-style.const";
 import { useId } from "react";
 import {
@@ -54,6 +55,7 @@ export function AreaChart({ points, series }: AreaChartProps) {
           contentStyle={chartTooltipContentStyle}
           itemStyle={chartTooltipItemStyle}
           labelStyle={chartTooltipLabelStyle}
+          wrapperStyle={chartTooltipWrapperStyle}
         />
         {series.length > 0 ? <Legend verticalAlign="bottom" height={36} /> : null}
         {series.map((item) => (
@@ -66,7 +68,6 @@ export function AreaChart({ points, series }: AreaChartProps) {
             fill={`url(#${gradientPrefix}-${item.key})`}
             strokeWidth={2}
             dot={false}
-            isAnimationActive={false}
           />
         ))}
       </RechartsAreaChart>
