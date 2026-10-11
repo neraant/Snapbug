@@ -98,7 +98,7 @@ JSON_SCHEMA_REGISTRY.add(findBugReportsInputDtoSchema, {
 JSON_SCHEMA_REGISTRY.add(findStatsInputDtoSchema, {
   title: "Bug report stats",
   description: "Overview stat cards for an organization the caller belongs to",
-  examples: [{ organizationId: "3a8c69a1-1ab1-45a8-8497-eae1e506d9d1" }],
+  examples: [{ organizationId: "3a8c69a1-1ab1-45a8-8497-eae1e506d9d1", periodDays: 30 }],
 });
 
 JSON_SCHEMA_REGISTRY.add(verifyCredentialsInputDtoSchema, {

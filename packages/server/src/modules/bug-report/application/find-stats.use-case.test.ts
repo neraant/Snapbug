@@ -13,7 +13,7 @@ const userId = "0a8c69a1-1ab1-45a8-8497-eae1e506d9d4";
 const organizationId = "3a8c69a1-1ab1-45a8-8497-eae1e506d9d1";
 const projectId = "4a8c69a1-1ab1-45a8-8497-eae1e506d9d1";
 
-const input = { organizationId };
+const input = { organizationId, periodDays: 30 as const };
 
 const membership = {
   id: "5a8c69a1-1ab1-45a8-8497-eae1e506d9d1",

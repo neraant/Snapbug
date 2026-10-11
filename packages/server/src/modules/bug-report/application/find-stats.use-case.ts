@@ -29,7 +29,7 @@ export class FindStatsUseCase {
     const projectIds = await this.resolveProjectIds(input);
     if (projectIds.length === 0) return { items: this.bugReportStatService.buildZeroItems() };
 
-    const windows = this.bugReportStatService.getComparisonWindows();
+    const windows = this.bugReportStatService.getComparisonWindows(input.periodDays);
 
     const replayInstants = [...windows.sparklineDayStarts, windows.currentPeriodStart];
 

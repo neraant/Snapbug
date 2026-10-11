@@ -2,12 +2,12 @@ import { UTCDate } from "@date-fns/utc";
 import type { DailyMetricRow } from "@workspace/server/modules/bug-report/entity/bug-report.types";
 import type { OpenMetricsAtInstant } from "@workspace/server/shared/audit/audit-log.types";
 import { BugReportStatId } from "@workspace/validation/modules/bug-report/consts/bug-report-stat-id.const";
+import type { BugReportStatPeriodDaysType } from "@workspace/validation/modules/bug-report/consts/bug-report-stat-period-days.const";
 import type { FindStatsOutputDtoType } from "@workspace/validation/modules/bug-report/dto/find-stats.schema";
 import { addDays, formatISO, startOfDay, subDays } from "date-fns";
 
 const MS_PER_HOUR = 60 * 60 * 1000;
 const SPARKLINE_DAY_COUNT = 7;
-const COMPARISON_PERIOD_DAYS = 30;
 
 export type StatComparisonWindows = {
   now: Date;
@@ -19,10 +19,10 @@ export type StatComparisonWindows = {
 };
 
 export class BugReportStatService {
-  getComparisonWindows(reference = new UTCDate()): StatComparisonWindows {
+  getComparisonWindows(periodDays: BugReportStatPeriodDaysType, reference = new UTCDate()): StatComparisonWindows {
     const now = reference;
-    const currentPeriodStart = subDays(now, COMPARISON_PERIOD_DAYS);
-    const previousPeriodStart = subDays(now, COMPARISON_PERIOD_DAYS * 2);
+    const currentPeriodStart = subDays(now, periodDays);
+    const previousPeriodStart = subDays(now, periodDays * 2);
     const sparklineDayStarts = this.getLastUtcDayStarts(now, SPARKLINE_DAY_COUNT);
     const sparklineFrom = sparklineDayStarts[0]!;
     const sparklineTo = addDays(sparklineDayStarts[sparklineDayStarts.length - 1]!, 1);

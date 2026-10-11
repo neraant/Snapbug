@@ -1,6 +1,18 @@
 export const texts = {
+  filter: {
+    project: {
+      ariaLabel: "Project",
+      allProjects: "All projects",
+    },
+    period: {
+      ariaLabel: "Time range",
+      last7Days: "Last 7 days",
+      last30Days: "Last 30 days",
+      last90Days: "Last 90 days",
+    },
+  },
   stat: {
-    comparisonPeriod: "vs previous 30 days",
+    comparisonPeriod: (periodDays: number) => `vs previous ${periodDays} days`,
     card: {
       newReport: {
         title: "New reports",

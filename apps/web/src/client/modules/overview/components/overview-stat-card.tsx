@@ -14,9 +14,10 @@ const iconByStatId: Record<OverviewStatItem["id"], LucideIcon> = {
 
 type OverviewStatCardProps = {
   item: OverviewStatItem;
+  periodDays: number;
 };
 
-export function OverviewStatCard({ item }: OverviewStatCardProps) {
+export function OverviewStatCard({ item, periodDays }: OverviewStatCardProps) {
   const copy = texts.stat.card[item.id];
   const Icon = iconByStatId[item.id];
 
@@ -30,7 +31,7 @@ export function OverviewStatCard({ item }: OverviewStatCardProps) {
         <StatCard.Delta
           changePercent={item.changePercent}
           polarity={item.polarity}
-          comparisonLabel={texts.stat.comparisonPeriod}
+          comparisonLabel={texts.stat.comparisonPeriod(periodDays)}
           trailing={<StatCard.Sparkline data={item.sparkline} stroke={item.sparklineStroke} />}
         />
       </StatCard.Footer>

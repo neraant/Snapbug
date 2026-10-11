@@ -3,14 +3,19 @@ import { Skeleton } from "@workspace/design-system/components/ui/skeleton";
 
 import { OverviewStatCard } from "@/client/modules/overview/components/overview-stat-card";
 import { useOverviewStatSection } from "@/client/modules/overview/hooks/use-overview-stat-section";
+import type { OverviewStatFilters } from "@/client/modules/overview/types/overview-stat-filter.type";
 
-export function OverviewStatSection() {
-  const items = useOverviewStatSection();
+type OverviewStatSectionProps = {
+  filters: OverviewStatFilters;
+};
+
+export function OverviewStatSection({ filters }: OverviewStatSectionProps) {
+  const items = useOverviewStatSection(filters);
 
   return (
     <Grid columns="responsive-4" gap="lg">
       {items.map((item) => (
-        <OverviewStatCard key={item.id} item={item} />
+        <OverviewStatCard key={item.id} item={item} periodDays={filters.periodDays} />
       ))}
     </Grid>
   );
