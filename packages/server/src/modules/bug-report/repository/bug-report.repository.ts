@@ -8,13 +8,22 @@ import { InternalServerError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import { BugReportSeverity } from "@workspace/validation/modules/bug-report/consts/bug-report-severity.const";
 import { BugReportStatus } from "@workspace/validation/modules/bug-report/consts/bug-report-status.const";
-import { and, count, gte, inArray, isNotNull, lt, sql } from "drizzle-orm";
+import { and, count, eq, gte, inArray, isNotNull, lt, sql } from "drizzle-orm";
 
 const openStatuses = [BugReportStatus.NEW, BugReportStatus.IN_PROGRESS] as const;
 const criticalHighSeverities = [BugReportSeverity.HIGH, BugReportSeverity.CRITICAL] as const;
 
 export class BugReportRepository {
   constructor(private readonly db: DbClient = defaultDb) {}
+
+  withTx(tx: DbClient): BugReportRepository {
+    return new BugReportRepository(tx);
+  }
+
+  async findById(id: string): Promise<BugReport | null> {
+    const [row] = await this.db.select().from(bugReportTable).where(eq(bugReportTable.id, id));
+    return row ? BugReportMapper.fromPersistence(row) : null;
+  }
 
   async findManyByProjectIds(projectIds: string[]): Promise<BugReport[]> {
     const bugReports = await this.db.query.bugReportTable.findMany({

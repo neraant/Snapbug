@@ -1,5 +1,6 @@
 import { UTCDate } from "@date-fns/utc";
 import type { DailyMetricRow } from "@workspace/server/modules/bug-report/entity/bug-report.types";
+import type { OpenMetricsAtInstant } from "@workspace/server/shared/audit/audit-log.types";
 import { BugReportStatId } from "@workspace/validation/modules/bug-report/consts/bug-report-stat-id.const";
 import type { FindStatsOutputDtoType } from "@workspace/validation/modules/bug-report/dto/find-stats.schema";
 import { addDays, formatISO, startOfDay, subDays } from "date-fns";
@@ -86,6 +87,9 @@ export class BugReportStatService {
     newReportsByDay: DailyMetricRow[];
     openCount: number;
     criticalHighOpenCount: number;
+    openAtPeriodStart: number;
+    criticalHighAtPeriodStart: number;
+    openMetricsByDay: OpenMetricsAtInstant[];
     medianCurrentMs: number;
     medianPreviousMs: number;
     medianByDay: DailyMetricRow[];
@@ -97,6 +101,9 @@ export class BugReportStatService {
       newReportsByDay,
       openCount,
       criticalHighOpenCount,
+      openAtPeriodStart,
+      criticalHighAtPeriodStart,
+      openMetricsByDay,
       medianCurrentMs,
       medianPreviousMs,
       medianByDay,
@@ -107,9 +114,8 @@ export class BugReportStatService {
       value: this.resolveDurationToSparklineHours(point.value),
     }));
 
-    // TODO(audit-log): compute changePercent and historical sparkline for open-issue cards from status-change events.
-    const openSparkline = this.flatSparkline(openCount);
-    const criticalHighSparkline = this.flatSparkline(criticalHighOpenCount);
+    const openSparkline = this.buildOpenSparkline(openMetricsByDay, openCount);
+    const criticalHighSparkline = this.buildCriticalHighSparkline(openMetricsByDay, criticalHighOpenCount);
 
     return [
       {
@@ -121,13 +127,13 @@ export class BugReportStatService {
       {
         id: BugReportStatId.OPEN_ISSUE,
         value: String(openCount),
-        changePercent: 0,
+        changePercent: this.calcChangePercent(openCount, openAtPeriodStart),
         sparkline: openSparkline,
       },
       {
         id: BugReportStatId.CRITICAL_HIGH_OPEN,
         value: String(criticalHighOpenCount),
-        changePercent: 0,
+        changePercent: this.calcChangePercent(criticalHighOpenCount, criticalHighAtPeriodStart),
         sparkline: criticalHighSparkline,
       },
       {
@@ -137,6 +143,22 @@ export class BugReportStatService {
         sparkline: medianSparkline,
       },
     ];
+  }
+
+  private buildOpenSparkline(metricsByDay: OpenMetricsAtInstant[], liveOpenCount: number) {
+    const sparkline = metricsByDay.map((metrics) => ({ value: metrics.open }));
+    if (sparkline.length > 0) {
+      sparkline[sparkline.length - 1] = { value: liveOpenCount };
+    }
+    return sparkline;
+  }
+
+  private buildCriticalHighSparkline(metricsByDay: OpenMetricsAtInstant[], liveCriticalHighCount: number) {
+    const sparkline = metricsByDay.map((metrics) => ({ value: metrics.criticalHigh }));
+    if (sparkline.length > 0) {
+      sparkline[sparkline.length - 1] = { value: liveCriticalHighCount };
+    }
+    return sparkline;
   }
 
   private getLastUtcDayStarts(reference: Date, dayCount: number): Date[] {

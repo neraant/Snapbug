@@ -9,7 +9,9 @@ const os = implement(bugReportContract).$context<OrpcContext>().use(mapAppErrorM
 const authed = os.use(authedMiddleware);
 
 export const bugReportRouter = os.router({
-  create: os.create.handler(async ({ input }) => await container.bugReport.createBugReport.execute(input)),
+  create: os.create.handler(
+    async ({ input, context }) => await container.bugReport.createBugReport.execute(input, context.actor),
+  ),
   findMany: authed.findMany.handler(
     async ({ input, context }) => await container.bugReport.findBugReports.execute(input, context.user.id),
   ),

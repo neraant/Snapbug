@@ -11,6 +11,26 @@ export abstract class BugReportMapper {
     return bugReport.toObject();
   }
 
+  static toAudit(bugReport: BugReport) {
+    const row = bugReport.toObject();
+    return {
+      status: row.status,
+      severity: row.severity,
+      assignedTo: row.assignedTo,
+      title: row.title,
+      reporterEmail: row.reporterEmail,
+      url: row.url,
+      userAgent: row.userAgent,
+      browser: row.browser,
+      os: row.os,
+      device: row.device,
+      viewportWidth: row.viewportWidth,
+      viewportHeight: row.viewportHeight,
+      hasReplay: row.hasReplay,
+      resolvedAt: row.resolvedAt,
+    };
+  }
+
   static toDto(bugReport: BugReport): BugReportModelType {
     const row = bugReport.toObject();
     return {

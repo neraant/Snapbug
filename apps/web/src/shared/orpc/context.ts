@@ -15,7 +15,9 @@ export async function createContext(): Promise<OrpcContext> {
   try {
     const session = await auth();
     const userId = session?.user?.id;
-    if (!userId) return { user: null, ip };
+    if (!userId) {
+      return { user: null, ip, actor: { type: "api-key", id: null } };
+    }
 
     return {
       ip,
@@ -24,8 +26,9 @@ export async function createContext(): Promise<OrpcContext> {
         email: session.user?.email ?? "",
         name: session.user?.name ?? null,
       },
+      actor: { type: "user", id: userId },
     };
   } catch {
-    return { user: null, ip };
+    return { user: null, ip, actor: { type: "api-key", id: null } };
   }
 }

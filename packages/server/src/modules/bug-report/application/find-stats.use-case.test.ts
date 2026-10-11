@@ -3,6 +3,7 @@ import type { MembershipPort } from "@workspace/server/modules/bug-report/port/m
 import type { ProjectPort } from "@workspace/server/modules/bug-report/port/project.port";
 import type { BugReportRepository } from "@workspace/server/modules/bug-report/repository/bug-report.repository";
 import { BugReportStatService } from "@workspace/server/modules/bug-report/service/bug-report-stat.service";
+import type { AuditLogRepository } from "@workspace/server/shared/audit/audit-log.repository";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import { BugReportStatId } from "@workspace/validation/modules/bug-report/consts/bug-report-stat-id.const";
 import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
@@ -41,6 +42,14 @@ function createRepositoryMock(overrides: Partial<BugReportRepository> = {}) {
   };
 }
 
+function createAuditLogRepositoryMock(overrides: Partial<AuditLogRepository> = {}) {
+  const zeroMetrics = Array.from({ length: 8 }, () => ({ open: 0, criticalHigh: 0 }));
+  return {
+    replayOpenBugReportMetrics: vi.fn().mockResolvedValue(zeroMetrics),
+    ...overrides,
+  };
+}
+
 describe("FindStatsUseCase", () => {
   it("throws when the user is not a member", async () => {
     const membershipPort = { findByUserAndOrganization: vi.fn().mockResolvedValue(null) };
@@ -51,6 +60,7 @@ describe("FindStatsUseCase", () => {
       projectPort as unknown as ProjectPort,
       bugReportRepository as unknown as BugReportRepository,
       new BugReportStatService(),
+      createAuditLogRepositoryMock() as unknown as AuditLogRepository,
     );
 
     await expect(useCase.execute(input, userId)).rejects.toMatchObject({
@@ -70,6 +80,7 @@ describe("FindStatsUseCase", () => {
       projectPort as unknown as ProjectPort,
       bugReportRepository as unknown as BugReportRepository,
       new BugReportStatService(),
+      createAuditLogRepositoryMock() as unknown as AuditLogRepository,
     );
 
     const result = await useCase.execute(input, userId);
@@ -98,6 +109,7 @@ describe("FindStatsUseCase", () => {
       projectPort as unknown as ProjectPort,
       bugReportRepository as unknown as BugReportRepository,
       new BugReportStatService(),
+      createAuditLogRepositoryMock() as unknown as AuditLogRepository,
     );
 
     const result = await useCase.execute(input, userId);
@@ -112,7 +124,7 @@ describe("FindStatsUseCase", () => {
     expect(newReport?.sparkline).toHaveLength(7);
   });
 
-  it("returns neutral deltas for open-issue cards until audit log exists", async () => {
+  it("derives open-issue deltas from audit replay when history is empty", async () => {
     const membershipPort = { findByUserAndOrganization: vi.fn().mockResolvedValue(membership) };
     const projectPort = { findManyByOrganizationId: vi.fn().mockResolvedValue([project]), findById: vi.fn() };
     const bugReportRepository = createRepositoryMock({
@@ -124,6 +136,7 @@ describe("FindStatsUseCase", () => {
       projectPort as unknown as ProjectPort,
       bugReportRepository as unknown as BugReportRepository,
       new BugReportStatService(),
+      createAuditLogRepositoryMock() as unknown as AuditLogRepository,
     );
 
     const result = await useCase.execute(input, userId);
@@ -131,9 +144,9 @@ describe("FindStatsUseCase", () => {
     const openIssue = result.items.find((item) => item.id === BugReportStatId.OPEN_ISSUE);
     const criticalHigh = result.items.find((item) => item.id === BugReportStatId.CRITICAL_HIGH_OPEN);
 
-    expect(openIssue?.changePercent).toBe(0);
-    expect(openIssue?.sparkline).toEqual(Array.from({ length: 7 }, () => ({ value: 9 })));
-    expect(criticalHigh?.changePercent).toBe(0);
-    expect(criticalHigh?.sparkline).toEqual(Array.from({ length: 7 }, () => ({ value: 3 })));
+    expect(openIssue?.changePercent).toBe(100);
+    expect(openIssue?.sparkline).toEqual([...Array.from({ length: 6 }, () => ({ value: 0 })), { value: 9 }]);
+    expect(criticalHigh?.changePercent).toBe(100);
+    expect(criticalHigh?.sparkline).toEqual([...Array.from({ length: 6 }, () => ({ value: 0 })), { value: 3 }]);
   });
 });

@@ -12,6 +12,7 @@ import { CreateBugReportUseCase } from "@workspace/server/modules/bug-report/app
 import { FindBugReportsUseCase } from "@workspace/server/modules/bug-report/application/find-bug-reports.use-case";
 import { FindStatsUseCase } from "@workspace/server/modules/bug-report/application/find-stats.use-case";
 import { BugReportRepository } from "@workspace/server/modules/bug-report/repository/bug-report.repository";
+import { BugReportService } from "@workspace/server/modules/bug-report/service/bug-report.service";
 import { BugReportStatService } from "@workspace/server/modules/bug-report/service/bug-report-stat.service";
 import { UserAdapter } from "@workspace/server/modules/identity/adapter/user.adapter";
 import { CreateUserUseCase } from "@workspace/server/modules/identity/application/create-user.use-case";
@@ -38,6 +39,8 @@ import { CreateProjectUseCase } from "@workspace/server/modules/project/applicat
 import { FindProjectsUseCase } from "@workspace/server/modules/project/application/find-projects.use-case";
 import { UpdateProjectUseCase } from "@workspace/server/modules/project/application/update-project.use-case";
 import { ProjectRepository } from "@workspace/server/modules/project/repository/project.repository";
+import { AuditLogRepository } from "@workspace/server/shared/audit/audit-log.repository";
+import { AuditLogService } from "@workspace/server/shared/audit/audit-log.service";
 import { withTransactionFactory } from "@workspace/server/shared/database/transaction.util";
 import { resendClient } from "@workspace/server/shared/email/email.client";
 import { EmailService } from "@workspace/server/shared/email/service/email.service";
@@ -56,6 +59,9 @@ const apiKeyRepository = new ApiKeyRepository();
 const resetPasswordRepository = new ResetPasswordRepository();
 const invitationRepository = new InvitationRepository();
 const bugReportRepository = new BugReportRepository();
+const auditLogRepository = new AuditLogRepository();
+const auditLogService = new AuditLogService(auditLogRepository);
+const bugReportService = new BugReportService(bugReportRepository, auditLogService);
 
 const membershipAdapter = new MembershipAdapter(membershipRepository);
 const userAdapter = new UserAdapter(userRepository);
@@ -119,9 +125,15 @@ const acceptInvitation = new AcceptInvitationUseCase(
 );
 
 const findProjectByKey = new FindProjectByKeyUseCase(apiKeyRepository, projectAdapter);
-const createBugReport = new CreateBugReportUseCase(apiKeyAdapter, bugReportRepository);
+const createBugReport = new CreateBugReportUseCase(apiKeyAdapter, bugReportService, withTransaction);
 const findBugReports = new FindBugReportsUseCase(membershipAdapter, projectAdapter, bugReportRepository);
-const findStats = new FindStatsUseCase(membershipAdapter, projectAdapter, bugReportRepository, bugReportStatService);
+const findStats = new FindStatsUseCase(
+  membershipAdapter,
+  projectAdapter,
+  bugReportRepository,
+  bugReportStatService,
+  auditLogRepository,
+);
 
 export const container = {
   membership: { createMembership, findMembership, findMembershipByUser },

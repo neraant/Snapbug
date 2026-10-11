@@ -383,7 +383,7 @@ function SidebarContent({ className, ...props }: React.ComponentProps<"div">) {
       data-sidebar="content"
       padding="md"
       className={cn(
-        "no-scrollbar min-h-0 flex-1 gap-0 overflow-auto transition-[padding] duration-200 ease-linear group-data-[collapsible=icon]:overflow-hidden group-data-[collapsible=icon]:p-2",
+        "no-scrollbar min-h-0 flex-1 gap-0 overflow-auto py-6 transition-[padding] duration-200 ease-linear group-data-[collapsible=icon]:overflow-hidden group-data-[collapsible=icon]:p-2",
         className,
       )}
       {...props}

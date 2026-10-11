@@ -2,6 +2,7 @@ import type { MembershipPort } from "@workspace/server/modules/bug-report/port/m
 import type { ProjectPort } from "@workspace/server/modules/bug-report/port/project.port";
 import type { BugReportRepository } from "@workspace/server/modules/bug-report/repository/bug-report.repository";
 import type { BugReportStatService } from "@workspace/server/modules/bug-report/service/bug-report-stat.service";
+import type { AuditLogRepository } from "@workspace/server/shared/audit/audit-log.repository";
 import { NotFoundError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import type {
@@ -15,6 +16,7 @@ export class FindStatsUseCase {
     private readonly projectPort: ProjectPort,
     private readonly bugReportRepository: BugReportRepository,
     private readonly bugReportStatService: BugReportStatService,
+    private readonly auditLogRepository: AuditLogRepository,
   ) {}
 
   async execute(input: FindStatsInputDtoType, userId: string): Promise<FindStatsOutputDtoType> {
@@ -29,6 +31,8 @@ export class FindStatsUseCase {
 
     const windows = this.bugReportStatService.getComparisonWindows();
 
+    const replayInstants = [...windows.sparklineDayStarts, windows.currentPeriodStart];
+
     const [
       newReportsCurrent,
       newReportsPrevious,
@@ -38,6 +42,7 @@ export class FindStatsUseCase {
       medianCurrentMs,
       medianPreviousMs,
       medianByDay,
+      replayMetrics,
     ] = await Promise.all([
       this.bugReportRepository.countCreatedBetween(projectIds, windows.currentPeriodStart, windows.now),
       this.bugReportRepository.countCreatedBetween(projectIds, windows.previousPeriodStart, windows.currentPeriodStart),
@@ -51,7 +56,12 @@ export class FindStatsUseCase {
         windows.currentPeriodStart,
       ),
       this.bugReportRepository.medianResolveDurationMsByDay(projectIds, windows.sparklineFrom, windows.sparklineTo),
+      this.auditLogRepository.replayOpenBugReportMetrics(projectIds, replayInstants),
     ]);
+
+    const openMetricsByDay = replayMetrics.slice(0, windows.sparklineDayStarts.length);
+    const openAtPeriodStart = replayMetrics[replayMetrics.length - 1]?.open ?? 0;
+    const criticalHighAtPeriodStart = replayMetrics[replayMetrics.length - 1]?.criticalHigh ?? 0;
 
     return {
       items: this.bugReportStatService.buildItemsFromAggregates({
@@ -61,6 +71,9 @@ export class FindStatsUseCase {
         newReportsByDay,
         openCount,
         criticalHighOpenCount,
+        openAtPeriodStart,
+        criticalHighAtPeriodStart,
+        openMetricsByDay,
         medianCurrentMs,
         medianPreviousMs,
         medianByDay,
