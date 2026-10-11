@@ -2,6 +2,7 @@ import { Column } from "@workspace/design-system/components/layout/column";
 import { Suspense } from "react";
 
 import { OverviewBreakdownSection } from "@/client/modules/overview/components/overview-breakdown-section";
+import { OverviewBusiestHoursCard } from "@/client/modules/overview/components/overview-busiest-hours-card";
 import { OverviewChartSection } from "@/client/modules/overview/components/overview-chart-section";
 import { OverviewStatSection } from "@/client/modules/overview/components/overview-stat-section";
 import type { OverviewStatFilters } from "@/client/modules/overview/types/overview-stat-filter.type";
@@ -21,6 +22,9 @@ export function Overview({ filters }: OverviewProps) {
       </Suspense>
       <Suspense fallback={<OverviewBreakdownSection.Fallback />}>
         <OverviewBreakdownSection filters={filters} />
+      </Suspense>
+      <Suspense fallback={<OverviewBusiestHoursCard.Fallback />}>
+        <OverviewBusiestHoursCard filters={filters} />
       </Suspense>
     </Column>
   );

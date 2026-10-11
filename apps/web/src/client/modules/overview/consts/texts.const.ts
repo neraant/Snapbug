@@ -55,6 +55,26 @@ export const texts = {
         medium: "Medium",
       },
     },
+    busiestHours: {
+      title: "Busiest Hours Heatmap",
+      description: "Distribution of report arrival times by day of week and hour of day (UTC)",
+      weekdayLabels: {
+        1: "Mon",
+        2: "Tue",
+        3: "Wed",
+        4: "Thu",
+        5: "Fri",
+        6: "Sat",
+        7: "Sun",
+      },
+      formatHourLabel: (hour: number) => `${hour}:00`,
+      formatTooltip: (weekdayLabel: string, hour: number, count: number) =>
+        `${weekdayLabel}, ${hour}:00 UTC — ${count} ${count === 1 ? "report" : "reports"}`,
+      formatAccessibleName: (weekdayLabel: string, hour: number, count: number) =>
+        `${weekdayLabel}, ${hour}:00 UTC, ${count} ${count === 1 ? "report" : "reports"}`,
+      legendFewer: "Fewer reports",
+      legendMore: "More reports",
+    },
   },
   breakdown: {
     emptyList: "No reports in this period",

@@ -21,8 +21,9 @@ const segmentedControlItemVariants = cva("rounded-md font-medium shadow-none", {
       sm: "h-6 px-2.5 text-xs",
     },
     selected: {
-      true: "bg-primary text-primary-foreground shadow-sm hover:bg-primary hover:text-primary-foreground",
-      false: "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+      true: "bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:text-primary-foreground dark:hover:bg-primary/90 dark:hover:text-primary-foreground",
+      false:
+        "text-muted-foreground hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent dark:hover:text-accent-foreground",
     },
   },
   defaultVariants: {
@@ -61,7 +62,7 @@ function SegmentedControl({
           <Button
             key={item.value}
             type="button"
-            variant="ghost"
+            variant={selected ? "default" : "ghost"}
             size={size === "sm" ? "xs" : "sm"}
             disabled={item.disabled}
             aria-pressed={selected}

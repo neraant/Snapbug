@@ -19,9 +19,16 @@ const bugReportChartSeverityCountSchema = z.object({
   count: z.number(),
 });
 
+const bugReportChartHourCellSchema = z.object({
+  weekday: z.number().int().min(1).max(7),
+  hour: z.number().int().min(0).max(23),
+  count: z.number(),
+});
+
 export const findChartsOutputDtoSchema = z.object({
   points: z.array(bugReportChartPointSchema),
   severity: z.array(bugReportChartSeverityCountSchema),
+  hours: z.array(bugReportChartHourCellSchema).length(168),
 });
 
 export type FindChartsOutputDtoType = z.infer<typeof findChartsOutputDtoSchema>;

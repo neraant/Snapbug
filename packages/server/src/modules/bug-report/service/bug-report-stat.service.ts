@@ -4,6 +4,7 @@ import type {
   NullableStringCountRow,
   SeverityCountRow,
   StatusCountRow,
+  WeekdayHourCountRow,
 } from "@workspace/server/modules/bug-report/entity/bug-report.types";
 import type { OpenMetricsAtInstant } from "@workspace/server/shared/audit/audit-log.types";
 import { bugReportSeverities } from "@workspace/validation/modules/bug-report/consts/bug-report-severity.const";
@@ -110,6 +111,7 @@ export class BugReportStatService {
         resolved: 0,
       })),
       severity: bugReportSeverities.map((severity) => ({ severity, count: 0 })),
+      hours: this.buildZeroHourCells(),
     };
   }
 
@@ -118,8 +120,9 @@ export class BugReportStatService {
     createdByDay: DailyMetricRow[];
     resolvedByDay: DailyMetricRow[];
     severityCounts: SeverityCountRow[];
+    createdByWeekdayHour: WeekdayHourCountRow[];
   }): FindChartsOutputDtoType {
-    const { dayStarts, createdByDay, resolvedByDay, severityCounts } = input;
+    const { dayStarts, createdByDay, resolvedByDay, severityCounts, createdByWeekdayHour } = input;
 
     const createdByDayKey = new Map(createdByDay.map((row) => [this.utcDayKey(row.day), row.value]));
     const resolvedByDayKey = new Map(resolvedByDay.map((row) => [this.utcDayKey(row.day), row.value]));
@@ -138,7 +141,35 @@ export class BugReportStatService {
         severity,
         count: severityByKey.get(severity) ?? 0,
       })),
+      hours: this.buildHourCellsFromAggregates(createdByWeekdayHour),
     };
+  }
+
+  buildZeroHourCells(): FindChartsOutputDtoType["hours"] {
+    const cells: FindChartsOutputDtoType["hours"] = [];
+    for (let weekday = 1; weekday <= 7; weekday += 1) {
+      for (let hour = 0; hour < 24; hour += 1) {
+        cells.push({ weekday, hour, count: 0 });
+      }
+    }
+    return cells;
+  }
+
+  buildHourCellsFromAggregates(rows: WeekdayHourCountRow[]): FindChartsOutputDtoType["hours"] {
+    const countByKey = new Map(rows.map((row) => [`${row.weekday}:${row.hour}`, row.count]));
+    const cells: FindChartsOutputDtoType["hours"] = [];
+
+    for (let weekday = 1; weekday <= 7; weekday += 1) {
+      for (let hour = 0; hour < 24; hour += 1) {
+        cells.push({
+          weekday,
+          hour,
+          count: countByKey.get(`${weekday}:${hour}`) ?? 0,
+        });
+      }
+    }
+
+    return cells;
   }
 
   getComparisonWindows(periodDays: BugReportStatPeriodDaysType, reference = new UTCDate()): StatComparisonWindows {

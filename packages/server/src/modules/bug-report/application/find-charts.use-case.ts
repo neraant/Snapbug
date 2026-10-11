@@ -28,10 +28,11 @@ export class FindChartsUseCase {
 
     const windows = this.bugReportStatService.getChartPeriodWindows(input.periodDays);
 
-    const [createdByDay, resolvedByDay, severityCounts] = await Promise.all([
+    const [createdByDay, resolvedByDay, severityCounts, createdByWeekdayHour] = await Promise.all([
       this.bugReportRepository.countCreatedByDay(projectIds, windows.queryFrom, windows.queryTo),
       this.bugReportRepository.countResolvedByDay(projectIds, windows.queryFrom, windows.queryTo),
       this.bugReportRepository.countCreatedBySeverity(projectIds, windows.queryFrom, windows.queryTo),
+      this.bugReportRepository.countCreatedByWeekdayHour(projectIds, windows.queryFrom, windows.queryTo),
     ]);
 
     return this.bugReportStatService.buildChartsFromAggregates({
@@ -39,6 +40,7 @@ export class FindChartsUseCase {
       createdByDay,
       resolvedByDay,
       severityCounts,
+      createdByWeekdayHour,
     });
   }
 

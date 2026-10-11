@@ -8,6 +8,7 @@ import type {
   NullableStringCountRow,
   SeverityCountRow,
   StatusCountRow,
+  WeekdayHourCountRow,
 } from "@workspace/server/modules/bug-report/entity/bug-report.types";
 import { InternalServerError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
@@ -79,6 +80,33 @@ export class BugReportRepository {
       .orderBy(dayBucket);
 
     return rows.map((row) => ({ day: row.day, value: Number(row.value) }));
+  }
+
+  async countCreatedByWeekdayHour(projectIds: string[], from: Date, to: Date): Promise<WeekdayHourCountRow[]> {
+    const weekdayBucket = sql<number>`extract(isodow from ${bugReportTable.createdAt} AT TIME ZONE 'UTC')`;
+    const hourBucket = sql<number>`extract(hour from ${bugReportTable.createdAt} AT TIME ZONE 'UTC')`;
+    const rows = await this.db
+      .select({
+        weekday: weekdayBucket,
+        hour: hourBucket,
+        count: count(),
+      })
+      .from(bugReportTable)
+      .where(
+        and(
+          inArray(bugReportTable.projectId, projectIds),
+          gte(bugReportTable.createdAt, from),
+          lt(bugReportTable.createdAt, to),
+        ),
+      )
+      .groupBy(weekdayBucket, hourBucket)
+      .orderBy(weekdayBucket, hourBucket);
+
+    return rows.map((row) => ({
+      weekday: Number(row.weekday),
+      hour: Number(row.hour),
+      count: Number(row.count),
+    }));
   }
 
   async countOpen(projectIds: string[]): Promise<number> {

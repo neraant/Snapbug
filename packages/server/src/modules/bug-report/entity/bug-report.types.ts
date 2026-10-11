@@ -54,3 +54,9 @@ export type NullableStringCountRow = {
   value: string | null;
   count: number;
 };
+
+export type WeekdayHourCountRow = {
+  weekday: number;
+  hour: number;
+  count: number;
+};

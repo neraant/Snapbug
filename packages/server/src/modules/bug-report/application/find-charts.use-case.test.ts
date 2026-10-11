@@ -38,6 +38,7 @@ function createRepositoryMock(overrides: Partial<BugReportRepository> = {}) {
     countCreatedByDay: vi.fn().mockResolvedValue([]),
     countResolvedByDay: vi.fn().mockResolvedValue([]),
     countCreatedBySeverity: vi.fn().mockResolvedValue([]),
+    countCreatedByWeekdayHour: vi.fn().mockResolvedValue([]),
     ...overrides,
   };
 }
@@ -75,7 +76,10 @@ describe("FindChartsUseCase", () => {
       { severity: BugReportSeverity.HIGH, count: 0 },
       { severity: BugReportSeverity.CRITICAL, count: 0 },
     ]);
+    expect(result.hours).toHaveLength(168);
+    expect(result.hours.every((cell) => cell.count === 0)).toBe(true);
     expect(bugReportRepository.countCreatedByDay).not.toHaveBeenCalled();
+    expect(bugReportRepository.countCreatedByWeekdayHour).not.toHaveBeenCalled();
   });
 
   it("maps repository rows onto UTC days and severities", async () => {
@@ -91,6 +95,7 @@ describe("FindChartsUseCase", () => {
         { severity: BugReportSeverity.HIGH, count: 4 },
         { severity: BugReportSeverity.CRITICAL, count: 1 },
       ]),
+      countCreatedByWeekdayHour: vi.fn().mockResolvedValue([{ weekday: 6, hour: 14, count: 5 }]),
     });
     const useCase = new FindChartsUseCase(
       membershipPort as unknown as MembershipPort,
@@ -108,6 +113,8 @@ describe("FindChartsUseCase", () => {
     expect(oct11).toEqual({ day: "2026-10-11", created: 2, resolved: 1 });
     expect(result.severity.find((row) => row.severity === BugReportSeverity.HIGH)?.count).toBe(4);
     expect(result.severity.find((row) => row.severity === BugReportSeverity.MEDIUM)?.count).toBe(0);
+    expect(result.hours.find((cell) => cell.weekday === 6 && cell.hour === 14)?.count).toBe(5);
+    expect(result.hours.find((cell) => cell.weekday === 6 && cell.hour === 15)?.count).toBe(0);
   });
 
   it("throws when the project does not belong to the organization", async () => {
