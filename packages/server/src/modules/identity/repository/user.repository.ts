@@ -24,6 +24,15 @@ export class UserRepository {
     return row ? UserMapper.fromPersistence(row) : null;
   }
 
+  async findManyByIds(ids: string[]): Promise<User[]> {
+    if (ids.length === 0) return [];
+
+    const users = await this.db.query.userTable.findMany({
+      where: { id: { in: ids } },
+    });
+    return users.map((user) => UserMapper.fromPersistence(user));
+  }
+
   async save(user: User): Promise<void> {
     const values = UserMapper.toPersistence(user);
 

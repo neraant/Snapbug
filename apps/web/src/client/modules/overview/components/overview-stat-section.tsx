@@ -13,7 +13,7 @@ export function OverviewStatSection({ filters }: OverviewStatSectionProps) {
   const items = useOverviewStatSection(filters);
 
   return (
-    <Grid columns="responsive-4" gap="lg">
+    <Grid columns="responsive-4" gap="xl">
       {items.map((item) => (
         <OverviewStatCard key={item.id} item={item} periodDays={filters.periodDays} />
       ))}
@@ -23,7 +23,7 @@ export function OverviewStatSection({ filters }: OverviewStatSectionProps) {
 
 function OverviewStatSectionFallback() {
   return (
-    <Grid columns="responsive-4" gap="lg">
+    <Grid columns="responsive-4" gap="xl">
       {Array.from({ length: 4 }, (_, index) => (
         <Skeleton key={index} className="h-37.25 w-full" />
       ))}

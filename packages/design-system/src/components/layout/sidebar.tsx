@@ -238,7 +238,7 @@ export function SidebarLayout({
         </SidebarFooter>
         <SidebarRail />
       </Sidebar>
-      <SidebarInset className="min-h-svh p-0">{children}</SidebarInset>
+      <SidebarInset className="min-h-svh min-w-0 p-0">{children}</SidebarInset>
     </SidebarProvider>
   );
 }

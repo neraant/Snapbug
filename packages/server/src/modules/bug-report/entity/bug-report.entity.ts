@@ -3,6 +3,7 @@ import type { BugReportPersistedType } from "@workspace/server/modules/bug-repor
 export class BugReport {
   readonly id: BugReportPersistedType["id"];
   readonly projectId: BugReportPersistedType["projectId"];
+  readonly shortId: BugReportPersistedType["shortId"];
   readonly assignedTo: BugReportPersistedType["assignedTo"];
   readonly status: BugReportPersistedType["status"];
   readonly severity: BugReportPersistedType["severity"];
@@ -29,6 +30,7 @@ export class BugReport {
   constructor(bugReport: BugReportPersistedType) {
     this.id = bugReport.id;
     this.projectId = bugReport.projectId;
+    this.shortId = bugReport.shortId;
     this.assignedTo = bugReport.assignedTo;
     this.status = bugReport.status;
     this.severity = bugReport.severity;
@@ -57,6 +59,7 @@ export class BugReport {
     return {
       id: this.id,
       projectId: this.projectId,
+      shortId: this.shortId,
       assignedTo: this.assignedTo,
       status: this.status,
       severity: this.severity,

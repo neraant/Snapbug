@@ -1,9 +1,10 @@
 import type { DbClient } from "@workspace/database";
 import { db as defaultDb } from "@workspace/database";
-import { bugReportTable } from "@workspace/database/schema";
+import { bugReportTable, projectTable } from "@workspace/database/schema";
 import type { BugReport } from "@workspace/server/modules/bug-report/entity/bug-report.entity";
 import { BugReportMapper } from "@workspace/server/modules/bug-report/entity/bug-report.mapper";
 import type {
+  AssigneeOpenCountRow,
   DailyMetricRow,
   NullableStringCountRow,
   SeverityCountRow,
@@ -13,6 +14,7 @@ import type {
 import { InternalServerError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import { BugReportSeverity } from "@workspace/validation/modules/bug-report/consts/bug-report-severity.const";
+import { formatBugReportShortId } from "@workspace/validation/modules/bug-report/consts/bug-report-short-id.const";
 import { BugReportStatus } from "@workspace/validation/modules/bug-report/consts/bug-report-status.const";
 import { and, count, eq, gte, inArray, isNotNull, lt, sql } from "drizzle-orm";
 
@@ -26,6 +28,30 @@ export class BugReportRepository {
     return new BugReportRepository(tx);
   }
 
+  async allocateShortId(organizationId: string): Promise<string> {
+    try {
+      await this.db.execute(sql`select pg_advisory_xact_lock(hashtext(${organizationId}))`);
+
+      const [row] = await this.db
+        .select({
+          maxSequence: sql<number | null>`max(
+            case
+              when ${bugReportTable.shortId} ~ '^SNB-[0-9]+$'
+              then substring(${bugReportTable.shortId} from 'SNB-([0-9]+)$')::int
+              else null
+            end
+          )`,
+        })
+        .from(bugReportTable)
+        .innerJoin(projectTable, eq(bugReportTable.projectId, projectTable.id))
+        .where(eq(projectTable.organizationId, organizationId));
+
+      return formatBugReportShortId((row?.maxSequence ?? 0) + 1);
+    } catch (error) {
+      throw new InternalServerError(ERROR_CODES.INTERNAL_SERVER_ERROR, undefined, { cause: error });
+    }
+  }
+
   async findById(id: string): Promise<BugReport | null> {
     const [row] = await this.db.select().from(bugReportTable).where(eq(bugReportTable.id, id));
     return row ? BugReportMapper.fromPersistence(row) : null;
@@ -37,6 +63,35 @@ export class BugReportRepository {
       orderBy: { createdAt: "desc" },
     });
     return bugReports.map((bugReport) => BugReportMapper.fromPersistence(bugReport));
+  }
+
+  async findRecentByProjectIds(projectIds: string[], limit: number): Promise<BugReport[]> {
+    if (projectIds.length === 0) return [];
+
+    const bugReports = await this.db.query.bugReportTable.findMany({
+      where: { projectId: { in: projectIds } },
+      orderBy: { createdAt: "desc" },
+      limit,
+    });
+    return bugReports.map((bugReport) => BugReportMapper.fromPersistence(bugReport));
+  }
+
+  async countOpenByAssignee(projectIds: string[]): Promise<AssigneeOpenCountRow[]> {
+    if (projectIds.length === 0) return [];
+
+    const rows = await this.db
+      .select({
+        assignedTo: bugReportTable.assignedTo,
+        count: count(),
+      })
+      .from(bugReportTable)
+      .where(and(inArray(bugReportTable.projectId, projectIds), inArray(bugReportTable.status, [...openStatuses])))
+      .groupBy(bugReportTable.assignedTo);
+
+    return rows.map((row) => ({
+      assignedTo: row.assignedTo,
+      count: Number(row.count),
+    }));
   }
 
   async save(bugReport: BugReport): Promise<void> {

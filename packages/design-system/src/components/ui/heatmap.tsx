@@ -17,7 +17,8 @@ import {
 import { cn } from "@workspace/design-system/lib/utils";
 import { useCallback, useState } from "react";
 
-const heatmapColumnTemplate = "grid-cols-[repeat(24,minmax(2.5rem,1fr))]";
+const heatmapColumnTemplate =
+  "grid-cols-[repeat(24,minmax(1.25rem,1fr))] sm:grid-cols-[repeat(24,minmax(2rem,1fr))] md:grid-cols-[repeat(24,minmax(2.5rem,1fr))]";
 const heatmapRowTemplate = "grid-cols-[2rem_minmax(0,1fr)]";
 
 const heatmapCellButtonClassName =
@@ -84,9 +85,9 @@ function Heatmap({
     hoveredRow && hoveredColumnIndex !== undefined ? formatTooltip(hoveredRow, hoveredColumnIndex, hoveredValue) : "";
 
   return (
-    <Column data-slot="heatmap" gap="md" className={cn("min-w-0", className)}>
-      <Column minWidth="0" className="relative overflow-x-auto pb-2">
-        <Column gap="sm" className="min-w-140">
+    <Column data-slot="heatmap" gap="md" width="full" minWidth="0" className={className}>
+      <Column width="full" minWidth="0" className="relative max-w-full overflow-x-auto pb-2">
+        <Column gap="sm" className="w-max min-w-full">
           <Grid gap="sm" className={heatmapRowTemplate}>
             <Column aria-hidden />
             <Grid gap="xs" className={heatmapColumnTemplate}>

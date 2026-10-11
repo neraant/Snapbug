@@ -108,4 +108,25 @@ export const texts = {
       },
     },
   },
+  activity: {
+    recent: {
+      title: "Recent Activity",
+      description: "The 8 latest issues captured by Snapbug",
+      viewAll: "View all tickets",
+      empty: "No issues yet",
+      unassigned: "Unassigned",
+      severityLabels: {
+        critical: "Critical",
+        high: "High",
+        medium: "Medium",
+        low: "Low",
+      },
+    },
+    workload: {
+      title: "Team Workload",
+      description: "Active open tickets assigned across engineers",
+      empty: "No teammates",
+      formatOpenCount: (count: number) => `${count} open`,
+    },
+  },
 } as const;

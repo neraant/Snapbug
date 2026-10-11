@@ -3,10 +3,12 @@ import { bugReportTable } from "@workspace/database/schema";
 import type { ProjectRow } from "@workspace/database/seed/project";
 import type { UserRow } from "@workspace/database/seed/user";
 import { BugReportSeverity } from "@workspace/validation/modules/bug-report/consts/bug-report-severity.const";
+import { formatBugReportShortId } from "@workspace/validation/modules/bug-report/consts/bug-report-short-id.const";
 import { BugReportStatus } from "@workspace/validation/modules/bug-report/consts/bug-report-status.const";
 import { inArray, type InferInsertModel } from "drizzle-orm";
 
 type BugReportInsert = InferInsertModel<typeof bugReportTable>;
+type BugReportDraft = Omit<BugReportInsert, "shortId">;
 
 const STORE_PROJECT_ID = "4a8c69a1-1ab1-45a8-8497-eae1e506d9d1";
 const MARKETING_PROJECT_ID = "4a8c69a1-1ab1-45a8-8497-eae1e506d9d2";
@@ -23,7 +25,7 @@ export async function seedBugReport(projects: ProjectRow[], users: UserRow[]) {
   const bobId = users.find((user) => user.email === "bob@example.com")?.id ?? null;
   const adminId = users.find((user) => user.email === "admin@example.com")?.id ?? null;
 
-  const bugReportData: BugReportInsert[] = [
+  const bugReportDrafts: BugReportDraft[] = [
     report({
       id: "6a8c69a1-1ab1-45a8-8497-eae1e506d901",
       projectId: STORE_PROJECT_ID,
@@ -295,6 +297,7 @@ export async function seedBugReport(projects: ProjectRow[], users: UserRow[]) {
     }),
   ].filter((bugReport) => projectIds.has(bugReport.projectId));
 
+  const bugReportData = assignShortIds(bugReportDrafts, projects);
   if (bugReportData.length === 0) return [];
 
   await db.insert(bugReportTable).values(bugReportData).onConflictDoNothing({ target: bugReportTable.id });
@@ -310,11 +313,31 @@ export async function seedBugReport(projects: ProjectRow[], users: UserRow[]) {
     );
 }
 
-function report(values: BugReportInsert): BugReportInsert {
+function report(values: BugReportDraft): BugReportDraft {
   return {
     hasReplay: false,
     ...values,
   };
+}
+
+function assignShortIds(bugReports: BugReportDraft[], projects: ProjectRow[]): BugReportInsert[] {
+  const projectById = new Map(projects.map((project) => [project.id, project]));
+  const sequenceByOrganization = new Map<string, number>();
+
+  const ordered = [...bugReports].sort(
+    (left, right) =>
+      (left.createdAt?.getTime() ?? 0) - (right.createdAt?.getTime() ?? 0) || left.id.localeCompare(right.id),
+  );
+
+  return ordered.flatMap((bugReport) => {
+    const project = projectById.get(bugReport.projectId);
+    if (!project) return [];
+
+    const sequence = (sequenceByOrganization.get(project.organizationId) ?? 0) + 1;
+    sequenceByOrganization.set(project.organizationId, sequence);
+
+    return [{ ...bugReport, shortId: formatBugReportShortId(sequence) }];
+  });
 }
 
 function daysAgo(days: number, hour: number): Date {

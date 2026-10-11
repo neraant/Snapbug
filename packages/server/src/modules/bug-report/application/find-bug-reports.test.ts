@@ -33,6 +33,7 @@ const project = {
 const bugReport = new BugReport({
   id: "6a8c69a1-1ab1-45a8-8497-eae1e506d901",
   projectId,
+  shortId: "SNB-1",
   assignedTo: null,
   status: BugReportStatus.NEW,
   severity: BugReportSeverity.MEDIUM,

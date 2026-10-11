@@ -1,6 +1,8 @@
 import type { DbClient } from "@workspace/database";
 import type { BugReport } from "@workspace/server/modules/bug-report/entity/bug-report.entity";
+import { BugReportFactory } from "@workspace/server/modules/bug-report/entity/bug-report.factory";
 import { BugReportMapper } from "@workspace/server/modules/bug-report/entity/bug-report.mapper";
+import type { CreateBugReportType } from "@workspace/server/modules/bug-report/entity/bug-report.types";
 import type { BugReportRepository } from "@workspace/server/modules/bug-report/repository/bug-report.repository";
 import type { AuditLogService } from "@workspace/server/shared/audit/audit-log.service";
 import type { AuditActor } from "@workspace/server/shared/audit/audit-log.types";
@@ -20,6 +22,16 @@ export class BugReportService {
 
   withActor(actor: AuditActor | null): BugReportService {
     return new BugReportService(this.bugReportRepository, this.auditLogService, actor);
+  }
+
+  async createWithAudit(
+    input: Omit<CreateBugReportType, "shortId"> & { organizationId: string },
+    action: string,
+  ): Promise<BugReport> {
+    const shortId = await this.bugReportRepository.allocateShortId(input.organizationId);
+    const bugReport = BugReportFactory.create({ ...input, shortId });
+    await this.saveWithAudit(bugReport, action);
+    return bugReport;
   }
 
   async saveWithAudit(bugReport: BugReport, action: string): Promise<void> {

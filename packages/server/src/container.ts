@@ -12,7 +12,9 @@ import { CreateBugReportUseCase } from "@workspace/server/modules/bug-report/app
 import { FindBreakdownsUseCase } from "@workspace/server/modules/bug-report/application/find-breakdowns.use-case";
 import { FindBugReportsUseCase } from "@workspace/server/modules/bug-report/application/find-bug-reports.use-case";
 import { FindChartsUseCase } from "@workspace/server/modules/bug-report/application/find-charts.use-case";
+import { FindRecentUseCase } from "@workspace/server/modules/bug-report/application/find-recent.use-case";
 import { FindStatsUseCase } from "@workspace/server/modules/bug-report/application/find-stats.use-case";
+import { FindWorkloadUseCase } from "@workspace/server/modules/bug-report/application/find-workload.use-case";
 import { BugReportRepository } from "@workspace/server/modules/bug-report/repository/bug-report.repository";
 import { BugReportService } from "@workspace/server/modules/bug-report/service/bug-report.service";
 import { BugReportStatService } from "@workspace/server/modules/bug-report/service/bug-report-stat.service";
@@ -143,6 +145,8 @@ const findBreakdowns = new FindBreakdownsUseCase(
   bugReportRepository,
   bugReportStatService,
 );
+const findRecent = new FindRecentUseCase(membershipAdapter, projectAdapter, userAdapter, bugReportRepository);
+const findWorkload = new FindWorkloadUseCase(membershipAdapter, projectAdapter, userAdapter, bugReportRepository);
 
 export const container = {
   membership: { createMembership, findMembership, findMembershipByUser },
@@ -152,5 +156,5 @@ export const container = {
   apiKey: { findProjectByKey },
   auth: { signUp, verifyCredentials, requestResetPassword, resetPassword },
   invitation: { sendInvitations, findInvitationByToken, acceptInvitation },
-  bugReport: { createBugReport, findBugReports, findStats, findCharts, findBreakdowns },
+  bugReport: { createBugReport, findBugReports, findStats, findCharts, findBreakdowns, findRecent, findWorkload },
 };

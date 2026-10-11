@@ -5,6 +5,7 @@ import { z } from "zod";
 export const bugReportModelSchema = z.object({
   id: z.uuid(),
   projectId: z.uuid(),
+  shortId: z.string(),
   assignedTo: z.uuid().nullable(),
   status: z.enum(BugReportStatus),
   severity: z.enum(BugReportSeverity),

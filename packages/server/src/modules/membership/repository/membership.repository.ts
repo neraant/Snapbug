@@ -34,6 +34,13 @@ export class MembershipRepository {
     return membership ? MembershipMapper.fromPersistence(membership) : null;
   }
 
+  async findManyByOrganizationId(organizationId: string): Promise<Membership[]> {
+    const memberships = await this.db.query.membershipTable.findMany({
+      where: { organizationId },
+    });
+    return memberships.map((membership) => MembershipMapper.fromPersistence(membership));
+  }
+
   async save(membership: Membership): Promise<void> {
     try {
       await this.db.insert(membershipTable).values(MembershipMapper.toPersistence(membership));

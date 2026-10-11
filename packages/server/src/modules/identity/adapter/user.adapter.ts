@@ -8,6 +8,7 @@ import { CreateUserUseCase } from "@workspace/server/modules/identity/applicatio
 import { FindUserUseCase } from "@workspace/server/modules/identity/application/find-user.use-case";
 import { FindUserByEmailUseCase } from "@workspace/server/modules/identity/application/find-user-by-email.use-case";
 import { FindUserCredentialsByEmailUseCase } from "@workspace/server/modules/identity/application/find-user-credentials-by-email.use-case";
+import { FindUsersByIdsUseCase } from "@workspace/server/modules/identity/application/find-users-by-ids.use-case";
 import { UpdateUserUseCase } from "@workspace/server/modules/identity/application/update-user.use-case";
 import type { UserRepository } from "@workspace/server/modules/identity/repository/user.repository";
 import type {
@@ -23,6 +24,7 @@ export class UserAdapter implements AuthUserPort, OrganizationUserPort {
   private readonly findUserByEmail: FindUserByEmailUseCase;
   private readonly findUserCredentialsByEmail: FindUserCredentialsByEmailUseCase;
   private readonly findUser: FindUserUseCase;
+  private readonly findUsersByIds: FindUsersByIdsUseCase;
   private readonly updateUser: UpdateUserUseCase;
 
   constructor(private readonly userRepository: UserRepository) {
@@ -30,6 +32,7 @@ export class UserAdapter implements AuthUserPort, OrganizationUserPort {
     this.findUserByEmail = new FindUserByEmailUseCase(userRepository);
     this.findUserCredentialsByEmail = new FindUserCredentialsByEmailUseCase(userRepository);
     this.findUser = new FindUserUseCase(userRepository);
+    this.findUsersByIds = new FindUsersByIdsUseCase(userRepository);
     this.updateUser = new UpdateUserUseCase(userRepository);
   }
 
@@ -43,6 +46,10 @@ export class UserAdapter implements AuthUserPort, OrganizationUserPort {
 
   async findByEmail(email: string): Promise<UserModelType | null> {
     return await this.findUserByEmail.execute(email);
+  }
+
+  async findManyByIds(ids: string[]): Promise<UserModelType[]> {
+    return await this.findUsersByIds.execute(ids);
   }
 
   async findCredentialsByEmail(email: string): Promise<UserCredentials | null> {

@@ -1,8 +1,6 @@
-import { bugReportSeverities } from "@workspace/validation/modules/bug-report/consts/bug-report-severity.const";
+import { bugReportModelSchema } from "@workspace/validation/modules/bug-report/dto/bug-report.model";
 import { findStatsInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-stats.schema";
 import { z } from "zod";
-
-const bugReportSeveritySchema = z.enum(bugReportSeverities);
 
 export const findChartsInputDtoSchema = findStatsInputDtoSchema;
 
@@ -14,8 +12,7 @@ const bugReportChartPointSchema = z.object({
   resolved: z.number(),
 });
 
-const bugReportChartSeverityCountSchema = z.object({
-  severity: bugReportSeveritySchema,
+const bugReportChartSeverityCountSchema = bugReportModelSchema.pick({ severity: true }).extend({
   count: z.number(),
 });
 

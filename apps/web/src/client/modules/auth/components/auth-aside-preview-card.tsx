@@ -21,7 +21,7 @@ export function AuthAsidePreviewCard({ className, ...props }: AuthAsidePreviewCa
             {preview.title}
           </Card.Title>
           <Card.Action>
-            <Badge variant="destructive">{preview.severity}</Badge>
+            <Badge variant="severityCritical">{preview.severity}</Badge>
           </Card.Action>
         </Row>
 

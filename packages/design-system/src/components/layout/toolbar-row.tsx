@@ -10,12 +10,12 @@ type ToolbarRowProps = {
 
 export function ToolbarRow({ leading, trailing, trailingAlign = "center" }: ToolbarRowProps) {
   return (
-    <Row gap="md" align="end" justify="between" wrap>
-      <Column gap="xs" minWidth="0">
+    <Row gap="md" align="center" justify="between" wrap>
+      <Column gap="xs" className="flex-1" minWidth="md">
         {leading}
       </Column>
       {trailing ? (
-        <Row align={trailingAlign} justify="end" gap="sm" minWidth="0" wrap>
+        <Row align={trailingAlign} justify="end" gap="sm" wrap>
           {trailing}
         </Row>
       ) : null}

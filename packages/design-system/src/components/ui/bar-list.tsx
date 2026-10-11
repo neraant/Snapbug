@@ -44,7 +44,7 @@ function BarList({ items, scale, total = 0, emptyLabel, barClassName, className 
   }
 
   return (
-    <Column data-slot="bar-list" gap="md" className={cn("w-full min-w-0", className)}>
+    <Column data-slot="bar-list" gap="md" className={cn("max-h-96 min-h-0 w-full min-w-0 overflow-y-auto", className)}>
       {items.map((item) => {
         const widthPercent = resolveBarWidthPercent(item.count, scale, total, maxCount);
 

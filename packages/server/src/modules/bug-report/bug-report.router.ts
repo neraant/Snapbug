@@ -24,4 +24,10 @@ export const bugReportRouter = os.router({
   findBreakdowns: authed.findBreakdowns.handler(
     async ({ input, context }) => await container.bugReport.findBreakdowns.execute(input, context.user.id),
   ),
+  findRecent: authed.findRecent.handler(
+    async ({ input, context }) => await container.bugReport.findRecent.execute(input, context.user.id),
+  ),
+  findWorkload: authed.findWorkload.handler(
+    async ({ input, context }) => await container.bugReport.findWorkload.execute(input, context.user.id),
+  ),
 });

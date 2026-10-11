@@ -4,6 +4,7 @@ import type { BugReportStatus } from "@workspace/validation/modules/bug-report/c
 export type BugReportPersistedType = {
   id: string;
   projectId: string;
+  shortId: string;
   assignedTo: string | null;
   status: BugReportStatus;
   severity: BugReportSeverity;
@@ -30,9 +31,15 @@ export type BugReportPersistedType = {
 
 export type CreateBugReportType = {
   projectId: string;
+  shortId: string;
   title: string;
   description: string;
   url: string;
+};
+
+export type AssigneeOpenCountRow = {
+  assignedTo: string | null;
+  count: number;
 };
 
 export type DailyMetricRow = {

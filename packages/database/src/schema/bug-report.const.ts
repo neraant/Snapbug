@@ -9,6 +9,7 @@ export const bugReportTable = pgTable("bug_reports", {
   projectId: uuid("project_id")
     .references(() => projectTable.id)
     .notNull(),
+  shortId: text("short_id").notNull(),
   assignedTo: uuid("assigned_to").references(() => userTable.id, { onDelete: "set null" }),
   status: text("status", { enum: bugReportStatuses }).notNull(),
   severity: text("severity", { enum: bugReportSeverities }).notNull(),

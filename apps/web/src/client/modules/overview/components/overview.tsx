@@ -1,6 +1,7 @@
 import { Column } from "@workspace/design-system/components/layout/column";
 import { Suspense } from "react";
 
+import { OverviewActivitySection } from "@/client/modules/overview/components/overview-activity-section";
 import { OverviewBreakdownSection } from "@/client/modules/overview/components/overview-breakdown-section";
 import { OverviewBusiestHoursCard } from "@/client/modules/overview/components/overview-busiest-hours-card";
 import { OverviewChartSection } from "@/client/modules/overview/components/overview-chart-section";
@@ -13,7 +14,7 @@ type OverviewProps = {
 
 export function Overview({ filters }: OverviewProps) {
   return (
-    <Column gap="xl">
+    <Column gap="xl" width="full" minWidth="0">
       <Suspense fallback={<OverviewStatSection.Fallback />}>
         <OverviewStatSection filters={filters} />
       </Suspense>
@@ -25,6 +26,9 @@ export function Overview({ filters }: OverviewProps) {
       </Suspense>
       <Suspense fallback={<OverviewBusiestHoursCard.Fallback />}>
         <OverviewBusiestHoursCard filters={filters} />
+      </Suspense>
+      <Suspense fallback={<OverviewActivitySection.Fallback />}>
+        <OverviewActivitySection filters={filters} />
       </Suspense>
     </Column>
   );

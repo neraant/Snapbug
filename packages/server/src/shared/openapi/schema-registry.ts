@@ -8,7 +8,9 @@ import { createBugReportInputDtoSchema } from "@workspace/validation/modules/bug
 import { findBreakdownsInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-breakdowns.schema";
 import { findBugReportsOutputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-bug-reports.schema";
 import { findChartsInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-charts.schema";
+import { findRecentInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-recent.schema";
 import { findStatsInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-stats.schema";
+import { findWorkloadInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-workload.schema";
 import { acceptInvitationInputDtoSchema } from "@workspace/validation/modules/invitation/dto/accept-invitation.schema";
 import {
   findInvitationByTokenInputDtoSchema,
@@ -66,6 +68,7 @@ JSON_SCHEMA_REGISTRY.add(bugReportModelSchema, {
     {
       id: "6a8c69a1-1ab1-45a8-8497-eae1e506d901",
       projectId: "4a8c69a1-1ab1-45a8-8497-eae1e506d9d1",
+      shortId: "SNB-1",
       assignedTo: null,
       status: BugReportStatus.NEW,
       severity: BugReportSeverity.MEDIUM,
@@ -112,6 +115,18 @@ JSON_SCHEMA_REGISTRY.add(findBreakdownsInputDtoSchema, {
   title: "Bug report breakdowns",
   description: "Overview breakdown cards for the caller's organization",
   examples: [{ periodDays: 30 }],
+});
+
+JSON_SCHEMA_REGISTRY.add(findRecentInputDtoSchema, {
+  title: "Recent bug reports",
+  description: "The latest bug reports for the caller's organization",
+  examples: [{}],
+});
+
+JSON_SCHEMA_REGISTRY.add(findWorkloadInputDtoSchema, {
+  title: "Bug report workload",
+  description: "Open bug reports per teammate for the caller's organization",
+  examples: [{}],
 });
 
 JSON_SCHEMA_REGISTRY.add(verifyCredentialsInputDtoSchema, {

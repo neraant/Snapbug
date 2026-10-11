@@ -20,6 +20,10 @@ const badgeVariants = cva(
         destructive: "bg-destructive/10 text-destructive",
         success: "bg-success/10 text-success",
         warning: "bg-warning/10 text-warning",
+        severityCritical: "bg-destructive-surface text-destructive-surface-foreground",
+        severityHigh: "bg-chart-1/15 text-chart-1",
+        severityMedium: "bg-warning-surface text-warning-surface-foreground",
+        severityLow: "bg-info-surface text-info-surface-foreground",
       },
     },
     defaultVariants: {
@@ -29,6 +33,7 @@ const badgeVariants = cva(
 );
 
 type BadgeProps = ComponentProps<"span"> & VariantProps<typeof badgeVariants>;
+type BadgeVariant = NonNullable<VariantProps<typeof badgeVariants>["variant"]>;
 
 function Badge({ className, variant = "default", ...props }: BadgeProps) {
   return <span data-slot="badge" className={cn(badgeVariants({ variant }), className)} {...props} />;
@@ -54,3 +59,4 @@ function TrendBadge({ changePercent, polarity, className }: TrendBadgeProps) {
 }
 
 export { Badge, badgeVariants, TrendBadge };
+export type { BadgeVariant };

@@ -1,16 +1,13 @@
-import { bugReportStatuses } from "@workspace/validation/modules/bug-report/consts/bug-report-status.const";
+import { bugReportModelSchema } from "@workspace/validation/modules/bug-report/dto/bug-report.model";
 import { findStatsInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-stats.schema";
 import { z } from "zod";
-
-const bugReportStatusSchema = z.enum(bugReportStatuses);
 
 const bugReportBreakdownCountItemSchema = z.object({
   label: z.string(),
   count: z.number(),
 });
 
-const bugReportBreakdownStatusItemSchema = z.object({
-  status: bugReportStatusSchema,
+const bugReportBreakdownStatusItemSchema = bugReportModelSchema.pick({ status: true }).extend({
   count: z.number(),
 });
 

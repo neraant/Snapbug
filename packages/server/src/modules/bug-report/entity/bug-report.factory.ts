@@ -10,6 +10,7 @@ export abstract class BugReportFactory {
     return new BugReport({
       id: randomUUID(),
       projectId: bugReport.projectId,
+      shortId: bugReport.shortId,
       assignedTo: null,
       status: BugReportStatus.NEW,
       severity: BugReportSeverity.MEDIUM,

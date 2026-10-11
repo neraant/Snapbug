@@ -1,4 +1,5 @@
 import { CreateBugReportUseCase } from "@workspace/server/modules/bug-report/application/create-bug-report.use-case";
+import { BugReportFactory } from "@workspace/server/modules/bug-report/entity/bug-report.factory";
 import { BugReportMapper } from "@workspace/server/modules/bug-report/entity/bug-report.mapper";
 import type { ApiKeyPort } from "@workspace/server/modules/bug-report/port/api-key.port";
 import type { BugReportService } from "@workspace/server/modules/bug-report/service/bug-report.service";
@@ -8,6 +9,7 @@ import { BugReportStatus } from "@workspace/validation/modules/bug-report/consts
 import { describe, expect, it, vi } from "vitest";
 
 const projectId = "4a8c69a1-1ab1-45a8-8497-eae1e506d9d1";
+const organizationId = "3a8c69a1-1ab1-45a8-8497-eae1e506d9d1";
 const actor = { type: "api-key" as const, id: null };
 
 const input = {
@@ -23,12 +25,20 @@ describe("CreateBugReportUseCase", () => {
       findProjectByKey: vi.fn().mockResolvedValue({
         id: projectId,
         name: "Store",
-        organizationId: "3a8c69a1-1ab1-45a8-8497-eae1e506d9d1",
+        organizationId,
         createdAt: "2026-10-03T09:00:00.000Z",
       }),
     };
-    const saveWithAudit = vi.fn().mockResolvedValue(undefined);
-    const withActor = vi.fn().mockReturnValue({ saveWithAudit });
+    const createWithAudit = vi.fn(async (createInput) =>
+      BugReportFactory.create({
+        projectId: createInput.projectId,
+        shortId: "SNB-4",
+        title: createInput.title,
+        description: createInput.description,
+        url: createInput.url,
+      }),
+    );
+    const withActor = vi.fn().mockReturnValue({ createWithAudit });
     const bugReportService = {
       withTx: vi.fn().mockReturnValue({ withActor }),
     };
@@ -45,10 +55,20 @@ describe("CreateBugReportUseCase", () => {
     expect(withTransaction).toHaveBeenCalledOnce();
     expect(bugReportService.withTx).toHaveBeenCalledOnce();
     expect(withActor).toHaveBeenCalledWith(actor);
-    expect(saveWithAudit).toHaveBeenCalledWith(expect.anything(), "Create bug report");
-    const saved = saveWithAudit.mock.calls[0]?.[0];
-    expect(result).toEqual(BugReportMapper.toDto(saved));
+    expect(createWithAudit).toHaveBeenCalledWith(
+      {
+        organizationId,
+        projectId,
+        title: input.title,
+        description: input.description,
+        url: input.url,
+      },
+      "Create bug report",
+    );
+    const created = createWithAudit.mock.results[0]?.value;
+    expect(result).toEqual(BugReportMapper.toDto(await created));
     expect(result.projectId).toBe(projectId);
+    expect(result.shortId).toBe("SNB-4");
     expect(result.status).toBe(BugReportStatus.NEW);
     expect(result.severity).toBe(BugReportSeverity.MEDIUM);
     expect(result).not.toHaveProperty("screenshotKey");
