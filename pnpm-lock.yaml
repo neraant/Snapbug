@@ -80,9 +80,6 @@ importers:
       react-hook-form:
         specifier: 7.87.0
         version: 7.87.0(react@19.2.4)
-      recharts:
-        specifier: 2.15.4
-        version: 2.15.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       zod:
         specifier: 4.4.3
         version: 4.4.3
