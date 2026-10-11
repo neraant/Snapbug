@@ -9,8 +9,9 @@ Tech capability, no SQL. `{Context}Service`. Wired in [api](./api.mdc).
 
 ## Logic
 
-- How: hash, crypto, format
+- How: hash, crypto, format, calculations the use-case would otherwise do inline
 - Not: policy (“email must be unique”) → [application](./application.mdc)
+- A write that changes state records it via `AuditLogService` in the same transaction (`withTx`)
 
 ## Do
 

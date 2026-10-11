@@ -6,6 +6,7 @@ import { BugReportStatus } from "@workspace/validation/modules/bug-report/consts
 import { bugReportModelSchema } from "@workspace/validation/modules/bug-report/dto/bug-report.model";
 import { createBugReportInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/create-bug-report.schema";
 import { findBugReportsInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-bug-reports.schema";
+import { findChartsInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-charts.schema";
 import { findStatsInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-stats.schema";
 import { acceptInvitationInputDtoSchema } from "@workspace/validation/modules/invitation/dto/accept-invitation.schema";
 import {
@@ -98,6 +99,12 @@ JSON_SCHEMA_REGISTRY.add(findBugReportsInputDtoSchema, {
 JSON_SCHEMA_REGISTRY.add(findStatsInputDtoSchema, {
   title: "Bug report stats",
   description: "Overview stat cards for an organization the caller belongs to",
+  examples: [{ organizationId: "3a8c69a1-1ab1-45a8-8497-eae1e506d9d1", periodDays: 30 }],
+});
+
+JSON_SCHEMA_REGISTRY.add(findChartsInputDtoSchema, {
+  title: "Bug report charts",
+  description: "Overview charts for an organization the caller belongs to",
   examples: [{ organizationId: "3a8c69a1-1ab1-45a8-8497-eae1e506d9d1", periodDays: 30 }],
 });
 

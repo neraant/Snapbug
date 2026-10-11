@@ -13,7 +13,8 @@ A use-case is either an **endpoint** (same `{verb}` on contract, router, and [co
 
 - Policy & workflow (uniqueness, order of steps)
 - `AppError` + `ERROR_CODES`
-- Service for hash/crypto; repo or **port** for I/O
+- Service for calculations and tech (hash, windows, formatting). Use-case orchestrates and applies policy
+- A state change is recorded through `AuditLogService` in the same transaction. See [shared](./shared.mdc)
 - Input/output = shared dto types, not local aliases
 
 Repo reports facts; use-case turns them into policy.

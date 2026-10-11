@@ -1,6 +1,8 @@
 import { Column } from "@workspace/design-system/components/layout/column";
 import { Row } from "@workspace/design-system/components/layout/row";
+import { ToolbarRow } from "@workspace/design-system/components/layout/toolbar-row";
 import { Button } from "@workspace/design-system/components/ui/button";
+import { Separator } from "@workspace/design-system/components/ui/separator";
 import { Typography } from "@workspace/design-system/components/ui/typography";
 import { BellIcon } from "lucide-react";
 import type { PropsWithChildren, ReactNode } from "react";
@@ -30,28 +32,32 @@ type PageProps = PropsWithChildren<{
 
 export function PageContainer({ title, description, badge, actions, children }: PageProps) {
   return (
-    <Column gap="xl" padding="lg" width="full" className="flex-1">
-      <Row align="end" justify="between" wrap className="border-b border-border pb-2">
-        <Column gap="none" className="min-w-[min(100%,24rem)] flex-1">
-          <Row align="center" gap="md" wrap={false}>
-            <Typography variant="heading-lg" className="font-heading font-extrabold tracking-tight">
-              {title}
-            </Typography>
-            {badge}
-          </Row>
-          {description ? (
-            <Typography variant="text-sm" className="pt-1 text-secondary-foreground">
-              {description}
-            </Typography>
-          ) : null}
-        </Column>
-        {actions ? (
-          <Row gap="sm" className="ml-auto">
-            {actions}
-          </Row>
-        ) : null}
-      </Row>
-      {children}
+    <Column gap="none" padding="none" width="full" className="flex-1">
+      <Column gap="md" padding="lg">
+        <ToolbarRow
+          trailingAlign="end"
+          leading={
+            <Column gap="none">
+              <Row align="center" gap="md" wrap={false}>
+                <Typography variant="heading-lg" weight="bold" className="font-heading tracking-tight">
+                  {title}
+                </Typography>
+                {badge}
+              </Row>
+              {description ? (
+                <Typography variant="text-sm" color="muted" className="pt-1">
+                  {description}
+                </Typography>
+              ) : null}
+            </Column>
+          }
+          trailing={actions}
+        />
+      </Column>
+      <Separator />
+      <Column gap="xl" padding="lg">
+        {children}
+      </Column>
     </Column>
   );
 }

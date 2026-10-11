@@ -1,8 +1,10 @@
 import { UTCDate } from "@date-fns/utc";
-import type { DailyMetricRow } from "@workspace/server/modules/bug-report/entity/bug-report.types";
+import type { DailyMetricRow, SeverityCountRow } from "@workspace/server/modules/bug-report/entity/bug-report.types";
 import type { OpenMetricsAtInstant } from "@workspace/server/shared/audit/audit-log.types";
+import { bugReportSeverities } from "@workspace/validation/modules/bug-report/consts/bug-report-severity.const";
 import { BugReportStatId } from "@workspace/validation/modules/bug-report/consts/bug-report-stat-id.const";
 import type { BugReportStatPeriodDaysType } from "@workspace/validation/modules/bug-report/consts/bug-report-stat-period-days.const";
+import type { FindChartsOutputDtoType } from "@workspace/validation/modules/bug-report/dto/find-charts.schema";
 import type { FindStatsOutputDtoType } from "@workspace/validation/modules/bug-report/dto/find-stats.schema";
 import { addDays, formatISO, startOfDay, subDays } from "date-fns";
 
@@ -18,7 +20,61 @@ export type StatComparisonWindows = {
   sparklineTo: Date;
 };
 
+export type ChartPeriodWindows = {
+  dayStarts: Date[];
+  queryFrom: Date;
+  queryTo: Date;
+};
+
 export class BugReportStatService {
+  getChartPeriodWindows(periodDays: BugReportStatPeriodDaysType, reference = new UTCDate()): ChartPeriodWindows {
+    const dayStarts = this.getUtcDayStartsForPeriod(reference, periodDays);
+    const queryFrom = dayStarts[0]!;
+    const queryTo = addDays(dayStarts[dayStarts.length - 1]!, 1);
+
+    return { dayStarts, queryFrom, queryTo };
+  }
+
+  buildZeroCharts(periodDays: BugReportStatPeriodDaysType, reference = new UTCDate()): FindChartsOutputDtoType {
+    const { dayStarts } = this.getChartPeriodWindows(periodDays, reference);
+    return {
+      points: dayStarts.map((day) => ({
+        day: this.utcDayKey(day),
+        created: 0,
+        resolved: 0,
+      })),
+      severity: bugReportSeverities.map((severity) => ({ severity, count: 0 })),
+    };
+  }
+
+  buildChartsFromAggregates(input: {
+    dayStarts: Date[];
+    createdByDay: DailyMetricRow[];
+    resolvedByDay: DailyMetricRow[];
+    severityCounts: SeverityCountRow[];
+  }): FindChartsOutputDtoType {
+    const { dayStarts, createdByDay, resolvedByDay, severityCounts } = input;
+
+    const createdByDayKey = new Map(createdByDay.map((row) => [this.utcDayKey(row.day), row.value]));
+    const resolvedByDayKey = new Map(resolvedByDay.map((row) => [this.utcDayKey(row.day), row.value]));
+    const severityByKey = new Map(severityCounts.map((row) => [row.severity, row.count]));
+
+    return {
+      points: dayStarts.map((day) => {
+        const key = this.utcDayKey(day);
+        return {
+          day: key,
+          created: createdByDayKey.get(key) ?? 0,
+          resolved: resolvedByDayKey.get(key) ?? 0,
+        };
+      }),
+      severity: bugReportSeverities.map((severity) => ({
+        severity,
+        count: severityByKey.get(severity) ?? 0,
+      })),
+    };
+  }
+
   getComparisonWindows(periodDays: BugReportStatPeriodDaysType, reference = new UTCDate()): StatComparisonWindows {
     const now = reference;
     const currentPeriodStart = subDays(now, periodDays);
@@ -161,10 +217,14 @@ export class BugReportStatService {
     return sparkline;
   }
 
-  private getLastUtcDayStarts(reference: Date, dayCount: number): Date[] {
+  private getUtcDayStartsForPeriod(reference: Date, periodDays: number): Date[] {
     const todayStart = startOfDay(reference);
-    const firstDay = subDays(todayStart, dayCount - 1);
-    return Array.from({ length: dayCount }, (_, index) => addDays(firstDay, index));
+    const firstDay = subDays(todayStart, periodDays - 1);
+    return Array.from({ length: periodDays }, (_, index) => addDays(firstDay, index));
+  }
+
+  private getLastUtcDayStarts(reference: Date, dayCount: number): Date[] {
+    return this.getUtcDayStartsForPeriod(reference, dayCount);
   }
 
   private utcDayKey(date: Date | string): string {

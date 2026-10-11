@@ -1,0 +1,22 @@
+---
+description: Type scale for UI copy and charts
+globs: apps/web/**/*.tsx,packages/design-system/**/*.{tsx,css}
+---
+
+# Typography
+
+One scale, the same steps as Tailwind. Product copy uses `Typography`. Primitives (`Button`, `Field`, `Badge`) may use the same Tailwind steps. Do not add `text-[…]`, a numeric `fontSize`, or a size class on top of a `Typography` variant.
+
+| Variant    | Size             | Use                          |
+| ---------- | ---------------- | ---------------------------- |
+| heading-lg | text-3xl (30px)  | Page title                   |
+| heading-md | text-2xl (24px)  | Metric value                 |
+| heading-sm | text-xl (20px)   | Emphasized figure            |
+| heading-xs | text-base (16px) | Card title                   |
+| text-lg    | text-lg (18px)   | Large body                   |
+| text-md    | text-base (16px) | Body                         |
+| text-sm    | text-sm (14px)   | Description, secondary label |
+| text-xs    | text-xs (12px)   | Caption, badge, meta         |
+| label      | text-sm (14px)   | Control label, medium weight |
+
+Chart axis ticks, legend, and tooltip are `text-xs` in `packages/design-system/src/styles/globals.css`. Do not set a font size on a chart. A caption drawn inside a chart uses `Typography` variant `text-xs`.

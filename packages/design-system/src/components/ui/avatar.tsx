@@ -13,7 +13,7 @@ const avatarVariants = cva(
         brand: "rounded-lg bg-sidebar-primary text-sidebar-primary-foreground",
       },
       size: {
-        xs: "size-5 text-[10px]",
+        xs: "size-5 text-xs",
         sm: "size-6 text-xs",
         md: "size-7 text-sm",
         lg: "size-8 text-base",

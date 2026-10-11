@@ -18,4 +18,7 @@ export const bugReportRouter = os.router({
   findStats: authed.findStats.handler(
     async ({ input, context }) => await container.bugReport.findStats.execute(input, context.user.id),
   ),
+  findCharts: authed.findCharts.handler(
+    async ({ input, context }) => await container.bugReport.findCharts.execute(input, context.user.id),
+  ),
 });

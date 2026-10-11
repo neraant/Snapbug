@@ -23,6 +23,10 @@ Root router: `src/shared/router.const.ts` (`router.auth`, `AppRouter`).
 
 - `AppError` subclasses + `ERROR_CODES` from `@workspace/server/shared/error/`
 
+## audit/
+
+Record a state change through `AuditLogService.save` (`src/shared/audit/`), from the module service, in the same transaction (`withTx`). Do not insert audit rows from a use-case or repository.
+
 ## DB
 
 - `@workspace/database` — not inside the server package

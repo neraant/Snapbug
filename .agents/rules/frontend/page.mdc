@@ -21,19 +21,18 @@ export default async function Layout({ children }: PropsWithChildren) {
 
 # Page
 
-Default export is `Page`. Put `"use client"` on the page when the route is client-only; module children under it don't repeat it.
+`page.tsx` exports only `Page`. No other components in that file. Put `"use client"` on the page when the route is client-only; module children under it don't repeat it.
 
 ```tsx
 "use client";
 
-import { Skeleton } from "@workspace/design-system/components/ui/skeleton";
 import { Suspense } from "react";
 
 import { OnboardingSteps } from "@/client/modules/onboarding/components/onboarding-steps";
 
 export default function Page() {
   return (
-    <Suspense fallback={<Skeleton className="h-100" />}>
+    <Suspense fallback={<OnboardingSteps.Fallback />}>
       <OnboardingSteps />
     </Suspense>
   );
@@ -42,7 +41,7 @@ export default function Page() {
 
 ## Data
 
-Wrap the part of the tree that suspends. Fallback: a design-system `Skeleton`, or omit it and let `app/loading.tsx` (global spinner) cover the route.
+Wrap the part of the tree that suspends. Fallback is `Component.Fallback`. Omit the boundary only when `app/loading.tsx` should cover the route.
 
 ## Composing modules
 

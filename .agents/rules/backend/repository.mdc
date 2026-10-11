@@ -16,6 +16,7 @@ Drizzle only. `{Aggregate}Repository`. One table. Speaks **entity**, not DTO. Se
 
 - `constructor(private readonly db: DbClient = defaultDb)`
 - `find*` → entity via `Mapper.fromPersistence`. Order in this query.
+- Reads use `this.db.query.{table}` (`findFirst`, `findMany`) when it can express the query. `select()` only for aggregates the query API cannot (count, group by, percentiles).
 - A foreign id filters **your** column (`inArray(orderTable.userId, ids)`)
 - `save(entity)` → `Mapper.toPersistence` then insert/update
 - Transactions: `withTx(tx)` returns a new repository on that client; methods use `this.db`
@@ -30,11 +31,10 @@ Drizzle only. `{Aggregate}Repository`. One table. Speaks **entity**, not DTO. Se
 
 ```ts
 async findManyByUserIds(userIds: string[]): Promise<Order[]> {
-  const rows = await this.db
-    .select()
-    .from(orderTable)
-    .where(inArray(orderTable.userId, userIds))
-    .orderBy(desc(orderTable.createdAt));
+  const rows = await this.db.query.orderTable.findMany({
+    where: { userId: { in: userIds } },
+    orderBy: { createdAt: "desc" },
+  });
   return rows.map((row) => OrderMapper.fromPersistence(row));
 }
 

@@ -7,7 +7,7 @@ globs: apps/web/src/client/**/{queries,hooks}/**/*.ts
 
 Reads and mutations: `apps/web/src/client/shared/queries/use-{verb}.ts`, calling `orpcQuery`.
 
-Reads use `useSuspenseQuery`. The page `Suspense` boundary is the loader (`Skeleton` or `app/loading.tsx`); no `isLoading` branch beside a suspense query.
+Reads use `useSuspenseQuery`. The `Suspense` fallback is `Component.Fallback` (or `app/loading.tsx`); no `isLoading` branch beside a suspense query.
 
 ```ts
 export function useFindOnboarding() {

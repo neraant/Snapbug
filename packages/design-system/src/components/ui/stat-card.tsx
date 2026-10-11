@@ -1,6 +1,8 @@
+import { Column } from "@workspace/design-system/components/layout/column";
 import { Row } from "@workspace/design-system/components/layout/row";
 import { TrendBadge } from "@workspace/design-system/components/ui/badge";
 import { Card } from "@workspace/design-system/components/ui/card";
+import { Separator } from "@workspace/design-system/components/ui/separator";
 import { SparklineChart, type SparklinePoint } from "@workspace/design-system/components/ui/sparkline-chart";
 import { Typography } from "@workspace/design-system/components/ui/typography";
 import type { StatTrendPolarity } from "@workspace/design-system/lib/stat-trend.util";
@@ -9,8 +11,12 @@ import type { ComponentProps, ReactNode } from "react";
 
 export type StatCardSparklinePoint = SparklinePoint;
 
-function StatCard({ className, gap = "none", padding = "md", ...props }: ComponentProps<typeof Card>) {
+function StatCard({ className, gap = "none", padding = "none", ...props }: ComponentProps<typeof Card>) {
   return <Card data-slot="stat-card" gap={gap} padding={padding} className={cn("min-w-0", className)} {...props} />;
+}
+
+function StatCardMain({ className, gap = "sm", ...props }: ComponentProps<typeof Column>) {
+  return <Column data-slot="stat-card-main" padding="md" gap={gap} className={className} {...props} />;
 }
 
 type StatCardHeaderProps = {
@@ -65,9 +71,12 @@ function StatCardValue({ value, hint }: StatCardValueProps) {
   );
 }
 
-function StatCardFooter({ className, ...props }: ComponentProps<"div">) {
+function StatCardFooter({ className, ...props }: ComponentProps<typeof Column>) {
   return (
-    <div data-slot="stat-card-footer" className={cn("mt-3 border-t border-border pt-2.5", className)} {...props} />
+    <>
+      <Separator />
+      <Column data-slot="stat-card-footer" padding="md" gap="none" className={cn("pt-2.5", className)} {...props} />
+    </>
   );
 }
 
@@ -83,7 +92,7 @@ function StatCardDelta({ changePercent, polarity, comparisonLabel, trailing }: S
     <Row align="center" justify="between" wrap={false} minWidth="0" gap="sm" className="w-full">
       <Row align="center" gap="xs" wrap={false} minWidth="0">
         <TrendBadge changePercent={changePercent} polarity={polarity} />
-        <Typography variant="text-sm" color="muted" className="text-[11px]">
+        <Typography variant="text-xs" color="muted">
           {comparisonLabel}
         </Typography>
       </Row>
@@ -92,6 +101,7 @@ function StatCardDelta({ changePercent, polarity, comparisonLabel, trailing }: S
   );
 }
 
+StatCard.Main = StatCardMain;
 StatCard.Header = StatCardHeader;
 StatCard.Icon = StatCardIcon;
 StatCard.Value = StatCardValue;
@@ -106,6 +116,7 @@ export {
   StatCardFooter,
   StatCardHeader,
   StatCardIcon,
+  StatCardMain,
   StatCardValue,
   TrendBadge,
 };

@@ -23,9 +23,10 @@ export function OverviewStatCard({ item, periodDays }: OverviewStatCardProps) {
 
   return (
     <StatCard>
-      <StatCard.Header title={copy.title} icon={<Icon aria-hidden />} />
-
-      <StatCard.Value value={item.value} hint={"valueHint" in copy ? copy.valueHint : undefined} />
+      <StatCard.Main>
+        <StatCard.Header title={copy.title} icon={<Icon aria-hidden />} />
+        <StatCard.Value value={item.value} hint={"valueHint" in copy ? copy.valueHint : undefined} />
+      </StatCard.Main>
 
       <StatCard.Footer>
         <StatCard.Delta

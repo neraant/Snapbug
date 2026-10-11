@@ -251,4 +251,14 @@
   .lucide {
     stroke-width: 1.5;
   }
+
+  /* Chart chrome matches Typography text-xs. */
+  .recharts-cartesian-axis-tick-value,
+  .recharts-legend-wrapper,
+  .recharts-default-tooltip {
+    @apply text-xs;
+  }
+  .recharts-cartesian-axis-tick-value {
+    @apply fill-muted-foreground;
+  }
 }

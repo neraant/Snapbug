@@ -33,4 +33,5 @@ app/**/page.tsx → components → hooks | utils
 - Copy lives in the module's `consts/`; generic client copy in `apps/web/src/client/modules/shared/consts/texts.const.ts` ([const](./const.mdc)).
 - A helper used by both server and client lives on the server side; the client imports it ([util](./util.mdc)).
 - API contracts and repeated field shapes (email, etc.) live in `@workspace/validation`. Import shared field schemas, keep them required, relax at the use site ([schema](./schema.mdc)).
-- Reads use `useSuspenseQuery` inside `Suspense`; paginated lists use `useQuery`; fetch the aggregate, not one field ([query](./query.mdc)).
+- `page.tsx` exports only `Page`. One component per file; `Component.Fallback` may share that file ([page](./page.mdc), [component](./component.mdc)).
+- Reads use `useSuspenseQuery` inside `Suspense`; fallback is `Component.Fallback`. Paginated lists use `useQuery`. Fetch the aggregate, not one field ([query](./query.mdc)).

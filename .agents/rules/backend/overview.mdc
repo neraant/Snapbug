@@ -42,7 +42,8 @@ contract → router → container → use-case → repository | service | port�
 | -------------------------------- | -------------------------------- |
 | Workflow, policy, AppError       | [application](./application.mdc) |
 | Invariants of one model (no I/O) | [entity](./entity.mdc)           |
-| Hash, crypto                     | [service](./service.mdc)         |
+| Hash, crypto, calculations       | [service](./service.mdc)         |
+| State-change audit               | `AuditLogService` via the service |
 | Persist / load this aggregate    | [repository](./repository.mdc)   |
 | Read that needs another module   | their port, then your use-case   |
 

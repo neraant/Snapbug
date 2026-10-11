@@ -10,6 +10,7 @@ import { ResetPasswordRepository } from "@workspace/server/modules/auth/reposito
 import { AuthService } from "@workspace/server/modules/auth/service/auth.service";
 import { CreateBugReportUseCase } from "@workspace/server/modules/bug-report/application/create-bug-report.use-case";
 import { FindBugReportsUseCase } from "@workspace/server/modules/bug-report/application/find-bug-reports.use-case";
+import { FindChartsUseCase } from "@workspace/server/modules/bug-report/application/find-charts.use-case";
 import { FindStatsUseCase } from "@workspace/server/modules/bug-report/application/find-stats.use-case";
 import { BugReportRepository } from "@workspace/server/modules/bug-report/repository/bug-report.repository";
 import { BugReportService } from "@workspace/server/modules/bug-report/service/bug-report.service";
@@ -134,6 +135,7 @@ const findStats = new FindStatsUseCase(
   bugReportStatService,
   auditLogRepository,
 );
+const findCharts = new FindChartsUseCase(membershipAdapter, projectAdapter, bugReportRepository, bugReportStatService);
 
 export const container = {
   membership: { createMembership, findMembership, findMembershipByUser },
@@ -143,5 +145,5 @@ export const container = {
   apiKey: { findProjectByKey },
   auth: { signUp, verifyCredentials, requestResetPassword, resetPassword },
   invitation: { sendInvitations, findInvitationByToken, acceptInvitation },
-  bugReport: { createBugReport, findBugReports, findStats },
+  bugReport: { createBugReport, findBugReports, findStats, findCharts },
 };

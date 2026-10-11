@@ -39,3 +39,8 @@ export type DailyMetricRow = {
   day: string;
   value: number;
 };
+
+export type SeverityCountRow = {
+  severity: BugReportSeverity;
+  count: number;
+};

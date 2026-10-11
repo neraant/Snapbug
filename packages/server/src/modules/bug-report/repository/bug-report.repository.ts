@@ -3,7 +3,7 @@ import { db as defaultDb } from "@workspace/database";
 import { bugReportTable } from "@workspace/database/schema";
 import type { BugReport } from "@workspace/server/modules/bug-report/entity/bug-report.entity";
 import { BugReportMapper } from "@workspace/server/modules/bug-report/entity/bug-report.mapper";
-import type { DailyMetricRow } from "@workspace/server/modules/bug-report/entity/bug-report.types";
+import type { DailyMetricRow, SeverityCountRow } from "@workspace/server/modules/bug-report/entity/bug-report.types";
 import { InternalServerError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import { BugReportSeverity } from "@workspace/validation/modules/bug-report/consts/bug-report-severity.const";
@@ -142,6 +142,50 @@ export class BugReportRepository {
     return rows.map((row) => ({
       day: row.day,
       value: row.value === null || row.value === undefined ? 0 : row.value * 1000,
+    }));
+  }
+
+  async countResolvedByDay(projectIds: string[], from: Date, to: Date): Promise<DailyMetricRow[]> {
+    const dayBucket = sql<string>`date_trunc('day', ${bugReportTable.resolvedAt} AT TIME ZONE 'UTC')`;
+    const rows = await this.db
+      .select({
+        day: dayBucket,
+        value: count(),
+      })
+      .from(bugReportTable)
+      .where(
+        and(
+          inArray(bugReportTable.projectId, projectIds),
+          isNotNull(bugReportTable.resolvedAt),
+          gte(bugReportTable.resolvedAt, from),
+          lt(bugReportTable.resolvedAt, to),
+        ),
+      )
+      .groupBy(dayBucket)
+      .orderBy(dayBucket);
+
+    return rows.map((row) => ({ day: row.day, value: Number(row.value) }));
+  }
+
+  async countCreatedBySeverity(projectIds: string[], from: Date, to: Date): Promise<SeverityCountRow[]> {
+    const rows = await this.db
+      .select({
+        severity: bugReportTable.severity,
+        count: count(),
+      })
+      .from(bugReportTable)
+      .where(
+        and(
+          inArray(bugReportTable.projectId, projectIds),
+          gte(bugReportTable.createdAt, from),
+          lt(bugReportTable.createdAt, to),
+        ),
+      )
+      .groupBy(bugReportTable.severity);
+
+    return rows.map((row) => ({
+      severity: row.severity,
+      count: Number(row.count),
     }));
   }
 }

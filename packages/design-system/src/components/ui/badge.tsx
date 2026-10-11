@@ -46,7 +46,7 @@ function TrendBadge({ changePercent, polarity, className }: TrendBadgeProps) {
   const TrendIcon = changePercent < 0 ? TrendingDownIcon : TrendingUpIcon;
 
   return (
-    <Badge variant={variant} className={cn("font-mono text-[10px]", className)}>
+    <Badge variant={variant} className={cn("font-mono", className)}>
       {changePercent !== 0 ? <TrendIcon aria-hidden /> : null}
       {formatStatTrendPercent(changePercent)}
     </Badge>

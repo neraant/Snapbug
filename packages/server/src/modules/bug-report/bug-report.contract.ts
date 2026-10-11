@@ -9,6 +9,10 @@ import {
   findBugReportsOutputDtoSchema,
 } from "@workspace/validation/modules/bug-report/dto/find-bug-reports.schema";
 import {
+  findChartsInputDtoSchema,
+  findChartsOutputDtoSchema,
+} from "@workspace/validation/modules/bug-report/dto/find-charts.schema";
+import {
   findStatsInputDtoSchema,
   findStatsOutputDtoSchema,
 } from "@workspace/validation/modules/bug-report/dto/find-stats.schema";
@@ -39,6 +43,16 @@ export const bugReportContract = {
       path: "/bug-reports/stats",
       tags: ["bug-report"],
       summary: "Bug report overview stats",
+      spec: sessionAuthSpec,
+    }),
+  findCharts: bugReport
+    .input(findChartsInputDtoSchema)
+    .output(findChartsOutputDtoSchema)
+    .route({
+      method: "GET",
+      path: "/bug-reports/charts",
+      tags: ["bug-report"],
+      summary: "Bug report overview charts",
       spec: sessionAuthSpec,
     }),
 };

@@ -25,9 +25,21 @@ export function SignInForm({ invitationToken }: SignInFormProps) {
 
 ## UI
 
-Use `@workspace/design-system` (`layout/`, `forms/`, `ui/`). Prefer its props (`gap`, `width`, `variant`, `size`) over custom classes.
+Use `@workspace/design-system` (`layout/`, `forms/`, `ui/`). Prefer its props (`gap`, `width`, `variant`, `size`) over custom classes. Text size comes from `Typography` variants — see [typography](./typography.mdc).
 
 A control reused across screens goes to `packages/design-system` as a primitive with `cva` variants, like shadcn: one file per control. See `packages/design-system/src/components/ui/button.tsx`.
+
+## One file
+
+One component per file. `Component.Fallback`, or a small private child, may live in the same file.
+
+```tsx
+function SignInFormFallback() {
+  return <Skeleton className="h-40" />;
+}
+
+SignInForm.Fallback = SignInFormFallback;
+```
 
 ## Exports
 
