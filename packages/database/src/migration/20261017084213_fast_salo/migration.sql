@@ -1,0 +1,1 @@
+ALTER TABLE "projects" ADD COLUMN "widget_settings" jsonb;

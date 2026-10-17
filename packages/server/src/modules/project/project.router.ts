@@ -18,4 +18,10 @@ export const projectRouter = os.router({
   updateProject: authed.updateProject.handler(
     async ({ input, context }) => await container.project.updateProject.execute(input, context.user.id),
   ),
+  findProjectWidgetSetting: authed.findProjectWidgetSetting.handler(
+    async ({ input, context }) => await container.project.findProjectWidgetSetting.execute(input, context.user.id),
+  ),
+  updateProjectWidgetSetting: authed.updateProjectWidgetSetting.handler(
+    async ({ input, context }) => await container.project.updateProjectWidgetSetting.execute(input, context.user.id),
+  ),
 });

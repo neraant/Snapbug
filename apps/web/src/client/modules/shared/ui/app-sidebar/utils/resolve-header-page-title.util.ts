@@ -1,8 +1,13 @@
 import type { SidebarItem } from "@workspace/design-system/components/layout/sidebar";
 
+function hrefPathname(href: string) {
+  const [pathOnly] = href.split("?");
+  return pathOnly || "/";
+}
+
 function isActivePath(pathname: string, href: string) {
-  if (href === "/") return pathname === "/";
-  return pathname === href || pathname.startsWith(`${href}/`);
+  const itemPath = hrefPathname(href);
+  return pathname === itemPath || pathname.startsWith(`${itemPath}/`);
 }
 
 export function resolveHeaderPageTitle(pathname: string, items: SidebarItem[], fallback: string) {

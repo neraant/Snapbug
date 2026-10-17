@@ -1,13 +1,14 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 
 import { projectScopeSearchParamKey } from "@/client/modules/shared/consts/project-scope-search-param.const";
 import {
   formatProjectScopeSearchParam,
   parseProjectScopeSearchParam,
 } from "@/client/modules/shared/utils/parse-project-scope-search-param.util";
+import { writeStoredProjectScope } from "@/client/modules/shared/utils/project-scope-storage.util";
 
 export function useProjectScopeSearchParam() {
   const router = useRouter();
@@ -16,8 +17,19 @@ export function useProjectScopeSearchParam() {
 
   const projectId = parseProjectScopeSearchParam(searchParams.get(projectScopeSearchParamKey));
 
+  useEffect(() => {
+    if (!searchParams.has(projectScopeSearchParamKey)) {
+      return;
+    }
+
+    const parsed = parseProjectScopeSearchParam(searchParams.get(projectScopeSearchParamKey));
+    writeStoredProjectScope(parsed);
+  }, [searchParams]);
+
   const setProjectId = useCallback(
     (nextProjectId: string | null) => {
+      writeStoredProjectScope(nextProjectId);
+
       const params = new URLSearchParams(searchParams.toString());
       const serialized = formatProjectScopeSearchParam(nextProjectId);
 

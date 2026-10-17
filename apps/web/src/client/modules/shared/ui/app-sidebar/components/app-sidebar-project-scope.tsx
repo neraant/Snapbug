@@ -21,6 +21,7 @@ import { useMemo } from "react";
 import { overviewStatAllProjectsValue } from "@/client/modules/overview/consts/overview-stat-filter.const";
 import { texts as overviewTexts } from "@/client/modules/overview/consts/texts.const";
 import { useProjectScopeSearchParam } from "@/client/modules/shared/hooks/use-project-scope-search-param";
+import { useRestoreProjectScopeSearchParam } from "@/client/modules/shared/hooks/use-restore-project-scope-search-param";
 import { useFindProjects } from "@/client/shared/queries/use-find-projects";
 
 function getProjectScopeLabel(projectId: string | null, projectNameById: Map<string, string>) {
@@ -110,6 +111,8 @@ export function AppSidebarProjectScope() {
   const isIconMode = state === "collapsed";
   const { projectId, setProjectId } = useProjectScopeSearchParam();
   const { data: projects } = useFindProjects();
+
+  useRestoreProjectScopeSearchParam();
 
   const sortedProjects = useMemo(
     () => [...projects].sort((left, right) => left.name.localeCompare(right.name)),

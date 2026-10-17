@@ -4,13 +4,15 @@ import { Column } from "@workspace/design-system/components/layout/column";
 import { SidebarLayout } from "@workspace/design-system/components/layout/sidebar";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { type PropsWithChildren, Suspense } from "react";
+import { type PropsWithChildren, Suspense, useMemo } from "react";
 
 import { texts as sharedTexts } from "@/client/modules/shared/consts/texts.const";
+import { useProjectScopeSearchParam } from "@/client/modules/shared/hooks/use-project-scope-search-param";
 import { AppSidebarHeader } from "@/client/modules/shared/ui/app-sidebar/components/app-sidebar-header";
 import { AppSidebarProjectScope } from "@/client/modules/shared/ui/app-sidebar/components/app-sidebar-project-scope";
 import { appSidebarItems } from "@/client/modules/shared/ui/app-sidebar/consts/app-sidebar.const";
 import { resolveHeaderPageTitle } from "@/client/modules/shared/ui/app-sidebar/utils/resolve-header-page-title.util";
+import { buildPathWithProjectScopeSearchParam } from "@/client/modules/shared/utils/parse-project-scope-search-param.util";
 import { signOutUser } from "@/client/modules/shared/utils/sign-out.util";
 import { texts as siteTexts } from "@/shared/consts/texts.const";
 
@@ -25,6 +27,15 @@ type AppSidebarProps = PropsWithChildren<{
 
 export function AppSidebar({ defaultSidebarOpen, user, children }: AppSidebarProps) {
   const pathname = usePathname();
+  const { projectId } = useProjectScopeSearchParam();
+  const sidebarItems = useMemo(
+    () =>
+      appSidebarItems.map((item) => ({
+        ...item,
+        href: buildPathWithProjectScopeSearchParam(item.href, projectId),
+      })),
+    [projectId],
+  );
   const pageTitle = resolveHeaderPageTitle(pathname, appSidebarItems, siteTexts.brand.name);
 
   return (
@@ -32,7 +43,7 @@ export function AppSidebar({ defaultSidebarOpen, user, children }: AppSidebarPro
       title={siteTexts.brand.name}
       description={siteTexts.brand.tagline}
       defaultOpen={defaultSidebarOpen}
-      items={appSidebarItems}
+      items={sidebarItems}
       pathname={pathname}
       user={{ name: user?.name ?? user?.email ?? "User", image: user?.image }}
       linkAs={Link}

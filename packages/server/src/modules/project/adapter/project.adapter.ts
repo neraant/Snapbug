@@ -46,4 +46,10 @@ export class ProjectAdapter implements OrganizationProjectPort, BugReportProject
   async findById(id: string): Promise<ProjectModelType | null> {
     return await this.findProjectById.execute(id);
   }
+
+  async findWidgetSetting(projectId: string): Promise<ProjectWidgetSettingModelType | null> {
+    const project = await this.projectRepository.findById(projectId);
+    if (!project) return null;
+    return ProjectMapper.toWidgetSettingDto(project);
+  }
 }

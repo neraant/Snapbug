@@ -4,12 +4,14 @@ export class Project {
   readonly id: ProjectPersistedType["id"];
   readonly name: ProjectPersistedType["name"];
   readonly organizationId: ProjectPersistedType["organizationId"];
+  readonly widgetSettings: ProjectPersistedType["widgetSettings"];
   readonly createdAt: ProjectPersistedType["createdAt"];
 
   constructor(project: ProjectPersistedType) {
     this.id = project.id;
     this.name = project.name;
     this.organizationId = project.organizationId;
+    this.widgetSettings = project.widgetSettings;
     this.createdAt = project.createdAt;
   }
 
@@ -28,6 +30,7 @@ export class Project {
       id: this.id,
       name: this.name,
       organizationId: this.organizationId,
+      widgetSettings: this.widgetSettings,
       createdAt: this.createdAt,
     };
   }

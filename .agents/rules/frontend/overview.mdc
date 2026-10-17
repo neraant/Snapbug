@@ -35,3 +35,11 @@ app/**/page.tsx → components → hooks | utils
 - API contracts and repeated field shapes (email, etc.) live in `@workspace/validation`. Import shared field schemas, keep them required, relax at the use site ([schema](./schema.mdc)).
 - `page.tsx` exports only `Page`. One component per file; `Component.Fallback` may share that file ([page](./page.mdc), [component](./component.mdc)).
 - Reads use `useSuspenseQuery` inside `Suspense`; fallback is `Component.Fallback`. Paginated lists use `useQuery`. Fetch the aggregate, not one field ([query](./query.mdc)).
+
+## UI & layout
+
+- **Design system in modules:** Compose from `@workspace/design-system` (`layout/`, `ui/`) and semantic tokens (`success`, `muted`, …). No raw HTML, utility classes, inline styles, or ad-hoc palette colors in `client/modules/`. Reuse an existing primitive; if the same UI appears in more than one place, add it to the design system ([component](./component.mdc)).
+- **One client boundary:** Prefer a single `"use client"` on the route `page.tsx`. Under a client page, module files must not repeat it. From a server route, only the client entry module file gets the directive—not every descendant ([page](./page.mdc)).
+- **Scoped navigation:** Links that carry project scope must keep the same search params on every in-app `href`. Match sidebar active state to `pathname`, not the full URL including query.
+- **Card chrome:** Segmented controls and card actions belong in the card header (`Card.Header` / `MetricCard.Header`), like other screens on the page. Reuse the page's existing card shell—don't wrap the same block in another card.
+- **Promises:** Await or `.catch()`; never prefix with `void`.

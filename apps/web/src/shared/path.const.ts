@@ -5,6 +5,7 @@ export const path = {
   resetPassword: "/reset-password",
   onboarding: "/onboarding",
 
-  overview: "/",
+  overview: "/overview",
   playground: "/playground",
+  sdk: "/sdk",
 } as const;

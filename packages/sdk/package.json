@@ -16,6 +16,9 @@
     "typescript": "5"
   },
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./widget": "./src/widget.ts",
+    "./privacy.util": "./src/privacy.util.ts",
+    "./widget-config.types": "./src/widget-config.types.ts"
   }
 }

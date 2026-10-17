@@ -1,11 +1,13 @@
-import { mountWidget, unmountWidget } from "./widget";
+import { mountWidget, unmountWidget, type WidgetConfig } from "./widget";
+
+export type { WidgetConfig } from "./widget";
 
 export const snapbug = {
-  init: (config: { apiKey: string; host: string }) => {
+  init: (config: WidgetConfig) => {
     const apiKey = config.apiKey.trim();
     if (!apiKey) return;
 
-    mountWidget({ apiKey, host: config.host.trim().replace(/\/$/, "") });
+    mountWidget({ ...config, apiKey, host: config.host.trim().replace(/\/$/, "") });
   },
   destroy: () => {
     unmountWidget();

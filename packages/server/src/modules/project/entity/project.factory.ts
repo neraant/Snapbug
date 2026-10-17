@@ -8,6 +8,7 @@ export abstract class ProjectFactory {
       id: randomUUID(),
       name: project.name,
       organizationId: project.organizationId,
+      widgetSettings: null,
       createdAt: new Date(),
     });
   }

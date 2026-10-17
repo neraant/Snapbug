@@ -65,9 +65,14 @@ const THEME_OPTION = [
   { value: "system", label: "System", icon: MonitorIcon },
 ] as const;
 
+function hrefPathname(href: string) {
+  const [pathOnly] = href.split("?");
+  return pathOnly || "/";
+}
+
 function isActivePath(pathname: string, href: string) {
-  if (href === "/") return pathname === "/";
-  return pathname === href || pathname.startsWith(`${href}/`);
+  const itemPath = hrefPathname(href);
+  return pathname === itemPath || pathname.startsWith(`${itemPath}/`);
 }
 
 function getInitials(name: string) {

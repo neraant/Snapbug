@@ -1,38 +1,25 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import { PageContainer } from "@workspace/design-system/components/layout/page";
-import { useMemo, useState } from "react";
+import { path } from "@/shared/path.const";
 
-import { Overview } from "@/client/modules/overview/components/overview";
-import { OverviewStatFilterToolbarContainer } from "@/client/modules/overview/components/overview-stat-filters";
-import { overviewStatPeriodDaysDefault } from "@/client/modules/overview/consts/overview-stat-filter.const";
-import type { OverviewStatFilters } from "@/client/modules/overview/types/overview-stat-filter.type";
-import { texts } from "@/client/modules/shared/consts/texts.const";
-import { useProjectScopeSearchParam } from "@/client/modules/shared/hooks/use-project-scope-search-param";
+type PageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
 
-export default function Page() {
-  const { projectId } = useProjectScopeSearchParam();
-  const [periodDays, setPeriodDays] = useState(overviewStatPeriodDaysDefault);
+export default async function Page({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const query = new URLSearchParams();
 
-  const filters = useMemo<OverviewStatFilters>(
-    () => ({
-      projectId,
-      periodDays,
-    }),
-    [periodDays, projectId],
-  );
+  for (const [key, value] of Object.entries(params)) {
+    if (typeof value === "string") {
+      query.set(key, value);
+    } else if (Array.isArray(value)) {
+      for (const entry of value) {
+        query.append(key, entry);
+      }
+    }
+  }
 
-  const onFiltersChange = (nextFilters: OverviewStatFilters) => {
-    setPeriodDays(nextFilters.periodDays);
-  };
-
-  return (
-    <PageContainer
-      title={texts.overview.title}
-      description={texts.overview.description}
-      actions={<OverviewStatFilterToolbarContainer filters={filters} onFiltersChange={onFiltersChange} />}
-    >
-      <Overview filters={filters} />
-    </PageContainer>
-  );
+  const queryString = query.toString();
+  redirect(queryString ? `${path.overview}?${queryString}` : path.overview);
 }

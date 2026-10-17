@@ -1,5 +1,6 @@
 import { db } from "@workspace/database";
 import { ApiKeyAdapter } from "@workspace/server/modules/api-key/adapter/api-key.adapter";
+import { FindProjectApiKeyUseCase } from "@workspace/server/modules/api-key/application/find-project-api-key.use-case";
 import { FindProjectByKeyUseCase } from "@workspace/server/modules/api-key/application/find-project-by-key.use-case";
 import { ApiKeyRepository } from "@workspace/server/modules/api-key/repository/api-key.repository";
 import { RequestPasswordResetUseCase } from "@workspace/server/modules/auth/application/request-password-reset.use-case";
@@ -40,8 +41,10 @@ import { UpdateOrganizationUseCase } from "@workspace/server/modules/organizatio
 import { OrganizationRepository } from "@workspace/server/modules/organization/repository/organization.repository";
 import { ProjectAdapter } from "@workspace/server/modules/project/adapter/project.adapter";
 import { CreateProjectUseCase } from "@workspace/server/modules/project/application/create-project.use-case";
+import { FindProjectWidgetSettingUseCase } from "@workspace/server/modules/project/application/find-project-widget-setting.use-case";
 import { FindProjectsUseCase } from "@workspace/server/modules/project/application/find-projects.use-case";
 import { UpdateProjectUseCase } from "@workspace/server/modules/project/application/update-project.use-case";
+import { UpdateProjectWidgetSettingUseCase } from "@workspace/server/modules/project/application/update-project-widget-setting.use-case";
 import { ProjectRepository } from "@workspace/server/modules/project/repository/project.repository";
 import { AuditLogRepository } from "@workspace/server/shared/audit/audit-log.repository";
 import { AuditLogService } from "@workspace/server/shared/audit/audit-log.service";
@@ -84,6 +87,8 @@ const findUserCredentialsByEmail = new FindUserCredentialsByEmailUseCase(userRep
 const createProject = new CreateProjectUseCase(membershipAdapter, projectRepository);
 const findProjects = new FindProjectsUseCase(membershipAdapter, projectRepository);
 const updateProject = new UpdateProjectUseCase(membershipAdapter, projectRepository);
+const findProjectWidgetSetting = new FindProjectWidgetSettingUseCase(membershipAdapter, projectRepository);
+const updateProjectWidgetSetting = new UpdateProjectWidgetSettingUseCase(membershipAdapter, projectRepository);
 
 const findOnboarding = new FindOnboardingUseCase(
   userAdapter,
@@ -129,6 +134,7 @@ const acceptInvitation = new AcceptInvitationUseCase(
 );
 
 const findProjectByKey = new FindProjectByKeyUseCase(apiKeyRepository, projectAdapter);
+const findProjectApiKey = new FindProjectApiKeyUseCase(membershipAdapter, projectAdapter, apiKeyRepository);
 const createBugReport = new CreateBugReportUseCase(apiKeyAdapter, bugReportService, withTransaction);
 const findBugReports = new FindBugReportsUseCase(membershipAdapter, projectAdapter, bugReportRepository);
 const findStats = new FindStatsUseCase(
@@ -151,9 +157,9 @@ const findWorkload = new FindWorkloadUseCase(membershipAdapter, projectAdapter, 
 export const container = {
   membership: { createMembership, findMembership, findMembershipByUser },
   identity: { createUser, findUserByEmail, findUserCredentialsByEmail },
-  project: { createProject, findProjects, updateProject },
+  project: { createProject, findProjects, updateProject, findProjectWidgetSetting, updateProjectWidgetSetting },
   organization: { findOnboarding, createOrganization, updateOrganization, completeOnboarding },
-  apiKey: { findProjectByKey },
+  apiKey: { findProjectByKey, findProjectApiKey },
   auth: { signUp, verifyCredentials, requestResetPassword, resetPassword },
   invitation: { sendInvitations, findInvitationByToken, acceptInvitation },
   bugReport: { createBugReport, findBugReports, findStats, findCharts, findBreakdowns, findRecent, findWorkload },

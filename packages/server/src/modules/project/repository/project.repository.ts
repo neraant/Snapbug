@@ -17,14 +17,18 @@ export class ProjectRepository {
     const project = await this.db.query.projectTable.findFirst({
       where: { id },
     });
-    return project ? ProjectMapper.fromPersistence(project) : null;
+    return project
+      ? ProjectMapper.fromPersistence({ ...project, widgetSettings: project.widgetSettings ?? null })
+      : null;
   }
 
   async findManyByOrganizationId(organizationId: string): Promise<Project[]> {
     const projects = await this.db.query.projectTable.findMany({
       where: { organizationId },
     });
-    return projects.map((project) => ProjectMapper.fromPersistence(project));
+    return projects.map((project) =>
+      ProjectMapper.fromPersistence({ ...project, widgetSettings: project.widgetSettings ?? null }),
+    );
   }
 
   async save(project: Project): Promise<void> {
@@ -37,12 +41,14 @@ export class ProjectRepository {
           id: values.id,
           name: values.name,
           organizationId: values.organizationId,
+          widgetSettings: values.widgetSettings,
           createdAt: values.createdAt,
         })
         .onConflictDoUpdate({
           target: projectTable.id,
           set: {
             name: values.name,
+            widgetSettings: values.widgetSettings,
           },
         });
     } catch (error) {

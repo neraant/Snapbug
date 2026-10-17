@@ -15,6 +15,7 @@ const existingProject = new Project({
   id: projectId,
   name: "Acme Store",
   organizationId,
+  widgetSettings: null,
   createdAt: persistedAt,
 });
 
