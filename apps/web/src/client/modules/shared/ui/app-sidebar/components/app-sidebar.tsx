@@ -4,10 +4,11 @@ import { Column } from "@workspace/design-system/components/layout/column";
 import { SidebarLayout } from "@workspace/design-system/components/layout/sidebar";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { PropsWithChildren } from "react";
+import { type PropsWithChildren, Suspense } from "react";
 
 import { texts as sharedTexts } from "@/client/modules/shared/consts/texts.const";
 import { AppSidebarHeader } from "@/client/modules/shared/ui/app-sidebar/components/app-sidebar-header";
+import { AppSidebarProjectScope } from "@/client/modules/shared/ui/app-sidebar/components/app-sidebar-project-scope";
 import { appSidebarItems } from "@/client/modules/shared/ui/app-sidebar/consts/app-sidebar.const";
 import { resolveHeaderPageTitle } from "@/client/modules/shared/ui/app-sidebar/utils/resolve-header-page-title.util";
 import { signOutUser } from "@/client/modules/shared/utils/sign-out.util";
@@ -37,6 +38,11 @@ export function AppSidebar({ defaultSidebarOpen, user, children }: AppSidebarPro
       linkAs={Link}
       signOutLabel={sharedTexts.signOut.label}
       onSignOut={signOutUser}
+      scopeSelector={
+        <Suspense fallback={<AppSidebarProjectScope.Fallback />}>
+          <AppSidebarProjectScope />
+        </Suspense>
+      }
     >
       <Column gap="none" className="min-h-svh">
         <AppSidebarHeader pageTitle={pageTitle} />

@@ -31,7 +31,7 @@ import {
 import { Typography } from "@workspace/design-system/components/ui/typography";
 import { BugIcon, EllipsisVerticalIcon, LogOutIcon, MonitorIcon, MoonIcon, SunIcon } from "lucide-react";
 import { useTheme } from "next-themes";
-import { createElement, type ElementType, type PropsWithChildren } from "react";
+import { createElement, type ElementType, type PropsWithChildren, type ReactNode } from "react";
 
 export type SidebarItem = {
   href: string;
@@ -56,6 +56,7 @@ type SidebarLayoutProps = PropsWithChildren<{
   menuLabel?: string;
   themeLabel?: string;
   linkAs?: ElementType;
+  scopeSelector?: ReactNode;
 }>;
 
 const THEME_OPTION = [
@@ -156,6 +157,7 @@ export function SidebarLayout({
   onSignOut,
   menuLabel = "More options",
   themeLabel = "Theme",
+  scopeSelector,
   children,
 }: SidebarLayoutProps) {
   const LinkComponent = linkAs ?? "a";
@@ -186,6 +188,15 @@ export function SidebarLayout({
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarHeader>
+        {scopeSelector ? (
+          <Column
+            gap="none"
+            padding="sm"
+            className="border-b transition-[padding] duration-200 ease-linear group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:p-2"
+          >
+            {scopeSelector}
+          </Column>
+        ) : null}
         <SidebarContent role="navigation" aria-label="Main">
           <SidebarGroup>
             <SidebarGroupContent>
