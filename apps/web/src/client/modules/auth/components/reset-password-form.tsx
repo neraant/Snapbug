@@ -11,7 +11,7 @@ import { useForm } from "react-hook-form";
 
 import { texts } from "@/client/modules/auth/consts/texts.const";
 import { resetPasswordSchema, type ResetPasswordSchemaType } from "@/client/modules/auth/schemas/reset-password.schema";
-import { useResetPassword } from "@/client/shared/queries/use-reset-password";
+import { useResetPassword } from "@/client/modules/shared/queries/use-reset-password";
 import { path } from "@/shared/path.const";
 
 type ResetPasswordFormProps = {

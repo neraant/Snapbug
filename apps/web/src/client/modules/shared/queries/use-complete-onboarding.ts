@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
-import { orpcQuery } from "@/client/shared/orpc/query-utils";
+import { orpcQuery } from "@/client/modules/shared/orpc/query-utils";
 
 export function useCompleteOnboarding() {
   const router = useRouter();

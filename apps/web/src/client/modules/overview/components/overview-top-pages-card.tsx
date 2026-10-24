@@ -5,7 +5,7 @@ import { cn } from "@workspace/design-system/lib/utils";
 import { texts } from "@/client/modules/overview/consts/texts.const";
 import type { OverviewStatFilters } from "@/client/modules/overview/types/overview-stat-filter.type";
 import { mapPagesToBarListItems } from "@/client/modules/overview/utils/map-pages-to-bar-list-items.util";
-import { useFindBugReportBreakdowns } from "@/client/shared/queries/use-find-bug-report-breakdowns";
+import { useFindBugReportBreakdowns } from "@/client/modules/shared/queries/use-find-bug-report-breakdowns";
 
 type OverviewTopPagesCardProps = {
   filters: OverviewStatFilters;

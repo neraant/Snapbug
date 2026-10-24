@@ -6,11 +6,11 @@ import { useEffect, useRef } from "react";
 import { overviewStatAllProjectsValue } from "@/client/modules/overview/consts/overview-stat-filter.const";
 import { projectScopeSearchParamKey } from "@/client/modules/shared/consts/project-scope-search-param.const";
 import { useProjectScopeSearchParam } from "@/client/modules/shared/hooks/use-project-scope-search-param";
+import { useFindProjects } from "@/client/modules/shared/queries/use-find-projects";
 import {
   isStoredProjectScopeValid,
   readStoredProjectScope,
 } from "@/client/modules/shared/utils/project-scope-storage.util";
-import { useFindProjects } from "@/client/shared/queries/use-find-projects";
 
 export function useRestoreProjectScopeSearchParam() {
   const searchParams = useSearchParams();

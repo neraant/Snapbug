@@ -8,8 +8,8 @@ import { useForm } from "react-hook-form";
 import { texts } from "@/client/modules/auth/consts/texts.const";
 import { signUpSchema, type SignUpSchemaType } from "@/client/modules/auth/schemas/sign-up.schema";
 import { acceptInvitationAfterAuth } from "@/client/modules/auth/utils/accept-invitation-after-auth.util";
-import { useAcceptInvitation } from "@/client/shared/queries/use-accept-invitation";
-import { useSignUp } from "@/client/shared/queries/use-sign-up";
+import { useAcceptInvitation } from "@/client/modules/shared/queries/use-accept-invitation";
+import { useSignUp } from "@/client/modules/shared/queries/use-sign-up";
 import { path } from "@/shared/path.const";
 
 type UseSignUpFormInput = {

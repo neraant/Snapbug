@@ -12,7 +12,7 @@ import {
   requestPasswordResetSchema,
   type RequestPasswordResetSchemaType,
 } from "@/client/modules/auth/schemas/request-password-reset.schema";
-import { useRequestPasswordReset } from "@/client/shared/queries/use-request-password-reset";
+import { useRequestPasswordReset } from "@/client/modules/shared/queries/use-request-password-reset";
 
 export function RequestPasswordResetForm() {
   const { mutateAsync: requestPasswordReset } = useRequestPasswordReset();

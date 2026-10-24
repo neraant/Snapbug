@@ -9,8 +9,8 @@ import {
   type OnboardingOrganizationSchemaType,
 } from "@/client/modules/onboarding/schemas/onboarding-organization.schema";
 import type { OnboardingWorkspace } from "@/client/modules/onboarding/types/onboarding-workspace.type";
-import { useCreateOrganization } from "@/client/shared/queries/use-create-organization";
-import { useUpdateOrganization } from "@/client/shared/queries/use-update-organization";
+import { useCreateOrganization } from "@/client/modules/shared/queries/use-create-organization";
+import { useUpdateOrganization } from "@/client/modules/shared/queries/use-update-organization";
 
 type UseOnboardingOrganizationStepInput = {
   initialName: string;

@@ -10,7 +10,7 @@ import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { useState } from "react";
 
 import { texts } from "@/client/modules/sdk-setup/consts/texts.const";
-import { useFindProjectApiKey } from "@/client/shared/queries/use-find-project-api-key";
+import { useFindProjectApiKey } from "@/client/modules/shared/queries/use-find-project-api-key";
 
 type SdkSetupApiKeyCardProps = {
   projectId: string;

@@ -7,8 +7,8 @@ import { texts } from "@/client/modules/onboarding/consts/texts.const";
 import type { OnboardingWorkspace } from "@/client/modules/onboarding/types/onboarding-workspace.type";
 import { resolveInitialOnboardingStep } from "@/client/modules/onboarding/utils/resolve-initial-onboarding-step.util";
 import { toOnboardingWorkspace } from "@/client/modules/onboarding/utils/to-onboarding-workspace.util";
-import { useCompleteOnboarding } from "@/client/shared/queries/use-complete-onboarding";
-import { useFindOnboarding } from "@/client/shared/queries/use-find-onboarding";
+import { useCompleteOnboarding } from "@/client/modules/shared/queries/use-complete-onboarding";
+import { useFindOnboarding } from "@/client/modules/shared/queries/use-find-onboarding";
 
 export function useOnboardingFlow() {
   const { data: snapshot } = useFindOnboarding();

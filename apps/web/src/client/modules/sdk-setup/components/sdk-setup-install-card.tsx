@@ -9,7 +9,7 @@ import {
   buildSdkSetupInstallSnippet,
   type SdkSetupInstallTab,
 } from "@/client/modules/sdk-setup/utils/build-sdk-setup-snippet.util";
-import { useFindProjectApiKey } from "@/client/shared/queries/use-find-project-api-key";
+import { useFindProjectApiKey } from "@/client/modules/shared/queries/use-find-project-api-key";
 
 const installTabs: SdkSetupInstallTab[] = ["npm", "pnpm", "yarn", "script"];
 

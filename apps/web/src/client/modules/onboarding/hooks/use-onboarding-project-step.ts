@@ -8,8 +8,8 @@ import {
   onboardingProjectSchema,
   type OnboardingProjectSchemaType,
 } from "@/client/modules/onboarding/schemas/onboarding-project.schema";
-import { useCreateProject } from "@/client/shared/queries/use-create-project";
-import { useUpdateProject } from "@/client/shared/queries/use-update-project";
+import { useCreateProject } from "@/client/modules/shared/queries/use-create-project";
+import { useUpdateProject } from "@/client/modules/shared/queries/use-update-project";
 
 type UseOnboardingProjectStepInput = {
   initialName: string;

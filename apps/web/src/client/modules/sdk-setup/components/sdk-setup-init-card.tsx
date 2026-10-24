@@ -14,8 +14,8 @@ import {
   buildSdkSetupInitSnippetForCopy,
   type SdkSetupInitTab,
 } from "@/client/modules/sdk-setup/utils/build-sdk-setup-snippet.util";
-import { useFindProjectApiKey } from "@/client/shared/queries/use-find-project-api-key";
-import { useFindProjectWidgetSetting } from "@/client/shared/queries/use-find-project-widget-setting";
+import { useFindProjectApiKey } from "@/client/modules/shared/queries/use-find-project-api-key";
+import { useFindProjectWidgetSetting } from "@/client/modules/shared/queries/use-find-project-widget-setting";
 
 const initTabs: SdkSetupInitTab[] = ["react", "next"];
 

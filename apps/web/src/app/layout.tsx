@@ -7,7 +7,7 @@ import type { Metadata } from "next";
 import { Figtree, Geist_Mono } from "next/font/google";
 import type { PropsWithChildren } from "react";
 
-import { QueryProvider } from "@/client/shared/query-client/provider";
+import { QueryProvider } from "@/client/modules/shared/query-client/provider";
 import { texts } from "@/shared/consts/texts.const";
 
 export const metadata: Metadata = {

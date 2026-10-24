@@ -7,8 +7,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 const hexColorSaveDebounceMs = 350;
 
-import { useFindProjectWidgetSetting } from "@/client/shared/queries/use-find-project-widget-setting";
-import { useUpdateProjectWidgetSetting } from "@/client/shared/queries/use-update-project-widget-setting";
+import { useFindProjectWidgetSetting } from "@/client/modules/shared/queries/use-find-project-widget-setting";
+import { useUpdateProjectWidgetSetting } from "@/client/modules/shared/queries/use-update-project-widget-setting";
 
 const buttonLabelSchema = projectWidgetSettingModelSchema.shape.buttonLabel;
 

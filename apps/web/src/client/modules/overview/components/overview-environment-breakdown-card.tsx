@@ -8,7 +8,7 @@ import { environmentBreakdownDimensions } from "@/client/modules/overview/consts
 import { texts } from "@/client/modules/overview/consts/texts.const";
 import { useOverviewEnvironmentBreakdownCard } from "@/client/modules/overview/hooks/use-overview-environment-breakdown-card";
 import type { OverviewStatFilters } from "@/client/modules/overview/types/overview-stat-filter.type";
-import { useFindBugReportBreakdowns } from "@/client/shared/queries/use-find-bug-report-breakdowns";
+import { useFindBugReportBreakdowns } from "@/client/modules/shared/queries/use-find-bug-report-breakdowns";
 
 type OverviewEnvironmentBreakdownCardProps = {
   filters: OverviewStatFilters;

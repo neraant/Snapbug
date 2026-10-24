@@ -6,7 +6,7 @@ import { cn } from "@workspace/design-system/lib/utils";
 import { texts } from "@/client/modules/overview/consts/texts.const";
 import type { OverviewStatFilters } from "@/client/modules/overview/types/overview-stat-filter.type";
 import { mapChartHoursToHeatmapRows } from "@/client/modules/overview/utils/map-chart-hours-to-heatmap-rows.util";
-import { useFindBugReportCharts } from "@/client/shared/queries/use-find-bug-report-charts";
+import { useFindBugReportCharts } from "@/client/modules/shared/queries/use-find-bug-report-charts";
 
 type OverviewBusiestHoursCardProps = {
   filters: OverviewStatFilters;

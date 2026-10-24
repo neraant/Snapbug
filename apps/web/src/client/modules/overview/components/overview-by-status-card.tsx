@@ -10,7 +10,7 @@ import { statusBreakdownColor } from "@/client/modules/overview/consts/status-br
 import { texts } from "@/client/modules/overview/consts/texts.const";
 import type { OverviewStatFilters } from "@/client/modules/overview/types/overview-stat-filter.type";
 import { mapStatusToStackedBarSegments } from "@/client/modules/overview/utils/map-status-to-stacked-bar-segments.util";
-import { useFindBugReportBreakdowns } from "@/client/shared/queries/use-find-bug-report-breakdowns";
+import { useFindBugReportBreakdowns } from "@/client/modules/shared/queries/use-find-bug-report-breakdowns";
 
 type OverviewByStatusCardProps = {
   filters: OverviewStatFilters;

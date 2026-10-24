@@ -7,7 +7,7 @@ import { SubmitButton } from "@workspace/design-system/components/ui/submit-butt
 
 import { texts } from "@/client/modules/auth/consts/texts.const";
 import { useSignUpForm } from "@/client/modules/auth/hooks/use-sign-up-form";
-import { useFindInvitationByToken } from "@/client/shared/queries/use-find-invitation-by-token";
+import { useFindInvitationByToken } from "@/client/modules/shared/queries/use-find-invitation-by-token";
 
 type SignUpFormProps = {
   invitationToken?: string;

@@ -21,8 +21,8 @@ import { useMemo } from "react";
 import { overviewStatAllProjectsValue } from "@/client/modules/overview/consts/overview-stat-filter.const";
 import { texts as overviewTexts } from "@/client/modules/overview/consts/texts.const";
 import { useProjectScopeSearchParam } from "@/client/modules/shared/hooks/use-project-scope-search-param";
-import { useRestoreProjectScopeSearchParam } from "@/client/modules/shared/hooks/use-restore-project-scope-search-param";
-import { useFindProjects } from "@/client/shared/queries/use-find-projects";
+import { useFindProjects } from "@/client/modules/shared/queries/use-find-projects";
+import { useRestoreProjectScopeSearchParam } from "@/client/modules/shared/ui/app-sidebar/hooks/use-restore-project-scope-search-param";
 
 function getProjectScopeLabel(projectId: string | null, projectNameById: Map<string, string>) {
   if (projectId == null) {

@@ -4,7 +4,7 @@ import { cn } from "@workspace/design-system/lib/utils";
 
 import { texts } from "@/client/modules/overview/consts/texts.const";
 import { mapWorkloadToBarListItems } from "@/client/modules/overview/utils/map-workload-to-bar-list-items.util";
-import { useFindBugReportWorkload } from "@/client/shared/queries/use-find-bug-report-workload";
+import { useFindBugReportWorkload } from "@/client/modules/shared/queries/use-find-bug-report-workload";
 
 type OverviewTeamWorkloadCardProps = {
   projectId: string | null;

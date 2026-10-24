@@ -5,10 +5,13 @@ import { useEffect, useMemo } from "react";
 
 import { buildSnapbugWidgetInitOptions } from "@/client/modules/sdk-setup/utils/build-snapbug-widget-init-options.util";
 import { useProjectScopeSearchParam } from "@/client/modules/shared/hooks/use-project-scope-search-param";
-import { useFindProjectApiKey } from "@/client/shared/queries/use-find-project-api-key";
-import { useFindProjectWidgetSetting } from "@/client/shared/queries/use-find-project-widget-setting";
+import { useFindProjectApiKey } from "@/client/modules/shared/queries/use-find-project-api-key";
+import { useFindProjectWidgetSetting } from "@/client/modules/shared/queries/use-find-project-widget-setting";
 
 const playgroundFallbackApiKey = "sb_test_store_active";
+
+const isStagingApp =
+  process.env.NEXT_PUBLIC_APP_ENV === "staging" || process.env.NEXT_PUBLIC_VERCEL_TARGET_ENV === "staging";
 
 export function PlaygroundSnapbug() {
   const { projectId } = useProjectScopeSearchParam();
@@ -22,6 +25,21 @@ export function PlaygroundSnapbug() {
 
 function PlaygroundSnapbugUnscoped() {
   useEffect(() => {
+    if (isStagingApp) {
+      const stagingApiKey = process.env.NEXT_PUBLIC_SNAPBUG_API_KEY?.trim();
+      if (!stagingApiKey) {
+        console.warn("NEXT_PUBLIC_SNAPBUG_API_KEY is not set");
+        return;
+      }
+
+      snapbug.init({
+        apiKey: stagingApiKey,
+        host: window.location.origin,
+      });
+
+      return () => snapbug.destroy();
+    }
+
     snapbug.init({
       apiKey: playgroundFallbackApiKey,
       host: window.location.origin,

@@ -9,8 +9,8 @@ import {
   type OnboardingTeammateSchemaType,
 } from "@/client/modules/onboarding/schemas/onboarding-teammate.schema";
 import { collectTeammateEmails } from "@/client/modules/onboarding/utils/collect-teammate-email.util";
-import { useCompleteOnboarding } from "@/client/shared/queries/use-complete-onboarding";
-import { useSendInvitations } from "@/client/shared/queries/use-send-invitations";
+import { useCompleteOnboarding } from "@/client/modules/shared/queries/use-complete-onboarding";
+import { useSendInvitations } from "@/client/modules/shared/queries/use-send-invitations";
 type UseOnboardingTeammateStepInput = {
   organizationId: string;
 };
