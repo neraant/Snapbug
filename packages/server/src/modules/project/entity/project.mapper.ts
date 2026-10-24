@@ -34,6 +34,7 @@ export abstract class ProjectMapper {
         ...projectWidgetSettingModelDefaults.privacy,
         ...widgetSettings.privacy,
       },
+      allowedDomains: widgetSettings.allowedDomains ?? projectWidgetSettingModelDefaults.allowedDomains,
     });
   }
 }

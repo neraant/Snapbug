@@ -10,7 +10,11 @@ const authed = os.use(authedMiddleware);
 
 export const bugReportRouter = os.router({
   create: os.create.handler(
-    async ({ input, context }) => await container.bugReport.createBugReport.execute(input, context.actor),
+    async ({ input, context }) =>
+      await container.bugReport.createBugReport.execute(input, context.actor, context.requestOrigin),
+  ),
+  findWidgetConfig: os.findWidgetConfig.handler(
+    async ({ input, context }) => await container.bugReport.findWidgetConfig.execute(input, context.requestOrigin),
   ),
   findMany: authed.findMany.handler(
     async ({ context }) => await container.bugReport.findBugReports.execute(context.user.id),

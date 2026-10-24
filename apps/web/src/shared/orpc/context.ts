@@ -3,24 +3,34 @@ import { headers } from "next/headers";
 
 import { auth } from "@/auth";
 
+async function getRequestHeaders() {
+  return await headers();
+}
+
 async function getClientIp(): Promise<string> {
-  const headerStore = await headers();
+  const headerStore = await getRequestHeaders();
   const forwarded = headerStore.get("x-forwarded-for");
   return forwarded?.split(",")[0]?.trim() || "unknown";
 }
 
+async function getRequestOrigin(): Promise<string | null> {
+  const headerStore = await getRequestHeaders();
+  return headerStore.get("origin");
+}
+
 export async function createContext(): Promise<OrpcContext> {
-  const ip = await getClientIp();
+  const [ip, requestOrigin] = await Promise.all([getClientIp(), getRequestOrigin()]);
 
   try {
     const session = await auth();
     const userId = session?.user?.id;
     if (!userId) {
-      return { user: null, ip, actor: { type: "api-key", id: null } };
+      return { user: null, ip, actor: { type: "api-key", id: null }, requestOrigin };
     }
 
     return {
       ip,
+      requestOrigin,
       user: {
         id: userId,
         email: session.user?.email ?? "",
@@ -29,6 +39,6 @@ export async function createContext(): Promise<OrpcContext> {
       actor: { type: "user", id: userId },
     };
   } catch {
-    return { user: null, ip, actor: { type: "api-key", id: null } };
+    return { user: null, ip, actor: { type: "api-key", id: null }, requestOrigin };
   }
 }

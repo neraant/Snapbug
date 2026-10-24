@@ -56,7 +56,7 @@ export function SdkSetupInstallCard({ projectId }: SdkSetupInstallCardProps) {
 }
 
 function SdkSetupInstallCardFallback() {
-  return <Skeleton className="h-48 w-full" />;
+  return <Skeleton className="h-55" />;
 }
 
 SdkSetupInstallCard.Fallback = SdkSetupInstallCardFallback;

@@ -66,7 +66,7 @@ export function SdkSetupApiKeyCard({ projectId }: SdkSetupApiKeyCardProps) {
 }
 
 function SdkSetupApiKeyCardFallback() {
-  return <Skeleton className="h-36 w-full" />;
+  return <Skeleton className="h-42.5" />;
 }
 
 SdkSetupApiKeyCard.Fallback = SdkSetupApiKeyCardFallback;

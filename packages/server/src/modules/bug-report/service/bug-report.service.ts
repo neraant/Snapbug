@@ -28,8 +28,9 @@ export class BugReportService {
     input: Omit<CreateBugReportType, "shortId"> & { organizationId: string },
     action: string,
   ): Promise<BugReport> {
-    const shortId = await this.bugReportRepository.allocateShortId(input.organizationId);
-    const bugReport = BugReportFactory.create({ ...input, shortId });
+    const { organizationId, ...createInput } = input;
+    const shortId = await this.bugReportRepository.allocateShortId(organizationId);
+    const bugReport = BugReportFactory.create({ ...createInput, shortId });
     await this.saveWithAudit(bugReport, action);
     return bugReport;
   }

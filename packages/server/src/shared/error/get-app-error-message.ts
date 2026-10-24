@@ -9,6 +9,7 @@ const ERROR_MESSAGES: Record<ErrorCode, string> = {
   [ERROR_CODES.USER_NOT_FOUND]: "User not found",
   [ERROR_CODES.UNAUTHORIZED]: "You need to sign in to continue",
   [ERROR_CODES.INVALID_API_KEY]: "This API key is invalid",
+  [ERROR_CODES.ORIGIN_NOT_ALLOWED]: "This site is not allowed to submit bug reports",
   [ERROR_CODES.ORGANIZATION_NOT_FOUND]: "Organization not found",
   [ERROR_CODES.MEMBERSHIP_ALREADY_EXISTS]: "This organization already has a member",
   [ERROR_CODES.USER_ALREADY_HAS_ORGANIZATION]: "You already belong to an organization",
@@ -19,6 +20,8 @@ const ERROR_MESSAGES: Record<ErrorCode, string> = {
   [ERROR_CODES.INVALID_RESET_PASSWORD_TOKEN]: "This reset link is invalid or has expired",
   [ERROR_CODES.INVALID_INVITATION_TOKEN]: "This invitation link is invalid or has expired",
   [ERROR_CODES.INVITATION_EMAIL_MISMATCH]: "Sign in with the email address that received the invitation",
+  [ERROR_CODES.SCREENSHOT_TOO_LARGE]: "Screenshot is too large",
+  [ERROR_CODES.INVALID_SCREENSHOT]: "Screenshot must be PNG or JPEG",
 };
 
 function isErrorCode(value: unknown): value is ErrorCode {

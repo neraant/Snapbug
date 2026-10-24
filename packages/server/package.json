@@ -10,6 +10,7 @@
     "test:unit": "vitest run"
   },
   "dependencies": {
+    "@date-fns/utc": "2.1.1",
     "@modelcontextprotocol/sdk": "1.26.0",
     "@orpc/client": "1.14.14",
     "@orpc/contract": "1.14.14",
@@ -17,9 +18,9 @@
     "@orpc/server": "1.14.14",
     "@orpc/zod": "1.14.14",
     "@react-email/render": "^2.1.0",
+    "@vercel/blob": "2.8.2",
     "@workspace/database": "workspace:*",
     "@workspace/validation": "workspace:*",
-    "@date-fns/utc": "2.1.1",
     "bcryptjs": "3.0.3",
     "date-fns": "4.1.0",
     "drizzle-orm": "1.0.0-rc.4",

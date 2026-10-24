@@ -13,9 +13,11 @@ import {
   projectWidgetSettingAccentValues,
   type ProjectWidgetSettingModelType,
 } from "@workspace/validation/modules/project/dto/project-widget-setting.model";
+import { projectWidgetSettingFontValues } from "@workspace/validation/shared/project-widget-setting-font.schema";
 import { InfoIcon } from "lucide-react";
 import { useMemo } from "react";
 
+import { SdkSetupWidgetColorPicker } from "@/client/modules/sdk-setup/components/sdk-setup-widget-color-picker";
 import { SdkSetupWidgetSettingField } from "@/client/modules/sdk-setup/components/sdk-setup-widget-setting-field";
 import { texts } from "@/client/modules/sdk-setup/consts/texts.const";
 import { useSdkSetupWidgetSetting } from "@/client/modules/sdk-setup/hooks/use-sdk-setup-widget-setting";
@@ -30,6 +32,21 @@ export function SdkSetupWidgetSettingsCard({ projectId }: SdkSetupWidgetSettings
     buttonLabelDraft,
     setButtonLabelDraft,
     buttonLabelError,
+    backgroundDraft,
+    backgroundCommitted,
+    backgroundError,
+    applyBackground,
+    clearBackground,
+    textDraft,
+    textCommitted,
+    textError,
+    applyText,
+    clearText,
+    mutedTextDraft,
+    mutedTextCommitted,
+    mutedTextError,
+    applyMutedText,
+    clearMutedText,
     patchSettings,
     patchPrivacy,
     commitButtonLabel,
@@ -49,6 +66,22 @@ export function SdkSetupWidgetSettingsCard({ projectId }: SdkSetupWidgetSettings
       { value: "light", label: texts.widgetSettings.theme.light },
       { value: "dark", label: texts.widgetSettings.theme.dark },
     ],
+    [],
+  );
+
+  const fontItems = useMemo(
+    () =>
+      projectWidgetSettingFontValues.map((value) => ({
+        value,
+        label:
+          value === "default"
+            ? texts.widgetSettings.font.default
+            : value === "system-ui"
+              ? texts.widgetSettings.font.systemUi
+              : value === "georgia"
+                ? texts.widgetSettings.font.georgia
+                : texts.widgetSettings.font.monospace,
+      })),
     [],
   );
 
@@ -120,6 +153,108 @@ export function SdkSetupWidgetSettingsCard({ projectId }: SdkSetupWidgetSettings
           }
         />
 
+        <SdkSetupWidgetSettingField
+          label={texts.widgetSettings.background.label}
+          htmlFor="widget-background"
+          invalid={backgroundError !== null}
+          labelAccessory={
+            backgroundError ? (
+              <Badge variant="destructive">
+                <InfoIcon />
+                {backgroundError}
+              </Badge>
+            ) : undefined
+          }
+          control={
+            <SdkSetupWidgetColorPicker
+              id="widget-background"
+              label={texts.widgetSettings.background.label}
+              draft={backgroundDraft}
+              committed={backgroundCommitted}
+              invalid={backgroundError !== null}
+              onPick={applyBackground}
+              onClear={clearBackground}
+            />
+          }
+        />
+
+        <SdkSetupWidgetSettingField
+          label={texts.widgetSettings.text.label}
+          htmlFor="widget-text"
+          invalid={textError !== null}
+          labelAccessory={
+            textError ? (
+              <Badge variant="destructive">
+                <InfoIcon />
+                {textError}
+              </Badge>
+            ) : undefined
+          }
+          control={
+            <SdkSetupWidgetColorPicker
+              id="widget-text"
+              label={texts.widgetSettings.text.label}
+              draft={textDraft}
+              committed={textCommitted}
+              invalid={textError !== null}
+              onPick={applyText}
+              onClear={clearText}
+            />
+          }
+        />
+
+        <SdkSetupWidgetSettingField
+          label={texts.widgetSettings.mutedText.label}
+          htmlFor="widget-muted-text"
+          invalid={mutedTextError !== null}
+          labelAccessory={
+            mutedTextError ? (
+              <Badge variant="destructive">
+                <InfoIcon />
+                {mutedTextError}
+              </Badge>
+            ) : undefined
+          }
+          control={
+            <SdkSetupWidgetColorPicker
+              id="widget-muted-text"
+              label={texts.widgetSettings.mutedText.label}
+              draft={mutedTextDraft}
+              committed={mutedTextCommitted}
+              invalid={mutedTextError !== null}
+              onPick={applyMutedText}
+              onClear={clearMutedText}
+            />
+          }
+        />
+
+        <SdkSetupWidgetSettingField
+          label={texts.widgetSettings.font.label}
+          control={
+            <SegmentedControl
+              aria-label={texts.widgetSettings.font.label}
+              value={settings.font ?? "default"}
+              items={fontItems}
+              onValueChange={(value) => patchSettings({ font: value as ProjectWidgetSettingModelType["font"] })}
+            />
+          }
+        />
+
+        <SdkSetupWidgetSettingField
+          htmlFor="widget-allowed-domains"
+          label={texts.widgetSettings.allowedDomains.label}
+          description={texts.widgetSettings.allowedDomains.description}
+          control={
+            <TagsInput
+              id="widget-allowed-domains"
+              value={settings.allowedDomains}
+              onValueChange={(allowedDomains) => patchSettings({ allowedDomains })}
+              placeholder={texts.widgetSettings.allowedDomains.placeholder}
+              removeTagLabel={texts.widgetSettings.allowedDomains.removeTag}
+            />
+          }
+        />
+
         <Column gap="md">
           <Typography variant="heading-xs">{texts.widgetSettings.privacy.heading}</Typography>
 
@@ -167,14 +302,14 @@ export function SdkSetupWidgetSettingsCard({ projectId }: SdkSetupWidgetSettings
           />
         </Column>
 
-        {/* TODO: Capture toggles (screenshot, replay, console, network) and allowed domains */}
+        {/* TODO: Capture toggles (screenshot, replay, console, network) */}
       </MetricCard.Content>
     </MetricCard>
   );
 }
 
 function SdkSetupWidgetSettingsCardFallback() {
-  return <Skeleton className="h-120 w-full" />;
+  return <Skeleton className="h-170" />;
 }
 
 SdkSetupWidgetSettingsCard.Fallback = SdkSetupWidgetSettingsCardFallback;

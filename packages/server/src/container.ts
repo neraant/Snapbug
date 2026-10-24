@@ -9,16 +9,21 @@ import { SignUpUseCase } from "@workspace/server/modules/auth/application/sign-u
 import { VerifyCredentialsUseCase } from "@workspace/server/modules/auth/application/verify-credentials.use-case";
 import { ResetPasswordRepository } from "@workspace/server/modules/auth/repository/reset-password.repository";
 import { AuthService } from "@workspace/server/modules/auth/service/auth.service";
+import { LocalFileStorageAdapter } from "@workspace/server/modules/bug-report/adapter/local-file-storage.adapter";
+import { VercelBlobFileStorageAdapter } from "@workspace/server/modules/bug-report/adapter/vercel-blob-file-storage.adapter";
 import { CreateBugReportUseCase } from "@workspace/server/modules/bug-report/application/create-bug-report.use-case";
 import { FindBreakdownsUseCase } from "@workspace/server/modules/bug-report/application/find-breakdowns.use-case";
 import { FindBugReportsUseCase } from "@workspace/server/modules/bug-report/application/find-bug-reports.use-case";
 import { FindChartsUseCase } from "@workspace/server/modules/bug-report/application/find-charts.use-case";
 import { FindRecentUseCase } from "@workspace/server/modules/bug-report/application/find-recent.use-case";
 import { FindStatsUseCase } from "@workspace/server/modules/bug-report/application/find-stats.use-case";
+import { FindWidgetConfigUseCase } from "@workspace/server/modules/bug-report/application/find-widget-config.use-case";
 import { FindWorkloadUseCase } from "@workspace/server/modules/bug-report/application/find-workload.use-case";
 import { BugReportRepository } from "@workspace/server/modules/bug-report/repository/bug-report.repository";
 import { BugReportService } from "@workspace/server/modules/bug-report/service/bug-report.service";
 import { BugReportStatService } from "@workspace/server/modules/bug-report/service/bug-report-stat.service";
+import { WidgetIngestOriginService } from "@workspace/server/modules/bug-report/service/widget-ingest-origin.service";
+import { WidgetUserAgentService } from "@workspace/server/modules/bug-report/service/widget-user-agent.service";
 import { UserAdapter } from "@workspace/server/modules/identity/adapter/user.adapter";
 import { CreateUserUseCase } from "@workspace/server/modules/identity/application/create-user.use-case";
 import { FindUserByEmailUseCase } from "@workspace/server/modules/identity/application/find-user-by-email.use-case";
@@ -51,6 +56,7 @@ import { AuditLogService } from "@workspace/server/shared/audit/audit-log.servic
 import { withTransactionFactory } from "@workspace/server/shared/database/transaction.util";
 import { resendClient } from "@workspace/server/shared/email/email.client";
 import { EmailService } from "@workspace/server/shared/email/service/email.service";
+import { env } from "@workspace/server/shared/env/env.schema";
 
 const withTransaction = withTransactionFactory(db);
 
@@ -69,6 +75,11 @@ const bugReportRepository = new BugReportRepository();
 const auditLogRepository = new AuditLogRepository();
 const auditLogService = new AuditLogService(auditLogRepository);
 const bugReportService = new BugReportService(bugReportRepository, auditLogService);
+const widgetIngestOriginService = new WidgetIngestOriginService();
+const widgetUserAgentService = new WidgetUserAgentService();
+const bugReportFileStorage = env.BLOB_READ_WRITE_TOKEN
+  ? new VercelBlobFileStorageAdapter(env.BLOB_READ_WRITE_TOKEN)
+  : new LocalFileStorageAdapter();
 
 const membershipAdapter = new MembershipAdapter(membershipRepository);
 const userAdapter = new UserAdapter(userRepository);
@@ -135,7 +146,16 @@ const acceptInvitation = new AcceptInvitationUseCase(
 
 const findProjectByKey = new FindProjectByKeyUseCase(apiKeyRepository, projectAdapter);
 const findProjectApiKey = new FindProjectApiKeyUseCase(membershipAdapter, projectAdapter, apiKeyRepository);
-const createBugReport = new CreateBugReportUseCase(apiKeyAdapter, bugReportService, withTransaction);
+const createBugReport = new CreateBugReportUseCase(
+  apiKeyAdapter,
+  projectAdapter,
+  bugReportService,
+  withTransaction,
+  widgetIngestOriginService,
+  widgetUserAgentService,
+  bugReportFileStorage,
+);
+const findWidgetConfig = new FindWidgetConfigUseCase(apiKeyAdapter, projectAdapter, widgetIngestOriginService);
 const findBugReports = new FindBugReportsUseCase(membershipAdapter, projectAdapter, bugReportRepository);
 const findStats = new FindStatsUseCase(
   membershipAdapter,
@@ -162,5 +182,14 @@ export const container = {
   apiKey: { findProjectByKey, findProjectApiKey },
   auth: { signUp, verifyCredentials, requestResetPassword, resetPassword },
   invitation: { sendInvitations, findInvitationByToken, acceptInvitation },
-  bugReport: { createBugReport, findBugReports, findStats, findCharts, findBreakdowns, findRecent, findWorkload },
+  bugReport: {
+    createBugReport,
+    findWidgetConfig,
+    findBugReports,
+    findStats,
+    findCharts,
+    findBreakdowns,
+    findRecent,
+    findWorkload,
+  },
 };

@@ -30,11 +30,23 @@ export type BugReportPersistedType = {
 };
 
 export type CreateBugReportType = {
+  id?: string;
   projectId: string;
   shortId: string;
   title: string;
   description: string;
   url: string;
+  userAgent?: string | null;
+  browser?: string | null;
+  os?: string | null;
+  device?: string | null;
+  viewportWidth?: number | null;
+  viewportHeight?: number | null;
+  screenshotKey?: string | null;
+  consoleLogs?: unknown[] | null;
+  networkLogs?: unknown[] | null;
+  reporterEmail?: string | null;
+  customContext?: Record<string, unknown> | null;
 };
 
 export type AssigneeOpenCountRow = {

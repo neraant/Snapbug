@@ -4,6 +4,7 @@ export const ERROR_CODES = {
   USER_NOT_FOUND: "user-not-found",
   UNAUTHORIZED: "unauthorized",
   INVALID_API_KEY: "invalid-api-key",
+  ORIGIN_NOT_ALLOWED: "origin-not-allowed",
   ORGANIZATION_NOT_FOUND: "organization-not-found",
   MEMBERSHIP_ALREADY_EXISTS: "membership-already-exists",
   USER_ALREADY_HAS_ORGANIZATION: "user-already-has-organization",
@@ -13,6 +14,8 @@ export const ERROR_CODES = {
   INVALID_RESET_PASSWORD_TOKEN: "invalid-reset-password-token",
   INVALID_INVITATION_TOKEN: "invalid-invitation-token",
   INVITATION_EMAIL_MISMATCH: "invitation-email-mismatch",
+  SCREENSHOT_TOO_LARGE: "screenshot-too-large",
+  INVALID_SCREENSHOT: "invalid-screenshot",
 } as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES];

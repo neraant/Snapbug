@@ -39,6 +39,14 @@ execute(): Promise<OrganizationDto[]>;
 
 The client reads `organization.name` off `findOrganizations`.
 
+## Shared logic
+
+Do not add `application/*.util.ts` for policy shared by several use-cases in the same module. Prefer a small [service](./service.mdc) wired in [container](./container.mdc) and injected; or private methods on each use-case (duplication OK); or [entity](./entity.mdc) pure methods when there is no `AppError` / I/O. One-off helpers in `application/` are discouraged.
+
+## Shared logic
+
+Do not add `application/*.util.ts` for policy shared by several use-cases in the same module. Prefer a small [service](./service.mdc) wired in [container](./container.mdc) and injected; or private methods on each use-case (duplication OK); or [entity](./entity.mdc) pure methods when there is no `AppError` / I/O. One-off helpers in `application/` are discouraged.
+
 ## Don't
 
 - Drizzle / tables / oRPC / other module's repo

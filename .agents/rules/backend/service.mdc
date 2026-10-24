@@ -10,7 +10,7 @@ Tech capability, no SQL. `{Context}Service`. Wired in [api](./api.mdc).
 ## Logic
 
 - How: hash, crypto, format, calculations the use-case would otherwise do inline
-- Not: policy (“email must be unique”) → [application](./application.mdc)
+- Usually not workflow policy (“email must be unique”) → [application](./application.mdc). Exception: the same module policy used by multiple use-cases → small service here, inject from [container](./container.mdc) (not `application/*.util.ts`)
 - A write that changes state records it via `AuditLogService` in the same transaction (`withTx`)
 
 ## Do

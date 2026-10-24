@@ -23,6 +23,9 @@ dist
 # turbo
 .turbo
 
+# bug report uploads
+.data/
+
 # misc
 .DS_Store
 *.pem

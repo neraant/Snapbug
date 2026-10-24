@@ -65,6 +65,34 @@ export const texts = {
       label: "Accent color",
       swatchLabel: (color: string) => `Use accent ${color}`,
     },
+    background: {
+      label: "Popup background",
+    },
+    text: {
+      label: "Popup text",
+    },
+    mutedText: {
+      label: "Muted text",
+    },
+    hexColor: {
+      clear: "Reset",
+      defaultHint: "Default",
+      hueSlider: "Hue",
+      hexInput: "Hex color",
+    },
+    font: {
+      label: "Font",
+      default: "Default",
+      systemUi: "System",
+      georgia: "Georgia",
+      monospace: "Mono",
+    },
+    allowedDomains: {
+      label: "Allowed domains",
+      description: "Hosts that may submit bug reports from the widget. Leave empty to allow any origin.",
+      placeholder: "Add domain",
+      removeTag: (domain: string) => `Remove ${domain}`,
+    },
     privacy: {
       heading: "Privacy",
       maskText: {

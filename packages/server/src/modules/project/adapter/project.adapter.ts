@@ -5,6 +5,7 @@ import type { ProjectPort as OrganizationProjectPort } from "@workspace/server/m
 import { CreateProjectUseCase } from "@workspace/server/modules/project/application/create-project.use-case";
 import { FindProjectByIdUseCase } from "@workspace/server/modules/project/application/find-project-by-id.use-case";
 import { FindProjectsUseCase } from "@workspace/server/modules/project/application/find-projects.use-case";
+import { ProjectMapper } from "@workspace/server/modules/project/entity/project.mapper";
 import type { MembershipPort } from "@workspace/server/modules/project/port/membership.port";
 import type { ProjectRepository } from "@workspace/server/modules/project/repository/project.repository";
 import type {
@@ -16,6 +17,7 @@ import type {
   FindProjectsOutputDtoType,
 } from "@workspace/validation/modules/project/dto/find-projects.schema";
 import type { ProjectModelType } from "@workspace/validation/modules/project/dto/project.model";
+import type { ProjectWidgetSettingModelType } from "@workspace/validation/modules/project/dto/project-widget-setting.model";
 
 export class ProjectAdapter implements OrganizationProjectPort, BugReportProjectPort, ApiKeyProjectPort {
   private readonly createProject: CreateProjectUseCase;

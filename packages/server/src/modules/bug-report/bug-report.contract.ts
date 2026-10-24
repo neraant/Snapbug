@@ -22,6 +22,10 @@ import {
   findStatsOutputDtoSchema,
 } from "@workspace/validation/modules/bug-report/dto/find-stats.schema";
 import {
+  findWidgetConfigInputDtoSchema,
+  findWidgetConfigOutputDtoSchema,
+} from "@workspace/validation/modules/bug-report/dto/find-widget-config.schema";
+import {
   findWorkloadInputDtoSchema,
   findWorkloadOutputDtoSchema,
 } from "@workspace/validation/modules/bug-report/dto/find-workload.schema";
@@ -34,6 +38,15 @@ export const bugReportContract = {
     .input(createBugReportInputDtoSchema)
     .output(createBugReportOutputDtoSchema)
     .route({ method: "POST", path: "/bug-reports", tags: ["bug-report"], summary: "Create bug report" }),
+  findWidgetConfig: bugReport
+    .input(findWidgetConfigInputDtoSchema)
+    .output(findWidgetConfigOutputDtoSchema)
+    .route({
+      method: "GET",
+      path: "/widget-config",
+      tags: ["bug-report"],
+      summary: "Public widget configuration for SDK",
+    }),
   findMany: bugReport.output(findBugReportsOutputDtoSchema).route({
     method: "GET",
     path: "/bug-reports",

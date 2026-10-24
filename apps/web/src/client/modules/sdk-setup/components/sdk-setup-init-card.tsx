@@ -38,9 +38,18 @@ export function SdkSetupInitCard({ projectId }: SdkSetupInitCardProps) {
     [],
   );
 
-  const code = buildSdkSetupInitSnippet({ tab, apiKey: apiKeyData.key, revealKey, widgetSettings });
+  const code = buildSdkSetupInitSnippet({
+    tab,
+    apiKey: apiKeyData.key,
+    revealKey,
+    widgetSettings,
+  });
   const panelTitle = tab === "next" ? texts.init.panelTitle.next : texts.init.panelTitle.react;
-  const copyText = buildSdkSetupInitSnippetForCopy({ tab, apiKey: apiKeyData.key, widgetSettings });
+  const copyText = buildSdkSetupInitSnippetForCopy({
+    tab,
+    apiKey: apiKeyData.key,
+    widgetSettings,
+  });
 
   return (
     <MetricCard id="step-init">
@@ -86,7 +95,7 @@ export function SdkSetupInitCard({ projectId }: SdkSetupInitCardProps) {
 }
 
 function SdkSetupInitCardFallback() {
-  return <Skeleton className="h-64 w-full" />;
+  return <Skeleton className="h-130" />;
 }
 
 SdkSetupInitCard.Fallback = SdkSetupInitCardFallback;

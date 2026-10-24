@@ -34,6 +34,7 @@ const context: OrpcContext = {
   user: { id: "user-1", email: "a@b.test", name: null },
   ip: "127.0.0.1",
   actor: { type: "user", id: "user-1" },
+  requestOrigin: null,
 };
 
 async function postJsonRpc(body: object) {
