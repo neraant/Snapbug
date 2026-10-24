@@ -125,7 +125,7 @@ export function buildSdkSetupInitSnippet(input: {
     return `'use client';
 
 import { useEffect } from 'react';
-import { snapbug } from '@workspace/sdk';
+import { snapbug } from '@neraant/snapbug';
 
 export function SnapbugProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
@@ -139,7 +139,7 @@ export function SnapbugProvider({ children }: { children: React.ReactNode }) {
   }
 
   return `import { useEffect } from 'react';
-import { snapbug } from '@workspace/sdk';
+import { snapbug } from '@neraant/snapbug';
 
 export function App() {
   useEffect(() => {

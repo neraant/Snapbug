@@ -1,4 +1,4 @@
-import type { WidgetConfig } from "@workspace/sdk";
+import type { WidgetConfig } from "@neraant/snapbug";
 import {
   projectWidgetSettingModelDefaults,
   type ProjectWidgetSettingModelType,

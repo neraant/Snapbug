@@ -3,7 +3,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@workspace/sdk": ["./src/index.ts"]
+      "@neraant/snapbug": ["./src/index.ts"]
     }
   },
   "include": ["src"],

@@ -1,6 +1,6 @@
 "use client";
 
-import { snapbug } from "@workspace/sdk";
+import { snapbug } from "@neraant/snapbug";
 import { useEffect, useMemo } from "react";
 
 import { buildSnapbugWidgetInitOptions } from "@/client/modules/sdk-setup/utils/build-snapbug-widget-init-options.util";

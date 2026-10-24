@@ -1,4 +1,4 @@
-# @workspace/sdk
+# @neraant/snapbug
 
 Embeddable Snapbug bug-report widget with screenshot, console, and network capture.
 
@@ -7,13 +7,13 @@ Embeddable Snapbug bug-report widget with screenshot, console, and network captu
 In this monorepo, add a workspace dependency to your app:
 
 ```bash
-pnpm add @workspace/sdk --filter <your-app>
+pnpm add @neraant/snapbug --filter <your-app>
 ```
 
 ## Example
 
 ```ts
-import { snapbug } from "@workspace/sdk";
+import { snapbug } from "@neraant/snapbug";
 
 await snapbug.init({
   apiKey: "your-api-key",

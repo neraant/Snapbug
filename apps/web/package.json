@@ -19,7 +19,7 @@
     "@tanstack/react-query": "5.102.8",
     "@workspace/analytics": "workspace:*",
     "@workspace/design-system": "workspace:*",
-    "@workspace/sdk": "workspace:*",
+    "@neraant/snapbug": "workspace:*",
     "@workspace/server": "workspace:*",
     "@workspace/validation": "workspace:*",
     "lucide-react": "1.40.0",
