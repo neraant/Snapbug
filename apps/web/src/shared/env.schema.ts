@@ -1,17 +1,16 @@
 import { z } from "zod";
 
-const envSchema = z.object({
+import { publicEnvSchema } from "@/shared/env.public.schema";
+
+const envSchema = publicEnvSchema.extend({
   AUTH_SECRET: z.string().min(1),
   NEXT_PUBLIC_APP_URL: z.url(),
-
-  // @disabled posthog
-  // NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN: z.string().min(1),
-  // NEXT_PUBLIC_POSTHOG_HOST: z.url(),
 });
 
 export const env = envSchema.parse({
   AUTH_SECRET: process.env.AUTH_SECRET,
   NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+  NEXT_PUBLIC_SNAPBUG_API_KEY: process.env.NEXT_PUBLIC_SNAPBUG_API_KEY,
 
   // @disabled posthog
   // NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN: process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN,
