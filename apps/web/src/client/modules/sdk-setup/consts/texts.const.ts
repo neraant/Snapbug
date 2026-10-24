@@ -114,6 +114,10 @@ export const texts = {
   testReport: {
     title: "3. Test report",
     description: "Send a sample report from your app to confirm the widget reaches Snapbug.",
-    status: "Waiting for a test report from your site.",
+    connection: {
+      connected: "Connected",
+      waiting: "Waiting for a test report from your site.",
+      notConnected: "Not connected",
+    },
   },
 } as const;
