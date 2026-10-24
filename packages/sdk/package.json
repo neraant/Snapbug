@@ -1,24 +1,60 @@
 {
   "name": "@workspace/sdk",
-  "version": "0.0.0",
+  "version": "0.1.0",
+  "description": "Embeddable bug report widget with screenshot, console and network capture",
   "type": "module",
-  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/neraant/Snapbug.git",
+    "directory": "packages/sdk"
+  },
+  "keywords": [
+    "bug-report",
+    "widget",
+    "feedback",
+    "snapbug"
+  ],
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "publishConfig": {
+    "access": "public",
+    "main": "./dist/index.cjs",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "unpkg": "./dist/snapbug.global.js",
+    "exports": {
+      ".": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js",
+        "require": "./dist/index.cjs"
+      }
+    }
+  },
   "scripts": {
+    "build": "tsup",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm build"
+  },
+  "dependencies": {
+    "modern-screenshot": "4.7.0"
   },
   "devDependencies": {
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
+    "@workspace/validation": "workspace:*",
     "eslint": "9",
     "prettier": "3.8.3",
+    "tsup": "9.0.0",
     "typescript": "5"
-  },
-  "exports": {
-    ".": "./src/index.ts",
-    "./widget": "./src/widget.ts",
-    "./privacy.util": "./src/privacy.util.ts",
-    "./widget-config.types": "./src/widget-config.types.ts"
   }
 }
