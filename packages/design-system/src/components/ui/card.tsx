@@ -23,7 +23,10 @@ function CardHeader({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
       data-slot="card-header"
-      className={cn("grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-1", className)}
+      className={cn(
+        "group/card-header grid grid-cols-[minmax(0,1fr)_auto] items-center gap-y-1 p-4 has-data-[slot=card-icon]:grid-cols-[auto_minmax(0,1fr)_auto] has-data-[slot=card-icon]:gap-x-3",
+        className,
+      )}
       {...props}
     />
   );
@@ -49,7 +52,10 @@ function CardTitle({ className, variant = "label", ...props }: ComponentProps<ty
   return (
     <Typography
       variant={variant}
-      className={cn("col-start-2 row-span-1 row-start-1 min-w-0 self-center justify-self-start", className)}
+      className={cn(
+        "col-start-1 row-start-1 min-w-0 self-center justify-self-start group-has-data-[slot=card-icon]/card-header:col-start-2",
+        className,
+      )}
       {...props}
     />
   );
@@ -60,14 +66,27 @@ function CardDescription({ className, ...props }: ComponentProps<typeof Typograp
     <Typography
       variant="text-sm"
       color="muted"
-      className={cn("col-start-2 row-start-2 min-w-0 self-start justify-self-start", className)}
+      className={cn(
+        "col-start-1 row-start-2 min-w-0 self-start justify-self-start group-has-data-[slot=card-icon]/card-header:col-start-2",
+        className,
+      )}
       {...props}
     />
   );
 }
 
 function CardAction({ className, ...props }: ComponentProps<typeof Row>) {
-  return <Row data-slot="card-action" wrap={false} className={className} {...props} />;
+  return (
+    <Row
+      data-slot="card-action"
+      wrap={false}
+      className={cn(
+        "col-start-2 row-start-1 self-center justify-self-end group-has-data-[slot=card-icon]/card-header:col-start-3",
+        className,
+      )}
+      {...props}
+    />
+  );
 }
 
 function CardContent({ className, gap = "sm", ...props }: ComponentProps<typeof Column>) {

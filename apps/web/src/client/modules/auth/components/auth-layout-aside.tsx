@@ -48,7 +48,7 @@ export function AuthLayoutAside() {
           </Column>
 
           <Row justify="center">
-            <Card width="lg">
+            <Card width="lg" padding="none">
               <Card.Header>
                 <Card.Icon>
                   <SparklesIcon className="text-warning" />

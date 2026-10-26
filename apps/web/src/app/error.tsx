@@ -1,13 +1,6 @@
 "use client";
 
-import { Center } from "@workspace/design-system/components/layout/center";
-import { Column } from "@workspace/design-system/components/layout/column";
-import { Button } from "@workspace/design-system/components/ui/button";
-import { Typography } from "@workspace/design-system/components/ui/typography";
-import Link from "next/link";
-import { useEffect } from "react";
-
-import { url } from "@/shared/build-url.util";
+import { ErrorScreen } from "@/client/modules/error/components/error-screen";
 
 type ErrorProps = {
   error: Error & { digest?: string };
@@ -15,26 +8,5 @@ type ErrorProps = {
 };
 
 export default function Error({ error, reset }: ErrorProps) {
-  useEffect(() => {
-    console.error(error);
-  }, [error]);
-
-  return (
-    <Center>
-      <Column gap="md">
-        <Typography variant="heading-lg">Something went wrong</Typography>
-        {error.digest && (
-          <Typography variant="text-sm" color="muted">
-            Digest: {error.digest}
-          </Typography>
-        )}
-        <Column gap="sm">
-          <Button onClick={reset}>Try again</Button>
-          <Button nativeButton={false} variant="outline" render={<Link href={url.overview()} />}>
-            Go back to the overview page
-          </Button>
-        </Column>
-      </Column>
-    </Center>
-  );
+  return <ErrorScreen error={error} reset={reset} />;
 }
