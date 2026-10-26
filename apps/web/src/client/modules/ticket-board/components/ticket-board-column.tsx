@@ -2,17 +2,17 @@ import { useDroppable } from "@dnd-kit/core";
 import { Column } from "@workspace/design-system/components/layout/column";
 import { Row } from "@workspace/design-system/components/layout/row";
 import { Button } from "@workspace/design-system/components/ui/button";
-import { Separator } from "@workspace/design-system/components/ui/separator";
 import { StatusIndicator } from "@workspace/design-system/components/ui/status-indicator";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@workspace/design-system/components/ui/tooltip";
 import { Typography } from "@workspace/design-system/components/ui/typography";
 import { cn } from "@workspace/design-system/lib/utils";
 import type { BugReportStatus } from "@workspace/validation/modules/bug-report/consts/bug-report-status.const";
 import type { BugReportModelType } from "@workspace/validation/modules/bug-report/dto/bug-report.model";
-import { Fragment, type Ref } from "react";
+import { Fragment, type Ref, useEffect, useState } from "react";
 
 import { TicketBoardCard } from "@/client/modules/ticket-board/components/ticket-board-card";
 import { texts } from "@/client/modules/ticket-board/consts/texts.const";
+import { ticketBoardCardHeightClass } from "@/client/modules/ticket-board/consts/ticket-board.const";
 
 type TicketBoardColumnProps = {
   status: BugReportStatus;
@@ -77,10 +77,13 @@ function TicketBoardColumnView({
   return (
     <div
       ref={columnRef}
-      className={cn("w-full max-w-80 min-w-80 flex-1 shrink-0", isOver ? "rounded-lg bg-muted/50" : undefined)}
+      className={cn(
+        "flex h-full min-h-0 w-full max-w-80 min-w-80 flex-1 shrink-0 flex-col",
+        isOver ? "rounded-lg bg-muted/50" : undefined,
+      )}
     >
-      <Column gap="sm" padding="sm" minWidth="0" width="full">
-        <Row align="center" gap="sm" wrap={false}>
+      <Column gap="sm" padding="sm" minWidth="0" width="full" className="flex h-full min-h-0 flex-col">
+        <Row align="center" gap="sm" wrap={false} className="shrink-0">
           <Tooltip>
             <TooltipTrigger render={headerTrigger} />
             <TooltipContent>{columnText.hint}</TooltipContent>
@@ -89,17 +92,17 @@ function TicketBoardColumnView({
             {reports.length}
           </Typography>
         </Row>
-        <Column gap="sm" minWidth="0" width="full">
+        <Column gap="sm" minWidth="0" width="full" className="min-h-0 flex-1 overflow-y-auto">
           {visibleReports.length === 0 ? (
             <>
-              {showInsertion && insertionIndex === 0 ? <TicketBoardDropIndicator /> : null}
+              {showInsertion && insertionIndex === 0 ? <TicketBoardDropPlaceholder /> : null}
               <Typography variant="text-sm" color="muted">
                 {columnText.empty}
               </Typography>
             </>
           ) : (
             <>
-              {showInsertion && insertionIndex === 0 ? <TicketBoardDropIndicator /> : null}
+              {showInsertion && insertionIndex === 0 ? <TicketBoardDropPlaceholder /> : null}
               {visibleReports.map((report, reportIndex) => (
                 <Fragment key={report.id}>
                   <TicketBoardCard
@@ -107,22 +110,38 @@ function TicketBoardColumnView({
                     projectName={showProjectName ? projectNameById.get(report.projectId) : undefined}
                     dragEnabled={dragEnabled}
                   />
-                  {showInsertion && insertionIndex === reportIndex + 1 ? <TicketBoardDropIndicator /> : null}
+                  {showInsertion && insertionIndex === reportIndex + 1 ? <TicketBoardDropPlaceholder /> : null}
                 </Fragment>
               ))}
             </>
           )}
+          {hasMore ? (
+            <Button variant="ghost" size="sm" className="shrink-0" onClick={onLoadMore}>
+              {texts.column.loadMore}
+            </Button>
+          ) : null}
         </Column>
-        {hasMore ? (
-          <Button variant="ghost" size="sm" onClick={onLoadMore}>
-            {texts.column.loadMore}
-          </Button>
-        ) : null}
       </Column>
     </div>
   );
 }
 
-function TicketBoardDropIndicator() {
-  return <Separator className="bg-primary" />;
+function TicketBoardDropPlaceholder() {
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setOpen(true));
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
+  return (
+    <div
+      aria-hidden
+      className={cn(
+        ticketBoardCardHeightClass,
+        "w-full shrink-0 rounded-lg border-2 border-dashed border-primary/60 bg-primary/5 transition-opacity duration-200 ease-out",
+        open ? "opacity-100" : "opacity-0",
+      )}
+    />
+  );
 }

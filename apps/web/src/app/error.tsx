@@ -7,7 +7,7 @@ import { Typography } from "@workspace/design-system/components/ui/typography";
 import Link from "next/link";
 import { useEffect } from "react";
 
-import { path } from "@/shared/path.const";
+import { url } from "@/shared/build-url.util";
 
 type ErrorProps = {
   error: Error & { digest?: string };
@@ -30,7 +30,7 @@ export default function Error({ error, reset }: ErrorProps) {
         )}
         <Column gap="sm">
           <Button onClick={reset}>Try again</Button>
-          <Button nativeButton={false} variant="outline" render={<Link href={path.overview} />}>
+          <Button nativeButton={false} variant="outline" render={<Link href={url.overview()} />}>
             Go back to the overview page
           </Button>
         </Column>

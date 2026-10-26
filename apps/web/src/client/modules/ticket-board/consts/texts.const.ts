@@ -10,7 +10,11 @@ export const texts = {
     searchClear: "Clear search",
     severity: {
       ariaLabel: "Severity",
-      all: "All severities",
+      placeholder: "All severities",
+    },
+    status: {
+      ariaLabel: "Status",
+      placeholder: "All statuses",
     },
     period: {
       ariaLabel: "Period",
@@ -60,7 +64,7 @@ export const texts = {
     noReportsDescription: "Install the SDK and send your first report from the widget.",
     sdkSetupLink: "Go to SDK setup",
     filteredTitle: "No tickets match your filters",
-    filteredDescription: "Try adjusting search, severity, or the time range.",
+    filteredDescription: "Try adjusting search, status, severity, or the time range.",
   },
   error: {
     title: "Could not load tickets",
@@ -69,7 +73,6 @@ export const texts = {
   },
   toast: {
     statusUpdated: "Ticket status updated",
-    undo: "Undo",
     updateFailed: "Could not update ticket status",
   },
 } as const;

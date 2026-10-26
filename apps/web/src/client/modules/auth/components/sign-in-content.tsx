@@ -6,9 +6,8 @@ import { useSearchParams } from "next/navigation";
 
 import { SignInForm } from "@/client/modules/auth/components/sign-in-form";
 import { texts } from "@/client/modules/auth/consts/texts.const";
-import { authPathWithInvitation } from "@/client/modules/auth/utils/auth-path-with-invitation.util";
 import { parseInvitationToken } from "@/client/modules/auth/utils/parse-invitation-token.util";
-import { path } from "@/shared/path.const";
+import { url } from "@/shared/build-url.util";
 
 export function SignInContent() {
   const searchParams = useSearchParams();
@@ -28,7 +27,7 @@ export function SignInContent() {
         <Button
           nativeButton={false}
           variant="link"
-          render={<Link href={authPathWithInvitation(path.signUp, invitationToken)} />}
+          render={<Link href={url.signUp({ invitation: invitationToken })} />}
         >
           {texts.signIn.footerLink}
         </Button>

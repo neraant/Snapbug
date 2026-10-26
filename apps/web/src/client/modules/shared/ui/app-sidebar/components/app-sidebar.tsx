@@ -11,7 +11,6 @@ import { useProjectScopeSearchParam } from "@/client/modules/shared/hooks/use-pr
 import { AppSidebarHeader } from "@/client/modules/shared/ui/app-sidebar/components/app-sidebar-header";
 import { AppSidebarProjectScope } from "@/client/modules/shared/ui/app-sidebar/components/app-sidebar-project-scope";
 import { appSidebarItems } from "@/client/modules/shared/ui/app-sidebar/consts/app-sidebar.const";
-import { resolveHeaderPageTitle } from "@/client/modules/shared/ui/app-sidebar/utils/resolve-header-page-title.util";
 import { buildPathWithProjectScopeSearchParam } from "@/client/modules/shared/utils/parse-project-scope-search-param.util";
 import { signOutUser } from "@/client/modules/shared/utils/sign-out.util";
 import { texts as siteTexts } from "@/shared/consts/texts.const";
@@ -36,7 +35,6 @@ export function AppSidebar({ defaultSidebarOpen, user, children }: AppSidebarPro
       })),
     [projectId],
   );
-  const pageTitle = resolveHeaderPageTitle(pathname, appSidebarItems, siteTexts.brand.name);
 
   return (
     <SidebarLayout
@@ -55,8 +53,8 @@ export function AppSidebar({ defaultSidebarOpen, user, children }: AppSidebarPro
         </Suspense>
       }
     >
-      <Column gap="none" className="min-h-svh">
-        <AppSidebarHeader pageTitle={pageTitle} />
+      <Column gap="none" className="flex h-svh min-h-0 flex-col overflow-hidden">
+        <AppSidebarHeader />
         {children}
       </Column>
     </SidebarLayout>

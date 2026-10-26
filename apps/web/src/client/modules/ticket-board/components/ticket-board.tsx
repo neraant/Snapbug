@@ -4,6 +4,7 @@ import {
   type DragCancelEvent,
   type DragEndEvent,
   type DragOverEvent,
+  DragOverlay,
   type DragStartEvent,
   KeyboardSensor,
   PointerSensor,
@@ -18,9 +19,13 @@ import { TooltipProvider } from "@workspace/design-system/components/ui/tooltip"
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useFindProjects } from "@/client/modules/shared/queries/use-find-projects";
+import { TicketBoardCard } from "@/client/modules/ticket-board/components/ticket-board-card";
 import { TicketBoardColumn } from "@/client/modules/ticket-board/components/ticket-board-column";
 import { TicketBoardEmpty } from "@/client/modules/ticket-board/components/ticket-board-empty";
-import { ticketBoardStatuses } from "@/client/modules/ticket-board/consts/ticket-board.const";
+import {
+  ticketBoardCardHeightClass,
+  ticketBoardStatuses,
+} from "@/client/modules/ticket-board/consts/ticket-board.const";
 import type { useTicketBoard } from "@/client/modules/ticket-board/hooks/use-ticket-board";
 import {
   resolveTicketBoardInsertionTarget,
@@ -103,6 +108,19 @@ export function TicketBoard({ projectId, onClearFilters, board }: TicketBoardPro
     return [preferred, ...corners.filter((collision) => collision.id !== preferred.id)];
   }, []);
 
+  const activeReport = useMemo(() => {
+    if (!activeDragId) {
+      return null;
+    }
+    for (const reports of board.reportsByStatus.values()) {
+      const match = reports.find((report) => report.id === activeDragId);
+      if (match) {
+        return match;
+      }
+    }
+    return null;
+  }, [activeDragId, board.reportsByStatus]);
+
   const columns = (
     <TicketBoardColumnRow
       board={board}
@@ -115,7 +133,7 @@ export function TicketBoard({ projectId, onClearFilters, board }: TicketBoardPro
   );
 
   return (
-    <Column gap="lg" minWidth="0" width="full" className="h-full">
+    <Column gap="lg" minWidth="0" width="full" className="flex min-h-0 flex-1 flex-col">
       {board.isEmpty ? (
         <TicketBoardEmpty variant="no-reports" projectId={projectId} onClearFilters={onClearFilters} />
       ) : null}
@@ -134,6 +152,15 @@ export function TicketBoard({ projectId, onClearFilters, board }: TicketBoardPro
               onDragCancel={handleDragCancel}
             >
               {columns}
+              <DragOverlay dropAnimation={null}>
+                {activeReport ? (
+                  <TicketBoardCard
+                    report={activeReport}
+                    projectName={showProjectName ? projectNameById.get(activeReport.projectId) : undefined}
+                    dragEnabled={false}
+                  />
+                ) : null}
+              </DragOverlay>
             </DndContext>
           ) : (
             columns
@@ -162,9 +189,9 @@ function TicketBoardColumnRow({
   insertionTarget,
 }: TicketBoardColumnRowProps) {
   return (
-    <Column minWidth="0" width="full" className="h-full overflow-x-auto pb-4">
-      <Row gap="lg" wrap={false} align="stretch" className="w-full min-w-min">
-        {ticketBoardStatuses.map((status) => (
+    <Column minWidth="0" width="full" className="min-h-0 flex-1 overflow-x-auto pb-4">
+      <Row gap="lg" wrap={false} align="stretch" className="h-full min-h-0 w-full min-w-min">
+        {board.visibleStatuses.map((status) => (
           <TicketBoardColumn
             key={status}
             status={status}
@@ -190,9 +217,9 @@ function TicketBoardFallback() {
         {ticketBoardStatuses.map((status) => (
           <Column key={status} gap="sm" minWidth="lg" className="w-full max-w-80 min-w-80 flex-1 shrink-0">
             <Skeleton className="h-5 w-32" />
-            <Skeleton className="h-34.5 w-full" />
-            <Skeleton className="h-34.5 w-full" />
-            <Skeleton className="h-34.5 w-full" />
+            <Skeleton className={`${ticketBoardCardHeightClass} w-full`} />
+            <Skeleton className={`${ticketBoardCardHeightClass} w-full`} />
+            <Skeleton className={`${ticketBoardCardHeightClass} w-full`} />
           </Column>
         ))}
       </Row>

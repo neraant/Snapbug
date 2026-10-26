@@ -62,6 +62,10 @@ export function useTicketBoard({ projectId, filters }: UseTicketBoardInput) {
   const filteredReports = useMemo(() => filterTicketBoardReports(reports, filters), [filters, reports]);
   const reportsByStatus = useMemo(() => groupTicketBoardReportsByStatus(filteredReports), [filteredReports]);
   const hasFilters = hasActiveTicketBoardFilters(filters);
+  const visibleStatuses =
+    filters.statuses.length > 0
+      ? ticketBoardStatuses.filter((status) => filters.statuses.includes(status))
+      : ticketBoardStatuses;
   const isEmpty = data.length === 0;
   const isFilteredEmpty = filteredReports.length === 0 && !isEmpty;
 
@@ -79,7 +83,6 @@ export function useTicketBoard({ projectId, filters }: UseTicketBoardInput) {
       nextBoardOrder: number,
       previousStatus: BugReportStatus,
       previousBoardOrder: number,
-      showUndoToast: boolean,
     ) => {
       setReportPatches((current) => {
         const next = new Map(current);
@@ -104,18 +107,10 @@ export function useTicketBoard({ projectId, filters }: UseTicketBoardInput) {
           return next;
         });
 
-        if (showUndoToast && previousStatus !== nextStatus) {
+        if (previousStatus !== nextStatus) {
           toast.add({
             title: texts.toast.statusUpdated,
             type: "success",
-            actionProps: {
-              children: texts.toast.undo,
-              onClick: () => {
-                applyBoardMove(reportId, previousStatus, previousBoardOrder, nextStatus, nextBoardOrder, false).catch(
-                  () => undefined,
-                );
-              },
-            },
           });
         }
       } catch {
@@ -172,17 +167,15 @@ export function useTicketBoard({ projectId, filters }: UseTicketBoardInput) {
         return;
       }
 
-      applyBoardMove(reportId, nextStatus, nextBoardOrder, report.status, report.boardOrder, statusChanged).catch(
-        () => undefined,
-      );
+      applyBoardMove(reportId, nextStatus, nextBoardOrder, report.status, report.boardOrder).catch(() => undefined);
     },
     [applyBoardMove, reports, reportsByStatus, visibleCountByStatus],
   );
 
   return {
-    filteredReports,
     reportsByStatus,
     visibleCountByStatus,
+    visibleStatuses,
     loadMore,
     onDragEnd,
     hasFilters,

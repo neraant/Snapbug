@@ -1,0 +1,50 @@
+import { routePattern } from "@/shared/route.const";
+
+export function buildUrl(
+  pattern: string,
+  params: Record<string, string | number> = {},
+  query: Record<string, string | undefined> = {},
+): string {
+  const pathname = Object.entries(params).reduce(
+    (result, [key, value]) => result.replaceAll(`:${key}`, encodeURIComponent(String(value))),
+    pattern,
+  );
+
+  return appendQueryParams(pathname, query);
+}
+
+export function appendQueryParams(pathname: string, query: Record<string, string | undefined> = {}): string {
+  const definedEntries = Object.entries(query).filter((entry): entry is [string, string] => entry[1] !== undefined);
+
+  if (definedEntries.length === 0) {
+    return pathname;
+  }
+
+  return `${pathname}?${new URLSearchParams(definedEntries).toString()}`;
+}
+
+export function matchUrl(pattern: string, pathname: string): Record<string, string> | null {
+  const names = (pattern.match(/:(\w+)/g) ?? []).map((token) => token.slice(1));
+  const expression = pattern.replace(/\/:\w+/g, "/([^/]+)").replace(/\//g, "\\/");
+  const match = pathname.match(new RegExp(`^${expression}$`));
+
+  if (!match) {
+    return null;
+  }
+
+  return Object.fromEntries(names.map((name, index) => [name, decodeURIComponent(match[index + 1] ?? "")]));
+}
+
+export const url = {
+  signIn: (query?: { invitation?: string }) => buildUrl(routePattern.signIn, {}, query),
+  signUp: (query?: { invitation?: string }) => buildUrl(routePattern.signUp, {}, query),
+  forgotPassword: () => routePattern.forgotPassword,
+  resetPassword: () => routePattern.resetPassword,
+  onboarding: () => routePattern.onboarding,
+
+  overview: () => routePattern.overview,
+  playground: () => routePattern.playground,
+  sdk: () => routePattern.sdk,
+  ticketsBoard: () => routePattern.ticketsBoard,
+  ticket: (shortId: string) => buildUrl(routePattern.ticket, { shortId }),
+} as const;

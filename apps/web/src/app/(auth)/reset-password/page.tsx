@@ -9,7 +9,7 @@ import { z } from "zod";
 
 import { ResetPasswordForm } from "@/client/modules/auth/components/reset-password-form";
 import { texts } from "@/client/modules/auth/consts/texts.const";
-import { path } from "@/shared/path.const";
+import { url } from "@/shared/build-url.util";
 
 export default function Page() {
   const searchParams = useSearchParams();
@@ -31,7 +31,7 @@ export default function Page() {
           <Typography variant="text-sm" color="muted">
             {texts.resetPassword.invalidLink}
           </Typography>
-          <Button nativeButton={false} variant="link" render={<Link href={path.forgotPassword} />}>
+          <Button nativeButton={false} variant="link" render={<Link href={url.forgotPassword()} />}>
             {texts.resetPassword.requestNewLink}
           </Button>
         </Column>

@@ -1,4 +1,6 @@
-export const path = {
+const ticketsBase = "/tickets";
+
+export const routePattern = {
   signIn: "/sign-in",
   signUp: "/sign-up",
   forgotPassword: "/forgot-password",
@@ -8,5 +10,6 @@ export const path = {
   overview: "/overview",
   playground: "/playground",
   sdk: "/sdk",
-  ticketsBoard: "/tickets/board",
+  ticketsBoard: `${ticketsBase}/board`,
+  ticket: `${ticketsBase}/:shortId`,
 } as const;

@@ -10,7 +10,7 @@ import { texts } from "@/client/modules/overview/consts/texts.const";
 import { mapRecentActivityToFeedItems } from "@/client/modules/overview/utils/map-recent-activity-to-feed-items.util";
 import { useFindBugReportRecent } from "@/client/modules/shared/queries/use-find-bug-report-recent";
 import { buildPathWithProjectScopeSearchParam } from "@/client/modules/shared/utils/parse-project-scope-search-param.util";
-import { path } from "@/shared/path.const";
+import { url } from "@/shared/build-url.util";
 
 type OverviewRecentActivityCardProps = {
   projectId: string | null;
@@ -19,7 +19,7 @@ type OverviewRecentActivityCardProps = {
 
 export function OverviewRecentActivityCard({ projectId, className }: OverviewRecentActivityCardProps) {
   const { data: items } = useFindBugReportRecent({ projectId: projectId ?? undefined });
-  const ticketsHref = buildPathWithProjectScopeSearchParam(path.ticketsBoard, projectId);
+  const ticketsHref = buildPathWithProjectScopeSearchParam(url.ticketsBoard(), projectId);
 
   return (
     <MetricCard className={cn(className)}>

@@ -17,7 +17,11 @@ export function filterTicketBoardReports(
       }
     }
 
-    if (filters.severity && report.severity !== filters.severity) {
+    if (filters.severities.length > 0 && !filters.severities.includes(report.severity)) {
+      return false;
+    }
+
+    if (filters.statuses.length > 0 && !filters.statuses.includes(report.status)) {
       return false;
     }
 
@@ -33,5 +37,10 @@ export function filterTicketBoardReports(
 }
 
 export function hasActiveTicketBoardFilters(filters: TicketBoardFilters): boolean {
-  return filters.search.trim().length > 0 || filters.severity !== null || filters.periodDays !== null;
+  return (
+    filters.search.trim().length > 0 ||
+    filters.severities.length > 0 ||
+    filters.statuses.length > 0 ||
+    filters.periodDays !== null
+  );
 }

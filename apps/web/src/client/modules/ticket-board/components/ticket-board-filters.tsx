@@ -2,17 +2,12 @@ import { Row } from "@workspace/design-system/components/layout/row";
 import { Button } from "@workspace/design-system/components/ui/button";
 import { SearchInput } from "@workspace/design-system/components/ui/search-input";
 import { SegmentedControl } from "@workspace/design-system/components/ui/segmented-control";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@workspace/design-system/components/ui/select";
-import { BugReportSeverity } from "@workspace/validation/modules/bug-report/consts/bug-report-severity.const";
+import { StatusIndicator } from "@workspace/design-system/components/ui/status-indicator";
+import { bugReportSeverities } from "@workspace/validation/modules/bug-report/consts/bug-report-severity.const";
 
+import { TicketBoardOptionFilter } from "@/client/modules/ticket-board/components/ticket-board-option-filter";
 import { texts } from "@/client/modules/ticket-board/consts/texts.const";
-import { ticketBoardPeriodDays } from "@/client/modules/ticket-board/consts/ticket-board.const";
+import { ticketBoardPeriodDays, ticketBoardStatuses } from "@/client/modules/ticket-board/consts/ticket-board.const";
 import type { TicketBoardFilters } from "@/client/modules/ticket-board/types/ticket-board-filter.type";
 import { hasActiveTicketBoardFilters } from "@/client/modules/ticket-board/utils/filter-ticket-board-reports.util";
 
@@ -22,8 +17,6 @@ type TicketBoardFiltersProps = {
   onClearFilters: () => void;
 };
 
-const severityOptions = [null, ...Object.values(BugReportSeverity)] as const;
-
 const periodOptions = [
   { value: "all", periodDays: ticketBoardPeriodDays.all, label: texts.filter.period.all },
   { value: "7", periodDays: ticketBoardPeriodDays.last7, label: texts.filter.period.last7Days },
@@ -31,13 +24,24 @@ const periodOptions = [
   { value: "90", periodDays: ticketBoardPeriodDays.last90, label: texts.filter.period.last90Days },
 ] as const;
 
+const statusOptions = ticketBoardStatuses.map((status) => ({
+  value: status,
+  label: texts.column[status].label,
+  leading: <StatusIndicator status={status} />,
+}));
+
+const severityOptions = bugReportSeverities.map((severity) => ({
+  value: severity,
+  label: texts.severityLabels[severity],
+}));
+
 export function TicketBoardFiltersBar({ filters, onFiltersChange, onClearFilters }: TicketBoardFiltersProps) {
   const periodValue =
     periodOptions.find((option) => option.periodDays === filters.periodDays)?.value ?? periodOptions[0].value;
   const hasFilters = hasActiveTicketBoardFilters(filters);
 
   return (
-    <Row align="center" gap="sm" justify="between" wrap>
+    <Row align="center" gap="sm" justify="between" className="p-1" wrap>
       <SearchInput
         width="sm"
         aria-label={texts.filter.searchAriaLabel}
@@ -53,26 +57,20 @@ export function TicketBoardFiltersBar({ filters, onFiltersChange, onClearFilters
             {texts.filter.clear}
           </Button>
         ) : null}
-        <Select
-          value={filters.severity ?? "all"}
-          onValueChange={(value) =>
-            onFiltersChange({
-              ...filters,
-              severity: value === "all" ? null : (value as BugReportSeverity),
-            })
-          }
-        >
-          <SelectTrigger aria-label={texts.filter.severity.ariaLabel} className="w-40">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {severityOptions.map((severity) => (
-              <SelectItem key={severity ?? "all"} value={severity ?? "all"}>
-                {severity ? texts.severityLabels[severity] : texts.filter.severity.all}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <TicketBoardOptionFilter
+          ariaLabel={texts.filter.status.ariaLabel}
+          placeholder={texts.filter.status.placeholder}
+          value={filters.statuses}
+          options={statusOptions}
+          onValueChange={(statuses) => onFiltersChange({ ...filters, statuses })}
+        />
+        <TicketBoardOptionFilter
+          ariaLabel={texts.filter.severity.ariaLabel}
+          placeholder={texts.filter.severity.placeholder}
+          value={filters.severities}
+          options={severityOptions}
+          onValueChange={(severities) => onFiltersChange({ ...filters, severities })}
+        />
         <SegmentedControl
           aria-label={texts.filter.period.ariaLabel}
           variant="muted"

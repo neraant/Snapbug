@@ -1,7 +1,7 @@
 import { container } from "@workspace/server/container";
 
 import { auth } from "@/auth";
-import { path } from "@/shared/path.const";
+import { url } from "@/shared/build-url.util";
 import { hasCompletedOnboarding } from "@/shared/utils/has-completed-onboarding.util";
 import { isGuestAuthPath, isOnboardingPath } from "@/shared/utils/onboarding-gate.util";
 
@@ -11,7 +11,7 @@ export default auth(async (req) => {
   const isOnboardingPage = isOnboardingPath(pathname);
 
   if (!req.auth && !isGuestAuthPage) {
-    return Response.redirect(new URL(path.signIn, req.nextUrl));
+    return Response.redirect(new URL(url.signIn(), req.nextUrl));
   }
 
   if (!req.auth) {
@@ -27,15 +27,15 @@ export default auth(async (req) => {
   const completed = hasCompletedOnboarding(snapshot);
 
   if (isGuestAuthPage) {
-    return Response.redirect(new URL(completed ? path.overview : path.onboarding, req.nextUrl));
+    return Response.redirect(new URL(completed ? url.overview() : url.onboarding(), req.nextUrl));
   }
 
   if (completed && isOnboardingPage) {
-    return Response.redirect(new URL(path.overview, req.nextUrl));
+    return Response.redirect(new URL(url.overview(), req.nextUrl));
   }
 
   if (!completed && !isOnboardingPage) {
-    return Response.redirect(new URL(path.onboarding, req.nextUrl));
+    return Response.redirect(new URL(url.onboarding(), req.nextUrl));
   }
 });
 

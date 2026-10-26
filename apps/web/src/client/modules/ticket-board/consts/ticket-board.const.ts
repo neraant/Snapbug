@@ -20,10 +20,14 @@ export const ticketBoardPeriodDays = {
 
 export const defaultTicketBoardFilters: TicketBoardFilters = {
   search: "",
-  severity: null,
+  severities: [],
+  statuses: [],
   periodDays: ticketBoardPeriodDays.all,
 };
 
 export const ticketBoardFiltersStorageKeyPrefix = "ticket-board-filters";
 
 export const ticketBoardFiltersStorageEvent = "ticket-board-filters-change";
+
+/** Matches column drop placeholder and loading skeletons so DnD slots do not jump. */
+export const ticketBoardCardHeightClass = "h-41";

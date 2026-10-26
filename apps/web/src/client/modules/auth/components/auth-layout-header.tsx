@@ -6,13 +6,13 @@ import { BugIcon } from "lucide-react";
 import Link from "next/link";
 
 import { AuthThemeToggle } from "@/client/modules/auth/components/auth-theme-toggle";
+import { url } from "@/shared/build-url.util";
 import { texts } from "@/shared/consts/texts.const";
-import { path } from "@/shared/path.const";
 
 export function AuthLayoutHeader() {
   return (
     <Row justify="between" align="center" width="full" wrap={false} minWidth="0">
-      <Link href={path.signIn}>
+      <Link href={url.signIn()}>
         <Row gap="sm" align="center" wrap={false} minWidth="0">
           <Avatar variant="brand">
             <AvatarFallback>

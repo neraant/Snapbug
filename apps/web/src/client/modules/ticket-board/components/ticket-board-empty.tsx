@@ -5,7 +5,7 @@ import Link from "next/link";
 
 import { buildPathWithProjectScopeSearchParam } from "@/client/modules/shared/utils/parse-project-scope-search-param.util";
 import { texts } from "@/client/modules/ticket-board/consts/texts.const";
-import { path } from "@/shared/path.const";
+import { url } from "@/shared/build-url.util";
 
 type TicketBoardEmptyProps = {
   variant: "no-reports" | "filtered";
@@ -28,7 +28,7 @@ export function TicketBoardEmpty({ variant, projectId, onClearFilters }: TicketB
     );
   }
 
-  const sdkHref = buildPathWithProjectScopeSearchParam(path.sdk, projectId);
+  const sdkHref = buildPathWithProjectScopeSearchParam(url.sdk(), projectId);
 
   return (
     <Column align="center" gap="sm" padding="lg">

@@ -1,6 +1,6 @@
 import { signOut } from "next-auth/react";
 
-import { path } from "@/shared/path.const";
+import { url } from "@/shared/build-url.util";
 
 // @disabled posthog
 // import { AuthAnalyticsEvent } from "@workspace/analytics";
@@ -9,7 +9,7 @@ import { path } from "@/shared/path.const";
 export function signOutUser() {
   signOut({
     redirect: true,
-    redirectTo: path.signIn,
+    redirectTo: url.signIn(),
   });
 
   // @disabled posthog

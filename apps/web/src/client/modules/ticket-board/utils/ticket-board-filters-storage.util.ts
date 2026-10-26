@@ -1,10 +1,12 @@
 import { BugReportSeverity } from "@workspace/validation/modules/bug-report/consts/bug-report-severity.const";
+import type { BugReportStatus } from "@workspace/validation/modules/bug-report/consts/bug-report-status.const";
 
 import {
   defaultTicketBoardFilters,
   ticketBoardFiltersStorageEvent,
   ticketBoardFiltersStorageKeyPrefix,
   ticketBoardPeriodDays,
+  ticketBoardStatuses,
 } from "@/client/modules/ticket-board/consts/ticket-board.const";
 import type {
   TicketBoardFilters,
@@ -63,7 +65,8 @@ export function readStoredTicketBoardFilters(organizationId: string): TicketBoar
 export function writeStoredTicketBoardFilters(organizationId: string, filters: TicketBoardFilters) {
   const raw = JSON.stringify({
     search: filters.search,
-    severity: filters.severity,
+    severities: filters.severities,
+    statuses: filters.statuses,
     periodDays: filters.periodDays,
   });
   const cached = snapshotByOrganizationId.get(organizationId);
@@ -94,17 +97,42 @@ function parseStoredTicketBoardFilters(raw: string | null): TicketBoardFilters {
 
     const record = parsed as Record<string, unknown>;
     const search = typeof record.search === "string" ? record.search : "";
-    const severity = isBugReportSeverity(record.severity) ? record.severity : null;
+    const severities = parseStoredSeverities(record);
+    const statuses = parseStoredStatuses(record.statuses);
     const periodDays = isTicketBoardPeriodDays(record.periodDays) ? record.periodDays : ticketBoardPeriodDays.all;
 
-    if (search.length === 0 && severity === null && periodDays === null) {
+    if (search.length === 0 && severities.length === 0 && statuses.length === 0 && periodDays === null) {
       return defaultTicketBoardFilters;
     }
 
-    return { search, severity, periodDays };
+    return { search, severities, statuses, periodDays };
   } catch {
     return defaultTicketBoardFilters;
   }
+}
+
+function parseStoredSeverities(record: Record<string, unknown>): BugReportSeverity[] {
+  if (Array.isArray(record.severities)) {
+    return record.severities.filter((entry): entry is BugReportSeverity => isBugReportSeverity(entry));
+  }
+
+  if (isBugReportSeverity(record.severity)) {
+    return [record.severity];
+  }
+
+  return [];
+}
+
+function parseStoredStatuses(value: unknown): BugReportStatus[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.filter((entry): entry is BugReportStatus => isBugReportStatus(entry));
+}
+
+function isBugReportStatus(value: unknown): value is BugReportStatus {
+  return ticketBoardStatuses.some((status) => status === value);
 }
 
 function isBugReportSeverity(value: unknown): value is BugReportSeverity {

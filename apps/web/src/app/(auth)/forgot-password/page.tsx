@@ -7,7 +7,7 @@ import Link from "next/link";
 
 import { RequestPasswordResetForm } from "@/client/modules/auth/components/request-password-reset-form";
 import { texts } from "@/client/modules/auth/consts/texts.const";
-import { path } from "@/shared/path.const";
+import { url } from "@/shared/build-url.util";
 
 export default function Page() {
   return (
@@ -21,7 +21,7 @@ export default function Page() {
       <RequestPasswordResetForm />
       <Typography variant="text-sm" color="muted" align="center">
         {texts.requestPasswordReset.footerPrompt}{" "}
-        <Button nativeButton={false} variant="link" render={<Link href={path.signIn} />}>
+        <Button nativeButton={false} variant="link" render={<Link href={url.signIn()} />}>
           {texts.requestPasswordReset.footerLink}
         </Button>
       </Typography>

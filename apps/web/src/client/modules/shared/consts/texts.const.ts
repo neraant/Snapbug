@@ -6,6 +6,7 @@ export const texts = {
     search: "Search tickets, URLs, stack traces...",
     searchShortcut: "⌘K",
     notifications: "Notifications",
+    breadcrumb: "Breadcrumb",
   },
   overview: {
     title: "Overview",

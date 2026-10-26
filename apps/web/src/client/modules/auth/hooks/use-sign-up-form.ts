@@ -10,7 +10,7 @@ import { signUpSchema, type SignUpSchemaType } from "@/client/modules/auth/schem
 import { acceptInvitationAfterAuth } from "@/client/modules/auth/utils/accept-invitation-after-auth.util";
 import { useAcceptInvitation } from "@/client/modules/shared/queries/use-accept-invitation";
 import { useSignUp } from "@/client/modules/shared/queries/use-sign-up";
-import { path } from "@/shared/path.const";
+import { url } from "@/shared/build-url.util";
 
 type UseSignUpFormInput = {
   invitationToken?: string;
@@ -57,7 +57,7 @@ export function useSignUpForm({ invitationToken, defaultEmail = "" }: UseSignUpF
     });
 
     await acceptInvitationAfterAuth(invitationToken, acceptInvitation);
-    router.replace(path.overview);
+    router.replace(url.overview());
   };
 
   return {

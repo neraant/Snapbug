@@ -1,14 +1,14 @@
-import { path } from "@/shared/path.const";
+import { url } from "@/shared/build-url.util";
 
 export function isGuestAuthPath(pathname: string): boolean {
   return (
-    pathname.startsWith(path.signIn) ||
-    pathname.startsWith(path.signUp) ||
-    pathname.startsWith(path.forgotPassword) ||
-    pathname.startsWith(path.resetPassword)
+    pathname.startsWith(url.signIn()) ||
+    pathname.startsWith(url.signUp()) ||
+    pathname.startsWith(url.forgotPassword()) ||
+    pathname.startsWith(url.resetPassword())
   );
 }
 
 export function isOnboardingPath(pathname: string): boolean {
-  return pathname.startsWith(path.onboarding);
+  return pathname.startsWith(url.onboarding());
 }

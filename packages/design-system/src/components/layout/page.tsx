@@ -32,7 +32,13 @@ type PageProps = PropsWithChildren<{
 
 export function PageContainer({ title, description, badge, actions, children }: PageProps) {
   return (
-    <Column gap="none" padding="none" width="full" minWidth="0" className="flex-1">
+    <Column
+      gap="none"
+      padding="none"
+      width="full"
+      minWidth="0"
+      className="flex min-h-0 flex-1 flex-col overflow-hidden"
+    >
       <Column gap="md" padding="lg">
         <ToolbarRow
           trailingAlign="end"
@@ -55,7 +61,7 @@ export function PageContainer({ title, description, badge, actions, children }: 
         />
       </Column>
       <Separator />
-      <Column gap="xl" padding="lg" minWidth="0" width="full" className="h-full">
+      <Column gap="xl" padding="lg" minWidth="0" width="full" className="flex min-h-0 flex-1 flex-col overflow-y-auto">
         {children}
       </Column>
     </Column>

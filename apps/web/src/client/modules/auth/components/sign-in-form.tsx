@@ -9,7 +9,7 @@ import Link from "next/link";
 
 import { texts } from "@/client/modules/auth/consts/texts.const";
 import { useSignInForm } from "@/client/modules/auth/hooks/use-sign-in-form";
-import { path } from "@/shared/path.const";
+import { url } from "@/shared/build-url.util";
 
 type SignInFormProps = {
   invitationToken?: string;
@@ -37,7 +37,7 @@ export function SignInForm({ invitationToken }: SignInFormProps) {
           autoComplete="current-password"
         />
         <Row justify="end" width="full">
-          <Button nativeButton={false} variant="link" render={<Link href={path.forgotPassword} />}>
+          <Button nativeButton={false} variant="link" render={<Link href={url.forgotPassword()} />}>
             {texts.signIn.forgotPassword}
           </Button>
         </Row>

@@ -7,9 +7,8 @@ import { Suspense } from "react";
 
 import { SignUpForm } from "@/client/modules/auth/components/sign-up-form";
 import { texts } from "@/client/modules/auth/consts/texts.const";
-import { authPathWithInvitation } from "@/client/modules/auth/utils/auth-path-with-invitation.util";
 import { parseInvitationToken } from "@/client/modules/auth/utils/parse-invitation-token.util";
-import { path } from "@/shared/path.const";
+import { url } from "@/shared/build-url.util";
 
 export function SignUpContent() {
   const searchParams = useSearchParams();
@@ -35,7 +34,7 @@ export function SignUpContent() {
         <Button
           nativeButton={false}
           variant="link"
-          render={<Link href={authPathWithInvitation(path.signIn, invitationToken)} />}
+          render={<Link href={url.signIn({ invitation: invitationToken })} />}
         >
           {texts.signUp.footerLink}
         </Button>

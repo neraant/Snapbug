@@ -6,7 +6,7 @@ import { defineConfig } from "drizzle-kit";
 
 const configDir = path.dirname(fileURLToPath(import.meta.url));
 
-config({ path: path.resolve(configDir, "../../.env.local") });
+config({ path: path.resolve(configDir, "./.env.local") });
 
 if (!process.env.DATABASE_URL) {
   throw new Error("DATABASE_URL is not set");

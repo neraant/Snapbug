@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { Column } from "@workspace/design-system/components/layout/column";
 
 import { TicketBoard } from "@/client/modules/ticket-board/components/ticket-board";
 import { useTicketBoard } from "@/client/modules/ticket-board/hooks/use-ticket-board";
@@ -10,15 +10,14 @@ type TicketBoardBodyProps = {
   projectId: string | null;
   filters: TicketBoardFilters;
   onClearFilters: VoidFunction;
-  onFilteredCountChange: (count: number) => void;
 };
 
-export function TicketBoardBody({ projectId, filters, onClearFilters, onFilteredCountChange }: TicketBoardBodyProps) {
+export function TicketBoardBody({ projectId, filters, onClearFilters }: TicketBoardBodyProps) {
   const board = useTicketBoard({ projectId, filters });
 
-  useEffect(() => {
-    onFilteredCountChange(board.filteredReports.length);
-  }, [board.filteredReports.length, onFilteredCountChange]);
-
-  return <TicketBoard projectId={projectId} onClearFilters={onClearFilters} board={board} />;
+  return (
+    <Column minWidth="0" width="full" className="flex min-h-0 flex-1 flex-col">
+      <TicketBoard projectId={projectId} onClearFilters={onClearFilters} board={board} />
+    </Column>
+  );
 }
