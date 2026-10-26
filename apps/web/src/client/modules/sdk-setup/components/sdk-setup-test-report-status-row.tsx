@@ -35,7 +35,7 @@ export function SdkSetupTestReportStatusRow({ state }: SdkSetupTestReportStatusR
   const label = statusLabel[state];
 
   return (
-    <Row align="center" gap="sm" role="status">
+    <Row align="center" gap="sm" role="status" aria-label={label}>
       <SdkSetupTestReportStatusDot state={state} />
       <Typography variant="text-xs" color="muted">
         {label}

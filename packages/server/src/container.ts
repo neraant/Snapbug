@@ -19,6 +19,7 @@ import { FindRecentUseCase } from "@workspace/server/modules/bug-report/applicat
 import { FindStatsUseCase } from "@workspace/server/modules/bug-report/application/find-stats.use-case";
 import { FindWidgetConfigUseCase } from "@workspace/server/modules/bug-report/application/find-widget-config.use-case";
 import { FindWorkloadUseCase } from "@workspace/server/modules/bug-report/application/find-workload.use-case";
+import { UpdateBugReportUseCase } from "@workspace/server/modules/bug-report/application/update-bug-report.use-case";
 import { BugReportRepository } from "@workspace/server/modules/bug-report/repository/bug-report.repository";
 import { BugReportService } from "@workspace/server/modules/bug-report/service/bug-report.service";
 import { BugReportStatService } from "@workspace/server/modules/bug-report/service/bug-report-stat.service";
@@ -173,6 +174,13 @@ const findBreakdowns = new FindBreakdownsUseCase(
 );
 const findRecent = new FindRecentUseCase(membershipAdapter, projectAdapter, userAdapter, bugReportRepository);
 const findWorkload = new FindWorkloadUseCase(membershipAdapter, projectAdapter, userAdapter, bugReportRepository);
+const updateBugReport = new UpdateBugReportUseCase(
+  membershipAdapter,
+  projectAdapter,
+  bugReportRepository,
+  bugReportService,
+  withTransaction,
+);
 
 export const container = {
   membership: { createMembership, findMembership, findMembershipByUser },
@@ -191,5 +199,6 @@ export const container = {
     findBreakdowns,
     findRecent,
     findWorkload,
+    updateBugReport,
   },
 };

@@ -60,9 +60,27 @@ export class BugReportRepository {
   async findManyByProjectIds(projectIds: string[]): Promise<BugReport[]> {
     const bugReports = await this.db.query.bugReportTable.findMany({
       where: { projectId: { in: projectIds } },
-      orderBy: { createdAt: "desc" },
     });
-    return bugReports.map((bugReport) => BugReportMapper.fromPersistence(bugReport));
+    return bugReports
+      .map((bugReport) => BugReportMapper.fromPersistence(bugReport))
+      .sort((left, right) => this.compareBoardOrder(left, right));
+  }
+
+  async findManyByProjectIdAndStatus(projectId: string, status: BugReportStatus): Promise<BugReport[]> {
+    const bugReports = await this.db.query.bugReportTable.findMany({
+      where: { projectId, status },
+    });
+    return bugReports
+      .map((bugReport) => BugReportMapper.fromPersistence(bugReport))
+      .sort((left, right) => this.compareBoardOrder(left, right));
+  }
+
+  private compareBoardOrder(left: BugReport, right: BugReport): number {
+    if (left.boardOrder !== right.boardOrder) {
+      return left.boardOrder - right.boardOrder;
+    }
+
+    return right.createdAt.getTime() - left.createdAt.getTime();
   }
 
   async findRecentByProjectIds(projectIds: string[], limit: number): Promise<BugReport[]> {
@@ -95,8 +113,39 @@ export class BugReportRepository {
   }
 
   async save(bugReport: BugReport): Promise<void> {
+    const values = BugReportMapper.toPersistence(bugReport);
+
     try {
-      await this.db.insert(bugReportTable).values(BugReportMapper.toPersistence(bugReport));
+      await this.db
+        .insert(bugReportTable)
+        .values(values)
+        .onConflictDoUpdate({
+          target: bugReportTable.id,
+          set: {
+            assignedTo: values.assignedTo,
+            status: values.status,
+            boardOrder: values.boardOrder,
+            severity: values.severity,
+            title: values.title,
+            description: values.description,
+            stepsToReproduce: values.stepsToReproduce,
+            reporterEmail: values.reporterEmail,
+            url: values.url,
+            userAgent: values.userAgent,
+            browser: values.browser,
+            os: values.os,
+            device: values.device,
+            viewportWidth: values.viewportWidth,
+            viewportHeight: values.viewportHeight,
+            screenshotKey: values.screenshotKey,
+            hasReplay: values.hasReplay,
+            consoleLogs: values.consoleLogs,
+            networkLogs: values.networkLogs,
+            customContext: values.customContext,
+            updatedAt: values.updatedAt,
+            resolvedAt: values.resolvedAt,
+          },
+        });
     } catch (error) {
       throw new InternalServerError(ERROR_CODES.INTERNAL_SERVER_ERROR, undefined, { cause: error });
     }

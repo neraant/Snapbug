@@ -23,6 +23,7 @@ export abstract class BugReportMapper {
     const row = bugReport.toObject();
     return {
       status: row.status,
+      boardOrder: row.boardOrder,
       severity: row.severity,
       assignedTo: row.assignedTo,
       title: row.title,
@@ -47,6 +48,7 @@ export abstract class BugReportMapper {
       shortId: row.shortId,
       assignedTo: row.assignedTo,
       status: row.status,
+      boardOrder: row.boardOrder,
       severity: row.severity,
       title: row.title,
       description: row.description,
@@ -60,6 +62,7 @@ export abstract class BugReportMapper {
       viewportWidth: row.viewportWidth,
       viewportHeight: row.viewportHeight,
       hasReplay: row.hasReplay,
+      hasScreenshot: row.screenshotKey != null && row.screenshotKey.length > 0,
       consoleLogs: row.consoleLogs,
       networkLogs: row.networkLogs,
       customContext: row.customContext,

@@ -12,6 +12,7 @@ export const bugReportTable = pgTable("bug_reports", {
   shortId: text("short_id").notNull(),
   assignedTo: uuid("assigned_to").references(() => userTable.id, { onDelete: "set null" }),
   status: text("status", { enum: bugReportStatuses }).notNull(),
+  boardOrder: integer("board_order").notNull().default(0),
   severity: text("severity", { enum: bugReportSeverities }).notNull(),
   title: text("title").notNull(),
   description: text("description").notNull(),

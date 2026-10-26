@@ -70,6 +70,7 @@ type TypographyProps = PropsWithChildren<{
   weight?: NonNullable<VariantProps<typeof typographyVariants>["weight"]>;
   font?: TypographyFont;
   truncate?: boolean;
+  lineClamp?: 2 | 3;
   className?: string;
   as?: ElementType;
 }>;
@@ -81,6 +82,7 @@ export function Typography({
   weight,
   font,
   truncate = false,
+  lineClamp,
   className,
   as,
   children,
@@ -91,7 +93,9 @@ export function Typography({
     <Tag
       className={cn(
         typographyVariants({ variant, color, align, weight, font }),
-        truncate && "min-w-0 truncate",
+        truncate && !lineClamp && "min-w-0 truncate",
+        lineClamp === 2 && "line-clamp-2 break-words",
+        lineClamp === 3 && "line-clamp-3 break-words",
         className,
       )}
     >

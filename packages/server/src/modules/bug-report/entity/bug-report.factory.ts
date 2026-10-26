@@ -13,6 +13,7 @@ export abstract class BugReportFactory {
       shortId: bugReport.shortId,
       assignedTo: null,
       status: BugReportStatus.NEW,
+      boardOrder: 0,
       severity: BugReportSeverity.MEDIUM,
       title: bugReport.title,
       description: bugReport.description,

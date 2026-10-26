@@ -6,8 +6,10 @@ import type { CreateBugReportType } from "@workspace/server/modules/bug-report/e
 import type { BugReportRepository } from "@workspace/server/modules/bug-report/repository/bug-report.repository";
 import type { AuditLogService } from "@workspace/server/shared/audit/audit-log.service";
 import type { AuditActor } from "@workspace/server/shared/audit/audit-log.types";
+import type { BugReportStatus } from "@workspace/validation/modules/bug-report/consts/bug-report-status.const";
 
 const BUG_REPORT_ENTITY_TYPE = "bug-report";
+const boardOrderStep = 1024;
 
 export class BugReportService {
   constructor(
@@ -30,7 +32,13 @@ export class BugReportService {
   ): Promise<BugReport> {
     const { organizationId, ...createInput } = input;
     const shortId = await this.bugReportRepository.allocateShortId(organizationId);
-    const bugReport = BugReportFactory.create({ ...createInput, shortId });
+    const createdBugReport = BugReportFactory.create({ ...createInput, shortId });
+    const columnReports = await this.bugReportRepository.findManyByProjectIdAndStatus(
+      createInput.projectId,
+      createdBugReport.status,
+    );
+    const maxBoardOrder = columnReports.reduce((max, report) => Math.max(max, report.boardOrder), 0);
+    const bugReport = createdBugReport.update({ boardOrder: maxBoardOrder + boardOrderStep });
     await this.saveWithAudit(bugReport, action);
     return bugReport;
   }
@@ -50,5 +58,22 @@ export class BugReportService {
       oldSnapshot: previous ? BugReportMapper.toAudit(previous) : null,
       newSnapshot: BugReportMapper.toAudit(saved),
     });
+  }
+
+  async normalizeBoardOrder(projectId: string, status: BugReportStatus): Promise<void> {
+    const bugReports = await this.bugReportRepository.findManyByProjectIdAndStatus(projectId, status);
+
+    for (let index = 0; index < bugReports.length; index++) {
+      const bugReport = bugReports[index];
+      if (!bugReport) {
+        continue;
+      }
+      const nextBoardOrder = (index + 1) * boardOrderStep;
+      if (bugReport.boardOrder === nextBoardOrder) {
+        continue;
+      }
+
+      await this.bugReportRepository.save(bugReport.update({ boardOrder: nextBoardOrder }));
+    }
   }
 }

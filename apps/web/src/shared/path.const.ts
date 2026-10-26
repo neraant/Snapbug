@@ -8,4 +8,5 @@ export const path = {
   overview: "/overview",
   playground: "/playground",
   sdk: "/sdk",
+  ticketsBoard: "/tickets/board",
 } as const;

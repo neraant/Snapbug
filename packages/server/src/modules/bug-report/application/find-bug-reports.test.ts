@@ -36,6 +36,7 @@ const bugReport = new BugReport({
   shortId: "SNB-1",
   assignedTo: null,
   status: BugReportStatus.NEW,
+  boardOrder: 1024,
   severity: BugReportSeverity.MEDIUM,
   title: "Pay button throws",
   description: "Clicking Pay shows a blank page.",
@@ -69,13 +70,14 @@ describe("FindBugReportsUseCase", () => {
       bugReportRepository as unknown as BugReportRepository,
     );
 
-    const result = await useCase.execute(userId);
+    const result = await useCase.execute({}, userId);
 
     expect(membershipPort.findByUser).toHaveBeenCalledWith(userId);
     expect(projectPort.findManyByOrganizationId).toHaveBeenCalledWith({ organizationId });
     expect(bugReportRepository.findManyByProjectIds).toHaveBeenCalledWith([projectId]);
     expect(result).toEqual([BugReportMapper.toDto(bugReport)]);
     expect(result[0]).not.toHaveProperty("screenshotKey");
+    expect(result[0]?.hasScreenshot).toBe(true);
   });
 
   it("returns an empty list when the organization has no projects", async () => {
@@ -88,7 +90,7 @@ describe("FindBugReportsUseCase", () => {
       bugReportRepository as unknown as BugReportRepository,
     );
 
-    const result = await useCase.execute(userId);
+    const result = await useCase.execute({}, userId);
 
     expect(result).toEqual([]);
     expect(bugReportRepository.findManyByProjectIds).not.toHaveBeenCalled();
@@ -104,7 +106,7 @@ describe("FindBugReportsUseCase", () => {
       bugReportRepository as unknown as BugReportRepository,
     );
 
-    await expect(useCase.execute(userId)).rejects.toMatchObject({
+    await expect(useCase.execute({}, userId)).rejects.toMatchObject({
       errorCode: ERROR_CODES.ORGANIZATION_NOT_FOUND,
     });
 

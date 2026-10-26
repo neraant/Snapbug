@@ -55,7 +55,7 @@ export function PageContainer({ title, description, badge, actions, children }: 
         />
       </Column>
       <Separator />
-      <Column gap="xl" padding="lg" minWidth="0" width="full">
+      <Column gap="xl" padding="lg" minWidth="0" width="full" className="h-full">
         {children}
       </Column>
     </Column>

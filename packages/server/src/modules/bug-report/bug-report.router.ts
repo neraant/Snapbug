@@ -17,7 +17,11 @@ export const bugReportRouter = os.router({
     async ({ input, context }) => await container.bugReport.findWidgetConfig.execute(input, context.requestOrigin),
   ),
   findMany: authed.findMany.handler(
-    async ({ context }) => await container.bugReport.findBugReports.execute(context.user.id),
+    async ({ input, context }) => await container.bugReport.findBugReports.execute(input, context.user.id),
+  ),
+  update: authed.update.handler(
+    async ({ input, context }) =>
+      await container.bugReport.updateBugReport.execute(input, context.user.id, context.actor),
   ),
   findStats: authed.findStats.handler(
     async ({ input, context }) => await container.bugReport.findStats.execute(input, context.user.id),

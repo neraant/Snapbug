@@ -14,6 +14,7 @@ const ERROR_MESSAGES: Record<ErrorCode, string> = {
   [ERROR_CODES.MEMBERSHIP_ALREADY_EXISTS]: "This organization already has a member",
   [ERROR_CODES.USER_ALREADY_HAS_ORGANIZATION]: "You already belong to an organization",
   [ERROR_CODES.PROJECT_NOT_FOUND]: "Project not found",
+  [ERROR_CODES.BUG_REPORT_NOT_FOUND]: "Bug report not found",
   [ERROR_CODES.INTERNAL_SERVER_ERROR]: "Something went wrong. Please try again",
   [ERROR_CODES.EMAIL_SEND_FAILED]: "Failed to send email. Please try again",
   [ERROR_CODES.RATE_LIMITED]: "You have exceeded the rate limit. Please try again later",

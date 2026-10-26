@@ -1,0 +1,1 @@
+ALTER TABLE "bug_reports" ADD COLUMN "board_order" integer DEFAULT 0 NOT NULL;

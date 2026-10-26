@@ -8,7 +8,10 @@ import {
   findBreakdownsInputDtoSchema,
   findBreakdownsOutputDtoSchema,
 } from "@workspace/validation/modules/bug-report/dto/find-breakdowns.schema";
-import { findBugReportsOutputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-bug-reports.schema";
+import {
+  findBugReportsInputDtoSchema,
+  findBugReportsOutputDtoSchema,
+} from "@workspace/validation/modules/bug-report/dto/find-bug-reports.schema";
 import {
   findChartsInputDtoSchema,
   findChartsOutputDtoSchema,
@@ -29,6 +32,10 @@ import {
   findWorkloadInputDtoSchema,
   findWorkloadOutputDtoSchema,
 } from "@workspace/validation/modules/bug-report/dto/find-workload.schema";
+import {
+  updateBugReportInputDtoSchema,
+  updateBugReportOutputDtoSchema,
+} from "@workspace/validation/modules/bug-report/dto/update-bug-report.schema";
 
 const bugReport = oc.$meta<{ mcp?: boolean }>({});
 
@@ -47,13 +54,26 @@ export const bugReportContract = {
       tags: ["bug-report"],
       summary: "Public widget configuration for SDK",
     }),
-  findMany: bugReport.output(findBugReportsOutputDtoSchema).route({
-    method: "GET",
-    path: "/bug-reports",
-    tags: ["bug-report"],
-    summary: "List bug reports",
-    spec: sessionAuthSpec,
-  }),
+  findMany: bugReport
+    .input(findBugReportsInputDtoSchema)
+    .output(findBugReportsOutputDtoSchema)
+    .route({
+      method: "GET",
+      path: "/bug-reports",
+      tags: ["bug-report"],
+      summary: "List bug reports",
+      spec: sessionAuthSpec,
+    }),
+  update: bugReport
+    .input(updateBugReportInputDtoSchema)
+    .output(updateBugReportOutputDtoSchema)
+    .route({
+      method: "PATCH",
+      path: "/bug-reports",
+      tags: ["bug-report"],
+      summary: "Update bug report",
+      spec: sessionAuthSpec,
+    }),
   findStats: bugReport
     .input(findStatsInputDtoSchema)
     .output(findStatsOutputDtoSchema)

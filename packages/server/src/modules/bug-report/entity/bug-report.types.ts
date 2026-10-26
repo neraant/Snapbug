@@ -7,6 +7,7 @@ export type BugReportPersistedType = {
   shortId: string;
   assignedTo: string | null;
   status: BugReportStatus;
+  boardOrder: number;
   severity: BugReportSeverity;
   title: string;
   description: string;
@@ -28,6 +29,30 @@ export type BugReportPersistedType = {
   updatedAt: Date;
   resolvedAt: Date | null;
 };
+
+export type UpdateBugReportType = Partial<
+  Pick<
+    BugReportPersistedType,
+    | "assignedTo"
+    | "status"
+    | "boardOrder"
+    | "severity"
+    | "title"
+    | "description"
+    | "stepsToReproduce"
+    | "reporterEmail"
+    | "url"
+    | "userAgent"
+    | "browser"
+    | "os"
+    | "device"
+    | "viewportWidth"
+    | "viewportHeight"
+    | "consoleLogs"
+    | "networkLogs"
+    | "customContext"
+  >
+>;
 
 export type CreateBugReportType = {
   id?: string;

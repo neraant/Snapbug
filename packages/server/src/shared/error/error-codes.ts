@@ -9,6 +9,7 @@ export const ERROR_CODES = {
   MEMBERSHIP_ALREADY_EXISTS: "membership-already-exists",
   USER_ALREADY_HAS_ORGANIZATION: "user-already-has-organization",
   PROJECT_NOT_FOUND: "project-not-found",
+  BUG_REPORT_NOT_FOUND: "bug-report-not-found",
   INTERNAL_SERVER_ERROR: "internal-server-error",
   EMAIL_SEND_FAILED: "email-send-failed",
   INVALID_RESET_PASSWORD_TOKEN: "invalid-reset-password-token",

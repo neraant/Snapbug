@@ -54,6 +54,7 @@ function createBugReport(index: number, status: BugReportStatus) {
     shortId: `SNB-${index}`,
     assignedTo: index % 2 === 0 ? assigneeId : null,
     status,
+    boardOrder: index * 1024,
     severity: BugReportSeverity.HIGH,
     title: `Issue ${index}`,
     description: "Something broke.",
