@@ -5,6 +5,10 @@ import { widgetState } from "../core/widget-state";
 
 const reporterEmailSchema = bugReportModelSchema.shape.reporterEmail;
 
+export function isValidReporterEmail(value: string) {
+  return reporterEmailSchema.safeParse(value).success;
+}
+
 export function identifyUser(options?: { email?: string }) {
   if (options === undefined) {
     widgetState.identifiedEmail = null;
@@ -17,8 +21,7 @@ export function identifyUser(options?: { email?: string }) {
     return;
   }
 
-  const parsed = reporterEmailSchema.safeParse(raw);
-  widgetState.identifiedEmail = parsed.success ? raw : null;
+  widgetState.identifiedEmail = isValidReporterEmail(raw) ? raw : null;
 }
 
 export function setReportCustomContext(value: Record<string, unknown> | null) {

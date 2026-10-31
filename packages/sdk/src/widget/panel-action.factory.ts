@@ -1,16 +1,17 @@
 import type { PanelSession } from "./panel.types";
 import { hidePanelFieldError } from "./panel-field-error.util";
-import { clearPanelScreenshot } from "./panel-screenshot.factory";
+import { MOBILE_PANEL_MAX_WIDTH_PX, triggerBottomAboveSheetPx } from "./panel-mobile.const";
+import { autoCapturePanelScreenshot, clearPanelScreenshot } from "./panel-screenshot.factory";
 import { showPanelForm } from "./panel-view.factory";
-
-const MOBILE_PANEL_MAX_WIDTH_PX = 639;
-const TRIGGER_ABOVE_SHEET_GAP_PX = 10;
 
 export function bindPanelActions(session: PanelSession) {
   session.openPanel = () => openPanel(session);
   session.closePanel = () => closePanel(session);
 
   session.cancel.addEventListener("click", () => {
+    session.closePanel();
+  });
+  session.closeButton.addEventListener("click", () => {
     session.closePanel();
   });
   session.done.addEventListener("click", () => {
@@ -34,6 +35,7 @@ export function bindPanelActions(session: PanelSession) {
 
 function openPanel(session: PanelSession) {
   showPanelForm(session);
+  session.email.prefill();
   session.panel.inert = false;
   session.panel.setAttribute("aria-hidden", "false");
   session.trigger.setAttribute("aria-expanded", "true");
@@ -43,11 +45,17 @@ function openPanel(session: PanelSession) {
     if (isMobilePanelViewport()) {
       positionTriggerAboveSheet(session);
     }
+    void autoCapturePanelScreenshot(session).then(() => {
+      if (document.activeElement === document.body && session.panel.classList.contains("snapbug-open")) {
+        session.title.focus();
+      }
+    });
   });
 }
 
 function closePanel(session: PanelSession) {
   session.attempt += 1;
+  session.sending = false;
   if (!session.success.hidden) resetPanelForm(session);
   session.panel.classList.remove("snapbug-open");
   session.panel.setAttribute("aria-hidden", "true");
@@ -75,8 +83,7 @@ function positionTriggerAboveSheet(session: PanelSession) {
 }
 
 function updateTriggerAboveSheetBottom(session: PanelSession) {
-  const panelHeight = session.panel.offsetHeight;
-  session.trigger.style.bottom = `${panelHeight + TRIGGER_ABOVE_SHEET_GAP_PX}px`;
+  session.trigger.style.bottom = `${triggerBottomAboveSheetPx(session.panel.offsetHeight)}px`;
 }
 
 function resetTriggerAboveSheet(session: PanelSession) {
@@ -89,8 +96,14 @@ function resetTriggerAboveSheet(session: PanelSession) {
 function resetPanelForm(session: PanelSession) {
   session.title.value = "";
   session.description.clear();
+  session.severity.reset();
+  session.email.reset();
+  session.diagnostic.reset();
   hidePanelFieldError(session.title, session.titleError);
   hidePanelFieldError(session.description.editable, session.descriptionError);
+  hidePanelFieldError(session.email.input, session.email.error);
   clearPanelScreenshot(session);
+  session.screenshotDeclined = false;
+  session.sending = false;
   showPanelForm(session);
 }

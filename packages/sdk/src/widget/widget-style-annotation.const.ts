@@ -115,21 +115,52 @@ export const widgetStyleAnnotation = `
   box-shadow: var(--shadow-md);
 }
 
-.snapbug .snapbug-screenshot-remove {
-  align-self: flex-start;
-  margin: 0;
-  padding: 0;
-  border: none;
-  background: none;
-  color: var(--muted-foreground);
-  font: inherit;
-  font-size: 13px;
-  text-decoration: underline;
-  cursor: pointer;
+.snapbug .snapbug-screenshot-caption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 
-.snapbug .snapbug-screenshot-remove:hover {
-  color: var(--foreground);
+.snapbug .snapbug-screenshot-caption-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted-foreground);
+  font-size: 13px;
+}
+
+.snapbug .snapbug-screenshot-caption-text svg {
+  width: 14px;
+  height: 14px;
+  color: var(--primary);
+}
+
+.snapbug .snapbug-screenshot-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.snapbug .snapbug-annotate {
+  height: 32px;
+  padding: 0 12px;
+  font-size: 13px;
+}
+
+.snapbug .snapbug-capture {
+  gap: 8px;
+  align-self: flex-start;
+}
+
+.snapbug .snapbug-capture svg {
+  width: 16px;
+  height: 16px;
+}
+
+.snapbug .snapbug-capture:disabled {
+  opacity: 0.6;
+  cursor: progress;
 }
 
 @media (prefers-reduced-motion: reduce) {

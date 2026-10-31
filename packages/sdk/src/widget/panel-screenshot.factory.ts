@@ -6,36 +6,56 @@ import { COPY } from "./widget-copy.const";
 
 export function bindPanelScreenshot(session: PanelSession) {
   session.captureScreenshot.addEventListener("click", async () => {
+    session.screenshotDeclined = false;
     await capturePanelScreenshot(session);
+  });
+  session.annotateScreenshot.addEventListener("click", () => {
+    session.annotation?.open();
   });
   session.removeScreenshot.addEventListener("click", () => {
     clearPanelScreenshot(session);
+    session.screenshotDeclined = true;
   });
 }
 
+/** Captures when the panel opens, unless a shot exists, one is in flight, or the user removed it. */
+export async function autoCapturePanelScreenshot(session: PanelSession) {
+  if (session.screenshotBlob || session.screenshotDeclined || session.captureScreenshot.disabled) return;
+  await capturePanelScreenshot(session);
+}
+
 export function clearPanelScreenshot(session: PanelSession) {
+  session.screenshotToken += 1;
   session.annotation?.unmount();
   session.annotation = null;
   revokeScreenshotPreview(session);
   session.screenshotBlob = null;
   session.screenshotPreview.removeAttribute("src");
   session.screenshotPreviewWrap.hidden = true;
-  session.removeScreenshot.hidden = true;
+  session.screenshotCaption.hidden = true;
+  setCaptureButton(session, false);
+}
+
+function setCaptureButton(session: PanelSession, capturing: boolean) {
+  const label = session.captureScreenshot.querySelector(".snapbug-capture-label");
+  if (label) label.textContent = capturing ? COPY.capturingScreenshot : COPY.captureScreenshot;
+  session.captureScreenshot.disabled = capturing;
+  session.captureScreenshot.hidden = session.screenshotBlob !== null;
 }
 
 async function capturePanelScreenshot(session: PanelSession) {
-  session.captureScreenshot.disabled = true;
-  const previousLabel = session.captureScreenshot.textContent;
-  session.captureScreenshot.textContent = COPY.capturingScreenshot;
+  const token = ++session.screenshotToken;
+  setCaptureButton(session, true);
 
   try {
     const blob = await capturePageScreenshot();
+    if (token !== session.screenshotToken) return;
     setScreenshotPreview(session, blob);
   } catch {
+    if (token !== session.screenshotToken) return;
     showPanelError(session, COPY.errorMessage);
   } finally {
-    session.captureScreenshot.disabled = false;
-    session.captureScreenshot.textContent = previousLabel ?? COPY.captureScreenshot;
+    if (token === session.screenshotToken) setCaptureButton(session, false);
   }
 }
 
@@ -47,7 +67,7 @@ function setScreenshotPreview(session: PanelSession, blob: Blob) {
   session.screenshotPreviewUrl = URL.createObjectURL(blob);
   session.screenshotPreview.src = session.screenshotPreviewUrl;
   session.screenshotPreviewWrap.hidden = false;
-  session.removeScreenshot.hidden = false;
+  session.screenshotCaption.hidden = false;
   session.annotation = mountScreenshotAnnotation(session.screenshotPreviewWrap, session.screenshotPreview, {
     getBlob: () => session.screenshotBlob,
     setBlob: (next) => {

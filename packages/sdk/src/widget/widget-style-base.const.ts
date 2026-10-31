@@ -113,10 +113,4 @@ export const widgetStyleBase = `
   width: 22px;
   height: 22px;
 }
-
-@media (max-width: 639px) {
-  .snapbug.snapbug-trigger.snapbug-trigger-above-sheet {
-    bottom: calc(90vh + 10px);
-  }
-}
 `;

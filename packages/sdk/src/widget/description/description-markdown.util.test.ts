@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { isDescriptionEmpty } from "./description-markdown.util";
+import { descriptionPlainLength, isDescriptionEmpty } from "./description-markdown.util";
 
 describe("isDescriptionEmpty", () => {
   it("treats whitespace and blank lines as empty", () => {
@@ -21,5 +21,13 @@ describe("isDescriptionEmpty", () => {
     expect(isDescriptionEmpty("**note**")).toBe(false);
     expect(isDescriptionEmpty("# Title")).toBe(false);
     expect(isDescriptionEmpty("- item")).toBe(false);
+  });
+});
+
+describe("descriptionPlainLength", () => {
+  it("ignores markdown markers", () => {
+    expect(descriptionPlainLength("**bold** and [link](https://x.com)")).toBe("bold and link".length);
+    expect(descriptionPlainLength("- one\n- two")).toBe("one\ntwo".length);
+    expect(descriptionPlainLength("")).toBe(0);
   });
 });

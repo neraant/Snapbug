@@ -9,7 +9,16 @@ export function isDescriptionEmpty(serialized: string): boolean {
   return true;
 }
 
-function lineHasMeaningfulContent(line: string): boolean {
+/** Length of the text a reader sees, without markdown markers (used for the minimum length check). */
+export function descriptionPlainLength(serialized: string): number {
+  return serialized
+    .split("\n")
+    .map((line) => plainLine(line).trim())
+    .join("\n")
+    .trim().length;
+}
+
+function plainLine(line: string): string {
   let content = line;
   content = content.replace(/^#{1,3}\s+/, "");
   content = content.replace(/^-\s+/, "");
@@ -18,7 +27,11 @@ function lineHasMeaningfulContent(line: string): boolean {
   content = stripBoldMarkers(content);
   content = stripItalicMarkers(content);
   content = stripLinkMarkers(content);
-  return content.trim().length > 0;
+  return content;
+}
+
+function lineHasMeaningfulContent(line: string): boolean {
+  return plainLine(line).trim().length > 0;
 }
 
 function stripBoldMarkers(text: string): string {

@@ -1,19 +1,29 @@
 import type { ResolvedWidgetOptions } from "../core/widget-config.types";
 import type { ScreenshotAnnotationController } from "../screenshot/annotation/annotation.types";
 import type { DescriptionEditorControl } from "./description/description-editor.factory";
+import type { DiagnosticControl } from "./panel-diagnostic.factory";
+import type { EmailControl } from "./panel-email.factory";
+import type { SeverityControl } from "./panel-severity.factory";
 
 export type PanelSession = {
   trigger: HTMLButtonElement;
   options: ResolvedWidgetOptions;
   panel: HTMLDivElement;
   form: HTMLFormElement;
+  header: HTMLDivElement;
   intro: HTMLDivElement;
+  closeButton: HTMLButtonElement;
+  body: HTMLDivElement;
   heading: HTMLHeadingElement;
   subtitle: HTMLParagraphElement;
   title: HTMLInputElement;
   titleError: HTMLParagraphElement;
   description: DescriptionEditorControl;
   descriptionError: HTMLParagraphElement;
+  descriptionCounter: HTMLSpanElement;
+  severity: SeverityControl;
+  email: EmailControl;
+  diagnostic: DiagnosticControl;
   actions: HTMLDivElement;
   submit: HTMLButtonElement;
   cancel: HTMLButtonElement;
@@ -34,8 +44,16 @@ export type PanelSession = {
   screenshotPreviewWrap: HTMLDivElement;
   screenshotPreview: HTMLImageElement;
   removeScreenshot: HTMLButtonElement;
+  annotateScreenshot: HTMLButtonElement;
+  screenshotCaption: HTMLDivElement;
+  screenshotActions: HTMLDivElement;
   attempt: number;
+  sending: boolean;
   screenshotBlob: Blob | null;
+  /** Bumped on every capture/clear so stale async captures are ignored. */
+  screenshotToken: number;
+  /** True after the user removed the capture; disables auto-capture until the form is reset. */
+  screenshotDeclined: boolean;
   screenshotPreviewUrl: string | null;
   annotation: ScreenshotAnnotationController | null;
   openPanel: () => void;

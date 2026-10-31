@@ -47,6 +47,8 @@
     "prepublishOnly": "pnpm build"
   },
   "dependencies": {
+    "@rrweb/record": "2.2.0",
+    "@rrweb/types": "2.2.0",
     "modern-screenshot": "4.7.0"
   },
   "devDependencies": {

@@ -6,11 +6,14 @@ export const widgetStylePanel = `
   z-index: 50;
   display: flex;
   flex-direction: column;
-  width: 400px;
-  max-height: min(640px, calc(100vh - 108px));
-  overflow: auto;
+  width: 420px;
+  max-width: calc(100vw - 48px);
+  min-width: 0;
+  max-height: min(720px, calc(100vh - 108px));
+  overflow-x: hidden;
+  overflow-y: auto;
   margin: 0;
-  padding: 20px;
+  padding: 0;
   border: 1px solid var(--border);
   border-radius: 16px;
   background: var(--card);
@@ -35,12 +38,21 @@ export const widgetStylePanel = `
 }
 
 @media (max-width: 639px) {
+  .snapbug .snapbug-severity {
+    grid-template-columns: 1fr;
+  }
+
+  .snapbug.snapbug-trigger {
+    bottom: 72px;
+  }
+
   .snapbug.snapbug-panel {
     right: 0;
-    bottom: 0;
+    bottom: 72px;
     left: 0;
     width: auto;
-    max-height: min(90vh, 100%);
+    max-width: none;
+    max-height: min(calc(90vh - 72px), calc(100% - 72px));
     border-right: none;
     border-bottom: none;
     border-left: none;
@@ -48,18 +60,88 @@ export const widgetStylePanel = `
   }
 }
 
-.snapbug .snapbug-form,
+.snapbug .snapbug-form {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  min-width: 0;
+}
+
 .snapbug .snapbug-result {
   display: flex;
   flex-direction: column;
   gap: 16px;
   margin: 0;
+  padding: 20px;
+}
+
+.snapbug .snapbug-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 20px 20px 0;
+  min-width: 0;
 }
 
 .snapbug .snapbug-intro {
   display: flex;
+  flex: 1;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
+  min-width: 0;
+}
+
+.snapbug .snapbug-close,
+.snapbug .snapbug-icon-button {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: calc(var(--radius) - 2px);
+  background: transparent;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition:
+    background-color 200ms ease,
+    color 200ms ease,
+    box-shadow 200ms ease;
+}
+
+.snapbug .snapbug-close:hover,
+.snapbug .snapbug-icon-button:hover {
+  background: color-mix(in oklch, var(--foreground) 6%, transparent);
+  color: var(--foreground);
+}
+
+.snapbug .snapbug-icon-button:hover {
+  color: var(--destructive);
+}
+
+.snapbug .snapbug-close:focus-visible,
+.snapbug .snapbug-icon-button:focus-visible {
+  outline: none;
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.snapbug .snapbug-close svg,
+.snapbug .snapbug-icon-button svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+}
+
+.snapbug .snapbug-body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 20px;
+  min-width: 0;
 }
 
 .snapbug .snapbug-result .snapbug-primary {
@@ -98,7 +180,90 @@ export const widgetStylePanel = `
 .snapbug .snapbug-label {
   color: var(--foreground);
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
+}
+
+.snapbug .snapbug-label-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.snapbug .snapbug-required {
+  color: var(--destructive);
+}
+
+.snapbug .snapbug-counter {
+  color: var(--muted-foreground);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.snapbug .snapbug-counter-met {
+  color: var(--foreground);
+}
+
+.snapbug .snapbug-hint {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.snapbug .snapbug-severity {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.snapbug .snapbug-severity-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: color-mix(in oklch, var(--foreground) 4%, var(--card));
+  color: var(--foreground);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 200ms ease,
+    border-color 200ms ease,
+    box-shadow 200ms ease;
+}
+
+.snapbug .snapbug-severity-card:hover {
+  border-color: color-mix(in oklch, var(--foreground) 24%, var(--border));
+}
+
+.snapbug .snapbug-severity-card[aria-checked="true"] {
+  border-color: var(--primary);
+  background: color-mix(in oklab, var(--primary) 12%, var(--card));
+  box-shadow: 0 0 0 1px var(--ring);
+}
+
+.snapbug .snapbug-severity-card:focus-visible {
+  outline: none;
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent);
+}
+
+.snapbug .snapbug-severity-title {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.snapbug .snapbug-severity-subtitle {
+  color: var(--muted-foreground);
+  font-size: 12px;
+  line-height: 1.3;
 }
 
 .snapbug .snapbug-input,
@@ -288,9 +453,17 @@ export const widgetStylePanel = `
 }
 
 .snapbug .snapbug-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 3;
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
   gap: 8px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+  background: var(--card);
+  min-width: 0;
 }
 
 .snapbug .snapbug-primary,
@@ -327,7 +500,7 @@ export const widgetStylePanel = `
 }
 
 .snapbug .snapbug-primary:hover:not(:disabled) {
-  background: color-mix(in oklch, var(--primary) 85%, var(--foreground));
+  background: color-mix(in oklab, var(--primary) 85%, var(--foreground));
 }
 
 .snapbug .snapbug-primary:disabled {
