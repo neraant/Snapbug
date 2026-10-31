@@ -9,6 +9,7 @@ import { cn } from "@workspace/design-system/lib/utils";
 import type { BugReportModelType } from "@workspace/validation/modules/bug-report/dto/bug-report.model";
 import { formatDistance } from "date-fns";
 import { CameraIcon, CirclePlayIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 
 import { bugReportSeverityBadgeVariant } from "@/client/modules/ticket-board/consts/bug-report-severity-badge-variant.const";
@@ -18,16 +19,34 @@ import { ticketBoardCardHeightClass } from "@/client/modules/ticket-board/consts
 type TicketBoardCardProps = {
   report: BugReportModelType;
   projectName?: string;
+  ticketHref: string;
   dragEnabled: boolean;
 };
 
-export function TicketBoardCard({ report, projectName, dragEnabled }: TicketBoardCardProps) {
+export function TicketBoardCard({ report, projectName, ticketHref, dragEnabled }: TicketBoardCardProps) {
   if (dragEnabled) {
-    return <TicketBoardCardDraggable report={report} projectName={projectName} />;
+    return <TicketBoardCardDraggable report={report} projectName={projectName} ticketHref={ticketHref} />;
   }
 
+  const router = useRouter();
+
+  const handleClick = useCallback(() => {
+    router.push(ticketHref);
+  }, [router, ticketHref]);
+
   return (
-    <div className={cn("shrink-0", ticketBoardCardHeightClass)}>
+    <div
+      className={cn("shrink-0 cursor-pointer", ticketBoardCardHeightClass)}
+      onClick={handleClick}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          handleClick();
+        }
+      }}
+      role="link"
+      tabIndex={0}
+    >
       <TicketBoardCardContent report={report} projectName={projectName} />
     </div>
   );
@@ -36,9 +55,11 @@ export function TicketBoardCard({ report, projectName, dragEnabled }: TicketBoar
 type TicketBoardCardDraggableProps = {
   report: BugReportModelType;
   projectName?: string;
+  ticketHref: string;
 };
 
-function TicketBoardCardDraggable({ report, projectName }: TicketBoardCardDraggableProps) {
+function TicketBoardCardDraggable({ report, projectName, ticketHref }: TicketBoardCardDraggableProps) {
+  const router = useRouter();
   const {
     attributes,
     listeners,
@@ -68,14 +89,19 @@ function TicketBoardCardDraggable({ report, projectName }: TicketBoardCardDragga
       }
     : undefined;
 
+  const handleClick = useCallback(() => {
+    router.push(ticketHref);
+  }, [router, ticketHref]);
+
   return (
     <div
       ref={setNodeRef}
       style={isDragging ? undefined : style}
       className={cn(
-        "shrink-0 overflow-hidden transition-[height] duration-200 ease-out",
+        "shrink-0 cursor-pointer overflow-hidden transition-[height] duration-200 ease-out",
         isDragging ? "pointer-events-none h-0" : ticketBoardCardHeightClass,
       )}
+      onClick={handleClick}
       {...listeners}
       {...attributes}
     >

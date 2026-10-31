@@ -15,7 +15,10 @@ import { CreateBugReportUseCase } from "@workspace/server/modules/bug-report/app
 import { FindBreakdownsUseCase } from "@workspace/server/modules/bug-report/application/find-breakdowns.use-case";
 import { FindBugReportsUseCase } from "@workspace/server/modules/bug-report/application/find-bug-reports.use-case";
 import { FindChartsUseCase } from "@workspace/server/modules/bug-report/application/find-charts.use-case";
+import { FindOneUseCase } from "@workspace/server/modules/bug-report/application/find-one.use-case";
 import { FindRecentUseCase } from "@workspace/server/modules/bug-report/application/find-recent.use-case";
+import { FindReplayUseCase } from "@workspace/server/modules/bug-report/application/find-replay.use-case";
+import { FindScreenshotUseCase } from "@workspace/server/modules/bug-report/application/find-screenshot.use-case";
 import { FindStatsUseCase } from "@workspace/server/modules/bug-report/application/find-stats.use-case";
 import { FindWidgetConfigUseCase } from "@workspace/server/modules/bug-report/application/find-widget-config.use-case";
 import { FindWorkloadUseCase } from "@workspace/server/modules/bug-report/application/find-workload.use-case";
@@ -158,6 +161,9 @@ const createBugReport = new CreateBugReportUseCase(
 );
 const findWidgetConfig = new FindWidgetConfigUseCase(apiKeyAdapter, projectAdapter, widgetIngestOriginService);
 const findBugReports = new FindBugReportsUseCase(membershipAdapter, projectAdapter, bugReportRepository);
+const findOne = new FindOneUseCase(membershipAdapter, userAdapter, bugReportRepository);
+const findScreenshot = new FindScreenshotUseCase(membershipAdapter, bugReportRepository, bugReportFileStorage);
+const findReplay = new FindReplayUseCase(membershipAdapter, bugReportRepository, bugReportFileStorage);
 const findStats = new FindStatsUseCase(
   membershipAdapter,
   projectAdapter,
@@ -194,6 +200,9 @@ export const container = {
     createBugReport,
     findWidgetConfig,
     findBugReports,
+    findOne,
+    findScreenshot,
+    findReplay,
     findStats,
     findCharts,
     findBreakdowns,

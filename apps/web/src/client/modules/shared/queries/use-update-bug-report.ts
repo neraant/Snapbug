@@ -8,9 +8,14 @@ export function useUpdateBugReport() {
   return useMutation(
     orpcQuery.bugReport.update.mutationOptions({
       onSuccess: async () => {
-        await queryClient.invalidateQueries({
-          queryKey: orpcQuery.bugReport.findMany.key(),
-        });
+        await Promise.all([
+          queryClient.invalidateQueries({
+            queryKey: orpcQuery.bugReport.findMany.key(),
+          }),
+          queryClient.invalidateQueries({
+            queryKey: orpcQuery.bugReport.findOne.key(),
+          }),
+        ]);
       },
     }),
   );

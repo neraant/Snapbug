@@ -97,15 +97,15 @@ export const texts = {
       heading: "Privacy",
       maskText: {
         label: "Mask text",
-        description: "Redact visible page text that appears in report fields.",
+        description: "Hide visible page text in session replay and strip it from report logs.",
       },
       maskInputs: {
         label: "Mask inputs",
-        description: "Redact values from page inputs that appear in report fields.",
+        description: "Hide input values in session replay and strip them from report logs.",
       },
       blockSelectors: {
         label: "Block CSS selectors",
-        description: "Selectors excluded from masking scans.",
+        description: "Leave matching elements out of session replay and out of the log redaction scan.",
         placeholder: "Add selector",
         removeTag: (selector: string) => `Remove ${selector}`,
       },

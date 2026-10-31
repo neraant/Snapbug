@@ -57,6 +57,16 @@ export class BugReportRepository {
     return row ? BugReportMapper.fromPersistence(row) : null;
   }
 
+  async findByShortIdAndOrganizationId(shortId: string, organizationId: string): Promise<BugReport | null> {
+    const row = await this.db.query.bugReportTable.findFirst({
+      where: {
+        shortId,
+        project: { organizationId },
+      },
+    });
+    return row ? BugReportMapper.fromPersistence(row) : null;
+  }
+
   async findManyByProjectIds(projectIds: string[]): Promise<BugReport[]> {
     const bugReports = await this.db.query.bugReportTable.findMany({
       where: { projectId: { in: projectIds } },
@@ -138,6 +148,7 @@ export class BugReportRepository {
             viewportWidth: values.viewportWidth,
             viewportHeight: values.viewportHeight,
             screenshotKey: values.screenshotKey,
+            replayKey: values.replayKey,
             hasReplay: values.hasReplay,
             consoleLogs: values.consoleLogs,
             networkLogs: values.networkLogs,

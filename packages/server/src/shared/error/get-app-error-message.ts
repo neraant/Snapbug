@@ -23,6 +23,8 @@ const ERROR_MESSAGES: Record<ErrorCode, string> = {
   [ERROR_CODES.INVITATION_EMAIL_MISMATCH]: "Sign in with the email address that received the invitation",
   [ERROR_CODES.SCREENSHOT_TOO_LARGE]: "Screenshot is too large",
   [ERROR_CODES.INVALID_SCREENSHOT]: "Screenshot must be PNG or JPEG",
+  [ERROR_CODES.REPLAY_TOO_LARGE]: "Session replay is too large",
+  [ERROR_CODES.INVALID_REPLAY]: "Session replay must be gzip or JSON",
 };
 
 function isErrorCode(value: unknown): value is ErrorCode {

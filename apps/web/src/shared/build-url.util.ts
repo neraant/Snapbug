@@ -1,5 +1,3 @@
-import { routePattern } from "@/shared/route.const";
-
 export function buildUrl(
   pattern: string,
   params: Record<string, string | number> = {},
@@ -35,6 +33,22 @@ export function matchUrl(pattern: string, pathname: string): Record<string, stri
   return Object.fromEntries(names.map((name, index) => [name, decodeURIComponent(match[index + 1] ?? "")]));
 }
 
+const ticketsBase = "/tickets";
+
+export const routePattern = {
+  signIn: "/sign-in",
+  signUp: "/sign-up",
+  forgotPassword: "/forgot-password",
+  resetPassword: "/reset-password",
+  onboarding: "/onboarding",
+
+  overview: "/overview",
+  playground: "/playground",
+  sdk: "/sdk",
+  tickets: `${ticketsBase}`,
+  ticket: `${ticketsBase}/:shortId`,
+} as const;
+
 export const url = {
   signIn: (query?: { invitation?: string }) => buildUrl(routePattern.signIn, {}, query),
   signUp: (query?: { invitation?: string }) => buildUrl(routePattern.signUp, {}, query),
@@ -45,6 +59,6 @@ export const url = {
   overview: () => routePattern.overview,
   playground: () => routePattern.playground,
   sdk: () => routePattern.sdk,
-  ticketsBoard: () => routePattern.ticketsBoard,
+  ticketsBoard: () => routePattern.tickets,
   ticket: (shortId: string) => buildUrl(routePattern.ticket, { shortId }),
 } as const;

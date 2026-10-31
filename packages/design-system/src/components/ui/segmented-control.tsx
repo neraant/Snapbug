@@ -1,6 +1,7 @@
 import { Button } from "@workspace/design-system/components/ui/button";
 import { cn } from "@workspace/design-system/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
+import type { ElementType } from "react";
 
 const segmentedControlVariants = cva("inline-flex rounded-lg border bg-muted p-1", {
   variants: {
@@ -59,6 +60,7 @@ const segmentedControlItemVariants = cva("rounded-md font-medium shadow-none", {
 export type SegmentedControlItem = {
   value: string;
   label: string;
+  icon?: ElementType;
   disabled?: boolean;
 };
 
@@ -83,6 +85,7 @@ function SegmentedControl({
     <div role="group" aria-label={ariaLabel} className={cn(segmentedControlVariants({ variant, size }), className)}>
       {items.map((item) => {
         const selected = value === item.value;
+        const Icon = item.icon;
         return (
           <Button
             key={item.value}
@@ -94,6 +97,7 @@ function SegmentedControl({
             className={segmentedControlItemVariants({ size, variant, selected })}
             onClick={() => onValueChange(item.value)}
           >
+            {Icon ? <Icon aria-hidden /> : null}
             {item.label}
           </Button>
         );

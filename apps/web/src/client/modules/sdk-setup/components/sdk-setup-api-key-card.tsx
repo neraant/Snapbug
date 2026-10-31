@@ -2,7 +2,7 @@ import { Row } from "@workspace/design-system/components/layout/row";
 import { Button } from "@workspace/design-system/components/ui/button";
 import { Code } from "@workspace/design-system/components/ui/code";
 import { CopyButton } from "@workspace/design-system/components/ui/copy-button";
-import { MetricCard } from "@workspace/design-system/components/ui/metric-card";
+import { Panel } from "@workspace/design-system/components/ui/panel";
 import { Skeleton } from "@workspace/design-system/components/ui/skeleton";
 import { Typography } from "@workspace/design-system/components/ui/typography";
 import { useCopyText } from "@workspace/design-system/hooks/use-copy-text";
@@ -29,8 +29,8 @@ export function SdkSetupApiKeyCard({ projectId }: SdkSetupApiKeyCardProps) {
   });
 
   return (
-    <MetricCard>
-      <MetricCard.Header
+    <Panel>
+      <Panel.Header
         title={texts.apiKey.title}
         action={
           <Row align="center" gap="sm" wrap={false}>
@@ -54,14 +54,14 @@ export function SdkSetupApiKeyCard({ projectId }: SdkSetupApiKeyCardProps) {
           </Row>
         }
       />
-      <MetricCard.Content gap="md">
+      <Panel.Content gap="md">
         <Code code={visible ? data.key : maskedKey} showCopy={false} />
         {/* TODO: Regenerate key modal and last-used metadata */}
         <Typography variant="text-xs" color="muted">
           {texts.apiKey.created(createdLabel)}
         </Typography>
-      </MetricCard.Content>
-    </MetricCard>
+      </Panel.Content>
+    </Panel>
   );
 }
 

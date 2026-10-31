@@ -19,6 +19,17 @@ export const bugReportRouter = os.router({
   findMany: authed.findMany.handler(
     async ({ input, context }) => await container.bugReport.findBugReports.execute(input, context.user.id),
   ),
+  findOne: authed.findOne.handler(
+    async ({ input, context }) => await container.bugReport.findOne.execute(input, context.user.id),
+  ),
+  findScreenshot: authed.findScreenshot.handler(async ({ input, context }) => {
+    const screenshot = await container.bugReport.findScreenshot.execute(input, context.user.id);
+    return new Blob([Buffer.from(screenshot.bytes)], { type: screenshot.contentType });
+  }),
+  findReplay: authed.findReplay.handler(async ({ input, context }) => {
+    const replay = await container.bugReport.findReplay.execute(input, context.user.id);
+    return new Blob([Buffer.from(replay.bytes)], { type: replay.contentType });
+  }),
   update: authed.update.handler(
     async ({ input, context }) =>
       await container.bugReport.updateBugReport.execute(input, context.user.id, context.actor),

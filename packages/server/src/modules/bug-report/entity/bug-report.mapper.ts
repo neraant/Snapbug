@@ -1,6 +1,7 @@
 import { BugReport } from "@workspace/server/modules/bug-report/entity/bug-report.entity";
 import type { BugReportPersistedType } from "@workspace/server/modules/bug-report/entity/bug-report.types";
 import type { BugReportModelType } from "@workspace/validation/modules/bug-report/dto/bug-report.model";
+import type { FindOneOutputDtoType } from "@workspace/validation/modules/bug-report/dto/find-one.schema";
 import type { FindRecentOutputDtoType } from "@workspace/validation/modules/bug-report/dto/find-recent.schema";
 import type { FindWorkloadOutputDtoType } from "@workspace/validation/modules/bug-report/dto/find-workload.schema";
 import type { UserModelType } from "@workspace/validation/modules/user/dto/user.model";
@@ -69,6 +70,15 @@ export abstract class BugReportMapper {
       createdAt: row.createdAt.toISOString(),
       updatedAt: row.updatedAt.toISOString(),
       resolvedAt: row.resolvedAt?.toISOString() ?? null,
+    };
+  }
+
+  static toFindOneOutput(bugReport: BugReport, assignee: UserModelType | null): FindOneOutputDtoType {
+    const dto = BugReportMapper.toDto(bugReport);
+
+    return {
+      ...dto,
+      assignee: assignee ? { id: assignee.id, name: assignee.name, email: assignee.email } : null,
     };
   }
 

@@ -1,5 +1,5 @@
 import { Code } from "@workspace/design-system/components/ui/code";
-import { MetricCard } from "@workspace/design-system/components/ui/metric-card";
+import { Panel } from "@workspace/design-system/components/ui/panel";
 import { SegmentedControl } from "@workspace/design-system/components/ui/segmented-control";
 import { Skeleton } from "@workspace/design-system/components/ui/skeleton";
 import { useMemo, useState } from "react";
@@ -34,8 +34,8 @@ export function SdkSetupInstallCard({ projectId }: SdkSetupInstallCardProps) {
   const panelTitle = tab === "script" ? texts.install.panelTitle.script : texts.install.panelTitle.terminal;
 
   return (
-    <MetricCard id="step-install">
-      <MetricCard.Header
+    <Panel id="step-install">
+      <Panel.Header
         title={texts.install.title}
         description={texts.install.description}
         action={
@@ -48,10 +48,10 @@ export function SdkSetupInstallCard({ projectId }: SdkSetupInstallCardProps) {
           />
         }
       />
-      <MetricCard.Content gap="md">
+      <Panel.Content gap="md">
         <Code title={panelTitle} code={code} copyLabel={texts.install.copy} copiedLabel={texts.install.copied} />
-      </MetricCard.Content>
-    </MetricCard>
+      </Panel.Content>
+    </Panel>
   );
 }
 

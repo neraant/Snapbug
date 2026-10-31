@@ -1,0 +1,102 @@
+.ticket-detail-replay-player {
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--card);
+}
+
+.ticket-detail-replay-player .rr-player {
+  float: none;
+  width: 100% !important;
+  max-width: 100%;
+  box-shadow: none;
+  border-radius: 0;
+  background: var(--card);
+}
+
+.ticket-detail-replay-player .rr-controller {
+  background: var(--card);
+  border-top: 1px solid var(--border);
+  border-radius: 0;
+  color: var(--foreground);
+}
+
+.ticket-detail-replay-player .rr-timeline__time {
+  color: var(--muted-foreground);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.ticket-detail-replay-player .rr-progress {
+  background: var(--muted);
+  border-color: var(--card);
+}
+
+.ticket-detail-replay-player .rr-progress__step {
+  background: color-mix(in oklch, var(--primary) 25%, transparent);
+}
+
+.ticket-detail-replay-player .rr-progress__handler {
+  background: var(--primary);
+}
+
+.ticket-detail-replay-player .rr-controller__btns button:active {
+  background: var(--accent);
+}
+
+.ticket-detail-replay-player .rr-controller__btns button.active {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.ticket-detail-replay-player .rr-controller__btns .switch:has(#skip) {
+  display: none;
+}
+
+.ticket-detail-replay-player-shell {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+.ticket-detail-replay-player-shell__play-overlay {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  background: color-mix(in oklch, var(--foreground) 12%, transparent);
+  color: var(--primary-foreground);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  height: var(--ticket-detail-replay-viewport-height, 320px);
+}
+
+.ticket-detail-replay-player-shell__play-overlay:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.ticket-detail-replay-player-shell__play-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 9999px;
+  background: var(--primary);
+  box-shadow: var(--shadow-md);
+}
+
+.ticket-detail-replay-player-shell__play-icon svg {
+  width: 1.75rem;
+  height: 1.75rem;
+  margin-left: 0.15rem;
+}

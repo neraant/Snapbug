@@ -19,6 +19,7 @@ import { TooltipProvider } from "@workspace/design-system/components/ui/tooltip"
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useFindProjects } from "@/client/modules/shared/queries/use-find-projects";
+import { buildPathWithProjectScopeSearchParam } from "@/client/modules/shared/utils/parse-project-scope-search-param.util";
 import { TicketBoardCard } from "@/client/modules/ticket-board/components/ticket-board-card";
 import { TicketBoardColumn } from "@/client/modules/ticket-board/components/ticket-board-column";
 import { TicketBoardEmpty } from "@/client/modules/ticket-board/components/ticket-board-empty";
@@ -31,6 +32,7 @@ import {
   resolveTicketBoardInsertionTarget,
   type TicketBoardInsertionTarget,
 } from "@/client/modules/ticket-board/utils/resolve-ticket-board-insertion-target.util";
+import { url } from "@/shared/build-url.util";
 
 type TicketBoardProps = {
   projectId: string | null;
@@ -126,6 +128,7 @@ export function TicketBoard({ projectId, onClearFilters, board }: TicketBoardPro
       board={board}
       projectNameById={projectNameById}
       showProjectName={showProjectName}
+      projectId={projectId}
       dragEnabled={isDragEnabled}
       activeDragId={activeDragId}
       insertionTarget={insertionTarget}
@@ -157,6 +160,7 @@ export function TicketBoard({ projectId, onClearFilters, board }: TicketBoardPro
                   <TicketBoardCard
                     report={activeReport}
                     projectName={showProjectName ? projectNameById.get(activeReport.projectId) : undefined}
+                    ticketHref={buildPathWithProjectScopeSearchParam(url.ticket(activeReport.shortId), projectId)}
                     dragEnabled={false}
                   />
                 ) : null}
@@ -175,6 +179,7 @@ type TicketBoardColumnRowProps = {
   board: ReturnType<typeof useTicketBoard>;
   projectNameById: Map<string, string>;
   showProjectName: boolean;
+  projectId: string | null;
   dragEnabled: boolean;
   activeDragId: string | null;
   insertionTarget: TicketBoardInsertionTarget | null;
@@ -184,6 +189,7 @@ function TicketBoardColumnRow({
   board,
   projectNameById,
   showProjectName,
+  projectId,
   dragEnabled,
   activeDragId,
   insertionTarget,
@@ -199,6 +205,7 @@ function TicketBoardColumnRow({
             visibleCount={board.visibleCountByStatus[status]}
             projectNameById={projectNameById}
             showProjectName={showProjectName}
+            projectId={projectId}
             onLoadMore={() => board.loadMore(status)}
             dragEnabled={dragEnabled}
             isDraggingTicket={dragEnabled && activeDragId !== null}

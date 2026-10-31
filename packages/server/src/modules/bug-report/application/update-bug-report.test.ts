@@ -51,6 +51,7 @@ const bugReport = new BugReport({
   viewportWidth: null,
   viewportHeight: null,
   screenshotKey: null,
+  replayKey: null,
   hasReplay: false,
   consoleLogs: null,
   networkLogs: null,

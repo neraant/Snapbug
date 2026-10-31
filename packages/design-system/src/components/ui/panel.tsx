@@ -1,22 +1,24 @@
 import { Column } from "@workspace/design-system/components/layout/column";
+import { Row } from "@workspace/design-system/components/layout/row";
 import { ToolbarRow } from "@workspace/design-system/components/layout/toolbar-row";
 import { Card } from "@workspace/design-system/components/ui/card";
 import { Separator } from "@workspace/design-system/components/ui/separator";
 import { Typography } from "@workspace/design-system/components/ui/typography";
 import { cn } from "@workspace/design-system/lib/utils";
-import type { ComponentProps, ReactNode } from "react";
+import type { ComponentProps, ElementType, ReactNode } from "react";
 
-function MetricCard({ className, ...props }: ComponentProps<typeof Card>) {
-  return <Card data-slot="metric-card" padding="none" gap="none" className={cn("min-w-0", className)} {...props} />;
+function Panel({ className, ...props }: ComponentProps<typeof Card>) {
+  return <Card data-slot="panel" padding="none" gap="none" className={cn("min-w-0", className)} {...props} />;
 }
 
-type MetricCardHeaderProps = {
+type PanelHeaderProps = {
   title: string;
   description?: string;
   action?: ReactNode;
+  icon?: ElementType;
 };
 
-function MetricCardHeader({ title, description, action }: MetricCardHeaderProps) {
+function PanelHeader({ title, description, action, icon: Icon }: PanelHeaderProps) {
   return (
     <>
       <Column padding="md">
@@ -24,7 +26,10 @@ function MetricCardHeader({ title, description, action }: MetricCardHeaderProps)
           trailingAlign="end"
           leading={
             <Column gap="xs" minWidth="0">
-              <Typography variant="heading-xs">{title}</Typography>
+              <Row align="center" gap="sm" wrap={false}>
+                {Icon ? <Icon aria-hidden className="size-4 shrink-0 text-muted-foreground" /> : null}
+                <Typography variant="heading-xs">{title}</Typography>
+              </Row>
               {description ? (
                 <Typography variant="text-sm" color="muted">
                   {description}
@@ -40,11 +45,11 @@ function MetricCardHeader({ title, description, action }: MetricCardHeaderProps)
   );
 }
 
-function MetricCardContent({ className, padding = "md", ...props }: ComponentProps<typeof Card.Content>) {
+function PanelContent({ className, padding = "md", ...props }: ComponentProps<typeof Card.Content>) {
   return <Card.Content padding={padding} className={cn("min-w-0", className)} {...props} />;
 }
 
-MetricCard.Header = MetricCardHeader;
-MetricCard.Content = MetricCardContent;
+Panel.Header = PanelHeader;
+Panel.Content = PanelContent;
 
-export { MetricCard, MetricCardContent, MetricCardHeader };
+export { Panel, PanelContent, PanelHeader };

@@ -1,6 +1,6 @@
 import { Row } from "@workspace/design-system/components/layout/row";
 import { FeedList } from "@workspace/design-system/components/ui/feed-list";
-import { MetricCard } from "@workspace/design-system/components/ui/metric-card";
+import { Panel } from "@workspace/design-system/components/ui/panel";
 import { Typography } from "@workspace/design-system/components/ui/typography";
 import { cn } from "@workspace/design-system/lib/utils";
 import { ArrowRightIcon } from "lucide-react";
@@ -22,8 +22,8 @@ export function OverviewRecentActivityCard({ projectId, className }: OverviewRec
   const ticketsHref = buildPathWithProjectScopeSearchParam(url.ticketsBoard(), projectId);
 
   return (
-    <MetricCard className={cn(className)}>
-      <MetricCard.Header
+    <Panel className={cn(className)}>
+      <Panel.Header
         title={texts.activity.recent.title}
         description={texts.activity.recent.description}
         action={
@@ -42,9 +42,9 @@ export function OverviewRecentActivityCard({ projectId, className }: OverviewRec
           </Link>
         }
       />
-      <MetricCard.Content>
+      <Panel.Content>
         <FeedList items={mapRecentActivityToFeedItems(items)} emptyLabel={texts.activity.recent.empty} />
-      </MetricCard.Content>
-    </MetricCard>
+      </Panel.Content>
+    </Panel>
   );
 }

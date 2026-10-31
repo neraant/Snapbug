@@ -10,9 +10,11 @@ import type { BugReportStatus } from "@workspace/validation/modules/bug-report/c
 import type { BugReportModelType } from "@workspace/validation/modules/bug-report/dto/bug-report.model";
 import { Fragment, type Ref, useEffect, useState } from "react";
 
+import { buildPathWithProjectScopeSearchParam } from "@/client/modules/shared/utils/parse-project-scope-search-param.util";
 import { TicketBoardCard } from "@/client/modules/ticket-board/components/ticket-board-card";
 import { texts } from "@/client/modules/ticket-board/consts/texts.const";
 import { ticketBoardCardHeightClass } from "@/client/modules/ticket-board/consts/ticket-board.const";
+import { url } from "@/shared/build-url.util";
 
 type TicketBoardColumnProps = {
   status: BugReportStatus;
@@ -20,6 +22,7 @@ type TicketBoardColumnProps = {
   visibleCount: number;
   projectNameById: Map<string, string>;
   showProjectName: boolean;
+  projectId: string | null;
   onLoadMore: () => void;
   insertionIndex: number | null;
   isDraggingTicket: boolean;
@@ -53,6 +56,7 @@ function TicketBoardColumnView({
   visibleCount,
   projectNameById,
   showProjectName,
+  projectId,
   onLoadMore,
   insertionIndex,
   isDraggingTicket,
@@ -108,6 +112,7 @@ function TicketBoardColumnView({
                   <TicketBoardCard
                     report={report}
                     projectName={showProjectName ? projectNameById.get(report.projectId) : undefined}
+                    ticketHref={buildPathWithProjectScopeSearchParam(url.ticket(report.shortId), projectId)}
                     dragEnabled={dragEnabled}
                   />
                   {showInsertion && insertionIndex === reportIndex + 1 ? <TicketBoardDropPlaceholder /> : null}

@@ -1,7 +1,6 @@
 import type { BreadcrumbCrumb } from "@/client/modules/shared/types/breadcrumb.type";
 import { texts } from "@/client/modules/shared/ui/app-sidebar/consts/texts.const";
-import { matchUrl, url } from "@/shared/build-url.util";
-import { routePattern } from "@/shared/route.const";
+import { matchUrl, routePattern, url } from "@/shared/build-url.util";
 
 type BreadcrumbRoute = {
   pattern: string;
@@ -22,7 +21,7 @@ const breadcrumbRoute: BreadcrumbRoute[] = [
     build: () => [{ href: url.sdk(), label: texts.sdkSetup }],
   },
   {
-    pattern: routePattern.ticketsBoard,
+    pattern: routePattern.tickets,
     build: () => [{ href: url.ticketsBoard(), label: texts.tickets }],
   },
   {

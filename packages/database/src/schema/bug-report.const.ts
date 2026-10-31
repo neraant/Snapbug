@@ -26,6 +26,7 @@ export const bugReportTable = pgTable("bug_reports", {
   viewportWidth: integer("viewport_width"),
   viewportHeight: integer("viewport_height"),
   screenshotKey: text("screenshot_key"),
+  replayKey: text("replay_key"),
   hasReplay: boolean("has_replay").notNull().default(false),
   consoleLogs: jsonb("console_logs").$type<unknown[]>(),
   networkLogs: jsonb("network_logs").$type<unknown[]>(),

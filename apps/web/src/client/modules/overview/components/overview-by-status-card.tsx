@@ -1,6 +1,6 @@
 import { Grid } from "@workspace/design-system/components/layout/grid";
 import { Row } from "@workspace/design-system/components/layout/row";
-import { MetricCard } from "@workspace/design-system/components/ui/metric-card";
+import { Panel } from "@workspace/design-system/components/ui/panel";
 import { StackedBar } from "@workspace/design-system/components/ui/stacked-bar";
 import { Typography } from "@workspace/design-system/components/ui/typography";
 import { cn } from "@workspace/design-system/lib/utils";
@@ -34,9 +34,9 @@ export function OverviewByStatusCard({ filters, className }: OverviewByStatusCar
   const statusByKey = new Map(breakdowns.status.map((row) => [row.status, row.count]));
 
   return (
-    <MetricCard className={cn(className)}>
-      <MetricCard.Header title={texts.breakdown.byStatus.title} description={texts.breakdown.byStatus.description} />
-      <MetricCard.Content className="flex flex-col gap-6">
+    <Panel className={cn(className)}>
+      <Panel.Header title={texts.breakdown.byStatus.title} description={texts.breakdown.byStatus.description} />
+      <Panel.Content className="flex flex-col gap-6">
         <StackedBar segments={segments} />
         <Grid columns={2} gap="md">
           {statusLegendOrder.map((status) => (
@@ -55,7 +55,7 @@ export function OverviewByStatusCard({ filters, className }: OverviewByStatusCar
             </Row>
           ))}
         </Grid>
-      </MetricCard.Content>
-    </MetricCard>
+      </Panel.Content>
+    </Panel>
   );
 }

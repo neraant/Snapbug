@@ -9,7 +9,10 @@ import {
 import { z } from "zod";
 
 export { BUG_REPORT_CUSTOM_CONTEXT_MAX_BYTES } from "@workspace/validation/modules/bug-report/consts/bug-report-custom-context.const";
+export { BUG_REPORT_REPLAY_MAX_BYTES } from "@workspace/validation/modules/bug-report/consts/bug-report-replay.const";
 export { BUG_REPORT_SCREENSHOT_MAX_BYTES } from "@workspace/validation/modules/bug-report/consts/bug-report-screenshot.const";
+
+export const bugReportReporterSeveritySchema = z.enum(["low", "high", "critical"]);
 
 export const bugReportCustomContextInputSchema = z
   .record(z.string(), z.unknown())
@@ -31,6 +34,7 @@ export const createBugReportInputDtoSchema = bugReportModelSchema
     customContext: bugReportCustomContextInputSchema.nullish(),
     consoleLogs: z.array(bugReportConsoleLogEntrySchema).max(BUG_REPORT_CONSOLE_LOG_MAX_ENTRIES).optional(),
     networkLogs: z.array(bugReportNetworkLogEntrySchema).max(BUG_REPORT_NETWORK_LOG_MAX_ENTRIES).optional(),
+    severity: bugReportReporterSeveritySchema.optional(),
   });
 
 export type CreateBugReportInputDtoType = z.infer<typeof createBugReportInputDtoSchema>;
@@ -40,6 +44,7 @@ export const createBugReportOutputDtoSchema = bugReportModelSchema;
 export type CreateBugReportOutputDtoType = z.infer<typeof createBugReportOutputDtoSchema>;
 
 export const BUG_REPORT_SCREENSHOT_FORM_FIELD = "screenshot" as const;
+export const BUG_REPORT_REPLAY_FORM_FIELD = "replay" as const;
 
 const optionalMultipartInt = z
   .string()

@@ -52,6 +52,10 @@
   --input: oklch(0.92 0.005 60); /* #E7E5E4 - Stone-200 */
   --ring: oklch(0.693 0.207 42.5); /* #F97316 - Orange Focus Ring */
 
+  /* Scrollbar — warm stone, follows foreground in both themes */
+  --scrollbar-thumb: color-mix(in oklch, var(--foreground) 22%, transparent);
+  --scrollbar-thumb-hover: color-mix(in oklch, var(--foreground) 40%, transparent);
+
   /* Charts & Telemetry */
   --chart-1: oklch(0.693 0.207 42.5); /* Brand Orange */
   --chart-2: oklch(0.704 0.165 158); /* Emerald Success */
@@ -252,6 +256,32 @@
     stroke-width: 1.5;
   }
 
+  /* Thin pill thumb, transparent track. 8px gutter with a 2px inset reads as ~4px. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) transparent;
+  }
+  *:hover {
+    scrollbar-color: var(--scrollbar-thumb-hover) transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  *::-webkit-scrollbar-track,
+  *::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+  *::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-thumb);
+    border: 2px solid transparent;
+    border-radius: 999px;
+    background-clip: padding-box;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: var(--scrollbar-thumb-hover);
+  }
+
   /* Chart chrome matches Typography text-xs. */
   .recharts-cartesian-axis-tick-value,
   .recharts-legend-wrapper,
@@ -260,5 +290,14 @@
   }
   .recharts-cartesian-axis-tick-value {
     @apply fill-muted-foreground;
+  }
+}
+
+@utility no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
   }
 }

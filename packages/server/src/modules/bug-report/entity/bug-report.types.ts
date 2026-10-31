@@ -21,6 +21,7 @@ export type BugReportPersistedType = {
   viewportWidth: number | null;
   viewportHeight: number | null;
   screenshotKey: string | null;
+  replayKey: string | null;
   hasReplay: boolean;
   consoleLogs: unknown[] | null;
   networkLogs: unknown[] | null;
@@ -68,6 +69,8 @@ export type CreateBugReportType = {
   viewportWidth?: number | null;
   viewportHeight?: number | null;
   screenshotKey?: string | null;
+  replayKey?: string | null;
+  severity?: BugReportSeverity;
   consoleLogs?: unknown[] | null;
   networkLogs?: unknown[] | null;
   reporterEmail?: string | null;

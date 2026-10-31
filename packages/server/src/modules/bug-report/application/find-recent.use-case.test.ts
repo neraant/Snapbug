@@ -68,6 +68,7 @@ function createBugReport(index: number, status: BugReportStatus) {
     viewportWidth: null,
     viewportHeight: null,
     screenshotKey: null,
+    replayKey: null,
     hasReplay: false,
     consoleLogs: null,
     networkLogs: null,

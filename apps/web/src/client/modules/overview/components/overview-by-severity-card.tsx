@@ -1,5 +1,5 @@
 import { DonutChart } from "@workspace/design-system/components/ui/donut-chart";
-import { MetricCard } from "@workspace/design-system/components/ui/metric-card";
+import { Panel } from "@workspace/design-system/components/ui/panel";
 import { cn } from "@workspace/design-system/lib/utils";
 import type { FindChartsOutputDtoType } from "@workspace/validation/modules/bug-report/dto/find-charts.schema";
 
@@ -15,11 +15,11 @@ export function OverviewBySeverityCard({ severity, className }: OverviewBySeveri
   const slices = mapSeverityToDonutSlices(severity, texts.chart.bySeverity.severityLabels);
 
   return (
-    <MetricCard className={cn(className)}>
-      <MetricCard.Header title={texts.chart.bySeverity.title} description={texts.chart.bySeverity.description} />
-      <MetricCard.Content className="h-72">
+    <Panel className={cn(className)}>
+      <Panel.Header title={texts.chart.bySeverity.title} description={texts.chart.bySeverity.description} />
+      <Panel.Content className="h-72">
         <DonutChart slices={slices} centerCaption={texts.chart.bySeverity.centerLabel} />
-      </MetricCard.Content>
-    </MetricCard>
+      </Panel.Content>
+    </Panel>
   );
 }

@@ -22,7 +22,7 @@ export function AppSidebarHeader() {
       justify="between"
       wrap={false}
       className={cn(
-        "sticky top-0 z-20 shrink-0 border-b border-border bg-sidebar px-6 backdrop-blur-md transition-[height] duration-200 ease-linear",
+        "shrink-0 border-b border-border bg-sidebar px-6 transition-[height] duration-200 ease-linear",
         isCompactHeader ? "h-12.25" : "h-16.25",
       )}
     >

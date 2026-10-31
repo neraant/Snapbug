@@ -17,6 +17,8 @@ export const ERROR_CODES = {
   INVITATION_EMAIL_MISMATCH: "invitation-email-mismatch",
   SCREENSHOT_TOO_LARGE: "screenshot-too-large",
   INVALID_SCREENSHOT: "invalid-screenshot",
+  REPLAY_TOO_LARGE: "replay-too-large",
+  INVALID_REPLAY: "invalid-replay",
 } as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES];

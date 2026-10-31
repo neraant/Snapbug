@@ -1,5 +1,5 @@
 import { AreaChart } from "@workspace/design-system/components/ui/area-chart";
-import { MetricCard } from "@workspace/design-system/components/ui/metric-card";
+import { Panel } from "@workspace/design-system/components/ui/panel";
 import { SegmentedControl } from "@workspace/design-system/components/ui/segmented-control";
 import { cn } from "@workspace/design-system/lib/utils";
 import type { FindChartsOutputDtoType } from "@workspace/validation/modules/bug-report/dto/find-charts.schema";
@@ -43,8 +43,8 @@ export function OverviewReportsOverTimeCard({ points, className }: OverviewRepor
     seriesId === reportsOverTimeSeriesId.ALL ? seriesCatalog : seriesCatalog.filter((item) => item.key === seriesId);
 
   return (
-    <MetricCard className={cn(className)}>
-      <MetricCard.Header
+    <Panel className={cn(className)}>
+      <Panel.Header
         title={texts.chart.reportsOverTime.title}
         description={texts.chart.reportsOverTime.description}
         action={
@@ -57,9 +57,9 @@ export function OverviewReportsOverTimeCard({ points, className }: OverviewRepor
           />
         }
       />
-      <MetricCard.Content className="h-72">
+      <Panel.Content className="h-72">
         <AreaChart points={mapReportsOverTimePoints(points)} series={series} />
-      </MetricCard.Content>
-    </MetricCard>
+      </Panel.Content>
+    </Panel>
   );
 }

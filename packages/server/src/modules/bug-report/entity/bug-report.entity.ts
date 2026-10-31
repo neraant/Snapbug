@@ -45,6 +45,7 @@ export class BugReport {
   readonly viewportWidth: BugReportPersistedType["viewportWidth"];
   readonly viewportHeight: BugReportPersistedType["viewportHeight"];
   readonly screenshotKey: BugReportPersistedType["screenshotKey"];
+  readonly replayKey: BugReportPersistedType["replayKey"];
   readonly hasReplay: BugReportPersistedType["hasReplay"];
   readonly consoleLogs: BugReportPersistedType["consoleLogs"];
   readonly networkLogs: BugReportPersistedType["networkLogs"];
@@ -73,6 +74,7 @@ export class BugReport {
     this.viewportWidth = bugReport.viewportWidth;
     this.viewportHeight = bugReport.viewportHeight;
     this.screenshotKey = bugReport.screenshotKey;
+    this.replayKey = bugReport.replayKey;
     this.hasReplay = bugReport.hasReplay;
     this.consoleLogs = bugReport.consoleLogs;
     this.networkLogs = bugReport.networkLogs;
@@ -144,6 +146,7 @@ export class BugReport {
       viewportWidth: this.viewportWidth,
       viewportHeight: this.viewportHeight,
       screenshotKey: this.screenshotKey,
+      replayKey: this.replayKey,
       hasReplay: this.hasReplay,
       consoleLogs: this.consoleLogs,
       networkLogs: this.networkLogs,

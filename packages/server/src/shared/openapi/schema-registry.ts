@@ -8,7 +8,10 @@ import { createBugReportInputDtoSchema } from "@workspace/validation/modules/bug
 import { findBreakdownsInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-breakdowns.schema";
 import { findBugReportsOutputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-bug-reports.schema";
 import { findChartsInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-charts.schema";
+import { findOneInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-one.schema";
 import { findRecentInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-recent.schema";
+import { findReplayInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-replay.schema";
+import { findScreenshotInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-screenshot.schema";
 import { findStatsInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-stats.schema";
 import { findWorkloadInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-workload.schema";
 import { acceptInvitationInputDtoSchema } from "@workspace/validation/modules/invitation/dto/accept-invitation.schema";
@@ -117,6 +120,24 @@ JSON_SCHEMA_REGISTRY.add(findBreakdownsInputDtoSchema, {
   title: "Bug report breakdowns",
   description: "Overview breakdown cards for the caller's organization",
   examples: [{ periodDays: 30 }],
+});
+
+JSON_SCHEMA_REGISTRY.add(findOneInputDtoSchema, {
+  title: "Find bug report",
+  description: "Load one bug report by short id for the caller's organization",
+  examples: [{ shortId: "SNB-1" }],
+});
+
+JSON_SCHEMA_REGISTRY.add(findScreenshotInputDtoSchema, {
+  title: "Bug report screenshot",
+  description: "Load the screenshot image for a bug report in the caller's organization",
+  examples: [{ shortId: "SNB-1" }],
+});
+
+JSON_SCHEMA_REGISTRY.add(findReplayInputDtoSchema, {
+  title: "Bug report replay",
+  description: "Load the session replay payload for a bug report in the caller's organization",
+  examples: [{ shortId: "SNB-1" }],
 });
 
 JSON_SCHEMA_REGISTRY.add(findRecentInputDtoSchema, {
