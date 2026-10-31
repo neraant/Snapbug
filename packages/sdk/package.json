@@ -54,6 +54,7 @@
     "@workspace/typescript-config": "workspace:*",
     "@workspace/validation": "workspace:*",
     "eslint": "9",
+    "jsdom": "26.1.0",
     "prettier": "3.8.3",
     "tsup": "9.0.0",
     "typescript": "5",

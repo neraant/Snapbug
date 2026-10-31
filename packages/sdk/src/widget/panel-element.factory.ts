@@ -1,5 +1,5 @@
 import type { ResolvedWidgetOptions } from "../core/widget-config.types";
-import { createDescriptionEditor } from "./description-editor.factory";
+import { createDescriptionEditor } from "./description/description-editor.factory";
 import {
   PANEL_DESCRIPTION_ERROR_ID,
   PANEL_ERROR_HEADING_ID,

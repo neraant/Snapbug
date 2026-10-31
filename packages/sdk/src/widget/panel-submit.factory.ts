@@ -1,6 +1,6 @@
 import { submitReport } from "../report/report-submit.service";
 import type { SubmitReportFailure } from "../report/report-submit.types";
-import { isDescriptionEmpty } from "./description-markdown.util";
+import { isDescriptionEmpty } from "./description/description-markdown.util";
 import type { PanelSession } from "./panel.types";
 import { hidePanelFieldError, showPanelFieldError } from "./panel-field-error.util";
 import { clearPanelScreenshot } from "./panel-screenshot.factory";

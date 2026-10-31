@@ -1,6 +1,6 @@
 import type { ResolvedWidgetOptions } from "../core/widget-config.types";
 import type { ScreenshotAnnotationController } from "../screenshot/annotation/annotation.types";
-import type { DescriptionEditorControl } from "./description-editor.factory";
+import type { DescriptionEditorControl } from "./description/description-editor.factory";
 
 export type PanelSession = {
   trigger: HTMLButtonElement;

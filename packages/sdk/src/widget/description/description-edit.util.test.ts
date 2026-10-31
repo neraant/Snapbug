@@ -5,6 +5,8 @@ import {
   applyLink,
   continueMarkup,
   detectFormat,
+  findLinkAt,
+  isDescriptionEmptyValue,
   removeLink,
   setHeading,
   toggleInline,
@@ -144,6 +146,21 @@ describe("continueMarkup", () => {
 
     const prefix: EditState = { value: "- a", start: 1, end: 1 };
     expect(continueMarkup(prefix)).toBeNull();
+  });
+});
+
+describe("isDescriptionEmptyValue", () => {
+  it("treats whitespace-only as empty", () => {
+    expect(isDescriptionEmptyValue("   \n\t  ")).toBe(true);
+    expect(isDescriptionEmptyValue("text")).toBe(false);
+  });
+});
+
+describe("normalizeUrl and findLinkAt", () => {
+  it("finds a link when the caret is inside markdown syntax", () => {
+    const value = "see [docs](https://x.com) here";
+    expect(findLinkAt(value, 5, 9)).toMatchObject({ label: "docs", href: "https://x.com" });
+    expect(findLinkAt(value, 0, 3)).toBeNull();
   });
 });
 

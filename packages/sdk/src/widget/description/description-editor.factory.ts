@@ -1,3 +1,4 @@
+import { COPY } from "../widget-copy.const";
 import type { EditPatch, EditState } from "./description-edit.util";
 import {
   applyLink,
@@ -9,7 +10,6 @@ import {
   toggleInline,
   toggleLines,
 } from "./description-edit.util";
-import { COPY } from "./widget-copy.const";
 
 export type DescriptionEditorControl = {
   root: HTMLElement;
