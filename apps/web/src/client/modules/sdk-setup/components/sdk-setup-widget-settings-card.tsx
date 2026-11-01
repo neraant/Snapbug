@@ -3,7 +3,7 @@ import { Row } from "@workspace/design-system/components/layout/row";
 import { Badge } from "@workspace/design-system/components/ui/badge";
 import { ColorSwatchButton } from "@workspace/design-system/components/ui/color-swatch-button";
 import { Input } from "@workspace/design-system/components/ui/input";
-import { MetricCard } from "@workspace/design-system/components/ui/metric-card";
+import { Panel } from "@workspace/design-system/components/ui/panel";
 import { SegmentedControl } from "@workspace/design-system/components/ui/segmented-control";
 import { Skeleton } from "@workspace/design-system/components/ui/skeleton";
 import { Switch } from "@workspace/design-system/components/ui/switch";
@@ -86,9 +86,9 @@ export function SdkSetupWidgetSettingsCard({ projectId }: SdkSetupWidgetSettings
   );
 
   return (
-    <MetricCard>
-      <MetricCard.Header title={texts.widgetSettings.title} description={texts.widgetSettings.description} />
-      <MetricCard.Content gap="lg">
+    <Panel>
+      <Panel.Header title={texts.widgetSettings.title} description={texts.widgetSettings.description} />
+      <Panel.Content gap="lg">
         <SdkSetupWidgetSettingField
           label={texts.widgetSettings.position.label}
           control={
@@ -303,8 +303,8 @@ export function SdkSetupWidgetSettingsCard({ projectId }: SdkSetupWidgetSettings
         </Column>
 
         {/* TODO: Capture toggles (screenshot, replay, console, network) */}
-      </MetricCard.Content>
-    </MetricCard>
+      </Panel.Content>
+    </Panel>
   );
 }
 

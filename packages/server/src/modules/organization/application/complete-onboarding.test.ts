@@ -38,7 +38,7 @@ describe("CompleteOnboardingUseCase", () => {
       withTransaction as unknown as WithTransactionType,
     );
 
-    const result = await useCase.execute({}, userId);
+    const result = await useCase.execute({}, userId, organizationId);
 
     expect(result).toEqual(snapshot);
     expect(withTransaction).not.toHaveBeenCalled();
@@ -54,7 +54,6 @@ describe("CompleteOnboardingUseCase", () => {
       withTx: vi.fn().mockReturnValue(userInTx),
     };
     const membershipPort = {
-      findByUser: vi.fn().mockResolvedValue(null),
       withTx: vi.fn().mockReturnValue(membershipInTx),
     };
     const projectPort = { withTx: vi.fn().mockReturnValue(projectInTx) };
@@ -72,7 +71,7 @@ describe("CompleteOnboardingUseCase", () => {
       withTransaction as unknown as WithTransactionType,
     );
 
-    await useCase.execute({ organizationName: "Acme Labs", projectName: "Store" }, userId);
+    await useCase.execute({ organizationName: "Acme Labs", projectName: "Store" }, userId, null);
 
     expect(repository.withTx).toHaveBeenCalledWith(tx);
     expect(organizationRepository.save).toHaveBeenCalledOnce();
@@ -81,7 +80,7 @@ describe("CompleteOnboardingUseCase", () => {
     expect(membershipInTx.create).toHaveBeenCalledOnce();
     expect(projectInTx.create).toHaveBeenCalledWith(expect.objectContaining({ name: "Store" }), userId);
     expect(userInTx.markOnboardingComplete).toHaveBeenCalledWith(userId);
-    expect(findOnboarding.execute).toHaveBeenCalledWith(userId);
+    expect(findOnboarding.execute).toHaveBeenCalledWith(userId, savedOrganization.id);
   });
 
   it("creates a project when the user already has an organization", async () => {
@@ -95,9 +94,11 @@ describe("CompleteOnboardingUseCase", () => {
       findOnboardingState: vi.fn().mockResolvedValue({ onboardingCompletedAt: null }),
       withTx: vi.fn().mockReturnValue(userInTx),
     };
+    const membershipInTx = {
+      findByUserAndOrganization: vi.fn().mockResolvedValue({ organizationId }),
+    };
     const membershipPort = {
-      findByUser: vi.fn().mockResolvedValue({ organizationId }),
-      withTx: vi.fn(),
+      withTx: vi.fn().mockReturnValue(membershipInTx),
     };
     const projectPort = { withTx: vi.fn().mockReturnValue(projectInTx) };
     const repository = { withTx: vi.fn().mockReturnValue(organizationRepository) };
@@ -112,7 +113,7 @@ describe("CompleteOnboardingUseCase", () => {
       withTransaction as unknown as WithTransactionType,
     );
 
-    await useCase.execute({ projectName: "Checkout" }, userId);
+    await useCase.execute({ projectName: "Checkout" }, userId, organizationId);
 
     expect(organizationRepository.save).not.toHaveBeenCalled();
     expect(projectInTx.create).toHaveBeenCalledWith(

@@ -8,7 +8,7 @@ import { texts } from "@/client/modules/auth/consts/texts.const";
 import { signInSchema, type SignInSchemaType } from "@/client/modules/auth/schemas/sign-in.schema";
 import { acceptInvitationAfterAuth } from "@/client/modules/auth/utils/accept-invitation-after-auth.util";
 import { useAcceptInvitation } from "@/client/modules/shared/queries/use-accept-invitation";
-import { path } from "@/shared/path.const";
+import { url } from "@/shared/build-url.util";
 
 type UseSignInFormInput = {
   invitationToken?: string;
@@ -43,7 +43,7 @@ export function useSignInForm({ invitationToken }: UseSignInFormInput) {
     });
 
     await acceptInvitationAfterAuth(invitationToken, acceptInvitation);
-    router.replace(path.overview);
+    router.replace(url.overview());
   };
 
   return {

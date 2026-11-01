@@ -19,7 +19,8 @@ describe("RequestPasswordResetUseCase", () => {
   it("stores a reset token and sends email when the user exists", async () => {
     const token = "550e8400-e29b-41d4-a716-446655440000";
     const txRepo = {
-      deleteByUserId: vi.fn().mockResolvedValue(undefined),
+      findByUserId: vi.fn().mockResolvedValue(null),
+      delete: vi.fn().mockResolvedValue(undefined),
       save: vi.fn().mockResolvedValue(undefined),
     };
     const resetPasswordRepository = {
@@ -44,7 +45,8 @@ describe("RequestPasswordResetUseCase", () => {
     expect(authService.generatePasswordResetToken).toHaveBeenCalledOnce();
     expect(withTransaction).toHaveBeenCalledOnce();
     expect(resetPasswordRepository.withTx).toHaveBeenCalledOnce();
-    expect(txRepo.deleteByUserId).toHaveBeenCalledWith(user.id);
+    expect(txRepo.findByUserId).toHaveBeenCalledWith(user.id);
+    expect(txRepo.delete).not.toHaveBeenCalled();
     expect(txRepo.save).toHaveBeenCalledOnce();
     const saved = txRepo.save.mock.calls[0]?.[0];
     expect(saved?.userId).toBe(user.id);

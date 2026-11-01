@@ -1,3 +1,4 @@
+import { BugReportMapper } from "@workspace/server/modules/bug-report/entity/bug-report.mapper";
 import type { MembershipPort } from "@workspace/server/modules/bug-report/port/membership.port";
 import type { ProjectPort } from "@workspace/server/modules/bug-report/port/project.port";
 import type { BugReportRepository } from "@workspace/server/modules/bug-report/repository/bug-report.repository";
@@ -9,6 +10,7 @@ import type {
   FindStatsInputDtoType,
   FindStatsOutputDtoType,
 } from "@workspace/validation/modules/bug-report/dto/find-stats.schema";
+import type { MembershipModelType } from "@workspace/validation/modules/membership/dto/membership.model";
 
 export class FindStatsUseCase {
   constructor(
@@ -19,12 +21,20 @@ export class FindStatsUseCase {
     private readonly auditLogRepository: AuditLogRepository,
   ) {}
 
-  async execute(input: FindStatsInputDtoType, userId: string): Promise<FindStatsOutputDtoType> {
-    const membership = await this.membershipPort.findByUser(userId);
+  async execute(
+    input: FindStatsInputDtoType,
+    userId: string,
+    organizationId: string | null,
+  ): Promise<FindStatsOutputDtoType> {
+    if (!organizationId) throw new NotFoundError(ERROR_CODES.ORGANIZATION_NOT_FOUND);
+
+    const membership = await this.membershipPort.findByUserAndOrganization({ userId, organizationId });
     if (!membership) throw new NotFoundError(ERROR_CODES.ORGANIZATION_NOT_FOUND);
 
-    const projectIds = await this.resolveProjectIds(input, membership.organizationId);
-    if (projectIds.length === 0) return { items: this.bugReportStatService.buildZeroItems() };
+    const projectIds = await this.resolveProjectIds(input, membership);
+    if (projectIds.length === 0) {
+      return BugReportMapper.toFindStatsOutput(this.bugReportStatService.buildZeroItems());
+    }
 
     const windows = this.bugReportStatService.getComparisonWindows(input.periodDays);
 
@@ -60,8 +70,8 @@ export class FindStatsUseCase {
     const openAtPeriodStart = replayMetrics[replayMetrics.length - 1]?.open ?? 0;
     const criticalHighAtPeriodStart = replayMetrics[replayMetrics.length - 1]?.criticalHigh ?? 0;
 
-    return {
-      items: this.bugReportStatService.buildItemsFromAggregates({
+    return BugReportMapper.toFindStatsOutput(
+      this.bugReportStatService.buildItemsFromAggregates({
         windows,
         newReportsCurrent,
         newReportsPrevious,
@@ -75,19 +85,24 @@ export class FindStatsUseCase {
         medianPreviousMs,
         medianByDay,
       }),
-    };
+    );
   }
 
-  private async resolveProjectIds(input: FindStatsInputDtoType, organizationId: string): Promise<string[]> {
+  private async resolveProjectIds(input: FindStatsInputDtoType, membership: MembershipModelType): Promise<string[]> {
     if (input.projectId) {
       const project = await this.projectPort.findById(input.projectId);
-      if (!project || project.organizationId !== organizationId) {
+      if (!project || project.organizationId !== membership.organizationId) {
         throw new NotFoundError(ERROR_CODES.PROJECT_NOT_FOUND);
       }
-      return [project.id];
+      const allowedProjectIds = await this.membershipPort.filterProjectIds(membership, [project.id]);
+      if (allowedProjectIds.length === 0) throw new NotFoundError(ERROR_CODES.PROJECT_NOT_FOUND);
+      return allowedProjectIds;
     }
 
-    const projects = await this.projectPort.findManyByOrganizationId({ organizationId });
-    return projects.map((project) => project.id);
+    const projects = await this.projectPort.findManyByOrganizationId({ organizationId: membership.organizationId });
+    return await this.membershipPort.filterProjectIds(
+      membership,
+      projects.map((project) => project.id),
+    );
   }
 }

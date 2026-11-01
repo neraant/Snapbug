@@ -22,6 +22,7 @@ export function mountScreenshotAnnotation(
   wireAnnotation(runtime);
   return {
     unmount: () => unmountAnnotation(runtime),
+    open: () => openAnnotationOverlay(runtime),
     flush: () => flushAnnotation(runtime),
   };
 }

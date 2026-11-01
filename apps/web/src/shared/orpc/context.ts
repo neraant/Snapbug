@@ -2,6 +2,7 @@ import type { OrpcContext } from "@workspace/server/orpc/context.const";
 import { headers } from "next/headers";
 
 import { auth } from "@/auth";
+import { resolveActiveOrganization } from "@/shared/organization/resolve-active-organization";
 
 async function getRequestHeaders() {
   return await headers();
@@ -25,20 +26,24 @@ export async function createContext(): Promise<OrpcContext> {
     const session = await auth();
     const userId = session?.user?.id;
     if (!userId) {
-      return { user: null, ip, actor: { type: "api-key", id: null }, requestOrigin };
+      return { user: null, organizationId: null, ip, actor: { type: "api-key", id: null }, requestOrigin };
     }
+
+    const activeOrganization = await resolveActiveOrganization(userId, true);
 
     return {
       ip,
       requestOrigin,
+      organizationId: activeOrganization?.organizationId ?? null,
       user: {
         id: userId,
         email: session.user?.email ?? "",
         name: session.user?.name ?? null,
+        role: activeOrganization?.role,
       },
       actor: { type: "user", id: userId },
     };
   } catch {
-    return { user: null, ip, actor: { type: "api-key", id: null }, requestOrigin };
+    return { user: null, organizationId: null, ip, actor: { type: "api-key", id: null }, requestOrigin };
   }
 }

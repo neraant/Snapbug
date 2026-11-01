@@ -22,10 +22,14 @@ export class User {
   }
 
   update(patch: UpdateUserType): User {
+    const passwordChanged = patch.passwordHash !== undefined && patch.passwordHash !== this.passwordHash;
+
     return new User({
       ...this.toObject(),
       ...patch,
       id: this.id,
+      passwordChangedAt: passwordChanged ? (patch.passwordChangedAt ?? new Date()) : this.passwordChangedAt,
+      onboardingCompletedAt: this.onboardingCompletedAt ?? patch.onboardingCompletedAt ?? null,
       createdAt: this.createdAt,
       updatedAt: new Date(),
     });

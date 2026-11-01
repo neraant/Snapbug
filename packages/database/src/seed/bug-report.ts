@@ -96,6 +96,7 @@ export async function seedBugReport(projects: ProjectRow[], users: UserRow[]) {
       viewportWidth: 1280,
       viewportHeight: 800,
       screenshotKey: "bug-reports/6a8c69a1-1ab1-45a8-8497-eae1e506d903/screenshot.png",
+      replayKey: "bug-reports/6a8c69a1-1ab1-45a8-8497-eae1e506d903/replay.json.gz",
       hasReplay: true,
       consoleLogs: [
         { level: "warn", message: "Cart total stale after quantity change", timestamp: daysAgo(3, 10).toISOString() },
@@ -213,6 +214,7 @@ export async function seedBugReport(projects: ProjectRow[], users: UserRow[]) {
       viewportWidth: 1536,
       viewportHeight: 864,
       screenshotKey: "bug-reports/6a8c69a1-1ab1-45a8-8497-eae1e506d908/screenshot.png",
+      replayKey: "bug-reports/6a8c69a1-1ab1-45a8-8497-eae1e506d908/replay.json.gz",
       hasReplay: true,
       networkLogs: [
         { method: "POST", url: "https://store.acme.test/api/payments", status: 0, durationMs: 10002 },
@@ -261,6 +263,7 @@ export async function seedBugReport(projects: ProjectRow[], users: UserRow[]) {
       viewportWidth: 1440,
       viewportHeight: 900,
       screenshotKey: "bug-reports/6a8c69a1-1ab1-45a8-8497-eae1e506d90a/screenshot.png",
+      replayKey: "bug-reports/6a8c69a1-1ab1-45a8-8497-eae1e506d90a/replay.json.gz",
       hasReplay: true,
       networkLogs: [{ method: "POST", url: "https://acme.test/api/contact", status: 422, durationMs: 180 }],
       createdAt: daysAgo(5, 14),

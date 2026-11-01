@@ -8,6 +8,8 @@ import { FindProjectsUseCase } from "@workspace/server/modules/project/applicati
 import { ProjectMapper } from "@workspace/server/modules/project/entity/project.mapper";
 import type { MembershipPort } from "@workspace/server/modules/project/port/membership.port";
 import type { ProjectRepository } from "@workspace/server/modules/project/repository/project.repository";
+import type { ProjectService } from "@workspace/server/modules/project/service/project.service";
+import type { WithTransactionType } from "@workspace/server/shared/database/transaction.util";
 import type {
   CreateProjectInputDtoType,
   CreateProjectOutputDtoType,
@@ -27,14 +29,23 @@ export class ProjectAdapter implements OrganizationProjectPort, BugReportProject
   constructor(
     private readonly projectRepository: ProjectRepository,
     private readonly membershipPort: MembershipPort,
+    private readonly projectService: ProjectService,
+    private readonly withTransaction: WithTransactionType,
   ) {
-    this.createProject = new CreateProjectUseCase(membershipPort, projectRepository);
+    this.createProject = new CreateProjectUseCase(membershipPort, projectService, withTransaction);
     this.findProjects = new FindProjectsUseCase(membershipPort, projectRepository);
     this.findProjectById = new FindProjectByIdUseCase(projectRepository);
   }
 
   withTx(tx: unknown): ProjectAdapter {
-    return new ProjectAdapter(this.projectRepository.withTx(tx as DbClient), this.membershipPort.withTx(tx));
+    const dbTx = tx as DbClient;
+    const useCurrentTransaction: WithTransactionType = async (callback) => await callback(dbTx);
+    return new ProjectAdapter(
+      this.projectRepository.withTx(dbTx),
+      this.membershipPort.withTx(tx),
+      this.projectService.withTx(dbTx),
+      useCurrentTransaction,
+    );
   }
 
   async create(input: CreateProjectInputDtoType, userId: string): Promise<CreateProjectOutputDtoType> {

@@ -36,6 +36,7 @@ const bugReport = new BugReport({
   shortId: "SNB-1",
   assignedTo: null,
   status: BugReportStatus.NEW,
+  boardOrder: 1024,
   severity: BugReportSeverity.MEDIUM,
   title: "Pay button throws",
   description: "Clicking Pay shows a blank page.",
@@ -49,6 +50,7 @@ const bugReport = new BugReport({
   viewportWidth: null,
   viewportHeight: null,
   screenshotKey: "private/screenshot.png",
+  replayKey: null,
   hasReplay: false,
   consoleLogs: null,
   networkLogs: null,
@@ -60,7 +62,10 @@ const bugReport = new BugReport({
 
 describe("FindBugReportsUseCase", () => {
   it("returns bug reports for a member", async () => {
-    const membershipPort = { findByUser: vi.fn().mockResolvedValue(membership) };
+    const membershipPort = {
+      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
+      findByUserAndOrganization: vi.fn().mockResolvedValue(membership),
+    };
     const projectPort = { findManyByOrganizationId: vi.fn().mockResolvedValue([project]) };
     const bugReportRepository = { findManyByProjectIds: vi.fn().mockResolvedValue([bugReport]) };
     const useCase = new FindBugReportsUseCase(
@@ -69,17 +74,21 @@ describe("FindBugReportsUseCase", () => {
       bugReportRepository as unknown as BugReportRepository,
     );
 
-    const result = await useCase.execute(userId);
+    const result = await useCase.execute({}, userId, organizationId);
 
-    expect(membershipPort.findByUser).toHaveBeenCalledWith(userId);
+    expect(membershipPort.findByUserAndOrganization).toHaveBeenCalledWith({ userId, organizationId });
     expect(projectPort.findManyByOrganizationId).toHaveBeenCalledWith({ organizationId });
     expect(bugReportRepository.findManyByProjectIds).toHaveBeenCalledWith([projectId]);
     expect(result).toEqual([BugReportMapper.toDto(bugReport)]);
     expect(result[0]).not.toHaveProperty("screenshotKey");
+    expect(result[0]?.hasScreenshot).toBe(true);
   });
 
   it("returns an empty list when the organization has no projects", async () => {
-    const membershipPort = { findByUser: vi.fn().mockResolvedValue(membership) };
+    const membershipPort = {
+      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
+      findByUserAndOrganization: vi.fn().mockResolvedValue(membership),
+    };
     const projectPort = { findManyByOrganizationId: vi.fn().mockResolvedValue([]) };
     const bugReportRepository = { findManyByProjectIds: vi.fn() };
     const useCase = new FindBugReportsUseCase(
@@ -88,14 +97,17 @@ describe("FindBugReportsUseCase", () => {
       bugReportRepository as unknown as BugReportRepository,
     );
 
-    const result = await useCase.execute(userId);
+    const result = await useCase.execute({}, userId, organizationId);
 
     expect(result).toEqual([]);
     expect(bugReportRepository.findManyByProjectIds).not.toHaveBeenCalled();
   });
 
   it("throws when the user is not a member", async () => {
-    const membershipPort = { findByUser: vi.fn().mockResolvedValue(null) };
+    const membershipPort = {
+      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
+      findByUserAndOrganization: vi.fn().mockResolvedValue(null),
+    };
     const projectPort = { findManyByOrganizationId: vi.fn() };
     const bugReportRepository = { findManyByProjectIds: vi.fn() };
     const useCase = new FindBugReportsUseCase(
@@ -104,11 +116,31 @@ describe("FindBugReportsUseCase", () => {
       bugReportRepository as unknown as BugReportRepository,
     );
 
-    await expect(useCase.execute(userId)).rejects.toMatchObject({
+    await expect(useCase.execute({}, userId, organizationId)).rejects.toMatchObject({
       errorCode: ERROR_CODES.ORGANIZATION_NOT_FOUND,
     });
 
     expect(projectPort.findManyByOrganizationId).not.toHaveBeenCalled();
+    expect(bugReportRepository.findManyByProjectIds).not.toHaveBeenCalled();
+  });
+
+  it("does not return tickets for a project outside the allow-list", async () => {
+    const membershipPort = {
+      findByUserAndOrganization: vi.fn().mockResolvedValue(membership),
+      filterProjectIds: vi.fn().mockResolvedValue([]),
+    };
+    const projectPort = { findById: vi.fn().mockResolvedValue(project), findManyByOrganizationId: vi.fn() };
+    const bugReportRepository = { findManyByProjectIds: vi.fn() };
+    const useCase = new FindBugReportsUseCase(
+      membershipPort as unknown as MembershipPort,
+      projectPort as unknown as ProjectPort,
+      bugReportRepository as unknown as BugReportRepository,
+    );
+
+    await expect(useCase.execute({ projectId }, userId, organizationId)).rejects.toMatchObject({
+      errorCode: ERROR_CODES.PROJECT_NOT_FOUND,
+    });
+
     expect(bugReportRepository.findManyByProjectIds).not.toHaveBeenCalled();
   });
 });

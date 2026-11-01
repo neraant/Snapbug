@@ -7,6 +7,7 @@ import type {
   AssigneeOpenCountRow,
   DailyMetricRow,
   NullableStringCountRow,
+  ProjectOpenCountRow,
   SeverityCountRow,
   StatusCountRow,
   WeekdayHourCountRow,
@@ -57,12 +58,63 @@ export class BugReportRepository {
     return row ? BugReportMapper.fromPersistence(row) : null;
   }
 
+  async findManyByShortId(shortId: string): Promise<Array<{ bugReport: BugReport; organizationId: string }>> {
+    const rows = await this.db.query.bugReportTable.findMany({
+      where: { shortId },
+      with: {
+        project: {
+          columns: { organizationId: true },
+        },
+      },
+    });
+
+    return rows.flatMap((row) => {
+      if (!row.project) return [];
+
+      const { project, ...bugReportRow } = row;
+      return [
+        {
+          bugReport: BugReportMapper.fromPersistence(bugReportRow),
+          organizationId: project.organizationId,
+        },
+      ];
+    });
+  }
+
+  async findByShortIdAndOrganizationId(shortId: string, organizationId: string): Promise<BugReport | null> {
+    const row = await this.db.query.bugReportTable.findFirst({
+      where: {
+        shortId,
+        project: { organizationId },
+      },
+    });
+    return row ? BugReportMapper.fromPersistence(row) : null;
+  }
+
   async findManyByProjectIds(projectIds: string[]): Promise<BugReport[]> {
     const bugReports = await this.db.query.bugReportTable.findMany({
       where: { projectId: { in: projectIds } },
-      orderBy: { createdAt: "desc" },
     });
-    return bugReports.map((bugReport) => BugReportMapper.fromPersistence(bugReport));
+    return bugReports
+      .map((bugReport) => BugReportMapper.fromPersistence(bugReport))
+      .sort((left, right) => this.compareBoardOrder(left, right));
+  }
+
+  async findManyByProjectIdAndStatus(projectId: string, status: BugReportStatus): Promise<BugReport[]> {
+    const bugReports = await this.db.query.bugReportTable.findMany({
+      where: { projectId, status },
+    });
+    return bugReports
+      .map((bugReport) => BugReportMapper.fromPersistence(bugReport))
+      .sort((left, right) => this.compareBoardOrder(left, right));
+  }
+
+  private compareBoardOrder(left: BugReport, right: BugReport): number {
+    if (left.boardOrder !== right.boardOrder) {
+      return left.boardOrder - right.boardOrder;
+    }
+
+    return right.createdAt.getTime() - left.createdAt.getTime();
   }
 
   async findRecentByProjectIds(projectIds: string[], limit: number): Promise<BugReport[]> {
@@ -94,9 +146,59 @@ export class BugReportRepository {
     }));
   }
 
+  async countOpenByProject(projectIds: string[]): Promise<ProjectOpenCountRow[]> {
+    if (projectIds.length === 0) return [];
+
+    const rows = await this.db
+      .select({
+        projectId: bugReportTable.projectId,
+        count: count(),
+      })
+      .from(bugReportTable)
+      .where(and(inArray(bugReportTable.projectId, projectIds), inArray(bugReportTable.status, [...openStatuses])))
+      .groupBy(bugReportTable.projectId);
+
+    return rows.map((row) => ({
+      projectId: row.projectId,
+      count: Number(row.count),
+    }));
+  }
+
   async save(bugReport: BugReport): Promise<void> {
+    const values = BugReportMapper.toPersistence(bugReport);
+
     try {
-      await this.db.insert(bugReportTable).values(BugReportMapper.toPersistence(bugReport));
+      await this.db
+        .insert(bugReportTable)
+        .values(values)
+        .onConflictDoUpdate({
+          target: bugReportTable.id,
+          set: {
+            assignedTo: values.assignedTo,
+            status: values.status,
+            boardOrder: values.boardOrder,
+            severity: values.severity,
+            title: values.title,
+            description: values.description,
+            stepsToReproduce: values.stepsToReproduce,
+            reporterEmail: values.reporterEmail,
+            url: values.url,
+            userAgent: values.userAgent,
+            browser: values.browser,
+            os: values.os,
+            device: values.device,
+            viewportWidth: values.viewportWidth,
+            viewportHeight: values.viewportHeight,
+            screenshotKey: values.screenshotKey,
+            replayKey: values.replayKey,
+            hasReplay: values.hasReplay,
+            consoleLogs: values.consoleLogs,
+            networkLogs: values.networkLogs,
+            customContext: values.customContext,
+            updatedAt: values.updatedAt,
+            resolvedAt: values.resolvedAt,
+          },
+        });
     } catch (error) {
       throw new InternalServerError(ERROR_CODES.INTERNAL_SERVER_ERROR, undefined, { cause: error });
     }

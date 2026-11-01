@@ -8,7 +8,10 @@ import { createBugReportInputDtoSchema } from "@workspace/validation/modules/bug
 import { findBreakdownsInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-breakdowns.schema";
 import { findBugReportsOutputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-bug-reports.schema";
 import { findChartsInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-charts.schema";
+import { findOneInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-one.schema";
 import { findRecentInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-recent.schema";
+import { findReplayInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-replay.schema";
+import { findScreenshotInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-screenshot.schema";
 import { findStatsInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-stats.schema";
 import { findWorkloadInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-workload.schema";
 import { acceptInvitationInputDtoSchema } from "@workspace/validation/modules/invitation/dto/accept-invitation.schema";
@@ -71,6 +74,7 @@ JSON_SCHEMA_REGISTRY.add(bugReportModelSchema, {
       shortId: "SNB-1",
       assignedTo: null,
       status: BugReportStatus.NEW,
+      boardOrder: 1024,
       severity: BugReportSeverity.MEDIUM,
       title: "Pay button throws when the cart is empty",
       description: "Clicking Pay on an empty cart shows a blank page.",
@@ -84,6 +88,7 @@ JSON_SCHEMA_REGISTRY.add(bugReportModelSchema, {
       viewportWidth: null,
       viewportHeight: null,
       hasReplay: false,
+      hasScreenshot: true,
       consoleLogs: null,
       networkLogs: null,
       customContext: null,
@@ -115,6 +120,24 @@ JSON_SCHEMA_REGISTRY.add(findBreakdownsInputDtoSchema, {
   title: "Bug report breakdowns",
   description: "Overview breakdown cards for the caller's organization",
   examples: [{ periodDays: 30 }],
+});
+
+JSON_SCHEMA_REGISTRY.add(findOneInputDtoSchema, {
+  title: "Find bug report",
+  description: "Load one bug report by short id for the caller's organization",
+  examples: [{ shortId: "SNB-1" }],
+});
+
+JSON_SCHEMA_REGISTRY.add(findScreenshotInputDtoSchema, {
+  title: "Bug report screenshot",
+  description: "Load the screenshot image for a bug report in the caller's organization",
+  examples: [{ shortId: "SNB-1" }],
+});
+
+JSON_SCHEMA_REGISTRY.add(findReplayInputDtoSchema, {
+  title: "Bug report replay",
+  description: "Load the session replay payload for a bug report in the caller's organization",
+  examples: [{ shortId: "SNB-1" }],
 });
 
 JSON_SCHEMA_REGISTRY.add(findRecentInputDtoSchema, {
@@ -247,6 +270,7 @@ JSON_SCHEMA_REGISTRY.add(projectModelSchema, {
     {
       id: "4a8c69a1-1ab1-45a8-8497-eae1e506d9d1",
       name: "Store",
+      color: "#F97316",
       organizationId: "3a8c69a1-1ab1-45a8-8497-eae1e506d9d1",
       createdAt: "2026-10-03T09:00:00.000Z",
     },
@@ -256,7 +280,7 @@ JSON_SCHEMA_REGISTRY.add(projectModelSchema, {
 JSON_SCHEMA_REGISTRY.add(createProjectInputDtoSchema, {
   title: "Create project",
   description: "Create a project in an organization",
-  examples: [{ organizationId: "2a8c69a1-1ab1-45a8-8497-eae1e506d9d1", name: "Store" }],
+  examples: [{ organizationId: "2a8c69a1-1ab1-45a8-8497-eae1e506d9d1", name: "Store", color: "#F97316" }],
 });
 
 JSON_SCHEMA_REGISTRY.add(updateProjectInputDtoSchema, {

@@ -1,3 +1,4 @@
+import { ResetPasswordMapper } from "@workspace/server/modules/auth/domain/reset-password.mapper";
 import type { UserPort } from "@workspace/server/modules/auth/port/user.port";
 import type { AuthService } from "@workspace/server/modules/auth/service/auth.service";
 import type { VerifyCredentialsInputDtoType } from "@workspace/validation/modules/auth/dto/verify-credentials.schema";
@@ -16,11 +17,6 @@ export class VerifyCredentialsUseCase {
     const isValid = await this.authService.verifyPassword(input.password, stored.passwordHash);
     if (!isValid) return null;
 
-    return {
-      id: stored.id,
-      email: stored.email,
-      name: stored.name,
-      onboardingCompletedAt: stored.onboardingCompletedAt,
-    };
+    return ResetPasswordMapper.toVerifyCredentialsOutput(stored);
   }
 }

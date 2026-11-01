@@ -52,7 +52,10 @@ function createAuditLogRepositoryMock(overrides: Partial<AuditLogRepository> = {
 
 describe("FindStatsUseCase", () => {
   it("throws when the user is not a member", async () => {
-    const membershipPort = { findByUser: vi.fn().mockResolvedValue(null) };
+    const membershipPort = {
+      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
+      findByUserAndOrganization: vi.fn().mockResolvedValue(null),
+    };
     const projectPort = { findManyByOrganizationId: vi.fn(), findById: vi.fn() };
     const bugReportRepository = createRepositoryMock();
     const useCase = new FindStatsUseCase(
@@ -63,7 +66,7 @@ describe("FindStatsUseCase", () => {
       createAuditLogRepositoryMock() as unknown as AuditLogRepository,
     );
 
-    await expect(useCase.execute(input, userId)).rejects.toMatchObject({
+    await expect(useCase.execute(input, userId, organizationId)).rejects.toMatchObject({
       errorCode: ERROR_CODES.ORGANIZATION_NOT_FOUND,
     });
 
@@ -72,7 +75,10 @@ describe("FindStatsUseCase", () => {
   });
 
   it("returns zeroed stats when the organization has no projects", async () => {
-    const membershipPort = { findByUser: vi.fn().mockResolvedValue(membership) };
+    const membershipPort = {
+      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
+      findByUserAndOrganization: vi.fn().mockResolvedValue(membership),
+    };
     const projectPort = { findManyByOrganizationId: vi.fn().mockResolvedValue([]), findById: vi.fn() };
     const bugReportRepository = createRepositoryMock();
     const useCase = new FindStatsUseCase(
@@ -83,7 +89,7 @@ describe("FindStatsUseCase", () => {
       createAuditLogRepositoryMock() as unknown as AuditLogRepository,
     );
 
-    const result = await useCase.execute(input, userId);
+    const result = await useCase.execute(input, userId, organizationId);
 
     expect(result.items).toHaveLength(4);
     expect(result.items.map((item) => item.id)).toEqual([
@@ -97,7 +103,10 @@ describe("FindStatsUseCase", () => {
   });
 
   it("returns new report stats from repository aggregates", async () => {
-    const membershipPort = { findByUser: vi.fn().mockResolvedValue(membership) };
+    const membershipPort = {
+      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
+      findByUserAndOrganization: vi.fn().mockResolvedValue(membership),
+    };
     const projectPort = { findManyByOrganizationId: vi.fn().mockResolvedValue([project]), findById: vi.fn() };
     const bugReportRepository = createRepositoryMock({
       countCreatedBetween: vi.fn().mockResolvedValueOnce(5).mockResolvedValueOnce(2),
@@ -112,7 +121,7 @@ describe("FindStatsUseCase", () => {
       createAuditLogRepositoryMock() as unknown as AuditLogRepository,
     );
 
-    const result = await useCase.execute(input, userId);
+    const result = await useCase.execute(input, userId, organizationId);
 
     const newReport = result.items.find((item) => item.id === BugReportStatId.NEW_REPORT);
     expect(newReport).toEqual({
@@ -125,7 +134,10 @@ describe("FindStatsUseCase", () => {
   });
 
   it("derives open-issue deltas from audit replay when history is empty", async () => {
-    const membershipPort = { findByUser: vi.fn().mockResolvedValue(membership) };
+    const membershipPort = {
+      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
+      findByUserAndOrganization: vi.fn().mockResolvedValue(membership),
+    };
     const projectPort = { findManyByOrganizationId: vi.fn().mockResolvedValue([project]), findById: vi.fn() };
     const bugReportRepository = createRepositoryMock({
       countOpen: vi.fn().mockResolvedValue(9),
@@ -139,7 +151,7 @@ describe("FindStatsUseCase", () => {
       createAuditLogRepositoryMock() as unknown as AuditLogRepository,
     );
 
-    const result = await useCase.execute(input, userId);
+    const result = await useCase.execute(input, userId, organizationId);
 
     const openIssue = result.items.find((item) => item.id === BugReportStatId.OPEN_ISSUE);
     const criticalHigh = result.items.find((item) => item.id === BugReportStatId.CRITICAL_HIGH_OPEN);

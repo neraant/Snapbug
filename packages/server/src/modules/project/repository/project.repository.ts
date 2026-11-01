@@ -40,6 +40,7 @@ export class ProjectRepository {
         .values({
           id: values.id,
           name: values.name,
+          color: values.color,
           organizationId: values.organizationId,
           widgetSettings: values.widgetSettings,
           createdAt: values.createdAt,
@@ -48,6 +49,7 @@ export class ProjectRepository {
           target: projectTable.id,
           set: {
             name: values.name,
+            color: values.color,
             widgetSettings: values.widgetSettings,
           },
         });

@@ -1,4 +1,5 @@
 import type { MembershipPersistedType } from "@workspace/server/modules/membership/entity/membership.types";
+import type { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
 
 export class Membership {
   readonly id: MembershipPersistedType["id"];
@@ -13,6 +14,14 @@ export class Membership {
     this.organizationId = membership.organizationId;
     this.role = membership.role;
     this.createdAt = membership.createdAt;
+  }
+
+  changeRole(role: UserRole): Membership {
+    if (role === this.role) {
+      return this;
+    }
+
+    return new Membership({ ...this.toObject(), role });
   }
 
   toObject(): MembershipPersistedType {

@@ -14,6 +14,15 @@ export class OrganizationRepository {
     return new OrganizationRepository(tx);
   }
 
+  async findManyByIds(ids: string[]): Promise<Organization[]> {
+    if (ids.length === 0) return [];
+
+    const rows = await this.db.query.organizationTable.findMany({
+      where: { id: { in: ids } },
+    });
+    return rows.map((row) => OrganizationMapper.fromPersistence(row));
+  }
+
   async findById(id: string): Promise<Organization | null> {
     const [row] = await this.db.select().from(organizationTable).where(eq(organizationTable.id, id));
     return row ? OrganizationMapper.fromPersistence(row) : null;

@@ -1,5 +1,5 @@
 import { BarList } from "@workspace/design-system/components/ui/bar-list";
-import { MetricCard } from "@workspace/design-system/components/ui/metric-card";
+import { Panel } from "@workspace/design-system/components/ui/panel";
 import { SegmentedControl } from "@workspace/design-system/components/ui/segmented-control";
 import { cn } from "@workspace/design-system/lib/utils";
 
@@ -26,8 +26,8 @@ export function OverviewEnvironmentBreakdownCard({ filters, className }: Overvie
   });
 
   return (
-    <MetricCard className={cn(className)}>
-      <MetricCard.Header
+    <Panel className={cn(className)}>
+      <Panel.Header
         title={texts.breakdown.environment.title}
         description={texts.breakdown.environment.description}
         action={
@@ -44,9 +44,9 @@ export function OverviewEnvironmentBreakdownCard({ filters, className }: Overvie
           />
         }
       />
-      <MetricCard.Content>
+      <Panel.Content>
         <BarList items={barItems} scale="total" total={environment.total} emptyLabel={texts.breakdown.emptyList} />
-      </MetricCard.Content>
-    </MetricCard>
+      </Panel.Content>
+    </Panel>
   );
 }

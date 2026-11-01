@@ -10,9 +10,14 @@ import type { WithTransactionType } from "@workspace/server/shared/database/tran
 import { BadRequestError, UnauthorizedError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import {
+  BUG_REPORT_REPLAY_ALLOWED_MIME_TYPES,
+  BUG_REPORT_REPLAY_MAX_BYTES,
+} from "@workspace/validation/modules/bug-report/consts/bug-report-replay.const";
+import {
   BUG_REPORT_SCREENSHOT_ALLOWED_MIME_TYPES,
   BUG_REPORT_SCREENSHOT_MAX_BYTES,
 } from "@workspace/validation/modules/bug-report/consts/bug-report-screenshot.const";
+import { BugReportSeverity } from "@workspace/validation/modules/bug-report/consts/bug-report-severity.const";
 import type {
   CreateBugReportInputDtoType,
   CreateBugReportOutputDtoType,
@@ -21,6 +26,11 @@ import { projectWidgetSettingModelDefaults } from "@workspace/validation/modules
 import { randomUUID } from "crypto";
 
 export type CreateBugReportScreenshotInput = {
+  data: Uint8Array;
+  mimeType: string;
+};
+
+export type CreateBugReportReplayInput = {
   data: Uint8Array;
   mimeType: string;
 };
@@ -41,9 +51,13 @@ export class CreateBugReportUseCase {
     actor: AuditActor | null,
     requestOrigin: string | null,
     screenshot?: CreateBugReportScreenshotInput,
+    replay?: CreateBugReportReplayInput,
   ): Promise<CreateBugReportOutputDtoType> {
     if (screenshot) {
       this.assertValidScreenshot(screenshot);
+    }
+    if (replay) {
+      this.assertValidReplay(replay);
     }
 
     const project = await this.apiKeyPort.findProjectByKey({ key: input.apiKey });
@@ -54,16 +68,29 @@ export class CreateBugReportUseCase {
     this.widgetIngestOriginService.assertAllowed(allowedDomains, requestOrigin);
 
     const parsedUserAgent = this.widgetUserAgentService.parse(input.userAgent);
+    const severity = CreateBugReportUseCase.mapReporterSeverity(input.severity);
 
     let screenshotKey: string | null = null;
+    let replayKey: string | null = null;
     let reportId: string | undefined;
 
-    if (screenshot) {
+    if (screenshot || replay) {
       reportId = randomUUID();
+    }
+
+    if (screenshot && reportId) {
       screenshotKey = await this.fileStoragePort.saveBugReportScreenshot({
         reportId,
         bytes: screenshot.data,
         contentType: screenshot.mimeType,
+      });
+    }
+
+    if (replay && reportId) {
+      replayKey = await this.fileStoragePort.saveBugReportReplay({
+        reportId,
+        bytes: replay.data,
+        contentType: replay.mimeType,
       });
     }
 
@@ -86,6 +113,8 @@ export class CreateBugReportUseCase {
             viewportWidth: input.viewportWidth ?? null,
             viewportHeight: input.viewportHeight ?? null,
             ...(screenshotKey ? { screenshotKey } : {}),
+            ...(replayKey ? { replayKey } : {}),
+            severity,
             consoleLogs: input.consoleLogs ?? null,
             networkLogs: input.networkLogs ?? null,
             reporterEmail: input.reporterEmail ?? null,
@@ -98,10 +127,28 @@ export class CreateBugReportUseCase {
       return BugReportMapper.toDto(bugReport);
     } catch (error) {
       if (screenshotKey) {
-        await this.fileStoragePort.delete(screenshotKey).catch(() => undefined);
+        try {
+          await this.fileStoragePort.delete(screenshotKey);
+        } catch {
+          // ignore cleanup failures
+        }
+      }
+      if (replayKey) {
+        try {
+          await this.fileStoragePort.delete(replayKey);
+        } catch {
+          // ignore cleanup failures
+        }
       }
       throw error;
     }
+  }
+
+  private static mapReporterSeverity(severity: CreateBugReportInputDtoType["severity"]): BugReportSeverity {
+    if (!severity) return BugReportSeverity.MEDIUM;
+    if (severity === "low") return BugReportSeverity.LOW;
+    if (severity === "high") return BugReportSeverity.HIGH;
+    return BugReportSeverity.CRITICAL;
   }
 
   private assertValidScreenshot(screenshot: CreateBugReportScreenshotInput): void {
@@ -115,6 +162,20 @@ export class CreateBugReportUseCase {
     const allowedMime = new Set<string>(BUG_REPORT_SCREENSHOT_ALLOWED_MIME_TYPES);
     if (!allowedMime.has(screenshot.mimeType)) {
       throw new BadRequestError(ERROR_CODES.INVALID_SCREENSHOT, "Screenshot must be PNG or JPEG");
+    }
+  }
+
+  private assertValidReplay(replay: CreateBugReportReplayInput): void {
+    if (replay.data.byteLength > BUG_REPORT_REPLAY_MAX_BYTES) {
+      throw new BadRequestError(
+        ERROR_CODES.REPLAY_TOO_LARGE,
+        `Replay must be at most ${BUG_REPORT_REPLAY_MAX_BYTES} bytes`,
+      );
+    }
+
+    const allowedMime = new Set<string>(BUG_REPORT_REPLAY_ALLOWED_MIME_TYPES);
+    if (!allowedMime.has(replay.mimeType)) {
+      throw new BadRequestError(ERROR_CODES.INVALID_REPLAY, "Replay must be gzip or JSON");
     }
   }
 }

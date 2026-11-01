@@ -35,7 +35,7 @@ describe("FindOnboardingUseCase", () => {
         suggestedOrganizationName,
       }),
     };
-    const membershipPort = { findByUser: vi.fn().mockResolvedValue(null) };
+    const membershipPort = { findByUserAndOrganization: vi.fn() };
     const organizationRepository = { findById: vi.fn() };
     const projectPort = { findManyByOrganizationId: vi.fn() };
     const useCase = new FindOnboardingUseCase(
@@ -45,7 +45,7 @@ describe("FindOnboardingUseCase", () => {
       projectPort as unknown as ProjectPort,
     );
 
-    const result = await useCase.execute(userId);
+    const result = await useCase.execute(userId, null);
 
     expect(result).toEqual({
       completedAt: null,
@@ -55,6 +55,7 @@ describe("FindOnboardingUseCase", () => {
       projectId: null,
       projectName: null,
     });
+    expect(membershipPort.findByUserAndOrganization).not.toHaveBeenCalled();
     expect(organizationRepository.findById).not.toHaveBeenCalled();
     expect(projectPort.findManyByOrganizationId).not.toHaveBeenCalled();
   });
@@ -66,7 +67,7 @@ describe("FindOnboardingUseCase", () => {
         suggestedOrganizationName,
       }),
     };
-    const membershipPort = { findByUser: vi.fn().mockResolvedValue(membership) };
+    const membershipPort = { findByUserAndOrganization: vi.fn().mockResolvedValue(membership) };
     const organizationRepository = { findById: vi.fn().mockResolvedValue(organization) };
     const projectPort = { findManyByOrganizationId: vi.fn().mockResolvedValue([]) };
     const useCase = new FindOnboardingUseCase(
@@ -76,7 +77,7 @@ describe("FindOnboardingUseCase", () => {
       projectPort as unknown as ProjectPort,
     );
 
-    const result = await useCase.execute(userId);
+    const result = await useCase.execute(userId, organizationId);
 
     expect(result).toEqual({
       completedAt,
@@ -95,7 +96,7 @@ describe("FindOnboardingUseCase", () => {
         suggestedOrganizationName,
       }),
     };
-    const membershipPort = { findByUser: vi.fn().mockResolvedValue(membership) };
+    const membershipPort = { findByUserAndOrganization: vi.fn().mockResolvedValue(membership) };
     const organizationRepository = { findById: vi.fn().mockResolvedValue(organization) };
     const projectPort = {
       findManyByOrganizationId: vi.fn().mockResolvedValue([
@@ -120,7 +121,7 @@ describe("FindOnboardingUseCase", () => {
       projectPort as unknown as ProjectPort,
     );
 
-    const result = await useCase.execute(userId);
+    const result = await useCase.execute(userId, organizationId);
 
     expect(result).toEqual({
       completedAt: null,

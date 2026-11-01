@@ -1,7 +1,7 @@
 import { Row } from "@workspace/design-system/components/layout/row";
 import { Button } from "@workspace/design-system/components/ui/button";
 import { Code } from "@workspace/design-system/components/ui/code";
-import { MetricCard } from "@workspace/design-system/components/ui/metric-card";
+import { Panel } from "@workspace/design-system/components/ui/panel";
 import { SegmentedControl } from "@workspace/design-system/components/ui/segmented-control";
 import { Skeleton } from "@workspace/design-system/components/ui/skeleton";
 import { Typography } from "@workspace/design-system/components/ui/typography";
@@ -52,8 +52,8 @@ export function SdkSetupInitCard({ projectId }: SdkSetupInitCardProps) {
   });
 
   return (
-    <MetricCard id="step-init">
-      <MetricCard.Header
+    <Panel id="step-init">
+      <Panel.Header
         title={texts.init.title}
         description={texts.init.description}
         action={
@@ -77,7 +77,7 @@ export function SdkSetupInitCard({ projectId }: SdkSetupInitCardProps) {
           </Row>
         }
       />
-      <MetricCard.Content gap="md">
+      <Panel.Content gap="md">
         {/* TODO: Vue 3 and Vanilla JS init tabs */}
         <Code
           title={panelTitle}
@@ -89,8 +89,8 @@ export function SdkSetupInitCard({ projectId }: SdkSetupInitCardProps) {
         <Typography variant="text-xs" color="muted">
           {texts.init.tip}
         </Typography>
-      </MetricCard.Content>
-    </MetricCard>
+      </Panel.Content>
+    </Panel>
   );
 }
 

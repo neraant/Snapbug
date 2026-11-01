@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import { path } from "@/shared/path.const";
+import { url } from "@/shared/build-url.util";
 
 type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -21,5 +21,5 @@ export default async function Page({ searchParams }: PageProps) {
   }
 
   const queryString = query.toString();
-  redirect(queryString ? `${path.overview}?${queryString}` : path.overview);
+  redirect(queryString ? `${url.overview()}?${queryString}` : url.overview());
 }

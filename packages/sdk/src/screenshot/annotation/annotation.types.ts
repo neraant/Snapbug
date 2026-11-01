@@ -30,6 +30,7 @@ export type MountScreenshotAnnotationOptions = {
 
 export type ScreenshotAnnotationController = {
   unmount: () => void;
+  open: () => void;
   flush: () => Promise<void>;
 };
 

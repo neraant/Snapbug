@@ -21,7 +21,6 @@ describe("CreateOrganizationUseCase", () => {
   it("creates an organization, an admin membership, and a default project", async () => {
     const organizationRepository = { save: vi.fn().mockResolvedValue(undefined) };
     const membershipPort = {
-      findByUser: vi.fn().mockResolvedValue(null),
       create: vi.fn().mockResolvedValue(null),
     };
     const projectPort = { create: vi.fn().mockResolvedValue(project) };
@@ -38,7 +37,10 @@ describe("CreateOrganizationUseCase", () => {
     expect(saved.name).toBe(input.name);
     expect(saved.reports_retention_days).toBe(90);
     expect(membershipPort.create).toHaveBeenCalledWith({ organizationId: saved.id }, userId);
-    expect(projectPort.create).toHaveBeenCalledWith({ organizationId: saved.id, name: "Default project" }, userId);
+    expect(projectPort.create).toHaveBeenCalledWith(
+      { organizationId: saved.id, name: "Default project", color: "#F97316" },
+      userId,
+    );
     expect(result).toEqual({
       organization: OrganizationMapper.toDto(saved),
       project,
@@ -48,7 +50,6 @@ describe("CreateOrganizationUseCase", () => {
   it("uses the given reports retention", async () => {
     const organizationRepository = { save: vi.fn().mockResolvedValue(undefined) };
     const membershipPort = {
-      findByUser: vi.fn().mockResolvedValue(null),
       create: vi.fn().mockResolvedValue(null),
     };
     const projectPort = { create: vi.fn().mockResolvedValue(project) };
@@ -64,31 +65,22 @@ describe("CreateOrganizationUseCase", () => {
     expect(saved.reports_retention_days).toBe(30);
   });
 
-  it("throws when the user already has an organization", async () => {
-    const organizationRepository = { save: vi.fn() };
+  it("creates another organization when the user already belongs to one", async () => {
+    const organizationRepository = { save: vi.fn().mockResolvedValue(undefined) };
     const membershipPort = {
-      findByUser: vi.fn().mockResolvedValue({
-        id: "1a8c69a1-1ab1-45a8-8497-eae1e506d9d1",
-        userId,
-        organizationId: "2a8c69a1-1ab1-45a8-8497-eae1e506d9d1",
-        role: "admin",
-        createdAt: "2026-10-03T09:00:00.000Z",
-      }),
-      create: vi.fn(),
+      create: vi.fn().mockResolvedValue(null),
     };
-    const projectPort = { create: vi.fn() };
+    const projectPort = { create: vi.fn().mockResolvedValue(project) };
     const useCase = new CreateOrganizationUseCase(
       organizationRepository as unknown as OrganizationRepository,
       membershipPort as unknown as MembershipPort,
       projectPort as unknown as ProjectPort,
     );
 
-    await expect(useCase.execute(input, userId)).rejects.toMatchObject({
-      errorCode: "user-already-has-organization",
-    });
+    await useCase.execute(input, userId);
 
-    expect(organizationRepository.save).not.toHaveBeenCalled();
-    expect(membershipPort.create).not.toHaveBeenCalled();
-    expect(projectPort.create).not.toHaveBeenCalled();
+    expect(organizationRepository.save).toHaveBeenCalledOnce();
+    expect(membershipPort.create).toHaveBeenCalledOnce();
+    expect(projectPort.create).toHaveBeenCalledOnce();
   });
 });

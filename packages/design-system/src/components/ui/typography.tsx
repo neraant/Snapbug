@@ -1,6 +1,6 @@
 import { cn } from "@workspace/design-system/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
-import type { ElementType, PropsWithChildren } from "react";
+import type { ComponentPropsWithoutRef, ElementType, PropsWithChildren } from "react";
 
 const typographyVariants = cva("", {
   variants: {
@@ -70,9 +70,11 @@ type TypographyProps = PropsWithChildren<{
   weight?: NonNullable<VariantProps<typeof typographyVariants>["weight"]>;
   font?: TypographyFont;
   truncate?: boolean;
+  lineClamp?: 2 | 3;
   className?: string;
   as?: ElementType;
-}>;
+}> &
+  Omit<ComponentPropsWithoutRef<"a">, "color" | "as" | "children">;
 
 export function Typography({
   variant = "text-md",
@@ -81,9 +83,11 @@ export function Typography({
   weight,
   font,
   truncate = false,
+  lineClamp,
   className,
   as,
   children,
+  ...props
 }: TypographyProps) {
   const Tag = as || DEFAULT_TAG[variant];
 
@@ -91,9 +95,12 @@ export function Typography({
     <Tag
       className={cn(
         typographyVariants({ variant, color, align, weight, font }),
-        truncate && "min-w-0 truncate",
+        truncate && !lineClamp && "min-w-0 truncate",
+        lineClamp === 2 && "line-clamp-2 break-words",
+        lineClamp === 3 && "line-clamp-3 break-words",
         className,
       )}
+      {...props}
     >
       {children}
     </Tag>

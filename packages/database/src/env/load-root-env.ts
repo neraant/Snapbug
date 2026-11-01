@@ -5,4 +5,4 @@ import { config } from "dotenv";
 
 const envDir = path.dirname(fileURLToPath(import.meta.url));
 
-config({ path: path.resolve(envDir, "../../../../.env.local") });
+config({ path: path.resolve(envDir, "../../.env.local") });

@@ -8,6 +8,7 @@ import type {
   FindChartsInputDtoType,
   FindChartsOutputDtoType,
 } from "@workspace/validation/modules/bug-report/dto/find-charts.schema";
+import type { MembershipModelType } from "@workspace/validation/modules/membership/dto/membership.model";
 
 export class FindChartsUseCase {
   constructor(
@@ -17,11 +18,17 @@ export class FindChartsUseCase {
     private readonly bugReportStatService: BugReportStatService,
   ) {}
 
-  async execute(input: FindChartsInputDtoType, userId: string): Promise<FindChartsOutputDtoType> {
-    const membership = await this.membershipPort.findByUser(userId);
+  async execute(
+    input: FindChartsInputDtoType,
+    userId: string,
+    organizationId: string | null,
+  ): Promise<FindChartsOutputDtoType> {
+    if (!organizationId) throw new NotFoundError(ERROR_CODES.ORGANIZATION_NOT_FOUND);
+
+    const membership = await this.membershipPort.findByUserAndOrganization({ userId, organizationId });
     if (!membership) throw new NotFoundError(ERROR_CODES.ORGANIZATION_NOT_FOUND);
 
-    const projectIds = await this.resolveProjectIds(input, membership.organizationId);
+    const projectIds = await this.resolveProjectIds(input, membership);
     if (projectIds.length === 0) {
       return this.bugReportStatService.buildZeroCharts(input.periodDays);
     }
@@ -44,16 +51,21 @@ export class FindChartsUseCase {
     });
   }
 
-  private async resolveProjectIds(input: FindChartsInputDtoType, organizationId: string): Promise<string[]> {
+  private async resolveProjectIds(input: FindChartsInputDtoType, membership: MembershipModelType): Promise<string[]> {
     if (input.projectId) {
       const project = await this.projectPort.findById(input.projectId);
-      if (!project || project.organizationId !== organizationId) {
+      if (!project || project.organizationId !== membership.organizationId) {
         throw new NotFoundError(ERROR_CODES.PROJECT_NOT_FOUND);
       }
-      return [project.id];
+      const allowedProjectIds = await this.membershipPort.filterProjectIds(membership, [project.id]);
+      if (allowedProjectIds.length === 0) throw new NotFoundError(ERROR_CODES.PROJECT_NOT_FOUND);
+      return allowedProjectIds;
     }
 
-    const projects = await this.projectPort.findManyByOrganizationId({ organizationId });
-    return projects.map((project) => project.id);
+    const projects = await this.projectPort.findManyByOrganizationId({ organizationId: membership.organizationId });
+    return await this.membershipPort.filterProjectIds(
+      membership,
+      projects.map((project) => project.id),
+    );
   }
 }

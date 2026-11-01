@@ -1,3 +1,4 @@
+import { startReplayCollector, stopReplayCollector } from "../replay/replay-collector.service";
 import { clearCollectorBuffers } from "./collector-buffer";
 import { startConsoleCollector, stopConsoleCollector } from "./console-collector.service";
 import { startErrorCollector, stopErrorCollector } from "./error-collector.service";
@@ -12,6 +13,7 @@ export function startCollectors() {
   startConsoleCollector();
   startErrorCollector();
   startNetworkCollector();
+  startReplayCollector();
 }
 
 export function stopCollectors() {
@@ -21,5 +23,6 @@ export function stopCollectors() {
   stopConsoleCollector();
   stopErrorCollector();
   stopNetworkCollector();
+  stopReplayCollector();
   clearCollectorBuffers();
 }

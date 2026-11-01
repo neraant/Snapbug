@@ -56,7 +56,10 @@ function createStatService() {
 
 describe("FindChartsUseCase", () => {
   it("returns a zero-filled series when the organization has no projects", async () => {
-    const membershipPort = { findByUser: vi.fn().mockResolvedValue(membership) };
+    const membershipPort = {
+      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
+      findByUserAndOrganization: vi.fn().mockResolvedValue(membership),
+    };
     const projectPort = { findManyByOrganizationId: vi.fn().mockResolvedValue([]), findById: vi.fn() };
     const bugReportRepository = createRepositoryMock();
     const useCase = new FindChartsUseCase(
@@ -66,7 +69,7 @@ describe("FindChartsUseCase", () => {
       createStatService(),
     );
 
-    const result = await useCase.execute(input, userId);
+    const result = await useCase.execute(input, userId, organizationId);
 
     expect(result.points).toHaveLength(7);
     expect(result.points.every((point) => point.created === 0 && point.resolved === 0)).toBe(true);
@@ -83,7 +86,10 @@ describe("FindChartsUseCase", () => {
   });
 
   it("maps repository rows onto UTC days and severities", async () => {
-    const membershipPort = { findByUser: vi.fn().mockResolvedValue(membership) };
+    const membershipPort = {
+      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
+      findByUserAndOrganization: vi.fn().mockResolvedValue(membership),
+    };
     const projectPort = { findManyByOrganizationId: vi.fn().mockResolvedValue([project]), findById: vi.fn() };
     const bugReportRepository = createRepositoryMock({
       countCreatedByDay: vi.fn().mockResolvedValue([
@@ -104,7 +110,7 @@ describe("FindChartsUseCase", () => {
       createStatService(),
     );
 
-    const result = await useCase.execute(input, userId);
+    const result = await useCase.execute(input, userId, organizationId);
 
     const oct10 = result.points.find((point) => point.day === "2026-10-10");
     const oct11 = result.points.find((point) => point.day === "2026-10-11");
@@ -118,7 +124,10 @@ describe("FindChartsUseCase", () => {
   });
 
   it("throws when the project does not belong to the organization", async () => {
-    const membershipPort = { findByUser: vi.fn().mockResolvedValue(membership) };
+    const membershipPort = {
+      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
+      findByUserAndOrganization: vi.fn().mockResolvedValue(membership),
+    };
     const projectPort = {
       findManyByOrganizationId: vi.fn(),
       findById: vi.fn().mockResolvedValue({ ...project, organizationId: otherOrganizationId }),
@@ -131,7 +140,7 @@ describe("FindChartsUseCase", () => {
       createStatService(),
     );
 
-    await expect(useCase.execute({ ...input, projectId }, userId)).rejects.toMatchObject({
+    await expect(useCase.execute({ ...input, projectId }, userId, organizationId)).rejects.toMatchObject({
       errorCode: ERROR_CODES.PROJECT_NOT_FOUND,
     });
 

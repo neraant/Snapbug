@@ -7,6 +7,7 @@ import { overviewStatAllProjectsValue } from "@/client/modules/overview/consts/o
 import { projectScopeSearchParamKey } from "@/client/modules/shared/consts/project-scope-search-param.const";
 import { useProjectScopeSearchParam } from "@/client/modules/shared/hooks/use-project-scope-search-param";
 import { useFindProjects } from "@/client/modules/shared/queries/use-find-projects";
+import { parseProjectScopeSearchParam } from "@/client/modules/shared/utils/parse-project-scope-search-param.util";
 import {
   isStoredProjectScopeValid,
   readStoredProjectScope,
@@ -17,6 +18,16 @@ export function useRestoreProjectScopeSearchParam() {
   const { setProjectId } = useProjectScopeSearchParam();
   const { data: projects } = useFindProjects();
   const restoredRef = useRef(false);
+
+  useEffect(() => {
+    const currentProjectId = parseProjectScopeSearchParam(searchParams.get(projectScopeSearchParamKey));
+    if (!currentProjectId) return;
+
+    const projectIds = new Set(projects.map((project) => project.id));
+    if (!projectIds.has(currentProjectId)) {
+      setProjectId(null);
+    }
+  }, [projects, searchParams, setProjectId]);
 
   useEffect(() => {
     if (restoredRef.current) {

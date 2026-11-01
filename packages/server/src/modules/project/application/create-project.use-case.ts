@@ -1,7 +1,8 @@
 import { ProjectFactory } from "@workspace/server/modules/project/entity/project.factory";
 import { ProjectMapper } from "@workspace/server/modules/project/entity/project.mapper";
 import type { MembershipPort } from "@workspace/server/modules/project/port/membership.port";
-import type { ProjectRepository } from "@workspace/server/modules/project/repository/project.repository";
+import type { ProjectService } from "@workspace/server/modules/project/service/project.service";
+import type { WithTransactionType } from "@workspace/server/shared/database/transaction.util";
 import { NotFoundError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import type {
@@ -12,7 +13,8 @@ import type {
 export class CreateProjectUseCase {
   constructor(
     private readonly membershipPort: MembershipPort,
-    private readonly projectRepository: ProjectRepository,
+    private readonly projectService: ProjectService,
+    private readonly withTransaction: WithTransactionType,
   ) {}
 
   async execute(input: CreateProjectInputDtoType, userId: string): Promise<CreateProjectOutputDtoType> {
@@ -24,9 +26,16 @@ export class CreateProjectUseCase {
 
     const project = ProjectFactory.create({
       name: input.name,
+      color: input.color,
       organizationId: input.organizationId,
     });
-    await this.projectRepository.save(project);
+    await this.withTransaction(async (tx) => {
+      await this.projectService
+        .withTx(tx)
+        .withActor({ type: "user", id: userId })
+        .saveWithAudit(project, "Create project");
+      await this.membershipPort.withTx(tx).grantProjectToMembers(input.organizationId, project.id, userId);
+    });
     return ProjectMapper.toDto(project);
   }
 }

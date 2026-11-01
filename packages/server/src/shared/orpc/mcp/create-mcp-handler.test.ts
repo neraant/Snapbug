@@ -4,6 +4,7 @@ import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import type { OrpcContext } from "@workspace/server/shared/orpc/context.const";
 import { createMcpHandler } from "@workspace/server/shared/orpc/mcp/create-mcp-handler";
 import type { OrpcMetaType } from "@workspace/server/shared/orpc/mcp/walk-mcp-tools";
+import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 
@@ -31,7 +32,8 @@ const router = {
 };
 
 const context: OrpcContext = {
-  user: { id: "user-1", email: "a@b.test", name: null },
+  user: { id: "user-1", email: "a@b.test", name: null, role: UserRole.ADMIN },
+  organizationId: null,
   ip: "127.0.0.1",
   actor: { type: "user", id: "user-1" },
   requestOrigin: null,

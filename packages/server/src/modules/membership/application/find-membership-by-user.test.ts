@@ -9,7 +9,7 @@ const userId = "0a8c69a1-1ab1-45a8-8497-eae1e506d9d4";
 const organizationId = "2a8c69a1-1ab1-45a8-8497-eae1e506d9d1";
 
 describe("FindMembershipByUserUseCase", () => {
-  it("returns the membership for the user", async () => {
+  it("returns the membership for the active organization", async () => {
     const membership = new Membership({
       id: "1a8c69a1-1ab1-45a8-8497-eae1e506d9d1",
       userId,
@@ -18,24 +18,25 @@ describe("FindMembershipByUserUseCase", () => {
       createdAt: new Date("2026-10-03T09:00:00.000Z"),
     });
     const membershipRepository = {
-      findByUserId: vi.fn().mockResolvedValue(membership),
+      findByUserAndOrganization: vi.fn().mockResolvedValue(membership),
     };
     const useCase = new FindMembershipByUserUseCase(membershipRepository as unknown as MembershipRepository);
 
-    const result = await useCase.execute(userId);
+    const result = await useCase.execute(userId, organizationId);
 
-    expect(membershipRepository.findByUserId).toHaveBeenCalledWith(userId);
+    expect(membershipRepository.findByUserAndOrganization).toHaveBeenCalledWith(userId, organizationId);
     expect(result).toEqual(MembershipMapper.toDto(membership));
   });
 
-  it("returns null when the user has no membership", async () => {
+  it("returns null when there is no active organization", async () => {
     const membershipRepository = {
-      findByUserId: vi.fn().mockResolvedValue(null),
+      findByUserAndOrganization: vi.fn(),
     };
     const useCase = new FindMembershipByUserUseCase(membershipRepository as unknown as MembershipRepository);
 
-    const result = await useCase.execute(userId);
+    const result = await useCase.execute(userId, null);
 
     expect(result).toBeNull();
+    expect(membershipRepository.findByUserAndOrganization).not.toHaveBeenCalled();
   });
 });

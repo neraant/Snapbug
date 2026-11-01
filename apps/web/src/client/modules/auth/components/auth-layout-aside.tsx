@@ -12,14 +12,14 @@ import { usePathname } from "next/navigation";
 import { AuthAsidePreviewCard } from "@/client/modules/auth/components/auth-aside-preview-card";
 import { texts } from "@/client/modules/auth/consts/texts.const";
 import { useAuthAsideCard } from "@/client/modules/auth/hooks/use-auth-aside-card";
-import { path } from "@/shared/path.const";
+import { url } from "@/shared/build-url.util";
 
 export function AuthLayoutAside() {
   const pathname = usePathname();
   const card = useAuthAsideCard();
 
-  const isSignIn = pathname === path.signIn;
-  const isOnboarding = pathname === path.onboarding;
+  const isSignIn = pathname === url.signIn();
+  const isOnboarding = pathname === url.onboarding();
 
   return (
     <div className="relative hidden h-full overflow-hidden border-l bg-background lg:block" aria-hidden>
@@ -48,7 +48,7 @@ export function AuthLayoutAside() {
           </Column>
 
           <Row justify="center">
-            <Card width="lg">
+            <Card width="lg" padding="none">
               <Card.Header>
                 <Card.Icon>
                   <SparklesIcon className="text-warning" />

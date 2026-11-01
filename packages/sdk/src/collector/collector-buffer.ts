@@ -3,6 +3,7 @@ import type {
   BugReportNetworkLogEntryType,
 } from "@workspace/validation/modules/bug-report/dto/bug-report-log-entry.schema";
 
+import { clearReplayBuffer } from "../replay/replay-buffer";
 import { BUG_REPORT_CONSOLE_LOG_MAX_ENTRIES, BUG_REPORT_NETWORK_LOG_MAX_ENTRIES } from "./collector.const";
 
 const consoleBuffer: BugReportConsoleLogEntryType[] = [];
@@ -35,4 +36,5 @@ export function snapshotCollectorBuffers(): {
 export function clearCollectorBuffers() {
   consoleBuffer.length = 0;
   networkBuffer.length = 0;
+  clearReplayBuffer();
 }

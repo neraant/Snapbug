@@ -1,3 +1,4 @@
+import { ResetPasswordMapper } from "@workspace/server/modules/auth/domain/reset-password.mapper";
 import type { UserPort } from "@workspace/server/modules/auth/port/user.port";
 import type { ResetPasswordRepository } from "@workspace/server/modules/auth/repository/reset-password.repository";
 import type { AuthService } from "@workspace/server/modules/auth/service/auth.service";
@@ -23,7 +24,7 @@ export class ResetPasswordUseCase {
 
     const passwordHash = await this.authService.hashPassword(input.password);
     const user = await this.userPort.update({ userId: resetPassword.userId, passwordHash });
-    await this.resetPasswordRepository.deleteByUserId(resetPassword.userId);
-    return { email: user.email };
+    await this.resetPasswordRepository.delete(resetPassword);
+    return ResetPasswordMapper.toResetPasswordOutput(user);
   }
 }

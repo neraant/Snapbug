@@ -20,7 +20,7 @@
     "**/*.mts",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
-    "src/shared/auth/next-auth.d.ts"
+    "src/types/next-auth.d.ts"
   ],
   "exclude": ["node_modules"]
 }

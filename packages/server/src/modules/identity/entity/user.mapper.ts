@@ -16,6 +16,10 @@ export abstract class UserMapper {
     return { id, name, email, onboardingCompletedAt };
   }
 
+  static toFindUsersByIdsOutput(users: User[]): UserModelType[] {
+    return users.map((user) => UserMapper.toDto(user));
+  }
+
   static toCredentialsDto(user: User): UserModelType & { passwordHash: string } {
     const { id, name, email, passwordHash, onboardingCompletedAt } = user.toObject();
     return { id, name, email, passwordHash, onboardingCompletedAt };

@@ -12,7 +12,7 @@ import { useForm } from "react-hook-form";
 import { texts } from "@/client/modules/auth/consts/texts.const";
 import { resetPasswordSchema, type ResetPasswordSchemaType } from "@/client/modules/auth/schemas/reset-password.schema";
 import { useResetPassword } from "@/client/modules/shared/queries/use-reset-password";
-import { path } from "@/shared/path.const";
+import { url } from "@/shared/build-url.util";
 
 type ResetPasswordFormProps = {
   token: string;
@@ -50,7 +50,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
         title: texts.resetPassword.toast.signInFailed,
         type: "error",
       });
-      router.replace(path.signIn);
+      router.replace(url.signIn());
       return;
     }
 
@@ -58,7 +58,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
       title: texts.resetPassword.toast.success,
       type: "success",
     });
-    router.replace(path.overview);
+    router.replace(url.overview());
   };
 
   return (

@@ -24,7 +24,7 @@ export function SdkSetupProjectContent({ projectId }: SdkSetupProjectContentProp
           <SdkSetupInitCard projectId={projectId} />
         </Suspense>
         <Suspense fallback={<SdkSetupTestReportCard.Fallback />}>
-          <SdkSetupTestReportCard />
+          <SdkSetupTestReportCard projectId={projectId} />
         </Suspense>
       </Column>
       <Column gap="lg" minWidth="0" width="full">

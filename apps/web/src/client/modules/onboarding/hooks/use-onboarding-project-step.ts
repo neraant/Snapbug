@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "@workspace/design-system/components/ui/toast";
 import { getAppErrorMessage } from "@workspace/server/error/get-app-error-message";
+import { projectColorDefault } from "@workspace/validation/shared/project-color.schema";
 import { useForm } from "react-hook-form";
 
 import { texts } from "@/client/modules/onboarding/consts/texts.const";
@@ -36,7 +37,7 @@ export function useOnboardingProjectStep({
       if (projectId) {
         await updateProject({ projectId, name: values.name });
       } else {
-        await createProject({ organizationId, name: values.name });
+        await createProject({ organizationId, name: values.name, color: projectColorDefault });
       }
 
       onSaved();

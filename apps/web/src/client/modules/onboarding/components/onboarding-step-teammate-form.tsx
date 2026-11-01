@@ -70,7 +70,7 @@ export function OnboardingStepTeammateForm({ organizationId, onBack, onSkip }: O
             {texts.teammate.addAnother}
           </Button>
         </Column>
-        <Card width="full" className="bg-muted/50">
+        <Card width="full" padding="none" className="bg-muted/50">
           <Card.Header>
             <Card.Icon>
               <RocketIcon className="text-primary" />

@@ -5,8 +5,11 @@ import type { ProjectPort } from "@workspace/server/modules/organization/port/pr
 import type { UserPort } from "@workspace/server/modules/organization/port/user.port";
 import type { OrganizationRepository } from "@workspace/server/modules/organization/repository/organization.repository";
 import type { WithTransactionType } from "@workspace/server/shared/database/transaction.util";
+import { NotFoundError } from "@workspace/server/shared/error/app-errors";
+import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import type { CompleteOnboardingInputDtoType } from "@workspace/validation/modules/organization/dto/complete-onboarding.schema";
 import type { FindOnboardingOutputDtoType } from "@workspace/validation/modules/organization/dto/find-onboarding.schema";
+import { projectColorDefault } from "@workspace/validation/shared/project-color.schema";
 
 const DEFAULT_ORGANIZATION_NAME = "Workspace";
 const DEFAULT_PROJECT_NAME = "Default project";
@@ -21,13 +24,17 @@ export class CompleteOnboardingUseCase {
     private readonly withTransaction: WithTransactionType,
   ) {}
 
-  async execute(input: CompleteOnboardingInputDtoType, userId: string): Promise<FindOnboardingOutputDtoType> {
+  async execute(
+    input: CompleteOnboardingInputDtoType,
+    userId: string,
+    organizationId: string | null,
+  ): Promise<FindOnboardingOutputDtoType> {
     const { onboardingCompletedAt } = await this.userPort.findOnboardingState(userId);
     if (onboardingCompletedAt) {
-      return await this.findOnboarding.execute(userId);
+      return await this.findOnboarding.execute(userId, organizationId);
     }
 
-    const membership = await this.membershipPort.findByUser(userId);
+    let resolvedOrganizationId = organizationId;
 
     await this.withTransaction(async (tx) => {
       const organizationRepository = this.organizationRepository.withTx(tx);
@@ -35,24 +42,37 @@ export class CompleteOnboardingUseCase {
       const projectPort = this.projectPort.withTx(tx);
       const userPort = this.userPort.withTx(tx);
 
-      if (!membership) {
+      if (!resolvedOrganizationId) {
         const organizationName = input.organizationName || DEFAULT_ORGANIZATION_NAME;
         const projectName = input.projectName || DEFAULT_PROJECT_NAME;
         const organization = OrganizationFactory.create({ name: organizationName });
         await organizationRepository.save(organization);
         await membershipPort.create({ organizationId: organization.id }, userId);
-        await projectPort.create({ organizationId: organization.id, name: projectName }, userId);
+        await projectPort.create(
+          { organizationId: organization.id, name: projectName, color: projectColorDefault },
+          userId,
+        );
+        resolvedOrganizationId = organization.id;
       } else {
-        const projects = await projectPort.findManyByOrganizationId({ organizationId: membership.organizationId });
+        const membership = await membershipPort.findByUserAndOrganization({
+          userId,
+          organizationId: resolvedOrganizationId,
+        });
+        if (!membership) throw new NotFoundError(ERROR_CODES.ORGANIZATION_NOT_FOUND);
+
+        const projects = await projectPort.findManyByOrganizationId({ organizationId: resolvedOrganizationId });
         if (projects.length === 0) {
           const projectName = input.projectName || DEFAULT_PROJECT_NAME;
-          await projectPort.create({ organizationId: membership.organizationId, name: projectName }, userId);
+          await projectPort.create(
+            { organizationId: resolvedOrganizationId, name: projectName, color: projectColorDefault },
+            userId,
+          );
         }
       }
 
       await userPort.markOnboardingComplete(userId);
     });
 
-    return await this.findOnboarding.execute(userId);
+    return await this.findOnboarding.execute(userId, resolvedOrganizationId);
   }
 }

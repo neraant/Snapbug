@@ -10,6 +10,10 @@ import { and, desc, eq, isNull } from "drizzle-orm";
 export class ApiKeyRepository {
   constructor(private readonly db: DbClient = defaultDb) {}
 
+  withTx(tx: DbClient): ApiKeyRepository {
+    return new ApiKeyRepository(tx);
+  }
+
   async findByKey(key: string): Promise<ApiKey | null> {
     const [row] = await this.db.select().from(apiKeyTable).where(eq(apiKeyTable.key, key));
     return row ? ApiKeyMapper.fromPersistence(row) : null;

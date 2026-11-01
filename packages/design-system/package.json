@@ -6,7 +6,8 @@
   "scripts": {
     "lint": "eslint .",
     "format": "prettier --write .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:unit": "vitest run"
   },
   "dependencies": {
     "@base-ui/react": "1.7.0",
@@ -35,7 +36,8 @@
     "eslint": "9",
     "prettier": "3.8.3",
     "tailwindcss": "4",
-    "typescript": "5"
+    "typescript": "5",
+    "vitest": "4.1.10"
   },
   "exports": {
     "./globals.css": "./src/styles/globals.css",

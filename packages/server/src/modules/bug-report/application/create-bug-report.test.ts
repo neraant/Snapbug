@@ -41,6 +41,7 @@ function bugReportFromCreateInput(createInput: {
   viewportWidth?: number | null;
   viewportHeight?: number | null;
   screenshotKey?: string | null;
+  replayKey?: string | null;
   consoleLogs?: unknown[] | null;
   networkLogs?: unknown[] | null;
   reporterEmail?: string | null;
@@ -51,6 +52,9 @@ function bugReportFromCreateInput(createInput: {
 
 const fileStoragePortStub: FileStoragePort = {
   saveBugReportScreenshot: vi.fn(),
+  readBugReportScreenshot: vi.fn(),
+  saveBugReportReplay: vi.fn(),
+  readBugReportReplay: vi.fn(),
   delete: vi.fn(),
 };
 
@@ -144,6 +148,7 @@ describe("CreateBugReportUseCase", () => {
         networkLogs: null,
         reporterEmail: null,
         customContext: null,
+        severity: BugReportSeverity.MEDIUM,
       },
       "Create bug report",
     );
@@ -365,6 +370,7 @@ describe("CreateBugReportUseCase", () => {
         networkLogs,
         reporterEmail: null,
         customContext: null,
+        severity: BugReportSeverity.MEDIUM,
       },
       "Create bug report",
     );
@@ -421,6 +427,7 @@ describe("CreateBugReportUseCase", () => {
         networkLogs: null,
         reporterEmail,
         customContext,
+        severity: BugReportSeverity.MEDIUM,
       },
       "Create bug report",
     );
@@ -461,6 +468,9 @@ describe("CreateBugReportUseCase", () => {
       withTransaction: withTransaction as WithTransactionType,
       fileStoragePort: {
         saveBugReportScreenshot,
+        readBugReportScreenshot: vi.fn(),
+        saveBugReportReplay: vi.fn(),
+        readBugReportReplay: vi.fn(),
         delete: deleteScreenshot,
       },
     });
@@ -510,5 +520,174 @@ describe("CreateBugReportUseCase", () => {
     expect(withTransaction).not.toHaveBeenCalled();
     expect(bugReportService.withTx).not.toHaveBeenCalled();
     expect(projectPort.findWidgetSetting).not.toHaveBeenCalled();
+  });
+
+  it("maps reporter severity onto the bug report", async () => {
+    const apiKeyPort = {
+      findProjectByKey: vi.fn().mockResolvedValue({
+        id: projectId,
+        name: "Store",
+        organizationId,
+        createdAt: "2026-10-03T09:00:00.000Z",
+      }),
+    };
+    const projectPort = {
+      findManyByOrganizationId: vi.fn(),
+      findById: vi.fn(),
+      findWidgetSetting: vi.fn().mockResolvedValue(widgetSettingBase),
+    };
+    const createWithAudit = vi.fn(async (createInput) =>
+      bugReportFromCreateInput({
+        ...createInput,
+        shortId: "SNB-10",
+      }),
+    );
+    const withActor = vi.fn().mockReturnValue({ createWithAudit });
+    const bugReportService = { withTx: vi.fn().mockReturnValue({ withActor }) };
+    const withTransaction = vi.fn(async (callback) => await callback({}));
+    const useCase = createUseCase({
+      apiKeyPort: apiKeyPort as unknown as ApiKeyPort,
+      projectPort: projectPort as unknown as ProjectPort,
+      bugReportService: bugReportService as unknown as BugReportService,
+      withTransaction: withTransaction as WithTransactionType,
+    });
+
+    const result = await useCase.execute({ ...input, severity: "critical" }, actor, "https://app.example.com");
+
+    expect(createWithAudit).toHaveBeenCalledWith(
+      expect.objectContaining({ severity: BugReportSeverity.CRITICAL }),
+      "Create bug report",
+    );
+    expect(result.severity).toBe(BugReportSeverity.CRITICAL);
+  });
+
+  it("persists replay key when replay is provided", async () => {
+    const replayKey = "bug-reports/6a8c69a1-1ab1-45a8-8497-eae1e506d901/replay.json.gz";
+    const saveBugReportReplay = vi.fn().mockResolvedValue(replayKey);
+    const deleteStorage = vi.fn();
+    const apiKeyPort = {
+      findProjectByKey: vi.fn().mockResolvedValue({
+        id: projectId,
+        name: "Store",
+        organizationId,
+        createdAt: "2026-10-03T09:00:00.000Z",
+      }),
+    };
+    const projectPort = {
+      findManyByOrganizationId: vi.fn(),
+      findById: vi.fn(),
+      findWidgetSetting: vi.fn().mockResolvedValue(widgetSettingBase),
+    };
+    const createWithAudit = vi.fn(async (createInput) =>
+      bugReportFromCreateInput({
+        ...createInput,
+        shortId: "SNB-11",
+      }),
+    );
+    const withActor = vi.fn().mockReturnValue({ createWithAudit });
+    const bugReportService = { withTx: vi.fn().mockReturnValue({ withActor }) };
+    const withTransaction = vi.fn(async (callback) => await callback({}));
+    const useCase = createUseCase({
+      apiKeyPort: apiKeyPort as unknown as ApiKeyPort,
+      projectPort: projectPort as unknown as ProjectPort,
+      bugReportService: bugReportService as unknown as BugReportService,
+      withTransaction: withTransaction as WithTransactionType,
+      fileStoragePort: {
+        saveBugReportScreenshot: vi.fn(),
+        readBugReportScreenshot: vi.fn(),
+        saveBugReportReplay,
+        readBugReportReplay: vi.fn(),
+        delete: deleteStorage,
+      },
+    });
+
+    const replay = { data: new Uint8Array([31, 139]), mimeType: "application/gzip" };
+    const result = await useCase.execute(input, actor, "https://app.example.com", undefined, replay);
+
+    expect(saveBugReportReplay).toHaveBeenCalledOnce();
+    expect(createWithAudit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        replayKey,
+        id: saveBugReportReplay.mock.calls[0]?.[0].reportId,
+      }),
+      "Create bug report",
+    );
+    expect(deleteStorage).not.toHaveBeenCalled();
+    expect(result.hasReplay).toBe(true);
+  });
+
+  it("throws when replay exceeds the size limit", async () => {
+    const apiKeyPort = { findProjectByKey: vi.fn() };
+    const projectPort = {
+      findManyByOrganizationId: vi.fn(),
+      findById: vi.fn(),
+      findWidgetSetting: vi.fn(),
+    };
+    const bugReportService = { withTx: vi.fn() };
+    const withTransaction = vi.fn();
+    const useCase = createUseCase({
+      apiKeyPort: apiKeyPort as unknown as ApiKeyPort,
+      projectPort: projectPort as unknown as ProjectPort,
+      bugReportService: bugReportService as unknown as BugReportService,
+      withTransaction: withTransaction as WithTransactionType,
+    });
+
+    const replay = { data: new Uint8Array(3_000_001), mimeType: "application/gzip" };
+
+    await expect(useCase.execute(input, actor, null, undefined, replay)).rejects.toMatchObject({
+      errorCode: ERROR_CODES.REPLAY_TOO_LARGE,
+    });
+
+    expect(apiKeyPort.findProjectByKey).not.toHaveBeenCalled();
+  });
+
+  it("deletes uploaded screenshot and replay when the transaction fails", async () => {
+    const screenshotKey = "bug-reports/id/screenshot.png";
+    const replayKey = "bug-reports/id/replay.json.gz";
+    const deleteStorage = vi.fn().mockResolvedValue(undefined);
+    const apiKeyPort = {
+      findProjectByKey: vi.fn().mockResolvedValue({
+        id: projectId,
+        name: "Store",
+        organizationId,
+        createdAt: "2026-10-03T09:00:00.000Z",
+      }),
+    };
+    const projectPort = {
+      findManyByOrganizationId: vi.fn(),
+      findById: vi.fn(),
+      findWidgetSetting: vi.fn().mockResolvedValue(widgetSettingBase),
+    };
+    const bugReportService = {
+      withTx: vi.fn().mockReturnValue({
+        withActor: vi.fn().mockReturnValue({
+          createWithAudit: vi.fn().mockRejectedValue(new Error("db failed")),
+        }),
+      }),
+    };
+    const withTransaction = vi.fn(async (callback) => await callback({}));
+    const useCase = createUseCase({
+      apiKeyPort: apiKeyPort as unknown as ApiKeyPort,
+      projectPort: projectPort as unknown as ProjectPort,
+      bugReportService: bugReportService as unknown as BugReportService,
+      withTransaction: withTransaction as WithTransactionType,
+      fileStoragePort: {
+        saveBugReportScreenshot: vi.fn().mockResolvedValue(screenshotKey),
+        readBugReportScreenshot: vi.fn(),
+        saveBugReportReplay: vi.fn().mockResolvedValue(replayKey),
+        readBugReportReplay: vi.fn(),
+        delete: deleteStorage,
+      },
+    });
+
+    const screenshot = { data: new Uint8Array([1]), mimeType: "image/png" };
+    const replay = { data: new Uint8Array([2]), mimeType: "application/gzip" };
+
+    await expect(useCase.execute(input, actor, "https://app.example.com", screenshot, replay)).rejects.toThrow(
+      "db failed",
+    );
+
+    expect(deleteStorage).toHaveBeenCalledWith(screenshotKey);
+    expect(deleteStorage).toHaveBeenCalledWith(replayKey);
   });
 });

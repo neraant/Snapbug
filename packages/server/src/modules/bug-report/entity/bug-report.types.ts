@@ -7,6 +7,7 @@ export type BugReportPersistedType = {
   shortId: string;
   assignedTo: string | null;
   status: BugReportStatus;
+  boardOrder: number;
   severity: BugReportSeverity;
   title: string;
   description: string;
@@ -20,6 +21,7 @@ export type BugReportPersistedType = {
   viewportWidth: number | null;
   viewportHeight: number | null;
   screenshotKey: string | null;
+  replayKey: string | null;
   hasReplay: boolean;
   consoleLogs: unknown[] | null;
   networkLogs: unknown[] | null;
@@ -28,6 +30,30 @@ export type BugReportPersistedType = {
   updatedAt: Date;
   resolvedAt: Date | null;
 };
+
+export type UpdateBugReportType = Partial<
+  Pick<
+    BugReportPersistedType,
+    | "assignedTo"
+    | "status"
+    | "boardOrder"
+    | "severity"
+    | "title"
+    | "description"
+    | "stepsToReproduce"
+    | "reporterEmail"
+    | "url"
+    | "userAgent"
+    | "browser"
+    | "os"
+    | "device"
+    | "viewportWidth"
+    | "viewportHeight"
+    | "consoleLogs"
+    | "networkLogs"
+    | "customContext"
+  >
+>;
 
 export type CreateBugReportType = {
   id?: string;
@@ -43,6 +69,8 @@ export type CreateBugReportType = {
   viewportWidth?: number | null;
   viewportHeight?: number | null;
   screenshotKey?: string | null;
+  replayKey?: string | null;
+  severity?: BugReportSeverity;
   consoleLogs?: unknown[] | null;
   networkLogs?: unknown[] | null;
   reporterEmail?: string | null;
@@ -51,6 +79,11 @@ export type CreateBugReportType = {
 
 export type AssigneeOpenCountRow = {
   assignedTo: string | null;
+  count: number;
+};
+
+export type ProjectOpenCountRow = {
+  projectId: string;
   count: number;
 };
 

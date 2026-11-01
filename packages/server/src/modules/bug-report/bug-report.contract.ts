@@ -1,5 +1,8 @@
 import { oc } from "@orpc/contract";
+import { oz } from "@orpc/zod";
 import { sessionAuthSpec } from "@workspace/server/shared/openapi/session-auth.const";
+import { countOpenByAssigneeOutputDtoSchema } from "@workspace/validation/modules/bug-report/dto/count-open-by-assignee.schema";
+import { countOpenByProjectOutputDtoSchema } from "@workspace/validation/modules/bug-report/dto/count-open-by-project.schema";
 import {
   createBugReportInputDtoSchema,
   createBugReportOutputDtoSchema,
@@ -8,15 +11,24 @@ import {
   findBreakdownsInputDtoSchema,
   findBreakdownsOutputDtoSchema,
 } from "@workspace/validation/modules/bug-report/dto/find-breakdowns.schema";
-import { findBugReportsOutputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-bug-reports.schema";
+import {
+  findBugReportsInputDtoSchema,
+  findBugReportsOutputDtoSchema,
+} from "@workspace/validation/modules/bug-report/dto/find-bug-reports.schema";
 import {
   findChartsInputDtoSchema,
   findChartsOutputDtoSchema,
 } from "@workspace/validation/modules/bug-report/dto/find-charts.schema";
 import {
+  findOneInputDtoSchema,
+  findOneOutputDtoSchema,
+} from "@workspace/validation/modules/bug-report/dto/find-one.schema";
+import {
   findRecentInputDtoSchema,
   findRecentOutputDtoSchema,
 } from "@workspace/validation/modules/bug-report/dto/find-recent.schema";
+import { findReplayInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-replay.schema";
+import { findScreenshotInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-screenshot.schema";
 import {
   findStatsInputDtoSchema,
   findStatsOutputDtoSchema,
@@ -29,6 +41,10 @@ import {
   findWorkloadInputDtoSchema,
   findWorkloadOutputDtoSchema,
 } from "@workspace/validation/modules/bug-report/dto/find-workload.schema";
+import {
+  updateBugReportInputDtoSchema,
+  updateBugReportOutputDtoSchema,
+} from "@workspace/validation/modules/bug-report/dto/update-bug-report.schema";
 
 const bugReport = oc.$meta<{ mcp?: boolean }>({});
 
@@ -47,13 +63,56 @@ export const bugReportContract = {
       tags: ["bug-report"],
       summary: "Public widget configuration for SDK",
     }),
-  findMany: bugReport.output(findBugReportsOutputDtoSchema).route({
-    method: "GET",
-    path: "/bug-reports",
-    tags: ["bug-report"],
-    summary: "List bug reports",
-    spec: sessionAuthSpec,
-  }),
+  findMany: bugReport
+    .input(findBugReportsInputDtoSchema)
+    .output(findBugReportsOutputDtoSchema)
+    .route({
+      method: "GET",
+      path: "/bug-reports",
+      tags: ["bug-report"],
+      summary: "List bug reports",
+      spec: sessionAuthSpec,
+    }),
+  findOne: bugReport
+    .input(findOneInputDtoSchema)
+    .output(findOneOutputDtoSchema)
+    .route({
+      method: "GET",
+      path: "/bug-reports/by-short-id",
+      tags: ["bug-report"],
+      summary: "Find bug report by short id",
+      spec: sessionAuthSpec,
+    }),
+  findScreenshot: bugReport
+    .input(findScreenshotInputDtoSchema)
+    .output(oz.blob())
+    .route({
+      method: "GET",
+      path: "/bug-reports/screenshot",
+      tags: ["bug-report"],
+      summary: "Bug report screenshot",
+      spec: sessionAuthSpec,
+    }),
+  findReplay: bugReport
+    .input(findReplayInputDtoSchema)
+    .output(oz.blob())
+    .route({
+      method: "GET",
+      path: "/bug-reports/replay",
+      tags: ["bug-report"],
+      summary: "Bug report session replay",
+      spec: sessionAuthSpec,
+    }),
+  update: bugReport
+    .input(updateBugReportInputDtoSchema)
+    .output(updateBugReportOutputDtoSchema)
+    .route({
+      method: "PATCH",
+      path: "/bug-reports",
+      tags: ["bug-report"],
+      summary: "Update bug report",
+      spec: sessionAuthSpec,
+    }),
   findStats: bugReport
     .input(findStatsInputDtoSchema)
     .output(findStatsOutputDtoSchema)
@@ -104,4 +163,18 @@ export const bugReportContract = {
       summary: "Bug report team workload",
       spec: sessionAuthSpec,
     }),
+  countOpenByProject: bugReport.output(countOpenByProjectOutputDtoSchema).route({
+    method: "GET",
+    path: "/bug-reports/open-count-by-project",
+    tags: ["bug-report"],
+    summary: "Count open bug reports by project",
+    spec: sessionAuthSpec,
+  }),
+  countOpenByAssignee: bugReport.output(countOpenByAssigneeOutputDtoSchema).route({
+    method: "GET",
+    path: "/bug-reports/open-count-by-assignee",
+    tags: ["bug-report"],
+    summary: "Count open bug reports by assignee",
+    spec: sessionAuthSpec,
+  }),
 };

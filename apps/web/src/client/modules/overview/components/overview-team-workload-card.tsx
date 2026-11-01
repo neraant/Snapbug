@@ -1,5 +1,5 @@
 import { BarList } from "@workspace/design-system/components/ui/bar-list";
-import { MetricCard } from "@workspace/design-system/components/ui/metric-card";
+import { Panel } from "@workspace/design-system/components/ui/panel";
 import { cn } from "@workspace/design-system/lib/utils";
 
 import { texts } from "@/client/modules/overview/consts/texts.const";
@@ -15,15 +15,15 @@ export function OverviewTeamWorkloadCard({ projectId, className }: OverviewTeamW
   const { data: items } = useFindBugReportWorkload({ projectId: projectId ?? undefined });
 
   return (
-    <MetricCard className={cn(className)}>
-      <MetricCard.Header title={texts.activity.workload.title} description={texts.activity.workload.description} />
-      <MetricCard.Content>
+    <Panel className={cn(className)}>
+      <Panel.Header title={texts.activity.workload.title} description={texts.activity.workload.description} />
+      <Panel.Content>
         <BarList
           items={mapWorkloadToBarListItems(items, texts.activity.workload.formatOpenCount)}
           scale="max"
           emptyLabel={texts.activity.workload.empty}
         />
-      </MetricCard.Content>
-    </MetricCard>
+      </Panel.Content>
+    </Panel>
   );
 }

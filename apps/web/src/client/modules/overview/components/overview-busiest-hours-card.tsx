@@ -1,5 +1,5 @@
 import { Heatmap } from "@workspace/design-system/components/ui/heatmap";
-import { MetricCard } from "@workspace/design-system/components/ui/metric-card";
+import { Panel } from "@workspace/design-system/components/ui/panel";
 import { Skeleton } from "@workspace/design-system/components/ui/skeleton";
 import { cn } from "@workspace/design-system/lib/utils";
 
@@ -22,9 +22,9 @@ export function OverviewBusiestHoursCard({ filters, className }: OverviewBusiest
   const rows = mapChartHoursToHeatmapRows(charts.hours);
 
   return (
-    <MetricCard className={cn(className)}>
-      <MetricCard.Header title={texts.chart.busiestHours.title} description={texts.chart.busiestHours.description} />
-      <MetricCard.Content className="min-h-55">
+    <Panel className={cn(className)}>
+      <Panel.Header title={texts.chart.busiestHours.title} description={texts.chart.busiestHours.description} />
+      <Panel.Content className="min-h-55">
         <Heatmap
           rows={rows}
           columnLabelInterval={3}
@@ -38,8 +38,8 @@ export function OverviewBusiestHoursCard({ filters, className }: OverviewBusiest
           legendFewerLabel={texts.chart.busiestHours.legendFewer}
           legendMoreLabel={texts.chart.busiestHours.legendMore}
         />
-      </MetricCard.Content>
-    </MetricCard>
+      </Panel.Content>
+    </Panel>
   );
 }
 

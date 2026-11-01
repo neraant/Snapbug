@@ -1,0 +1,1 @@
+ALTER TABLE "bug_reports" ADD COLUMN "replay_key" text;

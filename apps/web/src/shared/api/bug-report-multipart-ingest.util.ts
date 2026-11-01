@@ -1,8 +1,13 @@
 import { container } from "@workspace/server/container";
 import type { CreateBugReportScreenshotInput } from "@workspace/server/modules/bug-report/application/create-bug-report.use-case";
+import type { CreateBugReportReplayInput } from "@workspace/server/modules/bug-report/application/create-bug-report.use-case";
 import { AppError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import type { OrpcContext } from "@workspace/server/shared/orpc/context.const";
+import {
+  BUG_REPORT_REPLAY_ALLOWED_MIME_TYPES,
+  BUG_REPORT_REPLAY_MAX_BYTES,
+} from "@workspace/validation/modules/bug-report/consts/bug-report-replay.const";
 import {
   BUG_REPORT_SCREENSHOT_ALLOWED_MIME_TYPES,
   BUG_REPORT_SCREENSHOT_MAX_BYTES,
@@ -14,6 +19,7 @@ import {
   bugReportNetworkLogEntrySchema,
 } from "@workspace/validation/modules/bug-report/dto/bug-report-log-entry.schema";
 import {
+  BUG_REPORT_REPLAY_FORM_FIELD,
   BUG_REPORT_SCREENSHOT_FORM_FIELD,
   bugReportCustomContextInputSchema,
   createBugReportInputDtoSchema,
@@ -107,14 +113,40 @@ async function parseScreenshot(file: File): Promise<CreateBugReportScreenshotInp
   return { data: new Uint8Array(await file.arrayBuffer()), mimeType };
 }
 
+async function parseReplay(file: File): Promise<CreateBugReportReplayInput> {
+  if (file.size > BUG_REPORT_REPLAY_MAX_BYTES) {
+    throw new AppError(
+      "BAD_REQUEST",
+      ERROR_CODES.REPLAY_TOO_LARGE,
+      `Replay must be at most ${BUG_REPORT_REPLAY_MAX_BYTES} bytes`,
+    );
+  }
+
+  const mimeType = file.type.trim().length > 0 ? file.type : "application/gzip";
+  if (
+    !BUG_REPORT_REPLAY_ALLOWED_MIME_TYPES.includes(mimeType as (typeof BUG_REPORT_REPLAY_ALLOWED_MIME_TYPES)[number])
+  ) {
+    throw new AppError("BAD_REQUEST", ERROR_CODES.INVALID_REPLAY, "Replay must be gzip or JSON");
+  }
+
+  return { data: new Uint8Array(await file.arrayBuffer()), mimeType };
+}
+
 async function buildInput(formData: FormData): Promise<{
   input: CreateBugReportInputDtoType;
   screenshot?: CreateBugReportScreenshotInput;
+  replay?: CreateBugReportReplayInput;
 }> {
   const screenshotFile = formData.get(BUG_REPORT_SCREENSHOT_FORM_FIELD);
   let screenshot: CreateBugReportScreenshotInput | undefined;
   if (screenshotFile instanceof File && screenshotFile.size > 0) {
     screenshot = await parseScreenshot(screenshotFile);
+  }
+
+  const replayFile = formData.get(BUG_REPORT_REPLAY_FORM_FIELD);
+  let replay: CreateBugReportReplayInput | undefined;
+  if (replayFile instanceof File && replayFile.size > 0) {
+    replay = await parseReplay(replayFile);
   }
 
   const fields = createBugReportMultipartFieldsSchema.parse({
@@ -129,6 +161,7 @@ async function buildInput(formData: FormData): Promise<{
     networkLogsJson: formData.get("networkLogs") ?? undefined,
     reporterEmail: formData.get("reporterEmail") ?? undefined,
     customContextJson: formData.get("customContext") ?? undefined,
+    severity: formData.get("severity") ?? undefined,
   });
 
   const consoleLogs = parseOptionalLogJson(
@@ -155,20 +188,22 @@ async function buildInput(formData: FormData): Promise<{
     customContext,
     consoleLogs,
     networkLogs,
+    severity: fields.severity,
   });
 
-  return { input, screenshot };
+  return { input, screenshot, replay };
 }
 
 export async function ingestBugReportMultipart(request: Request, context: OrpcContext): Promise<Response> {
   try {
     const formData = await request.formData();
-    const { input, screenshot } = await buildInput(formData);
+    const { input, screenshot, replay } = await buildInput(formData);
     const result = await container.bugReport.createBugReport.execute(
       input,
       context.actor,
       context.requestOrigin,
       screenshot,
+      replay,
     );
     return Response.json(result);
   } catch (error) {

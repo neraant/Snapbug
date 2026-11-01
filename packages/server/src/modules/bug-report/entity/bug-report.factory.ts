@@ -7,13 +7,15 @@ import { randomUUID } from "crypto";
 export abstract class BugReportFactory {
   static create(bugReport: CreateBugReportType): BugReport {
     const now = new Date();
+    const replayKey = bugReport.replayKey ?? null;
     return new BugReport({
       id: bugReport.id ?? randomUUID(),
       projectId: bugReport.projectId,
       shortId: bugReport.shortId,
       assignedTo: null,
       status: BugReportStatus.NEW,
-      severity: BugReportSeverity.MEDIUM,
+      boardOrder: 0,
+      severity: bugReport.severity ?? BugReportSeverity.MEDIUM,
       title: bugReport.title,
       description: bugReport.description,
       stepsToReproduce: null,
@@ -26,7 +28,8 @@ export abstract class BugReportFactory {
       viewportWidth: bugReport.viewportWidth ?? null,
       viewportHeight: bugReport.viewportHeight ?? null,
       screenshotKey: bugReport.screenshotKey ?? null,
-      hasReplay: false,
+      replayKey,
+      hasReplay: replayKey !== null,
       consoleLogs: bugReport.consoleLogs ?? null,
       networkLogs: bugReport.networkLogs ?? null,
       customContext: bugReport.customContext ?? null,
