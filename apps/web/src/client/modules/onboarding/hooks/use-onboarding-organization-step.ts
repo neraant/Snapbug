@@ -10,7 +10,7 @@ import {
 } from "@/client/modules/onboarding/schemas/onboarding-organization.schema";
 import type { OnboardingWorkspace } from "@/client/modules/onboarding/types/onboarding-workspace.type";
 import { useCreateOrganization } from "@/client/modules/shared/queries/use-create-organization";
-import { useUpdateOrganization } from "@/client/modules/shared/queries/use-update-organization";
+import { useUpdateOnboardingOrganization } from "@/client/modules/shared/queries/use-update-onboarding-organization";
 import { selectActiveOrganization } from "@/shared/organization/select-active-organization";
 
 type UseOnboardingOrganizationStepInput = {
@@ -18,6 +18,7 @@ type UseOnboardingOrganizationStepInput = {
   suggestedOrganizationName: string;
   workspace: OnboardingWorkspace | null;
   onSaved: (workspace: OnboardingWorkspace) => void;
+  onSkipOnboarding: (organizationName?: string) => void;
 };
 
 export function useOnboardingOrganizationStep({
@@ -25,9 +26,10 @@ export function useOnboardingOrganizationStep({
   suggestedOrganizationName,
   workspace,
   onSaved,
+  onSkipOnboarding,
 }: UseOnboardingOrganizationStepInput) {
   const { mutateAsync: createOrganization, isPending: isCreating } = useCreateOrganization();
-  const { mutateAsync: updateOrganization, isPending: isUpdating } = useUpdateOrganization();
+  const { mutateAsync: updateOnboardingOrganization, isPending: isUpdating } = useUpdateOnboardingOrganization();
   const { control, handleSubmit, formState, getValues } = useForm<OnboardingOrganizationSchemaType>({
     resolver: zodResolver(onboardingOrganizationSchema),
     defaultValues: { name: initialName },
@@ -36,10 +38,11 @@ export function useOnboardingOrganizationStep({
   const onSubmit = handleSubmit(async (values) => {
     try {
       if (workspace) {
-        const organization = await updateOrganization({
+        const organization = await updateOnboardingOrganization({
           organizationId: workspace.organizationId,
           name: values.name,
         });
+        await selectActiveOrganization(workspace.organizationId);
 
         onSaved({
           ...workspace,
@@ -66,10 +69,33 @@ export function useOnboardingOrganizationStep({
     }
   });
 
+  const onSkip = () => {
+    const name = getValues("name").trim();
+    const run = async () => {
+      if (workspace) {
+        if (name) {
+          await updateOnboardingOrganization({ organizationId: workspace.organizationId, name });
+        }
+        await selectActiveOrganization(workspace.organizationId);
+        onSkipOnboarding();
+        return;
+      }
+
+      onSkipOnboarding(name);
+    };
+
+    run().catch((error: unknown) => {
+      toast.add({
+        title: getAppErrorMessage(error, texts.organization.toast.error),
+        type: "error",
+      });
+    });
+  };
+
   return {
     control,
     onSubmit,
-    skip: () => getValues("name"),
+    onSkip,
     loading: formState.isSubmitting || isCreating || isUpdating,
   };
 }

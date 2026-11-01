@@ -54,6 +54,7 @@ describe("CompleteOnboardingUseCase", () => {
       withTx: vi.fn().mockReturnValue(userInTx),
     };
     const membershipPort = {
+      findManyByUser: vi.fn().mockResolvedValue([]),
       withTx: vi.fn().mockReturnValue(membershipInTx),
     };
     const projectPort = { withTx: vi.fn().mockReturnValue(projectInTx) };
@@ -121,5 +122,46 @@ describe("CompleteOnboardingUseCase", () => {
       userId,
     );
     expect(userInTx.markOnboardingComplete).toHaveBeenCalledWith(userId);
+  });
+
+  it("marks onboarding complete without creating a workspace when the user already belongs to an organization", async () => {
+    const organizationRepository = { save: vi.fn() };
+    const membershipInTx = {
+      create: vi.fn(),
+      findByUserAndOrganization: vi.fn().mockResolvedValue({ organizationId }),
+    };
+    const projectInTx = {
+      create: vi.fn(),
+      findManyByOrganizationId: vi.fn().mockResolvedValue([{ id: snapshot.projectId }]),
+    };
+    const userInTx = { markOnboardingComplete: vi.fn().mockResolvedValue(undefined) };
+    const userPort = {
+      findOnboardingState: vi.fn().mockResolvedValue({ onboardingCompletedAt: null }),
+      withTx: vi.fn().mockReturnValue(userInTx),
+    };
+    const membershipPort = {
+      findManyByUser: vi.fn().mockResolvedValue([{ organizationId }]),
+      withTx: vi.fn().mockReturnValue(membershipInTx),
+    };
+    const projectPort = { withTx: vi.fn().mockReturnValue(projectInTx) };
+    const repository = { withTx: vi.fn().mockReturnValue(organizationRepository) };
+    const findOnboarding = { execute: vi.fn().mockResolvedValue(snapshot) };
+    const withTransaction = vi.fn(async (callback) => await callback(tx));
+    const useCase = new CompleteOnboardingUseCase(
+      userPort as unknown as UserPort,
+      membershipPort as unknown as MembershipPort,
+      repository as unknown as OrganizationRepository,
+      projectPort as unknown as ProjectPort,
+      findOnboarding as unknown as FindOnboardingUseCase,
+      withTransaction as unknown as WithTransactionType,
+    );
+
+    await useCase.execute({ organizationName: "Personal" }, userId, null);
+
+    expect(organizationRepository.save).not.toHaveBeenCalled();
+    expect(membershipInTx.create).not.toHaveBeenCalled();
+    expect(projectInTx.create).not.toHaveBeenCalled();
+    expect(userInTx.markOnboardingComplete).toHaveBeenCalledWith(userId);
+    expect(findOnboarding.execute).toHaveBeenCalledWith(userId, organizationId);
   });
 });

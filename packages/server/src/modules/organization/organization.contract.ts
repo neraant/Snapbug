@@ -11,6 +11,10 @@ import {
 import { findOnboardingOutputDtoSchema } from "@workspace/validation/modules/organization/dto/find-onboarding.schema";
 import { findOrganizationsOutputDtoSchema } from "@workspace/validation/modules/organization/dto/find-organizations.schema";
 import { organizationModelSchema } from "@workspace/validation/modules/organization/dto/organization.model";
+import {
+  updateOnboardingOrganizationInputDtoSchema,
+  updateOnboardingOrganizationOutputDtoSchema,
+} from "@workspace/validation/modules/organization/dto/update-onboarding-organization.schema";
 import { updateOrganizationInputDtoSchema } from "@workspace/validation/modules/organization/dto/update-organization.schema";
 
 export const organizationContract = {
@@ -41,6 +45,16 @@ export const organizationContract = {
     summary: "List organizations for the current user",
     spec: sessionAuthSpec,
   }),
+  updateOnboardingOrganization: oc
+    .input(updateOnboardingOrganizationInputDtoSchema)
+    .output(updateOnboardingOrganizationOutputDtoSchema)
+    .route({
+      method: "PATCH",
+      path: "/organizations/onboarding",
+      tags: ["organization"],
+      summary: "Rename the joined organization during onboarding",
+      spec: sessionAuthSpec,
+    }),
   findOnboarding: oc.output(findOnboardingOutputDtoSchema).route({
     method: "GET",
     path: "/organizations/onboarding",

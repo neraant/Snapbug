@@ -1,10 +1,11 @@
 import { OrganizationMapper } from "@workspace/server/modules/organization/entity/organization.mapper";
 import type { MembershipPort } from "@workspace/server/modules/organization/port/membership.port";
 import type { OrganizationRepository } from "@workspace/server/modules/organization/repository/organization.repository";
-import { NotFoundError } from "@workspace/server/shared/error/app-errors";
+import { ForbiddenError, NotFoundError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import type { OrganizationModelType } from "@workspace/validation/modules/organization/dto/organization.model";
 import type { UpdateOrganizationInputDtoType } from "@workspace/validation/modules/organization/dto/update-organization.schema";
+import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
 
 export class UpdateOrganizationUseCase {
   constructor(
@@ -18,6 +19,9 @@ export class UpdateOrganizationUseCase {
       organizationId: input.organizationId,
     });
     if (!membership) throw new NotFoundError(ERROR_CODES.ORGANIZATION_NOT_FOUND);
+    if (membership.role !== UserRole.ADMIN) {
+      throw new ForbiddenError(ERROR_CODES.ADMIN_REQUIRED, "Administrator access is required");
+    }
 
     const organization = await this.organizationRepository.findById(input.organizationId);
     if (!organization) throw new NotFoundError(ERROR_CODES.ORGANIZATION_NOT_FOUND);

@@ -13,6 +13,10 @@ import {
   findMembershipProjectAccessInputDtoSchema,
   findMembershipProjectAccessOutputDtoSchema,
 } from "@workspace/validation/modules/membership/dto/find-membership-project-access.schema";
+import {
+  findProjectMembersInputDtoSchema,
+  findProjectMembersOutputDtoSchema,
+} from "@workspace/validation/modules/membership/dto/find-project-members.schema";
 import { findTeamMembersOutputDtoSchema } from "@workspace/validation/modules/membership/dto/find-team-members.schema";
 import {
   removeMembershipInputDtoSchema,
@@ -62,6 +66,16 @@ export const membershipContract = {
     summary: "List team members",
     spec: sessionAuthSpec,
   }),
+  findProjectMembers: oc
+    .input(findProjectMembersInputDtoSchema)
+    .output(findProjectMembersOutputDtoSchema)
+    .route({
+      method: "GET",
+      path: "/project-members",
+      tags: ["membership"],
+      summary: "List people who can access a project",
+      spec: sessionAuthSpec,
+    }),
   updateMembershipRole: oc
     .input(updateMembershipRoleInputDtoSchema)
     .output(updateMembershipRoleOutputDtoSchema)

@@ -31,6 +31,7 @@ import {
 } from "@workspace/validation/modules/organization/dto/create-organization.schema";
 import { findOnboardingOutputDtoSchema } from "@workspace/validation/modules/organization/dto/find-onboarding.schema";
 import { organizationModelSchema } from "@workspace/validation/modules/organization/dto/organization.model";
+import { updateOnboardingOrganizationInputDtoSchema } from "@workspace/validation/modules/organization/dto/update-onboarding-organization.schema";
 import { updateOrganizationInputDtoSchema } from "@workspace/validation/modules/organization/dto/update-organization.schema";
 import { createProjectInputDtoSchema } from "@workspace/validation/modules/project/dto/create-project.schema";
 import { findProjectsOutputDtoSchema } from "@workspace/validation/modules/project/dto/find-projects.schema";
@@ -234,6 +235,12 @@ JSON_SCHEMA_REGISTRY.add(createMembershipInputDtoSchema, {
 JSON_SCHEMA_REGISTRY.add(updateOrganizationInputDtoSchema, {
   title: "Update organization",
   description: "Update organization settings",
+  examples: [{ organizationId: "2a8c69a1-1ab1-45a8-8497-eae1e506d9d1", name: "Acme" }],
+});
+
+JSON_SCHEMA_REGISTRY.add(updateOnboardingOrganizationInputDtoSchema, {
+  title: "Update organization during onboarding",
+  description: "Rename an organization the current user belongs to before onboarding is complete",
   examples: [{ organizationId: "2a8c69a1-1ab1-45a8-8497-eae1e506d9d1", name: "Acme" }],
 });
 

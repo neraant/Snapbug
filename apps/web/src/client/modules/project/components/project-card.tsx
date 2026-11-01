@@ -65,7 +65,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
       </Card.Content>
       <Separator />
       <Card.Content padding="md">
-        <ProjectCardMember />
+        <ProjectCardMember projectId={project.id} />
       </Card.Content>
     </Card>
   );

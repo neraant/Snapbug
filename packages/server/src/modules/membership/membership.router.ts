@@ -24,6 +24,10 @@ export const membershipRouter = os.router({
   findTeamMembers: admin.findTeamMembers.handler(
     async ({ context }) => await container.membership.findTeamMembers.execute(context.user.id, context.organizationId),
   ),
+  findProjectMembers: authed.findProjectMembers.handler(
+    async ({ input, context }) =>
+      await container.membership.findProjectMembers.execute(input, context.user.id, context.organizationId),
+  ),
   updateMembershipRole: admin.updateMembershipRole.handler(
     async ({ input, context }) =>
       await container.membership.updateMembershipRole.execute(input, context.user.id, context.organizationId),

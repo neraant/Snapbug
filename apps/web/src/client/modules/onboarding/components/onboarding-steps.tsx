@@ -29,7 +29,9 @@ export function OnboardingSteps() {
           suggestedOrganizationName={snapshot.suggestedOrganizationName}
           workspace={workspace}
           onSaved={onOrganizationSaved}
-          onSkipOnboarding={(organizationName) => void leaveOnboarding({ organizationName })}
+          onSkipOnboarding={(organizationName) => {
+            leaveOnboarding(organizationName ? { organizationName } : {}).catch(() => undefined);
+          }}
           skipLoading={isCompleting}
         />
       ) : null}

@@ -16,6 +16,10 @@ export const texts = {
   organization: {
     title: "Name your organization",
     description: "Projects, triage feeds, and settings live here. You can rename this anytime.",
+    joined: {
+      title: "Your organization",
+      description: "You joined this organization. Update its name before you finish setup.",
+    },
     field: {
       label: "Organization name",
       placeholder: "Acme Labs",

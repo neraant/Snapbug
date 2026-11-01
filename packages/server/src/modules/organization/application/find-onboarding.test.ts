@@ -35,7 +35,7 @@ describe("FindOnboardingUseCase", () => {
         suggestedOrganizationName,
       }),
     };
-    const membershipPort = { findByUserAndOrganization: vi.fn() };
+    const membershipPort = { findManyByUser: vi.fn().mockResolvedValue([]), findByUserAndOrganization: vi.fn() };
     const organizationRepository = { findById: vi.fn() };
     const projectPort = { findManyByOrganizationId: vi.fn() };
     const useCase = new FindOnboardingUseCase(
@@ -55,9 +55,44 @@ describe("FindOnboardingUseCase", () => {
       projectId: null,
       projectName: null,
     });
+    expect(membershipPort.findManyByUser).toHaveBeenCalledWith(userId);
     expect(membershipPort.findByUserAndOrganization).not.toHaveBeenCalled();
     expect(organizationRepository.findById).not.toHaveBeenCalled();
     expect(projectPort.findManyByOrganizationId).not.toHaveBeenCalled();
+  });
+
+  it("returns the joined organization when no active organization is selected", async () => {
+    const userPort = {
+      findOnboardingState: vi.fn().mockResolvedValue({
+        onboardingCompletedAt: null,
+        suggestedOrganizationName,
+      }),
+    };
+    const membershipPort = {
+      findManyByUser: vi.fn().mockResolvedValue([{ ...membership, role: UserRole.USER }]),
+      findByUserAndOrganization: vi.fn(),
+    };
+    const organizationRepository = { findById: vi.fn().mockResolvedValue(organization) };
+    const projectPort = { findManyByOrganizationId: vi.fn().mockResolvedValue([]) };
+    const useCase = new FindOnboardingUseCase(
+      userPort as unknown as UserPort,
+      membershipPort as unknown as MembershipPort,
+      organizationRepository as unknown as OrganizationRepository,
+      projectPort as unknown as ProjectPort,
+    );
+
+    const result = await useCase.execute(userId, null);
+
+    expect(membershipPort.findByUserAndOrganization).not.toHaveBeenCalled();
+    expect(organizationRepository.findById).toHaveBeenCalledWith(organizationId);
+    expect(result).toEqual({
+      completedAt: null,
+      suggestedOrganizationName,
+      organizationId,
+      organizationName: "Acme",
+      projectId: null,
+      projectName: null,
+    });
   });
 
   it("returns the organization with null project fields when there is no project", async () => {

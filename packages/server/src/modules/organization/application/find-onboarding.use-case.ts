@@ -15,9 +15,7 @@ export class FindOnboardingUseCase {
 
   async execute(userId: string, organizationId: string | null): Promise<FindOnboardingOutputDtoType> {
     const { onboardingCompletedAt, suggestedOrganizationName } = await this.userPort.findOnboardingState(userId);
-    const membership = organizationId
-      ? await this.membershipPort.findByUserAndOrganization({ userId, organizationId })
-      : null;
+    const membership = await this.resolveMembership(userId, organizationId);
 
     if (!membership) {
       return OrganizationMapper.toFindOnboardingOutput({
@@ -49,5 +47,14 @@ export class FindOnboardingUseCase {
       organization,
       project: project ?? null,
     });
+  }
+
+  private async resolveMembership(userId: string, organizationId: string | null) {
+    if (organizationId) {
+      return await this.membershipPort.findByUserAndOrganization({ userId, organizationId });
+    }
+
+    const memberships = await this.membershipPort.findManyByUser(userId);
+    return memberships[0] ?? null;
   }
 }

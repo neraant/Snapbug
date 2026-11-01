@@ -35,6 +35,10 @@ export class CompleteOnboardingUseCase {
     }
 
     let resolvedOrganizationId = organizationId;
+    if (!resolvedOrganizationId) {
+      const memberships = await this.membershipPort.findManyByUser(userId);
+      resolvedOrganizationId = memberships[0]?.organizationId ?? null;
+    }
 
     await this.withTransaction(async (tx) => {
       const organizationRepository = this.organizationRepository.withTx(tx);

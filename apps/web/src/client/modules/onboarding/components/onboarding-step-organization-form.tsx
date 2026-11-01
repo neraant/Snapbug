@@ -13,7 +13,7 @@ type OnboardingStepOrganizationFormProps = {
   suggestedOrganizationName: string;
   workspace: OnboardingWorkspace | null;
   onSaved: (workspace: OnboardingWorkspace) => void;
-  onSkipOnboarding: (organizationName: string) => void;
+  onSkipOnboarding: (organizationName?: string) => void;
   skipLoading?: boolean;
 };
 
@@ -25,19 +25,22 @@ export function OnboardingStepOrganizationForm({
   onSkipOnboarding,
   skipLoading = false,
 }: OnboardingStepOrganizationFormProps) {
-  const { control, onSubmit, skip, loading } = useOnboardingOrganizationStep({
+  const { control, onSubmit, onSkip, loading } = useOnboardingOrganizationStep({
     initialName,
     suggestedOrganizationName,
     workspace,
     onSaved,
+    onSkipOnboarding,
   });
+  const heading = workspace ? texts.organization.joined.title : texts.organization.title;
+  const description = workspace ? texts.organization.joined.description : texts.organization.description;
 
   return (
     <Column as="form" width="full" gap="lg" onSubmit={onSubmit}>
       <Column width="full" gap="xs">
-        <Typography variant="heading-md">{texts.organization.title}</Typography>
+        <Typography variant="heading-md">{heading}</Typography>
         <Typography variant="text-sm" color="muted">
-          {texts.organization.description}
+          {description}
         </Typography>
       </Column>
       <FieldGroup>
@@ -49,10 +52,12 @@ export function OnboardingStepOrganizationForm({
           placeholder={texts.organization.field.placeholder}
           autoComplete="organization"
         />
-        <Typography variant="text-xs" color="muted">
-          {texts.organization.field.hint}
-        </Typography>
-        <OnboardingStepActions loading={loading || skipLoading} onSkip={() => onSkipOnboarding(skip())} />
+        {workspace ? null : (
+          <Typography variant="text-xs" color="muted">
+            {texts.organization.field.hint}
+          </Typography>
+        )}
+        <OnboardingStepActions loading={loading || skipLoading} onSkip={onSkip} />
       </FieldGroup>
     </Column>
   );

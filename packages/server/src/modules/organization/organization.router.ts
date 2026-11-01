@@ -18,6 +18,10 @@ export const organizationRouter = os.router({
   findOrganizations: authed.findOrganizations.handler(
     async ({ context }) => await container.organization.findOrganizations.execute(context.user.id),
   ),
+  updateOnboardingOrganization: authed.updateOnboardingOrganization.handler(
+    async ({ input, context }) =>
+      await container.organization.updateOnboardingOrganization.execute(input, context.user.id),
+  ),
   findOnboarding: authed.findOnboarding.handler(
     async ({ context }) => await container.organization.findOnboarding.execute(context.user.id, context.organizationId),
   ),

@@ -14,7 +14,7 @@ export function useOnboardingFlow() {
   const { data: snapshot } = useFindOnboarding();
   const { mutateAsync: completeOnboarding, isPending: isCompleting } = useCompleteOnboarding();
   const [createdWorkspace, setCreatedWorkspace] = useState<OnboardingWorkspace | null>(null);
-  const [step, setStep] = useState(() => resolveInitialOnboardingStep(snapshot));
+  const [step, setStep] = useState(() => resolveInitialOnboardingStep());
 
   const workspace = createdWorkspace ?? toOnboardingWorkspace(snapshot);
 

@@ -46,6 +46,7 @@ import { FindMembershipUseCase } from "@workspace/server/modules/membership/appl
 import { FindMembershipByUserUseCase } from "@workspace/server/modules/membership/application/find-membership-by-user.use-case";
 import { FindMembershipProjectAccessUseCase } from "@workspace/server/modules/membership/application/find-membership-project-access.use-case";
 import { FindMembershipsByUserUseCase } from "@workspace/server/modules/membership/application/find-memberships-by-user.use-case";
+import { FindProjectMembersUseCase } from "@workspace/server/modules/membership/application/find-project-members.use-case";
 import { FindTeamMembersUseCase } from "@workspace/server/modules/membership/application/find-team-members.use-case";
 import { RemoveMembershipUseCase } from "@workspace/server/modules/membership/application/remove-membership.use-case";
 import { ReplaceMembershipProjectAccessUseCase } from "@workspace/server/modules/membership/application/replace-membership-project-access.use-case";
@@ -58,6 +59,7 @@ import { CompleteOnboardingUseCase } from "@workspace/server/modules/organizatio
 import { CreateOrganizationUseCase } from "@workspace/server/modules/organization/application/create-organization.use-case";
 import { FindOnboardingUseCase } from "@workspace/server/modules/organization/application/find-onboarding.use-case";
 import { FindOrganizationsUseCase } from "@workspace/server/modules/organization/application/find-organizations.use-case";
+import { UpdateOnboardingOrganizationUseCase } from "@workspace/server/modules/organization/application/update-onboarding-organization.use-case";
 import { UpdateOrganizationUseCase } from "@workspace/server/modules/organization/application/update-organization.use-case";
 import { OrganizationRepository } from "@workspace/server/modules/organization/repository/organization.repository";
 import { ProjectAdapter } from "@workspace/server/modules/project/adapter/project.adapter";
@@ -113,6 +115,12 @@ const findMembership = new FindMembershipUseCase(membershipRepository);
 const findMembershipByUser = new FindMembershipByUserUseCase(membershipRepository);
 const findMembershipsByUser = new FindMembershipsByUserUseCase(membershipRepository);
 const findTeamMembers = new FindTeamMembersUseCase(membershipRepository, userAdapter);
+const findProjectMembers = new FindProjectMembersUseCase(
+  membershipRepository,
+  projectAccessRepository,
+  projectAdapter,
+  userAdapter,
+);
 const updateMembershipRole = new UpdateMembershipRoleUseCase(membershipRepository);
 const removeMembership = new RemoveMembershipUseCase(membershipRepository);
 const findMembershipProjectAccess = new FindMembershipProjectAccessUseCase(
@@ -152,6 +160,11 @@ const findOnboarding = new FindOnboardingUseCase(
 );
 const createOrganization = new CreateOrganizationUseCase(organizationRepository, membershipAdapter, projectAdapter);
 const updateOrganization = new UpdateOrganizationUseCase(membershipAdapter, organizationRepository);
+const updateOnboardingOrganization = new UpdateOnboardingOrganizationUseCase(
+  userAdapter,
+  membershipAdapter,
+  organizationRepository,
+);
 const completeOnboarding = new CompleteOnboardingUseCase(
   userAdapter,
   membershipAdapter,
@@ -243,6 +256,7 @@ export const container = {
     findMembershipByUser,
     findMembershipsByUser,
     findTeamMembers,
+    findProjectMembers,
     updateMembershipRole,
     removeMembership,
     findMembershipProjectAccess,
@@ -250,7 +264,14 @@ export const container = {
   },
   identity: { createUser, findUserByEmail, findUserCredentialsByEmail },
   project: { createProject, findProjects, updateProject, findProjectWidgetSetting, updateProjectWidgetSetting },
-  organization: { findOnboarding, findOrganizations, createOrganization, updateOrganization, completeOnboarding },
+  organization: {
+    findOnboarding,
+    findOrganizations,
+    createOrganization,
+    updateOrganization,
+    updateOnboardingOrganization,
+    completeOnboarding,
+  },
   apiKey: { findProjectByKey, findProjectApiKey },
   auth: { signUp, verifyCredentials, requestResetPassword, resetPassword },
   invitation: { sendInvitations, findInvitationByToken, acceptInvitation },

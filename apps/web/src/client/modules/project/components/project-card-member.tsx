@@ -3,10 +3,14 @@ import { Avatar, AvatarFallback, AvatarGroup, AvatarGroupCount } from "@workspac
 import { texts } from "@/client/modules/project/consts/texts.const";
 import { getProjectMemberInitials } from "@/client/modules/project/utils/get-project-member-initials.util";
 import { splitProjectCardMembers } from "@/client/modules/project/utils/split-project-card-members.util";
-import { useFindTeamMembers } from "@/client/modules/shared/queries/use-find-team-members";
+import { useFindProjectMembers } from "@/client/modules/shared/queries/use-find-project-members";
 
-export function ProjectCardMember() {
-  const { data: members } = useFindTeamMembers();
+type ProjectCardMemberProps = {
+  projectId: string;
+};
+
+export function ProjectCardMember({ projectId }: ProjectCardMemberProps) {
+  const { data: members } = useFindProjectMembers(projectId);
   const { visible, overflow } = splitProjectCardMembers(members);
 
   if (visible.length === 0) {
