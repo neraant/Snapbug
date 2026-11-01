@@ -21,11 +21,17 @@ export class FindWorkloadUseCase {
     private readonly bugReportRepository: BugReportRepository,
   ) {}
 
-  async execute(input: FindWorkloadInputDtoType, userId: string): Promise<FindWorkloadOutputDtoType> {
-    const membership = await this.membershipPort.findByUser(userId);
+  async execute(
+    input: FindWorkloadInputDtoType,
+    userId: string,
+    organizationId: string | null,
+  ): Promise<FindWorkloadOutputDtoType> {
+    if (!organizationId) throw new NotFoundError(ERROR_CODES.ORGANIZATION_NOT_FOUND);
+
+    const membership = await this.membershipPort.findByUserAndOrganization({ userId, organizationId });
     if (!membership) throw new NotFoundError(ERROR_CODES.ORGANIZATION_NOT_FOUND);
 
-    const projects = await this.resolveProjects(input, membership.organizationId);
+    const projects = await this.resolveProjects(input, membership);
     const members = await this.membershipPort.findManyByOrganizationId(membership.organizationId);
     const users = await this.findUsers(members);
     const openCountByAssignee = await this.openCountByAssignee(projects);
@@ -33,16 +39,28 @@ export class FindWorkloadUseCase {
     return BugReportMapper.toWorkloadOutput(users, openCountByAssignee);
   }
 
-  private async resolveProjects(input: FindWorkloadInputDtoType, organizationId: string): Promise<ProjectModelType[]> {
+  private async resolveProjects(
+    input: FindWorkloadInputDtoType,
+    membership: MembershipModelType,
+  ): Promise<ProjectModelType[]> {
     if (input.projectId) {
       const project = await this.projectPort.findById(input.projectId);
-      if (!project || project.organizationId !== organizationId) {
+      if (!project || project.organizationId !== membership.organizationId) {
         throw new NotFoundError(ERROR_CODES.PROJECT_NOT_FOUND);
       }
+      const allowedProjectIds = await this.membershipPort.filterProjectIds(membership, [project.id]);
+      if (allowedProjectIds.length === 0) throw new NotFoundError(ERROR_CODES.PROJECT_NOT_FOUND);
       return [project];
     }
 
-    return await this.projectPort.findManyByOrganizationId({ organizationId });
+    const projects = await this.projectPort.findManyByOrganizationId({ organizationId: membership.organizationId });
+    const allowedProjectIds = new Set(
+      await this.membershipPort.filterProjectIds(
+        membership,
+        projects.map((project) => project.id),
+      ),
+    );
+    return projects.filter((project) => allowedProjectIds.has(project.id));
   }
 
   private async findUsers(members: MembershipModelType[]): Promise<UserModelType[]> {

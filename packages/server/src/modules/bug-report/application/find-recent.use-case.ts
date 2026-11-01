@@ -10,6 +10,7 @@ import type {
   FindRecentInputDtoType,
   FindRecentOutputDtoType,
 } from "@workspace/validation/modules/bug-report/dto/find-recent.schema";
+import type { MembershipModelType } from "@workspace/validation/modules/membership/dto/membership.model";
 import type { ProjectModelType } from "@workspace/validation/modules/project/dto/project.model";
 import type { UserModelType } from "@workspace/validation/modules/user/dto/user.model";
 
@@ -23,11 +24,17 @@ export class FindRecentUseCase {
     private readonly bugReportRepository: BugReportRepository,
   ) {}
 
-  async execute(input: FindRecentInputDtoType, userId: string): Promise<FindRecentOutputDtoType> {
-    const membership = await this.membershipPort.findByUser(userId);
+  async execute(
+    input: FindRecentInputDtoType,
+    userId: string,
+    organizationId: string | null,
+  ): Promise<FindRecentOutputDtoType> {
+    if (!organizationId) throw new NotFoundError(ERROR_CODES.ORGANIZATION_NOT_FOUND);
+
+    const membership = await this.membershipPort.findByUserAndOrganization({ userId, organizationId });
     if (!membership) throw new NotFoundError(ERROR_CODES.ORGANIZATION_NOT_FOUND);
 
-    const projects = await this.resolveProjects(input, membership.organizationId);
+    const projects = await this.resolveProjects(input, membership);
     if (projects.length === 0) return [];
 
     const bugReports = await this.bugReportRepository.findRecentByProjectIds(
@@ -43,16 +50,28 @@ export class FindRecentUseCase {
     return BugReportMapper.toRecentOutput(recentBugReports, projectNameById, userById);
   }
 
-  private async resolveProjects(input: FindRecentInputDtoType, organizationId: string): Promise<ProjectModelType[]> {
+  private async resolveProjects(
+    input: FindRecentInputDtoType,
+    membership: MembershipModelType,
+  ): Promise<ProjectModelType[]> {
     if (input.projectId) {
       const project = await this.projectPort.findById(input.projectId);
-      if (!project || project.organizationId !== organizationId) {
+      if (!project || project.organizationId !== membership.organizationId) {
         throw new NotFoundError(ERROR_CODES.PROJECT_NOT_FOUND);
       }
+      const allowedProjectIds = await this.membershipPort.filterProjectIds(membership, [project.id]);
+      if (allowedProjectIds.length === 0) throw new NotFoundError(ERROR_CODES.PROJECT_NOT_FOUND);
       return [project];
     }
 
-    return await this.projectPort.findManyByOrganizationId({ organizationId });
+    const projects = await this.projectPort.findManyByOrganizationId({ organizationId: membership.organizationId });
+    const allowedProjectIds = new Set(
+      await this.membershipPort.filterProjectIds(
+        membership,
+        projects.map((project) => project.id),
+      ),
+    );
+    return projects.filter((project) => allowedProjectIds.has(project.id));
   }
 
   private async findAssignees(bugReports: BugReport[]): Promise<UserModelType[]> {

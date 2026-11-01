@@ -47,7 +47,8 @@ const users = [
 describe("FindWorkloadUseCase", () => {
   it("includes every member at zero plus unassigned when nothing is open", async () => {
     const membershipPort = {
-      findByUser: vi.fn().mockResolvedValue(membership),
+      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
+      findByUserAndOrganization: vi.fn().mockResolvedValue(membership),
       findManyByOrganizationId: vi.fn().mockResolvedValue(members),
     };
     const projectPort = { findManyByOrganizationId: vi.fn().mockResolvedValue([]), findById: vi.fn() };
@@ -60,7 +61,7 @@ describe("FindWorkloadUseCase", () => {
       bugReportRepository as unknown as BugReportRepository,
     );
 
-    const result = await useCase.execute({}, userId);
+    const result = await useCase.execute({}, userId, organizationId);
 
     expect(bugReportRepository.countOpenByAssignee).not.toHaveBeenCalled();
     expect(result).toEqual([
@@ -73,7 +74,8 @@ describe("FindWorkloadUseCase", () => {
 
   it("counts only open assignments and sorts by count then name", async () => {
     const membershipPort = {
-      findByUser: vi.fn().mockResolvedValue(membership),
+      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
+      findByUserAndOrganization: vi.fn().mockResolvedValue(membership),
       findManyByOrganizationId: vi.fn().mockResolvedValue(members),
     };
     const projectPort = { findManyByOrganizationId: vi.fn().mockResolvedValue([project]), findById: vi.fn() };
@@ -91,7 +93,7 @@ describe("FindWorkloadUseCase", () => {
       bugReportRepository as unknown as BugReportRepository,
     );
 
-    const result = await useCase.execute({}, userId);
+    const result = await useCase.execute({}, userId, organizationId);
 
     expect(bugReportRepository.countOpenByAssignee).toHaveBeenCalledWith([projectId]);
     expect(result).toEqual([
@@ -104,7 +106,8 @@ describe("FindWorkloadUseCase", () => {
 
   it("throws when the project does not belong to the organization", async () => {
     const membershipPort = {
-      findByUser: vi.fn().mockResolvedValue(membership),
+      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
+      findByUserAndOrganization: vi.fn().mockResolvedValue(membership),
       findManyByOrganizationId: vi.fn(),
     };
     const projectPort = {
@@ -120,7 +123,7 @@ describe("FindWorkloadUseCase", () => {
       bugReportRepository as unknown as BugReportRepository,
     );
 
-    await expect(useCase.execute({ projectId }, userId)).rejects.toMatchObject({
+    await expect(useCase.execute({ projectId }, userId, organizationId)).rejects.toMatchObject({
       errorCode: ERROR_CODES.PROJECT_NOT_FOUND,
     });
 

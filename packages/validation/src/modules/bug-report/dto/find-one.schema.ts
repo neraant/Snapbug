@@ -16,6 +16,7 @@ export type FindOneInputDtoType = z.infer<typeof findOneInputDtoSchema>;
 
 export const findOneOutputDtoSchema = bugReportModelSchema.extend({
   assignee: findOneAssigneeSchema.nullable(),
+  organizationId: z.uuid(),
 });
 
 export type FindOneOutputDtoType = z.infer<typeof findOneOutputDtoSchema>;

@@ -35,7 +35,13 @@ async function handleRequest(request: Request) {
   }
 
   const context = isOpenApiDocsRequest(request)
-    ? { user: null, ip: "unknown", actor: { type: "api-key" as const, id: null }, requestOrigin: null }
+    ? {
+        user: null,
+        organizationId: null,
+        ip: "unknown",
+        actor: { type: "api-key" as const, id: null },
+        requestOrigin: null,
+      }
     : await createContext();
   const { matched, response } = await openAPIHandler.handle(request, {
     prefix: "/api",

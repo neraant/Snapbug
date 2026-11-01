@@ -12,14 +12,18 @@ import { UserRole } from "@workspace/validation/modules/user/consts/user-role.co
 export class CreateMembershipUseCase {
   constructor(private readonly membershipRepository: MembershipRepository) {}
 
-  async execute(input: CreateMembershipInputDtoType, userId: string): Promise<CreateMembershipOutputDtoType> {
-    const existing = await this.membershipRepository.findByOrganizationId(input.organizationId);
+  async execute(
+    input: CreateMembershipInputDtoType,
+    userId: string,
+    role: UserRole = UserRole.ADMIN,
+  ): Promise<CreateMembershipOutputDtoType> {
+    const existing = await this.membershipRepository.findByUserAndOrganization(userId, input.organizationId);
     if (existing) throw new ConflictError(ERROR_CODES.MEMBERSHIP_ALREADY_EXISTS);
 
     const membership = MembershipFactory.create({
       userId,
       organizationId: input.organizationId,
-      role: UserRole.ADMIN,
+      role,
     });
     await this.membershipRepository.save(membership);
     return MembershipMapper.toDto(membership);

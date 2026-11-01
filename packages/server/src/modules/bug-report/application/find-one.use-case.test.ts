@@ -61,12 +61,17 @@ const bugReport = new BugReport({
   resolvedAt: null,
 });
 
+const otherOrganizationId = "7a8c69a1-1ab1-45a8-8497-eae1e506d9d1";
+
 describe("FindOneUseCase", () => {
-  it("returns a bug report with assignee for a member", async () => {
-    const membershipPort = { findByUser: vi.fn().mockResolvedValue(membership) };
+  it("returns a bug report with assignee for a member of the ticket organization", async () => {
+    const membershipPort = {
+      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
+      findByUserAndOrganization: vi.fn().mockResolvedValue(membership),
+    };
     const userPort = { findManyByIds: vi.fn().mockResolvedValue([assignee]) };
     const bugReportRepository = {
-      findByShortIdAndOrganizationId: vi.fn().mockResolvedValue(bugReport),
+      findManyByShortId: vi.fn().mockResolvedValue([{ bugReport, organizationId }]),
     };
     const useCase = new FindOneUseCase(
       membershipPort as unknown as MembershipPort,
@@ -74,17 +79,43 @@ describe("FindOneUseCase", () => {
       bugReportRepository as unknown as BugReportRepository,
     );
 
-    const result = await useCase.execute({ shortId: "SNB-1" }, userId);
+    const result = await useCase.execute({ shortId: "SNB-1" }, userId, otherOrganizationId);
 
-    expect(bugReportRepository.findByShortIdAndOrganizationId).toHaveBeenCalledWith("SNB-1", organizationId);
-    expect(result).toEqual(BugReportMapper.toFindOneOutput(bugReport, assignee));
+    expect(bugReportRepository.findManyByShortId).toHaveBeenCalledWith("SNB-1");
+    expect(membershipPort.findByUserAndOrganization).toHaveBeenCalledWith({ userId, organizationId });
+    expect(result).toEqual(BugReportMapper.toFindOneOutput(bugReport, assignee, organizationId));
+  });
+
+  it("throws when the user is not a member of the ticket organization", async () => {
+    const membershipPort = {
+      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
+      findByUserAndOrganization: vi.fn().mockResolvedValue(null),
+    };
+    const userPort = { findManyByIds: vi.fn() };
+    const bugReportRepository = {
+      findManyByShortId: vi.fn().mockResolvedValue([{ bugReport, organizationId }]),
+    };
+    const useCase = new FindOneUseCase(
+      membershipPort as unknown as MembershipPort,
+      userPort as unknown as UserPort,
+      bugReportRepository as unknown as BugReportRepository,
+    );
+
+    await expect(useCase.execute({ shortId: "SNB-1" }, userId, organizationId)).rejects.toMatchObject({
+      errorCode: ERROR_CODES.BUG_REPORT_NOT_FOUND,
+    });
+
+    expect(userPort.findManyByIds).not.toHaveBeenCalled();
   });
 
   it("throws when the bug report is missing", async () => {
-    const membershipPort = { findByUser: vi.fn().mockResolvedValue(membership) };
+    const membershipPort = {
+      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
+      findByUserAndOrganization: vi.fn(),
+    };
     const userPort = { findManyByIds: vi.fn() };
     const bugReportRepository = {
-      findByShortIdAndOrganizationId: vi.fn().mockResolvedValue(null),
+      findManyByShortId: vi.fn().mockResolvedValue([]),
     };
     const useCase = new FindOneUseCase(
       membershipPort as unknown as MembershipPort,
@@ -92,8 +123,32 @@ describe("FindOneUseCase", () => {
       bugReportRepository as unknown as BugReportRepository,
     );
 
-    await expect(useCase.execute({ shortId: "SNB-99" }, userId)).rejects.toMatchObject({
+    await expect(useCase.execute({ shortId: "SNB-99" }, userId, organizationId)).rejects.toMatchObject({
       errorCode: ERROR_CODES.BUG_REPORT_NOT_FOUND,
     });
+
+    expect(membershipPort.findByUserAndOrganization).not.toHaveBeenCalled();
+  });
+
+  it("hides a ticket whose project is outside the allow-list", async () => {
+    const membershipPort = {
+      findByUserAndOrganization: vi.fn().mockResolvedValue(membership),
+      filterProjectIds: vi.fn().mockResolvedValue([]),
+    };
+    const userPort = { findManyByIds: vi.fn() };
+    const bugReportRepository = {
+      findManyByShortId: vi.fn().mockResolvedValue([{ bugReport, organizationId }]),
+    };
+    const useCase = new FindOneUseCase(
+      membershipPort as unknown as MembershipPort,
+      userPort as unknown as UserPort,
+      bugReportRepository as unknown as BugReportRepository,
+    );
+
+    await expect(useCase.execute({ shortId: "SNB-1" }, userId, organizationId)).rejects.toMatchObject({
+      errorCode: ERROR_CODES.BUG_REPORT_NOT_FOUND,
+    });
+
+    expect(userPort.findManyByIds).not.toHaveBeenCalled();
   });
 });

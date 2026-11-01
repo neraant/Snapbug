@@ -17,13 +17,8 @@ export class UpdateUserUseCase {
     const updatedUser = user.update({
       ...(input.name !== undefined && { name: input.name }),
       ...(input.email !== undefined && { email: input.email }),
-      ...(input.passwordHash !== undefined && {
-        passwordHash: input.passwordHash,
-        passwordChangedAt: new Date(),
-      }),
-      ...(input.onboardingCompletedAt !== undefined && {
-        onboardingCompletedAt: user.onboardingCompletedAt ?? input.onboardingCompletedAt,
-      }),
+      ...(input.passwordHash !== undefined && { passwordHash: input.passwordHash }),
+      ...(input.onboardingCompletedAt !== undefined && { onboardingCompletedAt: input.onboardingCompletedAt }),
     });
     await this.userRepository.save(updatedUser);
     return UserMapper.toDto(updatedUser);

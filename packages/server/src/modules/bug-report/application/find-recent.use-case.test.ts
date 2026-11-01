@@ -93,7 +93,10 @@ describe("FindRecentUseCase", () => {
       BugReportStatus.NEW,
     ];
     const bugReports = statuses.map((status, index) => createBugReport(index + 1, status));
-    const membershipPort = { findByUser: vi.fn().mockResolvedValue(membership) };
+    const membershipPort = {
+      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
+      findByUserAndOrganization: vi.fn().mockResolvedValue(membership),
+    };
     const projectPort = { findManyByOrganizationId: vi.fn().mockResolvedValue([project]), findById: vi.fn() };
     const userPort = { findManyByIds: vi.fn().mockResolvedValue([assignee]) };
     const bugReportRepository = { findRecentByProjectIds: vi.fn().mockResolvedValue(bugReports) };
@@ -104,7 +107,7 @@ describe("FindRecentUseCase", () => {
       bugReportRepository as unknown as BugReportRepository,
     );
 
-    const result = await useCase.execute({}, userId);
+    const result = await useCase.execute({}, userId, organizationId);
 
     expect(bugReportRepository.findRecentByProjectIds).toHaveBeenCalledWith([projectId], 8);
     expect(result).toHaveLength(8);
@@ -124,7 +127,10 @@ describe("FindRecentUseCase", () => {
   });
 
   it("limits the feed to the selected project", async () => {
-    const membershipPort = { findByUser: vi.fn().mockResolvedValue(membership) };
+    const membershipPort = {
+      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
+      findByUserAndOrganization: vi.fn().mockResolvedValue(membership),
+    };
     const projectPort = { findById: vi.fn().mockResolvedValue(project), findManyByOrganizationId: vi.fn() };
     const userPort = { findManyByIds: vi.fn() };
     const bugReportRepository = { findRecentByProjectIds: vi.fn().mockResolvedValue([]) };
@@ -135,7 +141,7 @@ describe("FindRecentUseCase", () => {
       bugReportRepository as unknown as BugReportRepository,
     );
 
-    const result = await useCase.execute({ projectId }, userId);
+    const result = await useCase.execute({ projectId }, userId, organizationId);
 
     expect(projectPort.findById).toHaveBeenCalledWith(projectId);
     expect(projectPort.findManyByOrganizationId).not.toHaveBeenCalled();
@@ -145,7 +151,10 @@ describe("FindRecentUseCase", () => {
   });
 
   it("reads every project in the organization when no project is selected", async () => {
-    const membershipPort = { findByUser: vi.fn().mockResolvedValue(membership) };
+    const membershipPort = {
+      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
+      findByUserAndOrganization: vi.fn().mockResolvedValue(membership),
+    };
     const projectPort = {
       findManyByOrganizationId: vi.fn().mockResolvedValue([project, otherProject]),
       findById: vi.fn(),
@@ -159,13 +168,16 @@ describe("FindRecentUseCase", () => {
       bugReportRepository as unknown as BugReportRepository,
     );
 
-    await useCase.execute({}, userId);
+    await useCase.execute({}, userId, organizationId);
 
     expect(bugReportRepository.findRecentByProjectIds).toHaveBeenCalledWith([projectId, otherProjectId], 8);
   });
 
   it("returns an empty list when the organization has no projects", async () => {
-    const membershipPort = { findByUser: vi.fn().mockResolvedValue(membership) };
+    const membershipPort = {
+      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
+      findByUserAndOrganization: vi.fn().mockResolvedValue(membership),
+    };
     const projectPort = { findManyByOrganizationId: vi.fn().mockResolvedValue([]), findById: vi.fn() };
     const userPort = { findManyByIds: vi.fn() };
     const bugReportRepository = { findRecentByProjectIds: vi.fn() };
@@ -176,14 +188,17 @@ describe("FindRecentUseCase", () => {
       bugReportRepository as unknown as BugReportRepository,
     );
 
-    const result = await useCase.execute({}, userId);
+    const result = await useCase.execute({}, userId, organizationId);
 
     expect(result).toEqual([]);
     expect(bugReportRepository.findRecentByProjectIds).not.toHaveBeenCalled();
   });
 
   it("throws when the project does not belong to the organization", async () => {
-    const membershipPort = { findByUser: vi.fn().mockResolvedValue(membership) };
+    const membershipPort = {
+      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
+      findByUserAndOrganization: vi.fn().mockResolvedValue(membership),
+    };
     const projectPort = {
       findById: vi.fn().mockResolvedValue({ ...project, organizationId: otherOrganizationId }),
       findManyByOrganizationId: vi.fn(),
@@ -197,7 +212,7 @@ describe("FindRecentUseCase", () => {
       bugReportRepository as unknown as BugReportRepository,
     );
 
-    await expect(useCase.execute({ projectId }, userId)).rejects.toMatchObject({
+    await expect(useCase.execute({ projectId }, userId, organizationId)).rejects.toMatchObject({
       errorCode: ERROR_CODES.PROJECT_NOT_FOUND,
     });
 

@@ -79,6 +79,7 @@ describe("UpdateBugReportUseCase", () => {
   it("updates status for a member", async () => {
     const updatedBugReport = bugReport.update({ status: BugReportStatus.IN_PROGRESS });
     const membershipPort = {
+      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
       findByUserAndOrganization: vi.fn().mockResolvedValue(membership),
     };
     const projectPort = { findById: vi.fn().mockResolvedValue(project) };
@@ -109,6 +110,7 @@ describe("UpdateBugReportUseCase", () => {
   it("sets resolvedAt when moving to resolved", async () => {
     const updatedBugReport = bugReport.update({ status: BugReportStatus.RESOLVED });
     const membershipPort = {
+      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
       findByUserAndOrganization: vi.fn().mockResolvedValue(membership),
     };
     const projectPort = { findById: vi.fn().mockResolvedValue(project) };
@@ -138,6 +140,7 @@ describe("UpdateBugReportUseCase", () => {
       resolvedAt: new Date("2026-10-04T09:00:00.000Z"),
     });
     const membershipPort = {
+      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
       findByUserAndOrganization: vi.fn().mockResolvedValue(membership),
     };
     const projectPort = { findById: vi.fn().mockResolvedValue(project) };
@@ -162,7 +165,10 @@ describe("UpdateBugReportUseCase", () => {
   });
 
   it("throws when the bug report is missing", async () => {
-    const membershipPort = { findByUserAndOrganization: vi.fn() };
+    const membershipPort = {
+      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
+      findByUserAndOrganization: vi.fn(),
+    };
     const projectPort = { findById: vi.fn() };
     const bugReportRepository = { findById: vi.fn().mockResolvedValue(null) };
     const bugReportService = { withTx: vi.fn() };
@@ -186,6 +192,7 @@ describe("UpdateBugReportUseCase", () => {
 
   it("does not persist when the patch matches the current state", async () => {
     const membershipPort = {
+      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
       findByUserAndOrganization: vi.fn().mockResolvedValue(membership),
     };
     const projectPort = { findById: vi.fn().mockResolvedValue(project) };
@@ -208,7 +215,10 @@ describe("UpdateBugReportUseCase", () => {
   });
 
   it("throws when the user is not a member", async () => {
-    const membershipPort = { findByUserAndOrganization: vi.fn().mockResolvedValue(null) };
+    const membershipPort = {
+      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
+      findByUserAndOrganization: vi.fn().mockResolvedValue(null),
+    };
     const projectPort = { findById: vi.fn().mockResolvedValue(project) };
     const bugReportRepository = { findById: vi.fn().mockResolvedValue(bugReport) };
     const bugReportService = { withTx: vi.fn() };

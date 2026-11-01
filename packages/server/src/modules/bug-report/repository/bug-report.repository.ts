@@ -7,6 +7,7 @@ import type {
   AssigneeOpenCountRow,
   DailyMetricRow,
   NullableStringCountRow,
+  ProjectOpenCountRow,
   SeverityCountRow,
   StatusCountRow,
   WeekdayHourCountRow,
@@ -55,6 +56,29 @@ export class BugReportRepository {
   async findById(id: string): Promise<BugReport | null> {
     const [row] = await this.db.select().from(bugReportTable).where(eq(bugReportTable.id, id));
     return row ? BugReportMapper.fromPersistence(row) : null;
+  }
+
+  async findManyByShortId(shortId: string): Promise<Array<{ bugReport: BugReport; organizationId: string }>> {
+    const rows = await this.db.query.bugReportTable.findMany({
+      where: { shortId },
+      with: {
+        project: {
+          columns: { organizationId: true },
+        },
+      },
+    });
+
+    return rows.flatMap((row) => {
+      if (!row.project) return [];
+
+      const { project, ...bugReportRow } = row;
+      return [
+        {
+          bugReport: BugReportMapper.fromPersistence(bugReportRow),
+          organizationId: project.organizationId,
+        },
+      ];
+    });
   }
 
   async findByShortIdAndOrganizationId(shortId: string, organizationId: string): Promise<BugReport | null> {
@@ -118,6 +142,24 @@ export class BugReportRepository {
 
     return rows.map((row) => ({
       assignedTo: row.assignedTo,
+      count: Number(row.count),
+    }));
+  }
+
+  async countOpenByProject(projectIds: string[]): Promise<ProjectOpenCountRow[]> {
+    if (projectIds.length === 0) return [];
+
+    const rows = await this.db
+      .select({
+        projectId: bugReportTable.projectId,
+        count: count(),
+      })
+      .from(bugReportTable)
+      .where(and(inArray(bugReportTable.projectId, projectIds), inArray(bugReportTable.status, [...openStatuses])))
+      .groupBy(bugReportTable.projectId);
+
+    return rows.map((row) => ({
+      projectId: row.projectId,
       count: Number(row.count),
     }));
   }

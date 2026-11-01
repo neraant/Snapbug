@@ -11,6 +11,11 @@ export abstract class ApiKeyMapper {
     return apiKey.toObject();
   }
 
+  static toAudit(apiKey: ApiKey): Record<string, unknown> {
+    const { projectId, createdAt, revokedAt } = apiKey.toObject();
+    return { projectId, createdAt, revokedAt };
+  }
+
   static toProjectApiKeyDto(apiKey: ApiKey): FindProjectApiKeyOutputDtoType {
     const { key, createdAt } = apiKey.toObject();
     return { key, createdAt: createdAt.toISOString() };

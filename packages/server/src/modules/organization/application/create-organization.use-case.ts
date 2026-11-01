@@ -3,12 +3,11 @@ import { OrganizationMapper } from "@workspace/server/modules/organization/entit
 import type { MembershipPort } from "@workspace/server/modules/organization/port/membership.port";
 import type { ProjectPort } from "@workspace/server/modules/organization/port/project.port";
 import type { OrganizationRepository } from "@workspace/server/modules/organization/repository/organization.repository";
-import { ConflictError } from "@workspace/server/shared/error/app-errors";
-import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import type {
   CreateOrganizationInputDtoType,
   CreateOrganizationOutputDtoType,
 } from "@workspace/validation/modules/organization/dto/create-organization.schema";
+import { projectColorDefault } from "@workspace/validation/shared/project-color.schema";
 
 const DEFAULT_PROJECT_NAME = "Default project";
 
@@ -20,11 +19,6 @@ export class CreateOrganizationUseCase {
   ) {}
 
   async execute(input: CreateOrganizationInputDtoType, userId: string): Promise<CreateOrganizationOutputDtoType> {
-    const existingMembership = await this.membershipPort.findByUser(userId);
-    if (existingMembership) {
-      throw new ConflictError(ERROR_CODES.USER_ALREADY_HAS_ORGANIZATION);
-    }
-
     const organization = OrganizationFactory.create({
       name: input.name,
       ...(input.reports_retention_days !== undefined && {
@@ -35,13 +29,10 @@ export class CreateOrganizationUseCase {
 
     await this.membershipPort.create({ organizationId: organization.id }, userId);
     const project = await this.projectPort.create(
-      { organizationId: organization.id, name: DEFAULT_PROJECT_NAME },
+      { organizationId: organization.id, name: DEFAULT_PROJECT_NAME, color: projectColorDefault },
       userId,
     );
 
-    return {
-      organization: OrganizationMapper.toDto(organization),
-      project,
-    };
+    return OrganizationMapper.toCreateOrganizationOutput(organization, project);
   }
 }

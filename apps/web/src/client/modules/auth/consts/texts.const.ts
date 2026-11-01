@@ -227,6 +227,10 @@ export const texts = {
   invitation: {
     fieldHint: (organizationName: string) => `You were invited to join ${organizationName}`,
     lookupError: "This invitation link is invalid or has expired. You can still sign up with any email.",
+    joiningTitle: "Joining the team",
+    joiningDescription: "Accepting your invitation…",
+    acceptFailedTitle: "Invitation not accepted",
+    continueToApp: "Continue to Snapbug",
     toast: {
       acceptError: "We could not accept your invitation. Try again from the link in your email.",
     },

@@ -82,6 +82,11 @@ export type AssigneeOpenCountRow = {
   count: number;
 };
 
+export type ProjectOpenCountRow = {
+  projectId: string;
+  count: number;
+};
+
 export type DailyMetricRow = {
   day: string;
   value: number;

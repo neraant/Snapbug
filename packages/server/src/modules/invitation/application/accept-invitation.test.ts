@@ -1,9 +1,8 @@
-import { Invitation } from "@workspace/server/modules/invitation/entity/invitation.entity";
 import { AcceptInvitationUseCase } from "@workspace/server/modules/invitation/application/accept-invitation.use-case";
+import { Invitation } from "@workspace/server/modules/invitation/entity/invitation.entity";
 import type { MembershipPort } from "@workspace/server/modules/invitation/port/membership.port";
+import type { ProjectPort } from "@workspace/server/modules/invitation/port/project.port";
 import type { InvitationRepository } from "@workspace/server/modules/invitation/repository/invitation.repository";
-import { Membership } from "@workspace/server/modules/membership/entity/membership.entity";
-import type { MembershipRepository } from "@workspace/server/modules/membership/repository/membership.repository";
 import type { WithTransactionType } from "@workspace/server/shared/database/transaction.util";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
@@ -12,6 +11,7 @@ import { describe, expect, it, vi } from "vitest";
 const userId = "0a8c69a1-1ab1-45a8-8497-eae1e506d9d4";
 const organizationId = "2a8c69a1-1ab1-45a8-8497-eae1e506d9d1";
 const token = "550e8400-e29b-41d4-a716-446655440000";
+const projectId = "4a8c69a1-1ab1-45a8-8497-eae1e506d9d1";
 const persistedAt = new Date("2026-10-03T09:00:00.000Z");
 
 const pendingInvitation = new Invitation({
@@ -26,11 +26,33 @@ const pendingInvitation = new Invitation({
 });
 
 function createTransactionalDeps() {
-  const membershipRepository = {
-    save: vi.fn().mockResolvedValue(undefined),
+  const membershipPort = {
+    findByUserAndOrganization: vi.fn().mockResolvedValue(null),
+    createInvited: vi.fn().mockResolvedValue({
+      id: "1a8c69a1-1ab1-45a8-8497-eae1e506d9d1",
+      userId,
+      organizationId,
+      role: UserRole.USER,
+      createdAt: persistedAt.toISOString(),
+    }),
+    grantProjects: vi.fn(),
     withTx: vi.fn(),
   };
-  membershipRepository.withTx.mockReturnValue(membershipRepository);
+  membershipPort.withTx.mockReturnValue(membershipPort);
+
+  const projectPort = {
+    findManyByOrganizationId: vi.fn().mockResolvedValue([
+      {
+        id: projectId,
+        name: "Acme Store",
+        color: "#F97316",
+        organizationId,
+        createdAt: persistedAt.toISOString(),
+      },
+    ]),
+    withTx: vi.fn(),
+  };
+  projectPort.withTx.mockReturnValue(projectPort);
 
   const invitationRepository = {
     findByToken: vi.fn().mockResolvedValue(pendingInvitation),
@@ -41,7 +63,7 @@ function createTransactionalDeps() {
 
   const withTransactionFn: WithTransactionType = vi.fn(async (callback) => await callback({} as never));
 
-  return { membershipRepository, invitationRepository, withTransactionFn };
+  return { membershipPort, projectPort, invitationRepository, withTransactionFn };
 }
 
 describe("AcceptInvitationUseCase", () => {
@@ -49,8 +71,8 @@ describe("AcceptInvitationUseCase", () => {
     const invitationRepository = { findByToken: vi.fn().mockResolvedValue(null) };
     const useCase = new AcceptInvitationUseCase(
       invitationRepository as unknown as InvitationRepository,
-      { findByUser: vi.fn() } as unknown as MembershipPort,
-      { save: vi.fn(), withTx: vi.fn() } as unknown as MembershipRepository,
+      { findByUserAndOrganization: vi.fn() } as unknown as MembershipPort,
+      { findManyByOrganizationId: vi.fn(), withTx: vi.fn() } as unknown as ProjectPort,
       vi.fn() as WithTransactionType,
     );
 
@@ -60,11 +82,11 @@ describe("AcceptInvitationUseCase", () => {
   });
 
   it("throws when the signed-in email does not match the invitation", async () => {
-    const { membershipRepository, invitationRepository, withTransactionFn } = createTransactionalDeps();
+    const { membershipPort, projectPort, invitationRepository, withTransactionFn } = createTransactionalDeps();
     const useCase = new AcceptInvitationUseCase(
       invitationRepository as unknown as InvitationRepository,
-      { findByUser: vi.fn().mockResolvedValue(null) } as unknown as MembershipPort,
-      membershipRepository as unknown as MembershipRepository,
+      membershipPort as unknown as MembershipPort,
+      projectPort as unknown as ProjectPort,
       withTransactionFn,
     );
 
@@ -75,56 +97,65 @@ describe("AcceptInvitationUseCase", () => {
     expect(withTransactionFn).not.toHaveBeenCalled();
   });
 
-  it("throws when the user already belongs to an organization", async () => {
-    const { membershipRepository, invitationRepository, withTransactionFn } = createTransactionalDeps();
-    const membershipPort = {
-      findByUser: vi.fn().mockResolvedValue(
-        new Membership({
-          id: "1a8c69a1-1ab1-45a8-8497-eae1e506d9d1",
-          userId,
-          organizationId,
-          role: UserRole.ADMIN,
-          createdAt: persistedAt,
-        }),
-      ),
-    };
+  it("throws when the user is already a member of the invited organization", async () => {
+    const { membershipPort, projectPort, invitationRepository, withTransactionFn } = createTransactionalDeps();
+    membershipPort.findByUserAndOrganization.mockResolvedValue({
+      id: "1a8c69a1-1ab1-45a8-8497-eae1e506d9d1",
+      userId,
+      organizationId,
+      role: UserRole.ADMIN,
+      createdAt: persistedAt.toISOString(),
+    });
     const useCase = new AcceptInvitationUseCase(
       invitationRepository as unknown as InvitationRepository,
       membershipPort as unknown as MembershipPort,
-      membershipRepository as unknown as MembershipRepository,
+      projectPort as unknown as ProjectPort,
       withTransactionFn,
     );
 
     await expect(useCase.execute({ token }, userId, "invitee@company.com")).rejects.toMatchObject({
-      errorCode: ERROR_CODES.USER_ALREADY_HAS_ORGANIZATION,
+      errorCode: ERROR_CODES.MEMBERSHIP_ALREADY_EXISTS,
     });
 
     expect(withTransactionFn).not.toHaveBeenCalled();
   });
 
   it("creates a user membership and marks the invitation accepted", async () => {
-    const { membershipRepository, invitationRepository, withTransactionFn } = createTransactionalDeps();
-    const membershipPort = { findByUser: vi.fn().mockResolvedValue(null) };
+    const { membershipPort, projectPort, invitationRepository, withTransactionFn } = createTransactionalDeps();
     const useCase = new AcceptInvitationUseCase(
       invitationRepository as unknown as InvitationRepository,
       membershipPort as unknown as MembershipPort,
-      membershipRepository as unknown as MembershipRepository,
+      projectPort as unknown as ProjectPort,
       withTransactionFn,
     );
 
     const result = await useCase.execute({ token }, userId, "invitee@company.com");
 
     expect(withTransactionFn).toHaveBeenCalledOnce();
-    expect(membershipRepository.save).toHaveBeenCalledOnce();
-    const savedMembership = membershipRepository.save.mock.calls[0]?.[0];
-    expect(savedMembership.userId).toBe(userId);
-    expect(savedMembership.organizationId).toBe(organizationId);
-    expect(savedMembership.role).toBe(UserRole.USER);
+    expect(membershipPort.createInvited).toHaveBeenCalledWith(organizationId, userId);
+    expect(membershipPort.grantProjects).toHaveBeenCalledWith(
+      "1a8c69a1-1ab1-45a8-8497-eae1e506d9d1",
+      [projectId],
+      userId,
+    );
     expect(invitationRepository.save).toHaveBeenCalledOnce();
-    const savedInvitation = invitationRepository.save.mock.calls[0]?.[0];
-    expect(savedInvitation.acceptedAt).not.toBeNull();
-    expect(result.role).toBe(UserRole.USER);
-    expect(result.organizationId).toBe(organizationId);
+    expect(membershipPort.findByUserAndOrganization).toHaveBeenCalledWith({ userId, organizationId });
     expect(result.userId).toBe(userId);
+    expect(result.organizationId).toBe(organizationId);
+  });
+
+  it("accepts an invitation when the user already belongs to another organization", async () => {
+    const { membershipPort, projectPort, invitationRepository, withTransactionFn } = createTransactionalDeps();
+    const useCase = new AcceptInvitationUseCase(
+      invitationRepository as unknown as InvitationRepository,
+      membershipPort as unknown as MembershipPort,
+      projectPort as unknown as ProjectPort,
+      withTransactionFn,
+    );
+
+    const result = await useCase.execute({ token }, userId, "invitee@company.com");
+
+    expect(result.organizationId).toBe(organizationId);
+    expect(membershipPort.createInvited).toHaveBeenCalledWith(organizationId, userId);
   });
 });

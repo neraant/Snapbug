@@ -56,7 +56,10 @@ const bugReport = new BugReport({
 describe("FindReplayUseCase", () => {
   it("returns replay bytes for a member", async () => {
     const bytes = new Uint8Array([31, 139, 8]);
-    const membershipPort = { findByUser: vi.fn().mockResolvedValue(membership) };
+    const membershipPort = {
+      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
+      findByUserAndOrganization: vi.fn().mockResolvedValue(membership),
+    };
     const bugReportRepository = {
       findByShortIdAndOrganizationId: vi.fn().mockResolvedValue(bugReport),
     };
@@ -69,7 +72,7 @@ describe("FindReplayUseCase", () => {
       fileStoragePort as unknown as FileStoragePort,
     );
 
-    const result = await useCase.execute({ shortId: "SNB-1" }, userId);
+    const result = await useCase.execute({ shortId: "SNB-1" }, userId, organizationId);
 
     expect(bugReportRepository.findByShortIdAndOrganizationId).toHaveBeenCalledWith("SNB-1", organizationId);
     expect(fileStoragePort.readBugReportReplay).toHaveBeenCalledWith(replayKey);
@@ -78,7 +81,10 @@ describe("FindReplayUseCase", () => {
 
   it("derives the storage key from report id when hasReplay is true but replayKey is missing", async () => {
     const bytes = new Uint8Array([31, 139, 8]);
-    const membershipPort = { findByUser: vi.fn().mockResolvedValue(membership) };
+    const membershipPort = {
+      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
+      findByUserAndOrganization: vi.fn().mockResolvedValue(membership),
+    };
     const bugReportWithDerivedKey = new BugReport({
       ...bugReport.toObject(),
       replayKey: null,
@@ -96,13 +102,16 @@ describe("FindReplayUseCase", () => {
       fileStoragePort as unknown as FileStoragePort,
     );
 
-    await useCase.execute({ shortId: "SNB-1" }, userId);
+    await useCase.execute({ shortId: "SNB-1" }, userId, organizationId);
 
     expect(fileStoragePort.readBugReportReplay).toHaveBeenCalledWith(`bug-reports/${bugReport.id}/replay.json.gz`);
   });
 
   it("throws when the bug report has no replay", async () => {
-    const membershipPort = { findByUser: vi.fn().mockResolvedValue(membership) };
+    const membershipPort = {
+      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
+      findByUserAndOrganization: vi.fn().mockResolvedValue(membership),
+    };
     const bugReportWithoutReplay = new BugReport({
       id: bugReport.id,
       projectId,
@@ -142,7 +151,7 @@ describe("FindReplayUseCase", () => {
       fileStoragePort as unknown as FileStoragePort,
     );
 
-    await expect(useCase.execute({ shortId: "SNB-1" }, userId)).rejects.toMatchObject({
+    await expect(useCase.execute({ shortId: "SNB-1" }, userId, organizationId)).rejects.toMatchObject({
       errorCode: ERROR_CODES.BUG_REPORT_NOT_FOUND,
     });
 

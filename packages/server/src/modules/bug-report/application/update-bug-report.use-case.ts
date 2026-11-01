@@ -38,6 +38,9 @@ export class UpdateBugReportUseCase {
     });
     if (!membership) throw new NotFoundError(ERROR_CODES.ORGANIZATION_NOT_FOUND);
 
+    const allowedProjectIds = await this.membershipPort.filterProjectIds(membership, [bugReport.projectId]);
+    if (allowedProjectIds.length === 0) throw new NotFoundError(ERROR_CODES.BUG_REPORT_NOT_FOUND);
+
     const { id: _id, ...patch } = input;
     const updatedBugReport = bugReport.update(patch);
 

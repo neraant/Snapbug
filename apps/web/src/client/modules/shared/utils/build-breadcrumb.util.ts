@@ -31,6 +31,14 @@ const breadcrumbRoute: BreadcrumbRoute[] = [
       { href: url.ticket(params.shortId ?? ""), label: params.shortId ?? "" },
     ],
   },
+  {
+    pattern: routePattern.projects,
+    build: () => [{ href: url.projects(), label: texts.projects }],
+  },
+  {
+    pattern: routePattern.team,
+    build: () => [{ href: url.team(), label: texts.team }],
+  },
 ];
 
 function patternScore(pattern: string) {

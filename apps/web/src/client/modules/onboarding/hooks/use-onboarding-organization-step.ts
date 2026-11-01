@@ -11,6 +11,7 @@ import {
 import type { OnboardingWorkspace } from "@/client/modules/onboarding/types/onboarding-workspace.type";
 import { useCreateOrganization } from "@/client/modules/shared/queries/use-create-organization";
 import { useUpdateOrganization } from "@/client/modules/shared/queries/use-update-organization";
+import { selectActiveOrganization } from "@/shared/organization/select-active-organization";
 
 type UseOnboardingOrganizationStepInput = {
   initialName: string;
@@ -48,6 +49,7 @@ export function useOnboardingOrganizationStep({
       }
 
       const result = await createOrganization({ name: values.name });
+      await selectActiveOrganization(result.organization.id);
       onSaved({
         completedAt: null,
         suggestedOrganizationName,

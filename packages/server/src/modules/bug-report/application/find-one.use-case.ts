@@ -16,20 +16,35 @@ export class FindOneUseCase {
     private readonly bugReportRepository: BugReportRepository,
   ) {}
 
-  async execute(input: FindOneInputDtoType, userId: string): Promise<FindOneOutputDtoType> {
-    const membership = await this.membershipPort.findByUser(userId);
-    if (!membership) throw new NotFoundError(ERROR_CODES.ORGANIZATION_NOT_FOUND);
+  async execute(
+    input: FindOneInputDtoType,
+    userId: string,
+    organizationId: string | null,
+  ): Promise<FindOneOutputDtoType> {
+    const candidates = await this.bugReportRepository.findManyByShortId(input.shortId);
+    const orderedCandidates = [...candidates].sort((left, right) => {
+      if (left.organizationId === organizationId) return -1;
+      if (right.organizationId === organizationId) return 1;
+      return 0;
+    });
 
-    const bugReport = await this.bugReportRepository.findByShortIdAndOrganizationId(
-      input.shortId,
-      membership.organizationId,
-    );
-    if (!bugReport) throw new NotFoundError(ERROR_CODES.BUG_REPORT_NOT_FOUND);
+    for (const candidate of orderedCandidates) {
+      const membership = await this.membershipPort.findByUserAndOrganization({
+        userId,
+        organizationId: candidate.organizationId,
+      });
+      if (!membership) continue;
 
-    const assignee = bugReport.assignedTo
-      ? ((await this.userPort.findManyByIds([bugReport.assignedTo]))[0] ?? null)
-      : null;
+      const allowedProjectIds = await this.membershipPort.filterProjectIds(membership, [candidate.bugReport.projectId]);
+      if (allowedProjectIds.length === 0) continue;
 
-    return BugReportMapper.toFindOneOutput(bugReport, assignee);
+      const assignee = candidate.bugReport.assignedTo
+        ? ((await this.userPort.findManyByIds([candidate.bugReport.assignedTo]))[0] ?? null)
+        : null;
+
+      return BugReportMapper.toFindOneOutput(candidate.bugReport, assignee, candidate.organizationId);
+    }
+
+    throw new NotFoundError(ERROR_CODES.BUG_REPORT_NOT_FOUND);
   }
 }

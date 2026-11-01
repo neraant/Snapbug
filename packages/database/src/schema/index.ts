@@ -5,6 +5,7 @@ export * from "@workspace/database/schema/invitation.const";
 export * from "@workspace/database/schema/membership.const";
 export * from "@workspace/database/schema/organization.const";
 export * from "@workspace/database/schema/project.const";
+export * from "@workspace/database/schema/project-access.const";
 export * from "@workspace/database/schema/relation.const";
 export * from "@workspace/database/schema/reset-password-token.const";
 export * from "@workspace/database/schema/user.const";

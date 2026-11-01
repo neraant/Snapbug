@@ -3,6 +3,7 @@
 import { Avatar as AvatarPrimitive } from "@base-ui/react/avatar";
 import { cn } from "@workspace/design-system/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
+import type { ComponentProps } from "react";
 
 const avatarVariants = cva(
   "inline-flex size-8 shrink-0 items-center justify-center overflow-hidden align-middle text-xs font-medium select-none",
@@ -28,11 +29,58 @@ const avatarVariants = cva(
 function Avatar({
   className,
   variant = "default",
+  size,
+  color,
+  style,
+  ...props
+}: AvatarPrimitive.Root.Props &
+  VariantProps<typeof avatarVariants> & {
+    color?: string;
+  }) {
+  return (
+    <AvatarPrimitive.Root
+      data-slot="avatar"
+      className={cn(avatarVariants({ variant, size }), color && "text-white", className)}
+      style={color ? { ...style, backgroundColor: color } : style}
+      {...props}
+    />
+  );
+}
+
+function AvatarGroup({ className, ...props }: ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="avatar-group"
+      className={cn("flex -space-x-2 *:data-[slot=avatar]:ring-2 *:data-[slot=avatar]:ring-background", className)}
+      {...props}
+    />
+  );
+}
+
+const avatarGroupCountSize = {
+  xs: "size-5",
+  sm: "size-6",
+  md: "size-7",
+  lg: "size-8",
+} as const;
+
+function AvatarGroupCount({
+  className,
   size = "md",
   ...props
-}: AvatarPrimitive.Root.Props & VariantProps<typeof avatarVariants>) {
+}: ComponentProps<"div"> & {
+  size?: keyof typeof avatarGroupCountSize;
+}) {
   return (
-    <AvatarPrimitive.Root data-slot="avatar" className={cn(avatarVariants({ variant, size }), className)} {...props} />
+    <div
+      data-slot="avatar-group-count"
+      className={cn(
+        "relative flex shrink-0 items-center justify-center rounded-full bg-muted text-xs text-muted-foreground ring-2 ring-background",
+        avatarGroupCountSize[size],
+        className,
+      )}
+      {...props}
+    />
   );
 }
 
@@ -52,4 +100,4 @@ function AvatarFallback({ className, ...props }: AvatarPrimitive.Fallback.Props)
   );
 }
 
-export { Avatar, AvatarFallback, AvatarImage };
+export { Avatar, AvatarFallback, AvatarGroup, AvatarGroupCount, AvatarImage };

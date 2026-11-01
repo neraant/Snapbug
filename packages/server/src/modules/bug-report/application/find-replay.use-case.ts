@@ -24,8 +24,14 @@ export class FindReplayUseCase {
     private readonly fileStoragePort: FileStoragePort,
   ) {}
 
-  async execute(input: FindReplayInputDtoType, userId: string): Promise<FindReplayResult> {
-    const membership = await this.membershipPort.findByUser(userId);
+  async execute(
+    input: FindReplayInputDtoType,
+    userId: string,
+    organizationId: string | null,
+  ): Promise<FindReplayResult> {
+    if (!organizationId) throw new NotFoundError(ERROR_CODES.ORGANIZATION_NOT_FOUND);
+
+    const membership = await this.membershipPort.findByUserAndOrganization({ userId, organizationId });
     if (!membership) throw new NotFoundError(ERROR_CODES.ORGANIZATION_NOT_FOUND);
 
     const bugReport = await this.bugReportRepository.findByShortIdAndOrganizationId(
@@ -33,6 +39,9 @@ export class FindReplayUseCase {
       membership.organizationId,
     );
     if (!bugReport) throw new NotFoundError(ERROR_CODES.BUG_REPORT_NOT_FOUND);
+
+    const allowedProjectIds = await this.membershipPort.filterProjectIds(membership, [bugReport.projectId]);
+    if (allowedProjectIds.length === 0) throw new NotFoundError(ERROR_CODES.BUG_REPORT_NOT_FOUND);
 
     const replayKey = resolveReplayStorageKey(bugReport);
     if (!replayKey) throw new NotFoundError(ERROR_CODES.BUG_REPORT_NOT_FOUND);

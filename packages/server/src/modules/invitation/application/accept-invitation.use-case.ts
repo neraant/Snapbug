@@ -1,8 +1,6 @@
 import type { MembershipPort } from "@workspace/server/modules/invitation/port/membership.port";
+import type { ProjectPort } from "@workspace/server/modules/invitation/port/project.port";
 import type { InvitationRepository } from "@workspace/server/modules/invitation/repository/invitation.repository";
-import { MembershipFactory } from "@workspace/server/modules/membership/entity/membership.factory";
-import { MembershipMapper } from "@workspace/server/modules/membership/entity/membership.mapper";
-import type { MembershipRepository } from "@workspace/server/modules/membership/repository/membership.repository";
 import type { WithTransactionType } from "@workspace/server/shared/database/transaction.util";
 import { BadRequestError, ConflictError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
@@ -10,13 +8,12 @@ import type {
   AcceptInvitationInputDtoType,
   AcceptInvitationOutputDtoType,
 } from "@workspace/validation/modules/invitation/dto/accept-invitation.schema";
-import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
 
 export class AcceptInvitationUseCase {
   constructor(
     private readonly invitationRepository: InvitationRepository,
     private readonly membershipPort: MembershipPort,
-    private readonly membershipRepository: MembershipRepository,
+    private readonly projectPort: ProjectPort,
     private readonly withTransaction: WithTransactionType,
   ) {}
 
@@ -34,25 +31,31 @@ export class AcceptInvitationUseCase {
       throw new BadRequestError(ERROR_CODES.INVITATION_EMAIL_MISMATCH);
     }
 
-    const existingMembership = await this.membershipPort.findByUser(userId);
-    if (existingMembership) {
-      throw new ConflictError(ERROR_CODES.USER_ALREADY_HAS_ORGANIZATION);
-    }
-
-    const membership = MembershipFactory.create({
+    const existingMembership = await this.membershipPort.findByUserAndOrganization({
       userId,
       organizationId: invitation.organizationId,
-      role: UserRole.USER,
     });
+    if (existingMembership) {
+      throw new ConflictError(ERROR_CODES.MEMBERSHIP_ALREADY_EXISTS);
+    }
+
     const acceptedInvitation = invitation.accept();
 
-    await this.withTransaction(async (tx) => {
-      const membershipRepository = this.membershipRepository.withTx(tx);
+    const membership = await this.withTransaction(async (tx) => {
+      const membershipPort = this.membershipPort.withTx(tx);
+      const projectPort = this.projectPort.withTx(tx);
       const invitationRepository = this.invitationRepository.withTx(tx);
-      await membershipRepository.save(membership);
+      const createdMembership = await membershipPort.createInvited(invitation.organizationId, userId);
+      const projects = await projectPort.findManyByOrganizationId({ organizationId: invitation.organizationId });
+      await membershipPort.grantProjects(
+        createdMembership.id,
+        projects.map((project) => project.id),
+        userId,
+      );
       await invitationRepository.save(acceptedInvitation);
+      return createdMembership;
     });
 
-    return MembershipMapper.toDto(membership);
+    return membership;
   }
 }

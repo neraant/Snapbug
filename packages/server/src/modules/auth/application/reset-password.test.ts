@@ -34,7 +34,7 @@ describe("ResetPasswordUseCase", () => {
     const resetPassword = createResetPassword(new Date(Date.now() + 60_000));
     const resetPasswordRepository = {
       findByToken: vi.fn().mockResolvedValue(resetPassword),
-      deleteByUserId: vi.fn().mockResolvedValue(undefined),
+      delete: vi.fn().mockResolvedValue(undefined),
     };
     const userPort = {
       update: vi.fn().mockResolvedValue(updatedUser),
@@ -52,14 +52,14 @@ describe("ResetPasswordUseCase", () => {
     expect(resetPasswordRepository.findByToken).toHaveBeenCalledWith(input.token);
     expect(authService.hashPassword).toHaveBeenCalledWith(input.password);
     expect(userPort.update).toHaveBeenCalledWith({ userId, passwordHash: "hashed" });
-    expect(resetPasswordRepository.deleteByUserId).toHaveBeenCalledWith(userId);
+    expect(resetPasswordRepository.delete).toHaveBeenCalledWith(resetPassword);
     expect(result).toEqual({ email: updatedUser.email });
   });
 
   it("throws when the reset token is unknown", async () => {
     const resetPasswordRepository = {
       findByToken: vi.fn().mockResolvedValue(null),
-      deleteByUserId: vi.fn(),
+      delete: vi.fn(),
     };
     const userPort = { update: vi.fn() };
     const authService = { hashPassword: vi.fn() };
@@ -76,14 +76,14 @@ describe("ResetPasswordUseCase", () => {
 
     expect(authService.hashPassword).not.toHaveBeenCalled();
     expect(userPort.update).not.toHaveBeenCalled();
-    expect(resetPasswordRepository.deleteByUserId).not.toHaveBeenCalled();
+    expect(resetPasswordRepository.delete).not.toHaveBeenCalled();
   });
 
   it("throws when the reset token has expired", async () => {
     const resetPassword = createResetPassword(new Date(Date.now() - 1_000));
     const resetPasswordRepository = {
       findByToken: vi.fn().mockResolvedValue(resetPassword),
-      deleteByUserId: vi.fn(),
+      delete: vi.fn(),
     };
     const userPort = { update: vi.fn() };
     const authService = { hashPassword: vi.fn() };
@@ -100,6 +100,6 @@ describe("ResetPasswordUseCase", () => {
 
     expect(authService.hashPassword).not.toHaveBeenCalled();
     expect(userPort.update).not.toHaveBeenCalled();
-    expect(resetPasswordRepository.deleteByUserId).not.toHaveBeenCalled();
+    expect(resetPasswordRepository.delete).not.toHaveBeenCalled();
   });
 });

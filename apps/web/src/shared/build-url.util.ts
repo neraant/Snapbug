@@ -47,6 +47,9 @@ export const routePattern = {
   sdk: "/sdk",
   tickets: `${ticketsBase}`,
   ticket: `${ticketsBase}/:shortId`,
+
+  projects: "/projects",
+  team: "/team",
 } as const;
 
 export const url = {
@@ -61,4 +64,7 @@ export const url = {
   sdk: () => routePattern.sdk,
   ticketsBoard: () => routePattern.tickets,
   ticket: (shortId: string) => buildUrl(routePattern.ticket, { shortId }),
+
+  projects: () => routePattern.projects,
+  team: () => routePattern.team,
 } as const;

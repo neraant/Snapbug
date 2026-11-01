@@ -270,6 +270,7 @@ JSON_SCHEMA_REGISTRY.add(projectModelSchema, {
     {
       id: "4a8c69a1-1ab1-45a8-8497-eae1e506d9d1",
       name: "Store",
+      color: "#F97316",
       organizationId: "3a8c69a1-1ab1-45a8-8497-eae1e506d9d1",
       createdAt: "2026-10-03T09:00:00.000Z",
     },
@@ -279,7 +280,7 @@ JSON_SCHEMA_REGISTRY.add(projectModelSchema, {
 JSON_SCHEMA_REGISTRY.add(createProjectInputDtoSchema, {
   title: "Create project",
   description: "Create a project in an organization",
-  examples: [{ organizationId: "2a8c69a1-1ab1-45a8-8497-eae1e506d9d1", name: "Store" }],
+  examples: [{ organizationId: "2a8c69a1-1ab1-45a8-8497-eae1e506d9d1", name: "Store", color: "#F97316" }],
 });
 
 JSON_SCHEMA_REGISTRY.add(updateProjectInputDtoSchema, {

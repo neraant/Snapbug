@@ -1,3 +1,4 @@
+import { BugReportMapper } from "@workspace/server/modules/bug-report/entity/bug-report.mapper";
 import type { ApiKeyPort } from "@workspace/server/modules/bug-report/port/api-key.port";
 import type { ProjectPort } from "@workspace/server/modules/bug-report/port/project.port";
 import type { WidgetIngestOriginService } from "@workspace/server/modules/bug-report/service/widget-ingest-origin.service";
@@ -27,7 +28,6 @@ export class FindWidgetConfigUseCase {
     const settings = widgetSetting ?? projectWidgetSettingModelDefaults;
     this.widgetIngestOriginService.assertAllowed(settings.allowedDomains, requestOrigin);
 
-    const { allowedDomains: _allowedDomains, ...publicConfig } = settings;
-    return publicConfig;
+    return BugReportMapper.toFindWidgetConfigOutput(settings);
   }
 }

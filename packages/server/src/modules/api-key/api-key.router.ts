@@ -13,6 +13,7 @@ export const apiKeyRouter = os.router({
     async ({ input }) => await container.apiKey.findProjectByKey.execute(input),
   ),
   findProjectApiKey: authed.findProjectApiKey.handler(
-    async ({ input, context }) => await container.apiKey.findProjectApiKey.execute(input, context.user.id),
+    async ({ input, context }) =>
+      await container.apiKey.findProjectApiKey.execute(input, context.user.id, context.organizationId),
   ),
 });

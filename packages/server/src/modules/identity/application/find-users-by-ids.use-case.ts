@@ -9,6 +9,6 @@ export class FindUsersByIdsUseCase {
     if (ids.length === 0) return [];
 
     const users = await this.userRepository.findManyByIds(ids);
-    return users.map((user) => UserMapper.toDto(user));
+    return UserMapper.toFindUsersByIdsOutput(users);
   }
 }

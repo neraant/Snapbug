@@ -1,6 +1,7 @@
 import { db } from "@workspace/database";
 import { projectTable } from "@workspace/database/schema";
 import type { OrganizationRow } from "@workspace/database/seed/organization";
+import { projectColorValues } from "@workspace/validation/shared/project-color.schema";
 import { inArray, type InferInsertModel, type InferSelectModel } from "drizzle-orm";
 
 type ProjectInsert = InferInsertModel<typeof projectTable>;
@@ -15,12 +16,14 @@ export async function seedProject(organizations: OrganizationRow[]): Promise<Pro
     {
       id: "4a8c69a1-1ab1-45a8-8497-eae1e506d9d1",
       name: "Acme Store",
+      color: projectColorValues[0],
       organizationId: organization.id,
       createdAt: daysAgo(30),
     },
     {
       id: "4a8c69a1-1ab1-45a8-8497-eae1e506d9d2",
       name: "Acme Marketing",
+      color: projectColorValues[4],
       organizationId: organization.id,
       createdAt: daysAgo(21),
     },

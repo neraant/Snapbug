@@ -5,6 +5,7 @@ import type { Membership } from "@workspace/server/modules/membership/entity/mem
 import { MembershipMapper } from "@workspace/server/modules/membership/entity/membership.mapper";
 import { InternalServerError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
+import { eq } from "drizzle-orm";
 
 export class MembershipRepository {
   constructor(private readonly db: DbClient = defaultDb) {}
@@ -20,18 +21,12 @@ export class MembershipRepository {
     return membership ? MembershipMapper.fromPersistence(membership) : null;
   }
 
-  async findByUserId(userId: string): Promise<Membership | null> {
-    const membership = await this.db.query.membershipTable.findFirst({
+  async findManyByUserId(userId: string): Promise<Membership[]> {
+    const memberships = await this.db.query.membershipTable.findMany({
       where: { userId },
+      orderBy: { createdAt: "desc" },
     });
-    return membership ? MembershipMapper.fromPersistence(membership) : null;
-  }
-
-  async findByOrganizationId(organizationId: string): Promise<Membership | null> {
-    const membership = await this.db.query.membershipTable.findFirst({
-      where: { organizationId },
-    });
-    return membership ? MembershipMapper.fromPersistence(membership) : null;
+    return memberships.map((membership) => MembershipMapper.fromPersistence(membership));
   }
 
   async findManyByOrganizationId(organizationId: string): Promise<Membership[]> {
@@ -42,8 +37,24 @@ export class MembershipRepository {
   }
 
   async save(membership: Membership): Promise<void> {
+    const values = MembershipMapper.toPersistence(membership);
+
     try {
-      await this.db.insert(membershipTable).values(MembershipMapper.toPersistence(membership));
+      await this.db
+        .insert(membershipTable)
+        .values(values)
+        .onConflictDoUpdate({
+          target: membershipTable.id,
+          set: { role: values.role },
+        });
+    } catch (error) {
+      throw new InternalServerError(ERROR_CODES.INTERNAL_SERVER_ERROR, undefined, { cause: error });
+    }
+  }
+
+  async delete(membership: Membership): Promise<void> {
+    try {
+      await this.db.delete(membershipTable).where(eq(membershipTable.id, membership.id));
     } catch (error) {
       throw new InternalServerError(ERROR_CODES.INTERNAL_SERVER_ERROR, undefined, { cause: error });
     }

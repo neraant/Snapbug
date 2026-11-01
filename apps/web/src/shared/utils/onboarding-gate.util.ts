@@ -9,6 +9,10 @@ export function isGuestAuthPath(pathname: string): boolean {
   );
 }
 
+export function isInvitationAuthPath(pathname: string): boolean {
+  return pathname.startsWith(url.signIn()) || pathname.startsWith(url.signUp());
+}
+
 export function isOnboardingPath(pathname: string): boolean {
   return pathname.startsWith(url.onboarding());
 }

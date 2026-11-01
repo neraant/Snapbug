@@ -56,7 +56,10 @@ const bugReport = new BugReport({
 describe("FindScreenshotUseCase", () => {
   it("returns screenshot bytes for a member", async () => {
     const bytes = new Uint8Array([137, 80, 78, 71]);
-    const membershipPort = { findByUser: vi.fn().mockResolvedValue(membership) };
+    const membershipPort = {
+      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
+      findByUserAndOrganization: vi.fn().mockResolvedValue(membership),
+    };
     const bugReportRepository = {
       findByShortIdAndOrganizationId: vi.fn().mockResolvedValue(bugReport),
     };
@@ -69,7 +72,7 @@ describe("FindScreenshotUseCase", () => {
       fileStoragePort as unknown as FileStoragePort,
     );
 
-    const result = await useCase.execute({ shortId: "SNB-1" }, userId);
+    const result = await useCase.execute({ shortId: "SNB-1" }, userId, organizationId);
 
     expect(bugReportRepository.findByShortIdAndOrganizationId).toHaveBeenCalledWith("SNB-1", organizationId);
     expect(fileStoragePort.readBugReportScreenshot).toHaveBeenCalledWith(screenshotKey);
@@ -77,7 +80,10 @@ describe("FindScreenshotUseCase", () => {
   });
 
   it("throws when the bug report has no screenshot", async () => {
-    const membershipPort = { findByUser: vi.fn().mockResolvedValue(membership) };
+    const membershipPort = {
+      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
+      findByUserAndOrganization: vi.fn().mockResolvedValue(membership),
+    };
     const bugReportWithoutScreenshot = new BugReport({
       id: bugReport.id,
       projectId,
@@ -117,7 +123,7 @@ describe("FindScreenshotUseCase", () => {
       fileStoragePort as unknown as FileStoragePort,
     );
 
-    await expect(useCase.execute({ shortId: "SNB-1" }, userId)).rejects.toMatchObject({
+    await expect(useCase.execute({ shortId: "SNB-1" }, userId, organizationId)).rejects.toMatchObject({
       errorCode: ERROR_CODES.BUG_REPORT_NOT_FOUND,
     });
 

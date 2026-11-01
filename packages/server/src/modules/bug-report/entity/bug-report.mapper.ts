@@ -1,9 +1,19 @@
 import { BugReport } from "@workspace/server/modules/bug-report/entity/bug-report.entity";
-import type { BugReportPersistedType } from "@workspace/server/modules/bug-report/entity/bug-report.types";
+import type {
+  AssigneeOpenCountRow,
+  BugReportPersistedType,
+  ProjectOpenCountRow,
+} from "@workspace/server/modules/bug-report/entity/bug-report.types";
 import type { BugReportModelType } from "@workspace/validation/modules/bug-report/dto/bug-report.model";
+import type { CountOpenByAssigneeOutputDtoType } from "@workspace/validation/modules/bug-report/dto/count-open-by-assignee.schema";
+import type { CountOpenByProjectOutputDtoType } from "@workspace/validation/modules/bug-report/dto/count-open-by-project.schema";
+import type { FindBugReportsOutputDtoType } from "@workspace/validation/modules/bug-report/dto/find-bug-reports.schema";
 import type { FindOneOutputDtoType } from "@workspace/validation/modules/bug-report/dto/find-one.schema";
 import type { FindRecentOutputDtoType } from "@workspace/validation/modules/bug-report/dto/find-recent.schema";
+import type { FindStatsOutputDtoType } from "@workspace/validation/modules/bug-report/dto/find-stats.schema";
+import type { FindWidgetConfigOutputDtoType } from "@workspace/validation/modules/bug-report/dto/find-widget-config.schema";
 import type { FindWorkloadOutputDtoType } from "@workspace/validation/modules/bug-report/dto/find-workload.schema";
+import type { ProjectWidgetSettingModelType } from "@workspace/validation/modules/project/dto/project-widget-setting.model";
 import type { UserModelType } from "@workspace/validation/modules/user/dto/user.model";
 
 const unassignedWorkloadName = "Unassigned";
@@ -73,12 +83,38 @@ export abstract class BugReportMapper {
     };
   }
 
-  static toFindOneOutput(bugReport: BugReport, assignee: UserModelType | null): FindOneOutputDtoType {
+  static toFindBugReportsOutput(bugReports: BugReport[]): FindBugReportsOutputDtoType {
+    return bugReports.map((bugReport) => BugReportMapper.toDto(bugReport));
+  }
+
+  static toCountOpenByAssigneeOutput(rows: AssigneeOpenCountRow[]): CountOpenByAssigneeOutputDtoType {
+    return rows.flatMap((row) => (row.assignedTo ? [{ userId: row.assignedTo, openCount: row.count }] : []));
+  }
+
+  static toCountOpenByProjectOutput(rows: ProjectOpenCountRow[]): CountOpenByProjectOutputDtoType {
+    return rows.map((row) => ({ projectId: row.projectId, openCount: row.count }));
+  }
+
+  static toFindStatsOutput(items: FindStatsOutputDtoType["items"]): FindStatsOutputDtoType {
+    return { items };
+  }
+
+  static toFindWidgetConfigOutput(settings: ProjectWidgetSettingModelType): FindWidgetConfigOutputDtoType {
+    const { allowedDomains: _allowedDomains, ...publicConfig } = settings;
+    return publicConfig;
+  }
+
+  static toFindOneOutput(
+    bugReport: BugReport,
+    assignee: UserModelType | null,
+    organizationId: string,
+  ): FindOneOutputDtoType {
     const dto = BugReportMapper.toDto(bugReport);
 
     return {
       ...dto,
       assignee: assignee ? { id: assignee.id, name: assignee.name, email: assignee.email } : null,
+      organizationId,
     };
   }
 

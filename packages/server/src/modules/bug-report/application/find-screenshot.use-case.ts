@@ -17,8 +17,14 @@ export class FindScreenshotUseCase {
     private readonly fileStoragePort: FileStoragePort,
   ) {}
 
-  async execute(input: FindScreenshotInputDtoType, userId: string): Promise<FindScreenshotResult> {
-    const membership = await this.membershipPort.findByUser(userId);
+  async execute(
+    input: FindScreenshotInputDtoType,
+    userId: string,
+    organizationId: string | null,
+  ): Promise<FindScreenshotResult> {
+    if (!organizationId) throw new NotFoundError(ERROR_CODES.ORGANIZATION_NOT_FOUND);
+
+    const membership = await this.membershipPort.findByUserAndOrganization({ userId, organizationId });
     if (!membership) throw new NotFoundError(ERROR_CODES.ORGANIZATION_NOT_FOUND);
 
     const bugReport = await this.bugReportRepository.findByShortIdAndOrganizationId(
@@ -26,6 +32,9 @@ export class FindScreenshotUseCase {
       membership.organizationId,
     );
     if (!bugReport) throw new NotFoundError(ERROR_CODES.BUG_REPORT_NOT_FOUND);
+
+    const allowedProjectIds = await this.membershipPort.filterProjectIds(membership, [bugReport.projectId]);
+    if (allowedProjectIds.length === 0) throw new NotFoundError(ERROR_CODES.BUG_REPORT_NOT_FOUND);
 
     const screenshotKey = bugReport.screenshotKey;
     if (!screenshotKey) throw new NotFoundError(ERROR_CODES.BUG_REPORT_NOT_FOUND);

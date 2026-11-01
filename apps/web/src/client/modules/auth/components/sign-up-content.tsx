@@ -1,19 +1,20 @@
+"use client";
+
 import { Column } from "@workspace/design-system/components/layout/column";
 import { Button } from "@workspace/design-system/components/ui/button";
 import { Typography } from "@workspace/design-system/components/ui/typography";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
 import { SignUpForm } from "@/client/modules/auth/components/sign-up-form";
 import { texts } from "@/client/modules/auth/consts/texts.const";
-import { parseInvitationToken } from "@/client/modules/auth/utils/parse-invitation-token.util";
 import { url } from "@/shared/build-url.util";
 
-export function SignUpContent() {
-  const searchParams = useSearchParams();
-  const invitationToken = parseInvitationToken(searchParams.get("invitation"));
+type SignUpContentProps = {
+  invitationToken?: string;
+};
 
+export function SignUpContent({ invitationToken }: SignUpContentProps) {
   return (
     <Column width="full" gap="lg">
       <Column width="full" gap="xs">

@@ -7,6 +7,7 @@ export abstract class ProjectFactory {
     return new Project({
       id: randomUUID(),
       name: project.name,
+      color: project.color,
       organizationId: project.organizationId,
       widgetSettings: null,
       createdAt: new Date(),

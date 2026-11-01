@@ -4,9 +4,11 @@ import { membershipContract } from "@workspace/server/modules/membership/members
 import { authedMiddleware } from "@workspace/server/shared/orpc/authed.middleware";
 import type { OrpcContext } from "@workspace/server/shared/orpc/context.const";
 import { mapAppErrorMiddleware } from "@workspace/server/shared/orpc/map-app-error.middleware";
+import { adminMiddleware } from "@workspace/server/shared/orpc/require-role.middleware";
 
 const os = implement(membershipContract).$context<OrpcContext>().use(mapAppErrorMiddleware);
 const authed = os.use(authedMiddleware);
+const admin = authed.use(adminMiddleware);
 
 export const membershipRouter = os.router({
   createMembership: authed.createMembership.handler(
@@ -16,6 +18,26 @@ export const membershipRouter = os.router({
     async ({ input }) => await container.membership.findMembership.execute(input),
   ),
   findMembershipByUser: authed.findMembershipByUser.handler(
-    async ({ context }) => await container.membership.findMembershipByUser.execute(context.user.id),
+    async ({ context }) =>
+      await container.membership.findMembershipByUser.execute(context.user.id, context.organizationId),
+  ),
+  findTeamMembers: admin.findTeamMembers.handler(
+    async ({ context }) => await container.membership.findTeamMembers.execute(context.user.id, context.organizationId),
+  ),
+  updateMembershipRole: admin.updateMembershipRole.handler(
+    async ({ input, context }) =>
+      await container.membership.updateMembershipRole.execute(input, context.user.id, context.organizationId),
+  ),
+  removeMembership: admin.removeMembership.handler(
+    async ({ input, context }) =>
+      await container.membership.removeMembership.execute(input, context.user.id, context.organizationId),
+  ),
+  findMembershipProjectAccess: admin.findMembershipProjectAccess.handler(
+    async ({ input, context }) =>
+      await container.membership.findMembershipProjectAccess.execute(input, context.user.id, context.organizationId),
+  ),
+  replaceMembershipProjectAccess: admin.replaceMembershipProjectAccess.handler(
+    async ({ input, context }) =>
+      await container.membership.replaceMembershipProjectAccess.execute(input, context.user.id, context.organizationId),
   ),
 });

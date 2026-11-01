@@ -19,16 +19,6 @@ export function TicketDetailCopyableUrlValue({ url }: TicketDetailCopyableUrlVal
       <Tooltip>
         <TooltipTrigger
           render={
-            <Typography variant="text-xs" align="right" className="max-w-48 min-w-0 truncate">
-              {url}
-            </Typography>
-          }
-        />
-        <TooltipContent>{url}</TooltipContent>
-      </Tooltip>
-      <Tooltip>
-        <TooltipTrigger
-          render={
             <Button
               type="button"
               variant="ghost"
@@ -44,6 +34,16 @@ export function TicketDetailCopyableUrlValue({ url }: TicketDetailCopyableUrlVal
           }
         />
         <TooltipContent>{copied ? texts.sidebar.copiedUrl : texts.sidebar.copyUrl}</TooltipContent>
+      </Tooltip>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <Typography variant="text-xs" align="right" className="max-w-48 min-w-0 truncate">
+              {url}
+            </Typography>
+          }
+        />
+        <TooltipContent>{url}</TooltipContent>
       </Tooltip>
     </Row>
   );

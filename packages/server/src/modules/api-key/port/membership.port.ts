@@ -1,5 +1,10 @@
-import type { FindMembershipByUserOutputDtoType } from "@workspace/validation/modules/membership/dto/find-membership-by-user.schema";
+import type {
+  FindMembershipInputDtoType,
+  FindMembershipOutputDtoType,
+} from "@workspace/validation/modules/membership/dto/find-membership.schema";
+import type { MembershipModelType } from "@workspace/validation/modules/membership/dto/membership.model";
 
 export type MembershipPort = {
-  findByUser: (userId: string) => Promise<FindMembershipByUserOutputDtoType>;
+  findByUserAndOrganization: (input: FindMembershipInputDtoType) => Promise<FindMembershipOutputDtoType>;
+  filterProjectIds: (membership: Pick<MembershipModelType, "id" | "role">, projectIds: string[]) => Promise<string[]>;
 };

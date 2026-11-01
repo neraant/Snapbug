@@ -19,8 +19,11 @@ const font = {
 const texts = {
   eyebrow: "Snapbug",
   tagline: "Developer Triage",
-  title: "You're on the guest list.",
-  body: "Someone invited you to their Snapbug workspace. Create your account and jump in. This link stays live for 7 days.",
+  title: (organizationName: string) => `Join ${organizationName}`,
+  body: (organizationName: string, recipientName?: string) =>
+    recipientName
+      ? `${recipientName}, you're invited to join ${organizationName}. Create your account and jump in. This link stays live for 7 days.`
+      : `You're invited to join ${organizationName}. Create your account and jump in. This link stays live for 7 days.`,
   action: "Accept invitation",
   fallback: "If the button hides, paste this link into your browser.",
   ignore: "Didn't expect this? Ignore the email — no account will be created.",
@@ -29,9 +32,11 @@ const texts = {
 
 type InvitationEmailTemplateProps = {
   inviteUrl: string;
+  organizationName: string;
+  recipientName?: string;
 };
 
-export function InvitationEmailTemplate({ inviteUrl }: InvitationEmailTemplateProps) {
+export function InvitationEmailTemplate({ inviteUrl, organizationName, recipientName }: InvitationEmailTemplateProps) {
   return (
     <div style={{ backgroundColor: color.canvas, margin: 0, padding: "40px 16px", fontFamily: font.sans }}>
       <table
@@ -100,7 +105,7 @@ export function InvitationEmailTemplate({ inviteUrl }: InvitationEmailTemplatePr
                         paddingBottom: 12,
                       }}
                     >
-                      {texts.title}
+                      {texts.title(organizationName)}
                     </td>
                   </tr>
                   <tr>
@@ -113,7 +118,7 @@ export function InvitationEmailTemplate({ inviteUrl }: InvitationEmailTemplatePr
                         padding: "0 12px 28px",
                       }}
                     >
-                      {texts.body}
+                      {texts.body(organizationName, recipientName)}
                     </td>
                   </tr>
                   <tr>

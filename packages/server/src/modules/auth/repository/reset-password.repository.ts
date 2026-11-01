@@ -19,8 +19,17 @@ export class ResetPasswordRepository {
     return row ? ResetPasswordMapper.fromPersistence(row) : null;
   }
 
-  async deleteByUserId(userId: string): Promise<void> {
-    await this.db.delete(resetPasswordTokenTable).where(eq(resetPasswordTokenTable.userId, userId));
+  async findByUserId(userId: string): Promise<ResetPassword | null> {
+    const row = await this.db.query.resetPasswordTokenTable.findFirst({ where: { userId } });
+    return row ? ResetPasswordMapper.fromPersistence(row) : null;
+  }
+
+  async delete(resetPassword: ResetPassword): Promise<void> {
+    try {
+      await this.db.delete(resetPasswordTokenTable).where(eq(resetPasswordTokenTable.id, resetPassword.id));
+    } catch (error) {
+      throw new InternalServerError(ERROR_CODES.INTERNAL_SERVER_ERROR, undefined, { cause: error });
+    }
   }
 
   async save(resetPassword: ResetPassword): Promise<void> {

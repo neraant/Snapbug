@@ -1,14 +1,15 @@
 import { oc } from "@orpc/contract";
 import { sessionAuthSpec } from "@workspace/server/shared/openapi/session-auth.const";
 import {
-  createOrganizationInputDtoSchema,
-  createOrganizationOutputDtoSchema,
-} from "@workspace/validation/modules/organization/dto/create-organization.schema";
-import {
   completeOnboardingInputDtoSchema,
   completeOnboardingOutputDtoSchema,
 } from "@workspace/validation/modules/organization/dto/complete-onboarding.schema";
+import {
+  createOrganizationInputDtoSchema,
+  createOrganizationOutputDtoSchema,
+} from "@workspace/validation/modules/organization/dto/create-organization.schema";
 import { findOnboardingOutputDtoSchema } from "@workspace/validation/modules/organization/dto/find-onboarding.schema";
+import { findOrganizationsOutputDtoSchema } from "@workspace/validation/modules/organization/dto/find-organizations.schema";
 import { organizationModelSchema } from "@workspace/validation/modules/organization/dto/organization.model";
 import { updateOrganizationInputDtoSchema } from "@workspace/validation/modules/organization/dto/update-organization.schema";
 
@@ -33,6 +34,13 @@ export const organizationContract = {
       summary: "Update organization",
       spec: sessionAuthSpec,
     }),
+  findOrganizations: oc.output(findOrganizationsOutputDtoSchema).route({
+    method: "GET",
+    path: "/organizations",
+    tags: ["organization"],
+    summary: "List organizations for the current user",
+    spec: sessionAuthSpec,
+  }),
   findOnboarding: oc.output(findOnboardingOutputDtoSchema).route({
     method: "GET",
     path: "/organizations/onboarding",

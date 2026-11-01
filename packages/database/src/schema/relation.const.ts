@@ -4,6 +4,7 @@ import { invitationTable } from "@workspace/database/schema/invitation.const";
 import { membershipTable } from "@workspace/database/schema/membership.const";
 import { organizationTable } from "@workspace/database/schema/organization.const";
 import { projectTable } from "@workspace/database/schema/project.const";
+import { projectAccessTable } from "@workspace/database/schema/project-access.const";
 import { resetPasswordTokenTable } from "@workspace/database/schema/reset-password-token.const";
 import { userTable } from "@workspace/database/schema/user.const";
 import { defineRelations } from "drizzle-orm";
@@ -14,6 +15,7 @@ const tables = {
   invitationTable,
   membershipTable,
   organizationTable,
+  projectAccessTable,
   projectTable,
   userTable,
   resetPasswordTokenTable,
@@ -67,6 +69,19 @@ export const relations = defineRelations(tables, (relation) => ({
       to: relation.organizationTable.id,
       optional: false,
     }),
+    projectAccesses: relation.many.projectAccessTable(),
+  },
+  projectAccessTable: {
+    membership: relation.one.membershipTable({
+      from: relation.projectAccessTable.membershipId,
+      to: relation.membershipTable.id,
+      optional: false,
+    }),
+    project: relation.one.projectTable({
+      from: relation.projectAccessTable.projectId,
+      to: relation.projectTable.id,
+      optional: false,
+    }),
   },
   projectTable: {
     organization: relation.one.organizationTable({
@@ -76,6 +91,7 @@ export const relations = defineRelations(tables, (relation) => ({
     }),
     apiKeys: relation.many.apiKeyTable(),
     bugReports: relation.many.bugReportTable(),
+    projectAccesses: relation.many.projectAccessTable(),
   },
   apiKeyTable: {
     project: relation.one.projectTable({

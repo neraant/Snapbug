@@ -9,6 +9,7 @@ import { TicketDetailIssueSection } from "@/client/modules/ticket-detail/compone
 import { TicketDetailReplaySection } from "@/client/modules/ticket-detail/components/ticket-detail-replay-section";
 import { TicketDetailScreenshotSection } from "@/client/modules/ticket-detail/components/ticket-detail-screenshot-section";
 import { TicketDetailSidebar } from "@/client/modules/ticket-detail/components/ticket-detail-sidebar";
+import { useFollowTicketOrganization } from "@/client/modules/ticket-detail/hooks/use-follow-ticket-organization";
 import { TICKET_DETAIL_REPLAY_PLAYER_SKELETON_HEIGHT } from "@/client/modules/ticket-detail/utils/build-ticket-detail-replay-player-props.util";
 
 type TicketDetailProps = {
@@ -16,6 +17,8 @@ type TicketDetailProps = {
 };
 
 export function TicketDetail({ shortId }: TicketDetailProps) {
+  const { showActiveOrganizationData } = useFollowTicketOrganization(shortId);
+
   return (
     <Column gap="none" width="full" minWidth="0" className="min-h-0 flex-1 overflow-y-auto">
       <Column gap="lg" padding="lg" width="full" minWidth="0">
@@ -26,8 +29,16 @@ export function TicketDetail({ shortId }: TicketDetailProps) {
         <Grid columns="responsive-3" gap="lg">
           <Column gap="lg" minWidth="0" width="full" className="min-w-0 lg:col-span-2">
             <TicketDetailIssueSection shortId={shortId} />
-            <TicketDetailScreenshotSection shortId={shortId} />
-            <TicketDetailReplaySection shortId={shortId} />
+            {showActiveOrganizationData ? (
+              <TicketDetailScreenshotSection shortId={shortId} />
+            ) : (
+              <Skeleton className="h-40 w-full" />
+            )}
+            {showActiveOrganizationData ? (
+              <TicketDetailReplaySection shortId={shortId} />
+            ) : (
+              <Skeleton className="w-full" style={{ height: TICKET_DETAIL_REPLAY_PLAYER_SKELETON_HEIGHT }} />
+            )}
             <TicketDetailDiagnosticsCard shortId={shortId} />
           </Column>
           <TicketDetailSidebar shortId={shortId} />

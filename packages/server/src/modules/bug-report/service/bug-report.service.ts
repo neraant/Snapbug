@@ -73,7 +73,7 @@ export class BugReportService {
         continue;
       }
 
-      await this.bugReportRepository.save(bugReport.update({ boardOrder: nextBoardOrder }));
+      await this.saveWithAudit(bugReport.update({ boardOrder: nextBoardOrder }), "Normalize bug report board order");
     }
   }
 }

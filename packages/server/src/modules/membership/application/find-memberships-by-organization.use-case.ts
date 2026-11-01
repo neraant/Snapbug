@@ -7,6 +7,6 @@ export class FindMembershipsByOrganizationUseCase {
 
   async execute(organizationId: string): Promise<MembershipModelType[]> {
     const memberships = await this.membershipRepository.findManyByOrganizationId(organizationId);
-    return memberships.map((membership) => MembershipMapper.toDto(membership));
+    return MembershipMapper.toFindMembershipsByOrganizationOutput(memberships);
   }
 }

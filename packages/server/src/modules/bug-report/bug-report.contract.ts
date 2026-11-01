@@ -1,6 +1,8 @@
 import { oc } from "@orpc/contract";
 import { oz } from "@orpc/zod";
 import { sessionAuthSpec } from "@workspace/server/shared/openapi/session-auth.const";
+import { countOpenByAssigneeOutputDtoSchema } from "@workspace/validation/modules/bug-report/dto/count-open-by-assignee.schema";
+import { countOpenByProjectOutputDtoSchema } from "@workspace/validation/modules/bug-report/dto/count-open-by-project.schema";
 import {
   createBugReportInputDtoSchema,
   createBugReportOutputDtoSchema,
@@ -161,4 +163,18 @@ export const bugReportContract = {
       summary: "Bug report team workload",
       spec: sessionAuthSpec,
     }),
+  countOpenByProject: bugReport.output(countOpenByProjectOutputDtoSchema).route({
+    method: "GET",
+    path: "/bug-reports/open-count-by-project",
+    tags: ["bug-report"],
+    summary: "Count open bug reports by project",
+    spec: sessionAuthSpec,
+  }),
+  countOpenByAssignee: bugReport.output(countOpenByAssigneeOutputDtoSchema).route({
+    method: "GET",
+    path: "/bug-reports/open-count-by-assignee",
+    tags: ["bug-report"],
+    summary: "Count open bug reports by assignee",
+    spec: sessionAuthSpec,
+  }),
 };

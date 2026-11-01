@@ -38,7 +38,10 @@ export class RequestPasswordResetUseCase {
 
     await this.withTransaction(async (tx) => {
       const resetPasswordRepository = this.resetPasswordRepository.withTx(tx);
-      await resetPasswordRepository.deleteByUserId(user.id);
+      const existingResetPassword = await resetPasswordRepository.findByUserId(user.id);
+      if (existingResetPassword) {
+        await resetPasswordRepository.delete(existingResetPassword);
+      }
       await resetPasswordRepository.save(resetPassword);
     });
 

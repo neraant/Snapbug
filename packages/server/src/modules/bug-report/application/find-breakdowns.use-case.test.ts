@@ -43,7 +43,10 @@ function createRepositoryMock(overrides: Partial<BugReportRepository> = {}) {
 
 describe("FindBreakdownsUseCase", () => {
   it("returns zero breakdowns when the organization has no projects", async () => {
-    const membershipPort = { findByUser: vi.fn().mockResolvedValue(membership) };
+    const membershipPort = {
+      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
+      findByUserAndOrganization: vi.fn().mockResolvedValue(membership),
+    };
     const projectPort = { findManyByOrganizationId: vi.fn().mockResolvedValue([]), findById: vi.fn() };
     const bugReportRepository = createRepositoryMock();
     const useCase = new FindBreakdownsUseCase(
@@ -53,7 +56,7 @@ describe("FindBreakdownsUseCase", () => {
       new BugReportStatService(),
     );
 
-    const result = await useCase.execute(input, userId);
+    const result = await useCase.execute(input, userId, organizationId);
 
     expect(result.status).toEqual([
       { status: BugReportStatus.NEW, count: 0 },
@@ -66,7 +69,10 @@ describe("FindBreakdownsUseCase", () => {
   });
 
   it("throws when the project does not belong to the organization", async () => {
-    const membershipPort = { findByUser: vi.fn().mockResolvedValue(membership) };
+    const membershipPort = {
+      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
+      findByUserAndOrganization: vi.fn().mockResolvedValue(membership),
+    };
     const projectPort = {
       findManyByOrganizationId: vi.fn(),
       findById: vi.fn().mockResolvedValue({ ...project, organizationId: otherOrganizationId }),
@@ -79,7 +85,7 @@ describe("FindBreakdownsUseCase", () => {
       new BugReportStatService(),
     );
 
-    await expect(useCase.execute({ ...input, projectId }, userId)).rejects.toMatchObject({
+    await expect(useCase.execute({ ...input, projectId }, userId, organizationId)).rejects.toMatchObject({
       errorCode: ERROR_CODES.PROJECT_NOT_FOUND,
     });
 
@@ -87,7 +93,10 @@ describe("FindBreakdownsUseCase", () => {
   });
 
   it("merges page URLs into host+path labels and drops invalid URLs", async () => {
-    const membershipPort = { findByUser: vi.fn().mockResolvedValue(membership) };
+    const membershipPort = {
+      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
+      findByUserAndOrganization: vi.fn().mockResolvedValue(membership),
+    };
     const projectPort = { findManyByOrganizationId: vi.fn().mockResolvedValue([project]), findById: vi.fn() };
     const bugReportRepository = createRepositoryMock({
       countCreatedByUrl: vi.fn().mockResolvedValue([
@@ -104,13 +113,16 @@ describe("FindBreakdownsUseCase", () => {
       new BugReportStatService(),
     );
 
-    const result = await useCase.execute(input, userId);
+    const result = await useCase.execute(input, userId, organizationId);
 
     expect(result.pages).toEqual([{ label: "store.acme.test/checkout", count: 3 }]);
   });
 
   it("fills missing statuses with zero and counts environment totals beyond the top five", async () => {
-    const membershipPort = { findByUser: vi.fn().mockResolvedValue(membership) };
+    const membershipPort = {
+      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
+      findByUserAndOrganization: vi.fn().mockResolvedValue(membership),
+    };
     const projectPort = { findManyByOrganizationId: vi.fn().mockResolvedValue([project]), findById: vi.fn() };
     const bugReportRepository = createRepositoryMock({
       countCreatedByStatus: vi.fn().mockResolvedValue([{ status: BugReportStatus.NEW, count: 5 }]),
@@ -130,7 +142,7 @@ describe("FindBreakdownsUseCase", () => {
       new BugReportStatService(),
     );
 
-    const result = await useCase.execute(input, userId);
+    const result = await useCase.execute(input, userId, organizationId);
 
     expect(result.status.find((row) => row.status === BugReportStatus.RESOLVED)?.count).toBe(0);
     expect(result.browser.total).toBe(31);

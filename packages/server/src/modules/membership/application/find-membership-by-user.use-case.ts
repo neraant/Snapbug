@@ -5,8 +5,10 @@ import type { FindMembershipByUserOutputDtoType } from "@workspace/validation/mo
 export class FindMembershipByUserUseCase {
   constructor(private readonly membershipRepository: MembershipRepository) {}
 
-  async execute(userId: string): Promise<FindMembershipByUserOutputDtoType> {
-    const membership = await this.membershipRepository.findByUserId(userId);
+  async execute(userId: string, organizationId: string | null): Promise<FindMembershipByUserOutputDtoType> {
+    if (!organizationId) return null;
+
+    const membership = await this.membershipRepository.findByUserAndOrganization(userId, organizationId);
     return membership ? MembershipMapper.toDto(membership) : null;
   }
 }

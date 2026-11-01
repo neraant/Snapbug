@@ -10,9 +10,9 @@ const organizationId = "2a8c69a1-1ab1-45a8-8497-eae1e506d9d1";
 const userId = "0a8c69a1-1ab1-45a8-8497-eae1e506d9d4";
 
 describe("CreateMembershipUseCase", () => {
-  it("creates an admin membership for an empty organization", async () => {
+  it("creates an admin membership when the user is not already in the organization", async () => {
     const membershipRepository = {
-      findByOrganizationId: vi.fn().mockResolvedValue(null),
+      findByUserAndOrganization: vi.fn().mockResolvedValue(null),
       save: vi.fn().mockResolvedValue(undefined),
     };
     const useCase = new CreateMembershipUseCase(membershipRepository as unknown as MembershipRepository);
@@ -26,7 +26,7 @@ describe("CreateMembershipUseCase", () => {
     expect(saved.role).toBe(UserRole.ADMIN);
   });
 
-  it("throws when the organization already has a member", async () => {
+  it("throws when this user is already in the organization", async () => {
     const existing = new Membership({
       id: "1a8c69a1-1ab1-45a8-8497-eae1e506d9d1",
       userId,
@@ -35,7 +35,7 @@ describe("CreateMembershipUseCase", () => {
       createdAt: new Date("2026-10-03T09:00:00.000Z"),
     });
     const membershipRepository = {
-      findByOrganizationId: vi.fn().mockResolvedValue(existing),
+      findByUserAndOrganization: vi.fn().mockResolvedValue(existing),
       save: vi.fn(),
     };
     const useCase = new CreateMembershipUseCase(membershipRepository as unknown as MembershipRepository);

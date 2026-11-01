@@ -19,7 +19,7 @@ export class InvitationRepository {
     return row ? InvitationMapper.fromPersistence(row) : null;
   }
 
-  async upsertPending(invitation: Invitation): Promise<void> {
+  async save(invitation: Invitation): Promise<void> {
     const values = InvitationMapper.toPersistence(invitation);
 
     try {
@@ -32,24 +32,6 @@ export class InvitationRepository {
             token: values.token,
             expiresAt: values.expiresAt,
             invitedByUserId: values.invitedByUserId,
-            acceptedAt: null,
-          },
-        });
-    } catch (error) {
-      throw new InternalServerError(ERROR_CODES.INTERNAL_SERVER_ERROR, undefined, { cause: error });
-    }
-  }
-
-  async save(invitation: Invitation): Promise<void> {
-    const values = InvitationMapper.toPersistence(invitation);
-
-    try {
-      await this.db
-        .insert(invitationTable)
-        .values(values)
-        .onConflictDoUpdate({
-          target: invitationTable.id,
-          set: {
             acceptedAt: values.acceptedAt,
           },
         });

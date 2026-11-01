@@ -15,10 +15,14 @@ export const organizationRouter = os.router({
   updateOrganization: authed.updateOrganization.handler(
     async ({ input, context }) => await container.organization.updateOrganization.execute(input, context.user.id),
   ),
+  findOrganizations: authed.findOrganizations.handler(
+    async ({ context }) => await container.organization.findOrganizations.execute(context.user.id),
+  ),
   findOnboarding: authed.findOnboarding.handler(
-    async ({ context }) => await container.organization.findOnboarding.execute(context.user.id),
+    async ({ context }) => await container.organization.findOnboarding.execute(context.user.id, context.organizationId),
   ),
   completeOnboarding: authed.completeOnboarding.handler(
-    async ({ input, context }) => await container.organization.completeOnboarding.execute(input, context.user.id),
+    async ({ input, context }) =>
+      await container.organization.completeOnboarding.execute(input, context.user.id, context.organizationId),
   ),
 });

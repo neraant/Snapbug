@@ -1,3 +1,4 @@
+import { InvitationMapper } from "@workspace/server/modules/invitation/entity/invitation.mapper";
 import type { OrganizationPort } from "@workspace/server/modules/invitation/port/organization.port";
 import type { InvitationRepository } from "@workspace/server/modules/invitation/repository/invitation.repository";
 import { NotFoundError } from "@workspace/server/shared/error/app-errors";
@@ -24,9 +25,6 @@ export class FindInvitationByTokenUseCase {
       throw new NotFoundError(ERROR_CODES.INVALID_INVITATION_TOKEN);
     }
 
-    return {
-      email: invitation.email,
-      organizationName: organization.name,
-    };
+    return InvitationMapper.toFindByTokenOutput(invitation, organization.name);
   }
 }

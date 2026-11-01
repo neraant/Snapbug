@@ -15,14 +15,20 @@ export class FindProjectWidgetSettingUseCase {
   async execute(
     input: FindProjectWidgetSettingInputDtoType,
     userId: string,
+    organizationId: string | null,
   ): Promise<FindProjectWidgetSettingOutputDtoType> {
-    const membership = await this.membershipPort.findByUser(userId);
+    if (!organizationId) throw new NotFoundError(ERROR_CODES.ORGANIZATION_NOT_FOUND);
+
+    const membership = await this.membershipPort.findByUserAndOrganization({ userId, organizationId });
     if (!membership) throw new NotFoundError(ERROR_CODES.ORGANIZATION_NOT_FOUND);
 
     const project = await this.projectRepository.findById(input.projectId);
     if (!project || project.organizationId !== membership.organizationId) {
       throw new NotFoundError(ERROR_CODES.PROJECT_NOT_FOUND);
     }
+
+    const [allowedProjectId] = await this.membershipPort.filterProjectIds(membership, [project.id]);
+    if (!allowedProjectId) throw new NotFoundError(ERROR_CODES.PROJECT_NOT_FOUND);
 
     return ProjectMapper.toWidgetSettingDto(project);
   }
