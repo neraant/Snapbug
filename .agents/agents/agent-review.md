@@ -31,4 +31,23 @@ Weakening review means skipping or renaming the `ci` or `agent-review` checks, c
 
 Approve only when the change matches the spec and the decisions, keeps the rules above, and does not weaken review.
 
-Your final answer is one JSON object and nothing else. The only keys are `decision` and `summary`. `decision` is `approve` or `request_changes`. `summary` is the review body in English. Name the files and the spec, decision, or plan item that the change matches or breaks. Do not wrap the JSON in Markdown. Do not include credentials, private keys, or tokens in the summary.
+Your final answer is one JSON object and nothing else. The only keys are `decision` and `summary`. `decision` is `approve` or `request_changes`. Do not wrap the JSON in Markdown. Do not include credentials, private keys, or tokens in the summary.
+
+`summary` is the review body in English. It is this markdown and nothing else:
+
+## Verdict
+approve or request changes
+
+## Why
+one or two sentences, the actual reason
+
+## What changed
+short bullets of the real diff, or "No file changes."
+
+## Spec
+one line: which product rules the diff touches, or "Product rules not touched." Mention TBD tasks P-08 and P-18 only if the diff starts them.
+
+## Human
+"No." if the bot may approve, or "Yes. Protected path: <paths>." if a person must approve.
+
+Write `request changes` under Verdict when `decision` is `request_changes`. A person must approve only when the diff touches a protected path; list those paths. Do not add a preamble, another heading, or a list of rules the diff does not touch.

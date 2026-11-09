@@ -219,6 +219,64 @@ jobs:
           import sys
           from pathlib import Path
 
+          def protected_review_body(names, protected_paths, limit):
+              spec_paths = [
+                  path
+                  for path in names
+                  if path == "docs/SPEC.md" or path.startswith("docs/decisions/")
+              ]
+              if spec_paths:
+                  spec = "The diff edits " + ", ".join(spec_paths) + "."
+              else:
+                  spec = "Product rules not touched."
+              changed_paths = list(names)
+              human_paths = list(protected_paths)
+
+              def assemble(changed_paths, spec, human_paths, omitted):
+                  if changed_paths:
+                      lines = ["- " + path for path in changed_paths]
+                      if omitted:
+                          lines.append("- ...")
+                      changed = "\n".join(lines)
+                  else:
+                      changed = "No file changes."
+                  human = "Yes. Protected path: " + ", ".join(human_paths) + "."
+                  return (
+                      "## Verdict\n"
+                      "request changes\n"
+                      "\n"
+                      "## Why\n"
+                      "Protected paths changed "
+                      "(.github/, .cursor/, .agents/, docs/SPEC.md, or docs/decisions/). "
+                      "This workflow does not approve those edits.\n"
+                      "\n"
+                      "## What changed\n"
+                      + changed
+                      + "\n"
+                      "\n"
+                      "## Spec\n"
+                      + spec
+                      + "\n"
+                      "\n"
+                      "## Human\n"
+                      + human
+                      + "\n"
+                  )
+
+              omitted = False
+              text = assemble(changed_paths, spec, human_paths, omitted)
+              while len(text) > limit and len(changed_paths) > 1:
+                  changed_paths.pop()
+                  omitted = True
+                  text = assemble(changed_paths, spec, human_paths, omitted)
+              if len(text) > limit and spec_paths:
+                  spec = "The diff edits product rules in docs/SPEC.md or docs/decisions/."
+                  text = assemble(changed_paths, spec, human_paths, omitted)
+              while len(text) > limit and len(human_paths) > 1:
+                  human_paths.pop()
+                  text = assemble(changed_paths, spec, human_paths, omitted)
+              return text[:limit]
+
           review = __import__("json").loads(Path(sys.argv[1]).read_text())
           if not isinstance(review, dict) or set(review) != {"decision", "summary"}:
               sys.exit("review JSON shape is invalid")
@@ -233,9 +291,13 @@ jobs:
           if "-----BEGIN" in summary or "ghs_" in summary or "github_pat_" in summary:
               sys.exit("summary contains a secret marker")
 
-          protected = False
+          names = []
+          protected_paths = []
           for raw in Path(sys.argv[2]).read_text().splitlines():
               path = raw.strip().strip('"')
+              if not path:
+                  continue
+              names.append(path)
               if (
                   path == "docs/SPEC.md"
                   or path.startswith(".github/")
@@ -243,19 +305,19 @@ jobs:
                   or path.startswith(".agents/")
                   or path.startswith("docs/decisions/")
               ):
-                  protected = True
-                  break
+                  protected_paths.append(path)
 
           limit = 4000
-          if protected:
+          if protected_paths:
               decision = "request_changes"
-              note = (
-                  "Protected paths changed (.github/, .cursor/, .agents/, docs/SPEC.md, or docs/decisions/). "
-                  "This workflow does not approve those edits.\n\n"
-              )
-              summary = (note + summary)[:limit]
+              summary = protected_review_body(names, protected_paths, limit)
           else:
               summary = summary[:limit]
+
+          if key and key in summary:
+              sys.exit("summary contains the cursor key")
+          if "-----BEGIN" in summary or "ghs_" in summary or "github_pat_" in summary:
+              sys.exit("summary contains a secret marker")
 
           Path(sys.argv[3]).write_text(summary)
           Path(sys.argv[4]).write_text(decision + "\n")
