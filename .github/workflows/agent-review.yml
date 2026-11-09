@@ -130,8 +130,22 @@ jobs:
           text = raw.get("result")
           if not isinstance(text, str):
               sys.exit("agent result is not a string")
+
+          def strip_one_fence(value):
+              body = value.strip().lstrip("\ufeff")
+              if not body.startswith("```") or not body.endswith("```"):
+                  return body
+              line_end = body.find("\n")
+              if line_end == -1:
+                  return body
+              opener = body[:line_end].strip().lower()
+              if opener not in ("```", "```json"):
+                  return body
+              return body[line_end + 1 : -3].strip()
+
+          candidate = strip_one_fence(text)
           try:
-              review = json.loads(text.strip())
+              review = json.loads(candidate)
           except json.JSONDecodeError:
               sys.exit("review result is not one JSON object")
           if (
