@@ -194,7 +194,7 @@ jobs:
           Path(sys.argv[2]).write_text(json.dumps(review))
           PY
 
-      - uses: actions/create-github-app-token@v3
+      - uses: actions/create-github-app-token@v3.0.0
         id: app-token
         with:
           app-id: ${{ vars.REVIEWER_APP_ID }}
