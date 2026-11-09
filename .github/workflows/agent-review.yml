@@ -194,10 +194,10 @@ jobs:
           Path(sys.argv[2]).write_text(json.dumps(review))
           PY
 
-      - uses: actions/create-github-app-token@v3.0.0
+      - uses: actions/create-github-app-token@v3
         id: app-token
         with:
-          app-id: ${{ vars.REVIEWER_APP_ID }}
+          client-id: Iv23liaMk0S9lkvKh5WR
           private-key: ${{ secrets.REVIEWER_PRIVATE_KEY }}
           permission-contents: read
           permission-pull-requests: write
