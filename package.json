@@ -17,7 +17,7 @@
     "db:seed": "pnpm --filter @workspace/database db:seed",
     "db:studio": "pnpm --filter @workspace/database db:studio",
     "db:reset": "docker compose down -v && docker compose up -d && pnpm db:migrate && pnpm db:seed",
-    "test:unit": "pnpm --filter @workspace/server --filter @neraant/snapbug test:unit"
+    "test:unit": "pnpm --filter @workspace/server --filter @workspace/design-system --filter @neraant/snapbug test:unit"
   },
   "devDependencies": {
     "@workspace/eslint-config": "workspace:*",
