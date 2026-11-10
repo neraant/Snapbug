@@ -357,10 +357,26 @@ def git(
     return result.stdout.strip()
 
 
+def remove_tree(path: Path) -> None:
+    last_error: OSError | None = None
+    for _ in range(5):
+        if not path.exists():
+            return
+        try:
+            shutil.rmtree(path)
+        except OSError as error:
+            last_error = error
+            time.sleep(0.2)
+            continue
+        if not path.exists():
+            return
+    raise LoopError(f"could not remove {path}") from last_error
+
+
 def ensure_clone(auth: TokenSource) -> None:
     HOME_STATE.mkdir(parents=True, exist_ok=True)
     if CLONE.exists():
-        shutil.rmtree(CLONE)
+        remove_tree(CLONE)
     token = auth.current()
     cloned = subprocess.run(
         clone_command(CLONE),
@@ -514,6 +530,7 @@ def agent_environment(parent: dict[str, str], api_key: str, home: str) -> dict[s
         "TMPDIR": parent.get("TMPDIR", "/tmp"),
         "GH_TOKEN": "",
         "GITHUB_TOKEN": "",
+        "AGENT_CLI_CREDENTIAL_STORE": "file",
     }
 
 
@@ -575,7 +592,7 @@ def run_agent(task_id: str, branch: str, task_line: str) -> None:
             raise LoopError(f"agent timed out for {task_id}") from None
         save_agent_log(task_id, stdout or "", stderr or "", [key])
         if "Keychain" in (stderr or "") or "Security command failed" in (stderr or ""):
-            raise SetupError("macOS keychain blocked the agent. Choose Reset to Defaults on that dialog.")
+            raise SetupError("the agent called the macOS keychain and failed")
         if proc.returncode != 0:
             raise LoopError(f"agent exited {proc.returncode}")
     finally:
@@ -1028,8 +1045,22 @@ None.
             "cursor-key",
             str(home),
         )
-        allowed = {"PATH", "HOME", "CURSOR_API_KEY", "LANG", "TMPDIR", "GH_TOKEN", "GITHUB_TOKEN"}
-        if set(agent_env) != allowed or agent_env["HOME"] != str(home) or agent_env["GH_TOKEN"] != "":
+        allowed = {
+            "PATH",
+            "HOME",
+            "CURSOR_API_KEY",
+            "LANG",
+            "TMPDIR",
+            "GH_TOKEN",
+            "GITHUB_TOKEN",
+            "AGENT_CLI_CREDENTIAL_STORE",
+        }
+        if (
+            set(agent_env) != allowed
+            or agent_env["HOME"] != str(home)
+            or agent_env["GH_TOKEN"] != ""
+            or agent_env["AGENT_CLI_CREDENTIAL_STORE"] != "file"
+        ):
             raise SystemExit("agent env failed")
         if "SECRET" in agent_env or "implementer.pem" in agent_env["HOME"] or list(home.iterdir()):
             raise SystemExit("agent env failed")
