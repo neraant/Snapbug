@@ -91,6 +91,10 @@ class LoopError(RuntimeError):
     pass
 
 
+class SetupError(LoopError):
+    pass
+
+
 class TokenSource:
     def __init__(self, mint):
         self.mint = mint
@@ -570,6 +574,8 @@ def run_agent(task_id: str, branch: str, task_line: str) -> None:
             save_agent_log(task_id, stdout or "", stderr or "", [key])
             raise LoopError(f"agent timed out for {task_id}") from None
         save_agent_log(task_id, stdout or "", stderr or "", [key])
+        if "Keychain" in (stderr or "") or "Security command failed" in (stderr or ""):
+            raise SetupError("macOS keychain blocked the agent. Choose Reset to Defaults on that dialog.")
         if proc.returncode != 0:
             raise LoopError(f"agent exited {proc.returncode}")
     finally:
@@ -861,6 +867,8 @@ def one_task(auth: TokenSource, state: dict, notes: list[str]) -> tuple[str, boo
     try:
         run_agent(task_id, branch, line)
         used_agent = True
+    except SetupError:
+        raise
     except (LoopError, subprocess.TimeoutExpired) as error:
         used_agent = True
         return fail(f"{task_id} agent failed: {error}")
