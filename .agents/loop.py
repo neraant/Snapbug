@@ -24,7 +24,7 @@ from pathlib import Path
 
 REPO = os.environ.get("SNAPBUG_REPO", "neraant/Snapbug")
 OWNER, NAME = REPO.split("/", 1)
-APP_ID = os.environ.get("IMPLEMENTER_APP_ID", "180272519")
+APP_ID = os.environ.get("IMPLEMENTER_APP_ID", "Iv23lixwtl5CaJOLcyAd")
 KEY_PATH = Path(
     os.environ.get("IMPLEMENTER_PRIVATE_KEY_PATH", Path.home() / ".snapbug/implementer.pem")
 )
@@ -1074,6 +1074,7 @@ def main() -> None:
     if "--self-check" in sys.argv:
         self_check()
         return
+    cursor_key()
     limit = agent_call_cap()
     notes = [f"Repository: {REPO}", f"Agent call cap: {limit}", f"Model: {MODEL}"]
     auth = TokenSource(lambda: installation_token(app_jwt()))
