@@ -13,7 +13,4 @@ export const identityRouter = os.router({
   findUserByEmail: authed.findUserByEmail.handler(
     async ({ input }) => await container.identity.findUserByEmail.execute(input.email),
   ),
-  findUserCredentialsByEmail: authed.findUserCredentialsByEmail.handler(
-    async ({ input }) => await container.identity.findUserCredentialsByEmail.execute(input.email),
-  ),
 });

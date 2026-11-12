@@ -8,10 +8,6 @@ import {
   findUserByEmailInputDtoSchema,
   findUserByEmailOutputDtoSchema,
 } from "@workspace/validation/modules/user/dto/find-user-by-email.schema";
-import {
-  findUserCredentialsByEmailInputDtoSchema,
-  findUserCredentialsByEmailOutputDtoSchema,
-} from "@workspace/validation/modules/user/dto/find-user-credentials-by-email.schema";
 
 export const identityContract = {
   createUser: oc
@@ -26,16 +22,6 @@ export const identityContract = {
       path: "/users/by-email",
       tags: ["identity"],
       summary: "Find user by email",
-      spec: sessionAuthSpec,
-    }),
-  findUserCredentialsByEmail: oc
-    .input(findUserCredentialsByEmailInputDtoSchema)
-    .output(findUserCredentialsByEmailOutputDtoSchema)
-    .route({
-      method: "GET",
-      path: "/users/credentials",
-      tags: ["identity"],
-      summary: "Find user credentials by email",
       spec: sessionAuthSpec,
     }),
 };

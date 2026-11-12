@@ -1,10 +1,6 @@
 import { oc } from "@orpc/contract";
 import { sessionAuthSpec } from "@workspace/server/shared/openapi/session-auth.const";
 import {
-  createMembershipInputDtoSchema,
-  createMembershipOutputDtoSchema,
-} from "@workspace/validation/modules/membership/dto/create-membership.schema";
-import {
   findMembershipInputDtoSchema,
   findMembershipOutputDtoSchema,
 } from "@workspace/validation/modules/membership/dto/find-membership.schema";
@@ -32,16 +28,6 @@ import {
 } from "@workspace/validation/modules/membership/dto/update-membership-role.schema";
 
 export const membershipContract = {
-  createMembership: oc
-    .input(createMembershipInputDtoSchema)
-    .output(createMembershipOutputDtoSchema)
-    .route({
-      method: "POST",
-      path: "/memberships",
-      tags: ["membership"],
-      summary: "Create membership",
-      spec: sessionAuthSpec,
-    }),
   findMembership: oc
     .input(findMembershipInputDtoSchema)
     .output(findMembershipOutputDtoSchema)
