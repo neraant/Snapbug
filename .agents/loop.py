@@ -35,7 +35,11 @@ CLONE = HOME_STATE / "src"
 MAX_AGENT_CALLS = 5
 TOKEN_MAX_AGE = 45 * 60
 FAILURES_BEFORE_BLOCK = 3
-MODEL_ID = "cursor-grok-4.7"
+MODELS = {
+    "low": "grok-4.7-low",
+    "medium": "grok-4.7-medium",
+    "high": "grok-4.7-high",
+}
 EFFORTS = ("low", "medium", "high")
 AGENT_TIMEOUT = 30 * 60
 REQUIRED_CHECKS = ("ci", "agent-review")
@@ -629,8 +633,11 @@ def run_agent(task_id: str, branch: str, task_line: str, model: str) -> None:
             raise LoopError(f"agent timed out for {task_id}")
         if "Keychain" in stderr or "Security command failed" in stderr:
             raise SetupError("the agent called the macOS keychain and failed")
+        if "Cannot use this model" in stderr:
+            raise SetupError(agent_stderr_line(stderr))
         if proc.returncode != 0:
-            raise LoopError(f"agent exited {proc.returncode}")
+            detail = agent_stderr_line(stderr)
+            raise LoopError(detail or f"agent exited {proc.returncode}")
         result_error = agent_result_error(stdout_lines)
         if result_error:
             raise LoopError(result_error)
@@ -678,10 +685,18 @@ def record(notes: list[str], message: str) -> None:
     say(message)
 
 
+def agent_stderr_line(stderr: str) -> str:
+    line = stderr.strip().splitlines()[0] if stderr.strip() else ""
+    if len(line) > 180:
+        line = line[:177] + "..."
+    return line
+
+
 def model_for(effort: str) -> str:
-    if effort not in EFFORTS:
+    model = MODELS.get(effort, "")
+    if effort not in EFFORTS or not model or model.endswith("-fast"):
         raise LoopError(f"unknown effort {effort}")
-    return f"{MODEL_ID}[effort={effort},fast=false]"
+    return model
 
 
 def plan_row(plan: str, task_id: str) -> str:
@@ -695,7 +710,7 @@ def plan_row(plan: str, task_id: str) -> str:
 def effort_for(task_line: str, plan_row_text: str) -> str:
     """Pick low, medium, or high from the size of the task and the plan row.
 
-    The ceiling is always cursor-grok-4.7 with fast mode off. Word count is the
+    The ceiling is grok-4.7-high. Fast variants are not used. Word count is the
     volume. Acceptance criteria and clause breaks stand in for how many
     behaviors the task packs in.
     """
@@ -1315,10 +1330,10 @@ None.
         raise SystemExit("effort failed")
     ceiling = model_for("high")
     if (
-        ceiling != "cursor-grok-4.7[effort=high,fast=false]"
-        or "fast=true" in ceiling
-        or model_for("low") != "cursor-grok-4.7[effort=low,fast=false]"
-        or model_for("medium") != "cursor-grok-4.7[effort=medium,fast=false]"
+        ceiling != "grok-4.7-high"
+        or ceiling.endswith("-fast")
+        or model_for("low") != "grok-4.7-low"
+        or model_for("medium") != "grok-4.7-medium"
     ):
         raise SystemExit("model failed")
     try:
