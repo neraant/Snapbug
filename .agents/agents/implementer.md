@@ -13,7 +13,7 @@ The loop names the model. Use that model. Do not enable fast mode and do not swi
 
 Work in multitask. Independent parts of this one task run in parallel through the Task tool. Give every subagent the same model and leave fast mode off. You still implement only this task, on the current branch, and you commit.
 
-Do not edit the TBD section or the Blocked section of `docs/PLAN.md` or `docs/STATUS.md`. Do not mark a task done. Do not move any task other than the current one.
+When this task is implemented, move its line from `## Open` to `## Done` in `docs/STATUS.md` and keep the line text. Do not mark any other task done. Do not edit the TBD section or the Blocked section. If review requested changes and this task is not finished, move its line back to Open.
 
 Do not edit `.github/**`, `.cursor/**`, `.agents/**`, `docs/SPEC.md`, or `docs/decisions/**`.
 

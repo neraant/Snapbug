@@ -552,6 +552,43 @@ def newly_done(before_line: str, after_line: str) -> bool:
     )
 
 
+def sole_bullet(section: str, task_id: str) -> str | None:
+    found = [raw for raw in section.splitlines() if (match := BULLET.match(raw)) and match.group(1) == task_id]
+    if len(found) != 1:
+        return None
+    return found[0]
+
+
+def without_task(section: str, task_id: str) -> list[str]:
+    return [raw for raw in section.splitlines() if not ((match := BULLET.match(raw)) and match.group(1) == task_id)]
+
+
+def done_section_problem(before: str, after: str, task_id: str) -> str | None:
+    before_done = section_span(before, "Done")
+    after_done = section_span(after, "Done")
+    before_open = section_span(before, "Open")
+    after_open = section_span(after, "Open")
+    if before_done == after_done and before_open == after_open:
+        return None
+    if None in {before_done, after_done, before_open, after_open}:
+        return "marks a task done"
+    if without_task(before_done or "", task_id) != without_task(after_done or "", task_id):
+        return "marks a task done"
+    if without_task(before_open or "", task_id) != without_task(after_open or "", task_id):
+        return "moves a task other than the current one"
+    before_done_line = sole_bullet(before_done or "", task_id)
+    before_open_line = sole_bullet(before_open or "", task_id)
+    after_done_line = sole_bullet(after_done or "", task_id)
+    after_open_line = sole_bullet(after_open or "", task_id)
+    if bool(before_done_line) == bool(before_open_line) or bool(after_done_line) == bool(after_open_line):
+        return "marks a task done"
+    before_line = before_done_line or before_open_line
+    after_line = after_done_line or after_open_line
+    if before_line != after_line and (before_done_line is None) != (after_done_line is None):
+        return "marks a task done"
+    return None
+
+
 def doc_problem(before: str, after: str, task_id: str) -> str | None:
     before_text = normalized(before).rstrip("\n")
     after_text = normalized(after).rstrip("\n")
@@ -560,10 +597,12 @@ def doc_problem(before: str, after: str, task_id: str) -> str | None:
     for heading, reason in (
         ("TBD", "edits the TBD section"),
         ("Blocked", "edits the Blocked section"),
-        ("Done", "marks a task done"),
     ):
         if section_span(before_text, heading) != section_span(after_text, heading):
             return reason
+    done_reason = done_section_problem(before_text, after_text, task_id)
+    if done_reason:
+        return done_reason
     before_map = {task: line for task, line in task_entries(before_text)}
     after_map = {task: line for task, line in task_entries(after_text)}
     for task in sorted(TBD):
@@ -662,8 +701,9 @@ def run_agent(task_id: str, branch: str, task_line: str, model: str) -> None:
             + "Give every subagent this same model and leave fast mode off. "
             + "You still implement only this task, on this branch, and you commit.\n"
             + "Implement this task only. Commit on the current branch. Do not push.\n"
-            + "Do not edit the TBD or Blocked sections. Do not mark a task done. "
-            + "Do not move any task other than this one.\n"
+            + "When this task is implemented, move its line from Open to Done in docs/STATUS.md and keep the line text. "
+            + "Do not mark any other task done. Do not edit the TBD or Blocked sections. "
+            + "If review requested changes and this task is not finished, move its line back to Open.\n"
         )
         say(f"{task_id} agent started")
         proc = subprocess.Popen(
@@ -1336,6 +1376,12 @@ None.
         raise SystemExit("blocked guard")
     if doc_problem(status, status.replace("- shipped", "- shipped\n- P-01 done now"), "P-01") != "marks a task done":
         raise SystemExit("done guard")
+    moved = status.replace("- P-01 first task\n", "").replace("- shipped\n", "- shipped\n- P-01 first task\n")
+    if doc_problem(status, moved, "P-01") is not None or doc_problem(moved, status, "P-01") is not None:
+        raise SystemExit("done move refused")
+    moved_other = status.replace("- P-02 second task\n", "").replace("- shipped\n", "- shipped\n- P-02 second task\n")
+    if doc_problem(status, moved_other, "P-01") != "marks a task done":
+        raise SystemExit("other done move allowed")
     if (
         doc_problem(status, status.replace("- P-02 second task", "- P-02 second task edited"), "P-01")
         != "moves a task other than the current one"
