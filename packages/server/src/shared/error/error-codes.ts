@@ -26,6 +26,8 @@ export const ERROR_CODES = {
   INVALID_SCREENSHOT: "invalid-screenshot",
   REPLAY_TOO_LARGE: "replay-too-large",
   INVALID_REPLAY: "invalid-replay",
+  USER_TOKEN_NOT_FOUND: "user-token-not-found",
+  PROJECT_KEY_NOT_ACCEPTED: "project-key-not-accepted",
 } as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES];

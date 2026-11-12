@@ -44,6 +44,10 @@ export class UserAdapter implements AuthUserPort, OrganizationUserPort {
     return await this.createUser.execute(data);
   }
 
+  async findById(userId: string): Promise<UserModelType> {
+    return await this.findUser.execute(userId);
+  }
+
   async findByEmail(email: string): Promise<UserModelType | null> {
     return await this.findUserByEmail.execute(email);
   }

@@ -129,4 +129,51 @@ describe("FindScreenshotUseCase", () => {
 
     expect(fileStoragePort.readBugReportScreenshot).not.toHaveBeenCalled();
   });
+
+  it("returns a screenshot for a token owner without a session organization", async () => {
+    const bytes = new Uint8Array([137, 80, 78, 71]);
+    const membershipPort = {
+      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
+      findByUserAndOrganization: vi.fn().mockResolvedValue(membership),
+    };
+    const bugReportRepository = {
+      findManyByShortId: vi.fn().mockResolvedValue([{ bugReport, organizationId }]),
+    };
+    const fileStoragePort = {
+      readBugReportScreenshot: vi.fn().mockResolvedValue({ bytes, contentType: "image/png" }),
+    };
+    const useCase = new FindScreenshotUseCase(
+      membershipPort as unknown as MembershipPort,
+      bugReportRepository as unknown as BugReportRepository,
+      fileStoragePort as unknown as FileStoragePort,
+    );
+
+    const result = await useCase.execute({ shortId: "SNB-1" }, userId, null);
+
+    expect(fileStoragePort.readBugReportScreenshot).toHaveBeenCalledWith(screenshotKey);
+    expect(result).toEqual({ bytes, contentType: "image/png" });
+    expect(result).not.toHaveProperty("replay");
+  });
+
+  it("does not return someone else's screenshot", async () => {
+    const membershipPort = {
+      filterProjectIds: vi.fn().mockResolvedValue([]),
+      findByUserAndOrganization: vi.fn().mockResolvedValue(membership),
+    };
+    const bugReportRepository = {
+      findManyByShortId: vi.fn().mockResolvedValue([{ bugReport, organizationId }]),
+    };
+    const fileStoragePort = { readBugReportScreenshot: vi.fn() };
+    const useCase = new FindScreenshotUseCase(
+      membershipPort as unknown as MembershipPort,
+      bugReportRepository as unknown as BugReportRepository,
+      fileStoragePort as unknown as FileStoragePort,
+    );
+
+    await expect(useCase.execute({ shortId: "SNB-1" }, userId, null)).rejects.toMatchObject({
+      errorCode: ERROR_CODES.BUG_REPORT_NOT_FOUND,
+    });
+
+    expect(fileStoragePort.readBugReportScreenshot).not.toHaveBeenCalled();
+  });
 });

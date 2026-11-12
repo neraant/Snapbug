@@ -32,6 +32,8 @@ const ERROR_MESSAGES: Record<ErrorCode, string> = {
   [ERROR_CODES.INVALID_SCREENSHOT]: "Screenshot must be PNG or JPEG",
   [ERROR_CODES.REPLAY_TOO_LARGE]: "Session replay is too large",
   [ERROR_CODES.INVALID_REPLAY]: "Session replay must be gzip or JSON",
+  [ERROR_CODES.USER_TOKEN_NOT_FOUND]: "Token not found",
+  [ERROR_CODES.PROJECT_KEY_NOT_ACCEPTED]: "A project key is not accepted",
 };
 
 function isErrorCode(value: unknown): value is ErrorCode {

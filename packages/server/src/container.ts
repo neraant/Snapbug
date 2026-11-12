@@ -25,6 +25,7 @@ import { FindScreenshotUseCase } from "@workspace/server/modules/bug-report/appl
 import { FindStatsUseCase } from "@workspace/server/modules/bug-report/application/find-stats.use-case";
 import { FindWidgetConfigUseCase } from "@workspace/server/modules/bug-report/application/find-widget-config.use-case";
 import { FindWorkloadUseCase } from "@workspace/server/modules/bug-report/application/find-workload.use-case";
+import { ListTicketsUseCase } from "@workspace/server/modules/bug-report/application/list-tickets.use-case";
 import { UpdateBugReportUseCase } from "@workspace/server/modules/bug-report/application/update-bug-report.use-case";
 import { BugReportRepository } from "@workspace/server/modules/bug-report/repository/bug-report.repository";
 import { BugReportService } from "@workspace/server/modules/bug-report/service/bug-report.service";
@@ -68,6 +69,12 @@ import { UpdateProjectUseCase } from "@workspace/server/modules/project/applicat
 import { UpdateProjectWidgetSettingUseCase } from "@workspace/server/modules/project/application/update-project-widget-setting.use-case";
 import { ProjectRepository } from "@workspace/server/modules/project/repository/project.repository";
 import { ProjectService } from "@workspace/server/modules/project/service/project.service";
+import { CreateUserTokenUseCase } from "@workspace/server/modules/user-token/application/create-user-token.use-case";
+import { FindUserByTokenUseCase } from "@workspace/server/modules/user-token/application/find-user-by-token.use-case";
+import { FindUserTokensUseCase } from "@workspace/server/modules/user-token/application/find-user-tokens.use-case";
+import { RevokeUserTokenUseCase } from "@workspace/server/modules/user-token/application/revoke-user-token.use-case";
+import { UserTokenRepository } from "@workspace/server/modules/user-token/repository/user-token.repository";
+import { UserTokenService } from "@workspace/server/modules/user-token/service/user-token.service";
 import { AuditLogRepository } from "@workspace/server/shared/audit/audit-log.repository";
 import { AuditLogService } from "@workspace/server/shared/audit/audit-log.service";
 import { withTransactionFactory } from "@workspace/server/shared/database/transaction.util";
@@ -244,6 +251,13 @@ const updateBugReport = new UpdateBugReportUseCase(
   bugReportService,
   withTransaction,
 );
+const listTickets = new ListTicketsUseCase(membershipAdapter, projectAdapter, bugReportRepository);
+const userTokenRepository = new UserTokenRepository();
+const userTokenService = new UserTokenService();
+const createUserToken = new CreateUserTokenUseCase(userTokenService, userTokenRepository);
+const findUserTokens = new FindUserTokensUseCase(userTokenRepository);
+const revokeUserToken = new RevokeUserTokenUseCase(userTokenRepository);
+const findUserByToken = new FindUserByTokenUseCase(userTokenService, userTokenRepository, userAdapter);
 
 export const container = {
   membership: {
@@ -285,5 +299,12 @@ export const container = {
     countOpenByProject,
     countOpenByAssignee,
     updateBugReport,
+    listTickets,
+  },
+  userToken: {
+    create: createUserToken,
+    findMany: findUserTokens,
+    revoke: revokeUserToken,
+    findUserByToken,
   },
 };

@@ -60,4 +60,17 @@ describe("listMcpTools", () => {
     expect(listMcpTools(router).map((tool) => tool.name)).toEqual(["bugReport_create"]);
     expect(listMcpTools(router)[0]?.description).toBe("Create bug report");
   });
+
+  it("uses an explicit tool name when meta provides one", () => {
+    const named = builder
+      .meta({ mcp: true, name: "list_tickets", readOnlyHint: false })
+      .route({ summary: "List tickets" })
+      .handler(() => ({ ok: true }));
+
+    const tools = listMcpTools({ bugReport: { listTickets: named } });
+
+    expect(tools).toEqual([
+      expect.objectContaining({ name: "list_tickets", description: "List tickets", readOnlyHint: false }),
+    ]);
+  });
 });
