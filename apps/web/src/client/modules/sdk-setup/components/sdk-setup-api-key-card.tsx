@@ -6,10 +6,13 @@ import { Panel } from "@workspace/design-system/components/ui/panel";
 import { Skeleton } from "@workspace/design-system/components/ui/skeleton";
 import { Typography } from "@workspace/design-system/components/ui/typography";
 import { useCopyText } from "@workspace/design-system/hooks/use-copy-text";
+import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { useState } from "react";
 
+import { SdkSetupRotateApiKeyDialog } from "@/client/modules/sdk-setup/components/sdk-setup-rotate-api-key-dialog";
 import { texts } from "@/client/modules/sdk-setup/consts/texts.const";
+import { useFindMembershipByUser } from "@/client/modules/shared/queries/use-find-membership-by-user";
 import { useFindProjectApiKey } from "@/client/modules/shared/queries/use-find-project-api-key";
 
 type SdkSetupApiKeyCardProps = {
@@ -18,6 +21,8 @@ type SdkSetupApiKeyCardProps = {
 
 export function SdkSetupApiKeyCard({ projectId }: SdkSetupApiKeyCardProps) {
   const { data } = useFindProjectApiKey({ projectId });
+  const { data: membership } = useFindMembershipByUser();
+  const isAdmin = membership?.role === UserRole.ADMIN;
   const [visible, setVisible] = useState(false);
   const { copied, copy } = useCopyText();
 
@@ -45,18 +50,21 @@ export function SdkSetupApiKeyCard({ projectId }: SdkSetupApiKeyCardProps) {
             </Button>
             <CopyButton
               copied={copied}
-              onCopy={() => copy(data.key)}
+              onCopy={() => {
+                copy(data.key).catch(() => undefined);
+              }}
               copyLabel={texts.apiKey.copy}
               copiedLabel={texts.apiKey.copied}
               variant="muted"
               size="sm"
             />
+            {isAdmin ? <SdkSetupRotateApiKeyDialog projectId={projectId} /> : null}
           </Row>
         }
       />
       <Panel.Content gap="md">
         <Code code={visible ? data.key : maskedKey} showCopy={false} />
-        {/* TODO: Regenerate key modal and last-used metadata */}
+        {/* TODO: last-used metadata */}
         <Typography variant="text-xs" color="muted">
           {texts.apiKey.created(createdLabel)}
         </Typography>

@@ -25,10 +25,10 @@ Do not start tasks marked TBD: an implementer agent must not take them.
 - Postgres in `docker-compose.yaml`. Drizzle migrations in `packages/database/src/migration`. Seed of text tickets: `packages/database/src/seed`.
 - Retention is one organization column, `reports_retention_days`. There is no project-level retention.
 - P-01 a session must not return the password hash or a membership in another organization.
+- P-02 administrator-only invitations, domains, masking, and key rotation. Rotation issues a new key, stops the previous key immediately, and shows the new secret once.
 
 ## Open
 
-- P-02 administrator-only invitations, domains, masking, and key rotation. Rotation issues a new key, stops the previous key immediately, and shows the new secret once.
 - P-03 MCP through a normal client and a user token. A project key is not accepted. Tools are `list_tickets`, `get_ticket`, `get_screenshot`, and `update_ticket`. The secret is shown once and can be revoked.
 - P-04 comments, and the `add_comment` tool. No replay tool.
 - P-06 organization settings on a screen: name and the one retention period.

@@ -32,4 +32,30 @@ export class ApiKeyService {
       newSnapshot: ApiKeyMapper.toAudit(apiKey),
     });
   }
+
+  async replaceWithAudit(previous: ApiKey | null, next: ApiKey): Promise<void> {
+    await this.apiKeyRepository.save(next);
+    await this.auditLogService.save({
+      action: previous ? "Rotate API key" : "Create API key",
+      entityType: "api-key",
+      entityId: next.id,
+      projectId: next.projectId,
+      actor: this.actor,
+      oldSnapshot: null,
+      newSnapshot: ApiKeyMapper.toAudit(next),
+    });
+
+    if (previous) {
+      await this.apiKeyRepository.save(previous);
+      await this.auditLogService.save({
+        action: "Revoke API key",
+        entityType: "api-key",
+        entityId: previous.id,
+        projectId: previous.projectId,
+        actor: this.actor,
+        oldSnapshot: { ...ApiKeyMapper.toAudit(previous), revokedAt: null },
+        newSnapshot: ApiKeyMapper.toAudit(previous),
+      });
+    }
+  }
 }

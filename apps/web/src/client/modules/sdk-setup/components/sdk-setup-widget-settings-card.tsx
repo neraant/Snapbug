@@ -13,6 +13,7 @@ import {
   projectWidgetSettingAccentValues,
   type ProjectWidgetSettingModelType,
 } from "@workspace/validation/modules/project/dto/project-widget-setting.model";
+import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
 import { projectWidgetSettingFontValues } from "@workspace/validation/shared/project-widget-setting-font.schema";
 import { InfoIcon } from "lucide-react";
 import { useMemo } from "react";
@@ -21,12 +22,15 @@ import { SdkSetupWidgetColorPicker } from "@/client/modules/sdk-setup/components
 import { SdkSetupWidgetSettingField } from "@/client/modules/sdk-setup/components/sdk-setup-widget-setting-field";
 import { texts } from "@/client/modules/sdk-setup/consts/texts.const";
 import { useSdkSetupWidgetSetting } from "@/client/modules/sdk-setup/hooks/use-sdk-setup-widget-setting";
+import { useFindMembershipByUser } from "@/client/modules/shared/queries/use-find-membership-by-user";
 
 type SdkSetupWidgetSettingsCardProps = {
   projectId: string;
 };
 
 export function SdkSetupWidgetSettingsCard({ projectId }: SdkSetupWidgetSettingsCardProps) {
+  const { data: membership } = useFindMembershipByUser();
+  const isAdmin = membership?.role === UserRole.ADMIN;
   const {
     settings,
     buttonLabelDraft,
@@ -240,20 +244,28 @@ export function SdkSetupWidgetSettingsCard({ projectId }: SdkSetupWidgetSettings
           }
         />
 
-        <SdkSetupWidgetSettingField
-          htmlFor="widget-allowed-domains"
-          label={texts.widgetSettings.allowedDomains.label}
-          description={texts.widgetSettings.allowedDomains.description}
-          control={
-            <TagsInput
-              id="widget-allowed-domains"
-              value={settings.allowedDomains}
-              onValueChange={(allowedDomains) => patchSettings({ allowedDomains })}
-              placeholder={texts.widgetSettings.allowedDomains.placeholder}
-              removeTagLabel={texts.widgetSettings.allowedDomains.removeTag}
-            />
-          }
-        />
+        <Column gap="sm">
+          {isAdmin ? null : (
+            <Typography variant="text-xs" color="muted">
+              {texts.widgetSettings.domainsAndMaskingAdmin}
+            </Typography>
+          )}
+          <SdkSetupWidgetSettingField
+            htmlFor="widget-allowed-domains"
+            label={texts.widgetSettings.allowedDomains.label}
+            description={texts.widgetSettings.allowedDomains.description}
+            control={
+              <TagsInput
+                id="widget-allowed-domains"
+                value={settings.allowedDomains}
+                disabled={!isAdmin}
+                onValueChange={(allowedDomains) => patchSettings({ allowedDomains })}
+                placeholder={texts.widgetSettings.allowedDomains.placeholder}
+                removeTagLabel={texts.widgetSettings.allowedDomains.removeTag}
+              />
+            }
+          />
+        </Column>
 
         <Column gap="md">
           <Typography variant="heading-xs">{texts.widgetSettings.privacy.heading}</Typography>
@@ -267,6 +279,7 @@ export function SdkSetupWidgetSettingsCard({ projectId }: SdkSetupWidgetSettings
               <Switch
                 id="privacy-mask-text"
                 checked={settings.privacy.maskText}
+                disabled={!isAdmin}
                 onCheckedChange={(maskText) => patchPrivacy({ maskText })}
               />
             }
@@ -281,6 +294,7 @@ export function SdkSetupWidgetSettingsCard({ projectId }: SdkSetupWidgetSettings
               <Switch
                 id="privacy-mask-inputs"
                 checked={settings.privacy.maskInputs}
+                disabled={!isAdmin}
                 onCheckedChange={(maskInputs) => patchPrivacy({ maskInputs })}
               />
             }
@@ -294,6 +308,7 @@ export function SdkSetupWidgetSettingsCard({ projectId }: SdkSetupWidgetSettings
               <TagsInput
                 id="privacy-block-selectors"
                 value={settings.privacy.blockSelectors}
+                disabled={!isAdmin}
                 onValueChange={(blockSelectors) => patchPrivacy({ blockSelectors })}
                 placeholder={texts.widgetSettings.privacy.blockSelectors.placeholder}
                 removeTagLabel={texts.widgetSettings.privacy.blockSelectors.removeTag}

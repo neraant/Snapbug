@@ -6,12 +6,13 @@ import type { TokenPort } from "@workspace/server/modules/invitation/port/token.
 import type { UserPort } from "@workspace/server/modules/invitation/port/user.port";
 import type { InvitationRepository } from "@workspace/server/modules/invitation/repository/invitation.repository";
 import type { EmailService } from "@workspace/server/shared/email/service/email.service";
-import { NotFoundError } from "@workspace/server/shared/error/app-errors";
+import { ForbiddenError, NotFoundError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import type {
   SendInvitationsInputDtoType,
   SendInvitationsOutputDtoType,
 } from "@workspace/validation/modules/invitation/dto/send-invitation.schema";
+import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
 
 const TOKEN_TTL_MS = 1000 * 60 * 60 * 24 * 7; // 7 days
 
@@ -36,6 +37,9 @@ export class SendInvitationsUseCase {
     });
     if (!inviterMembership) {
       throw new NotFoundError(ERROR_CODES.ORGANIZATION_NOT_FOUND);
+    }
+    if (inviterMembership.role !== UserRole.ADMIN) {
+      throw new ForbiddenError(ERROR_CODES.ADMIN_REQUIRED, "Administrator access is required");
     }
 
     const organization = await this.organizationPort.findById(input.organizationId);

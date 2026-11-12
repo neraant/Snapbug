@@ -51,6 +51,31 @@ describe("SendInvitationsUseCase", () => {
     });
   });
 
+  it("does not send an invitation when the inviter is not an administrator", async () => {
+    const membershipPort = {
+      findByUserAndOrganization: vi.fn().mockResolvedValue({ role: UserRole.USER }),
+    };
+    const invitationRepository = { save: vi.fn() };
+    const emailService = { send: vi.fn() };
+    const useCase = new SendInvitationsUseCase(
+      invitationRepository as unknown as InvitationRepository,
+      membershipPort as unknown as MembershipPort,
+      { findByEmail: vi.fn() } as unknown as UserPort,
+      organizationPort(),
+      { generatePasswordResetToken: vi.fn() } as unknown as TokenPort,
+      emailService as unknown as EmailService,
+    );
+
+    await expect(
+      useCase.execute({ organizationId, emails: ["peer@company.com"] }, userId, inviterEmail),
+    ).rejects.toMatchObject({
+      errorCode: ERROR_CODES.ADMIN_REQUIRED,
+    });
+
+    expect(invitationRepository.save).not.toHaveBeenCalled();
+    expect(emailService.send).not.toHaveBeenCalled();
+  });
+
   it("dedupes emails and skips the inviter", async () => {
     const token = "550e8400-e29b-41d4-a716-446655440000";
     const membershipPort = {

@@ -43,6 +43,15 @@ export const texts = {
     show: "Show",
     hide: "Hide",
     created: (date: string) => `Created: ${date}`,
+    rotate: "Rotate key",
+    rotateTitle: "Rotate project key",
+    rotateDescription: "This issues a new key and stops the previous key immediately.",
+    confirm: "Rotate key",
+    cancel: "Cancel",
+    revealedTitle: "New project key",
+    revealedDescription: "Copy this key into your app. It is shown here once. The previous key has stopped working.",
+    close: "Done",
+    rotateError: "Could not rotate the project key. Please try again.",
   },
   widgetSettings: {
     title: "Widget settings",
@@ -87,6 +96,7 @@ export const texts = {
       georgia: "Georgia",
       monospace: "Mono",
     },
+    domainsAndMaskingAdmin: "Only an administrator can change domains and masking.",
     allowedDomains: {
       label: "Allowed domains",
       description: "Hosts that may submit bug reports from the widget. Leave empty to allow any origin.",
