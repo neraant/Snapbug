@@ -31,7 +31,10 @@ KEY_PATH = Path(
 )
 CURSOR_KEY_PATH = Path(os.environ.get("CURSOR_KEY_PATH", Path.home() / ".snapbug/cursor.key"))
 HOME_STATE = Path.home() / ".snapbug"
-CLONE = HOME_STATE / "src"
+BASE = HOME_STATE / "repo"
+WORKTREES = HOME_STATE / "worktrees"
+LEGACY = HOME_STATE / "src"
+TREE = BASE
 MAX_AGENT_CALLS = 5
 TOKEN_MAX_AGE = 45 * 60
 FAILURES_BEFORE_BLOCK = 3
@@ -364,6 +367,15 @@ def git(
     return result.stdout.strip()
 
 
+def tree() -> Path:
+    return TREE
+
+
+def use_tree(path: Path) -> None:
+    global TREE
+    TREE = path
+
+
 def remove_tree(path: Path) -> None:
     last_error: OSError | None = None
     for _ in range(5):
@@ -380,30 +392,99 @@ def remove_tree(path: Path) -> None:
     raise LoopError(f"could not remove {path}") from last_error
 
 
-def ensure_clone(auth: TokenSource) -> None:
-    HOME_STATE.mkdir(parents=True, exist_ok=True)
-    if CLONE.exists():
-        remove_tree(CLONE)
-    token = auth.current()
-    cloned = subprocess.run(
-        clone_command(CLONE),
-        check=False,
-        capture_output=True,
-        text=True,
-        env=git_auth_env(os.environ.copy(), token),
-    )
-    if cloned.returncode != 0:
-        raise LoopError("could not clone the repository")
-    git(CLONE, ["config", "user.name", "neraant-snapbug-implementer[bot]"])
+def configure_identity(repo: Path) -> None:
+    git(repo, ["config", "user.name", "neraant-snapbug-implementer[bot]"])
     git(
-        CLONE,
+        repo,
         [
             "config",
             "user.email",
             "180272519+neraant-snapbug-implementer[bot]@users.noreply.github.com",
         ],
     )
-    git(CLONE, ["fetch", "--prune", "origin"], auth)
+
+
+def ensure_base(auth: TokenSource) -> None:
+    HOME_STATE.mkdir(parents=True, exist_ok=True)
+    if not (BASE / ".git").is_dir():
+        if (LEGACY / ".git").is_dir() and not BASE.exists():
+            LEGACY.rename(BASE)
+        else:
+            token = auth.current()
+            cloned = subprocess.run(
+                clone_command(BASE),
+                check=False,
+                capture_output=True,
+                text=True,
+                env=git_auth_env(os.environ.copy(), token),
+            )
+            if cloned.returncode != 0:
+                raise LoopError("could not clone the repository")
+    configure_identity(BASE)
+    git(BASE, ["fetch", "--prune", "origin"], auth)
+    use_tree(BASE)
+    refresh_base()
+
+
+def refresh_base() -> None:
+    if git(BASE, ["status", "--porcelain"], check=False):
+        raise LoopError("base repo has uncommitted files")
+    git(BASE, ["checkout", "--detach", "origin/master"])
+
+
+def worktree_for(task_id: str) -> Path:
+    if not re.fullmatch(r"P-\d+", task_id) or task_id in TBD:
+        raise LoopError(f"refusing worktree for {task_id}")
+    return WORKTREES / task_id
+
+
+def keep_worktree(dirty: bool, unpushed: bool) -> bool:
+    return dirty or unpushed
+
+
+def prepare_worktree(auth: TokenSource, task_id: str, branch: str) -> Path:
+    if not allowed_branch(branch):
+        raise LoopError(f"refusing to check out {branch}")
+    path = worktree_for(task_id)
+    git(BASE, ["fetch", "--prune", "origin"], auth)
+    current = git(BASE, ["branch", "--show-current"], check=False)
+    if current == branch:
+        refresh_base()
+    if path.exists():
+        say(f"{task_id} reusing worktree {path}")
+        return path
+    WORKTREES.mkdir(parents=True, exist_ok=True)
+    local = git(BASE, ["rev-parse", "--verify", "--quiet", branch], check=False)
+    if local:
+        git(BASE, ["worktree", "add", str(path), branch])
+    else:
+        remote = git(BASE, ["rev-parse", "--verify", "--quiet", f"origin/{branch}"], check=False)
+        base = remote or git(BASE, ["rev-parse", "origin/master"])
+        git(BASE, ["worktree", "add", "-b", branch, str(path), base])
+    say(f"{task_id} worktree {path}")
+    return path
+
+
+def worktree_dirty(repo: Path) -> bool:
+    return bool(git(repo, ["status", "--porcelain"], check=False))
+
+
+def worktree_unpushed(repo: Path) -> bool:
+    count = git(repo, ["rev-list", "--count", "origin/master..HEAD"], check=False)
+    return count not in {"", "0"}
+
+
+def release_worktree(task_id: str, keep: bool) -> None:
+    path = worktree_for(task_id)
+    if keep:
+        if path.exists():
+            say(f"{task_id} worktree kept at {path}")
+        return
+    if not path.exists():
+        return
+    git(BASE, ["worktree", "remove", "--force", str(path)])
+    git(BASE, ["worktree", "prune"])
+    say(f"{task_id} worktree removed")
 
 
 def load_state() -> dict:
@@ -429,18 +510,8 @@ def record_failure(state: dict, task_id: str, counted: bool) -> tuple[int, bool]
     return current + 1, True
 
 
-def checkout_task(auth: TokenSource, branch: str) -> None:
-    if not allowed_branch(branch):
-        raise LoopError(f"refusing to check out {branch}")
-    git(CLONE, ["fetch", "--prune", "origin"], auth)
-    remote = git(CLONE, ["rev-parse", "--verify", "--quiet", f"origin/{branch}"], check=False)
-    base = remote or git(CLONE, ["rev-parse", "origin/master"])
-    git(CLONE, ["checkout", "--force", "-B", branch, base], auth)
-    git(CLONE, CLEAN_ARGS, auth)
-
-
 def changed_paths() -> list[str]:
-    names = git(CLONE, DIFF_ARGS, check=False)
+    names = git(tree(), DIFF_ARGS, check=False)
     return [line for line in names.splitlines() if line]
 
 
@@ -464,8 +535,8 @@ def newly_done(before_line: str, after_line: str) -> bool:
 
 
 def doc_problem(before: str, after: str, task_id: str) -> str | None:
-    before_text = normalized(before)
-    after_text = normalized(after)
+    before_text = normalized(before).rstrip("\n")
+    after_text = normalized(after).rstrip("\n")
     if before_text == after_text:
         return None
     for heading, reason in (
@@ -503,8 +574,8 @@ def doc_problem(before: str, after: str, task_id: str) -> str | None:
 
 def docs_problem(task_id: str) -> str | None:
     for rel in ("docs/STATUS.md", "docs/PLAN.md"):
-        before = git(CLONE, ["show", f"origin/master:{rel}"])
-        path = CLONE / rel
+        before = git(tree(), ["show", f"origin/master:{rel}"])
+        path = tree() / rel
         after = path.read_text() if path.is_file() else ""
         reason = doc_problem(before, after, task_id)
         if reason:
@@ -521,9 +592,9 @@ def choose_prompt(master: str | None, clone: str | None) -> str:
 
 
 def load_instructions() -> str:
-    showed = git_run(CLONE, ["show", "origin/master:.agents/agents/implementer.md"])
+    showed = git_run(tree(), ["show", "origin/master:.agents/agents/implementer.md"])
     master = showed.stdout if showed.returncode == 0 else None
-    path = CLONE / ".agents/agents/implementer.md"
+    path = tree() / ".agents/agents/implementer.md"
     clone = path.read_text() if path.is_file() else None
     return choose_prompt(master, clone)
 
@@ -590,7 +661,7 @@ def run_agent(task_id: str, branch: str, task_line: str, model: str) -> None:
                 "--",
                 prompt,
             ],
-            cwd=CLONE,
+            cwd=tree(),
             env=agent_environment(os.environ.copy(), key, str(home)),
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -649,9 +720,9 @@ def run_agent(task_id: str, branch: str, task_line: str, model: str) -> None:
 def push_branch(auth: TokenSource, branch: str) -> None:
     if branch in FORBIDDEN_REFS or branch.startswith("chore/block-") or not allowed_branch(branch):
         raise LoopError(f"refusing to push {branch}")
-    if git(CLONE, ["branch", "--show-current"]) != branch:
+    if git(tree(), ["branch", "--show-current"]) != branch:
         raise LoopError(f"refusing to push while {branch} is not checked out")
-    git(CLONE, ["push", "origin", f"HEAD:{branch}"], auth)
+    git(tree(), ["push", "origin", f"HEAD:{branch}"], auth)
 
 
 def gh(auth: TokenSource, args: list[str]) -> str:
@@ -663,7 +734,7 @@ def gh(auth: TokenSource, args: list[str]) -> str:
     try:
         result = subprocess.run(
             ["gh", *args],
-            cwd=CLONE,
+            cwd=tree(),
             env=env,
             capture_output=True,
             text=True,
@@ -834,7 +905,7 @@ def template_text() -> str:
 
 
 def load_template() -> str:
-    showed = git_run(CLONE, ["show", "origin/master:.github/pull_request_template.md"])
+    showed = git_run(tree(), ["show", "origin/master:.github/pull_request_template.md"])
     if showed.returncode == 0 and showed.stdout.strip():
         return showed.stdout
     return template_text()
@@ -888,7 +959,7 @@ def ensure_pr(auth: TokenSource, branch: str, task_id: str, task_line: str, titl
     if found:
         number = str(found[0]["number"])
     else:
-        showed = git_run(CLONE, ["show", "origin/master:docs/PLAN.md"])
+        showed = git_run(tree(), ["show", "origin/master:docs/PLAN.md"])
         plan = showed.stdout if showed.returncode == 0 else ""
         body = pull_request_body(load_template(), task_id, task_line, branch, plan)
         body_path = Path(tempfile.mkstemp(prefix="snapbug-pr-")[1])
@@ -1020,10 +1091,10 @@ def wait_for(auth: TokenSource, number: str, label: str) -> str:
 
 
 def one_task(auth: TokenSource, state: dict, notes: list[str]) -> tuple[str, bool]:
-    git(CLONE, ["fetch", "--prune", "origin"], auth)
-    git(CLONE, ["checkout", "--force", "--detach", "origin/master"], auth)
-    git(CLONE, CLEAN_ARGS, auth)
-    status = (CLONE / "docs/STATUS.md").read_text()
+    git(BASE, ["fetch", "--prune", "origin"], auth)
+    refresh_base()
+    use_tree(BASE)
+    status = (BASE / "docs/STATUS.md").read_text()
     clear_landed_blocks(state, status)
     for task_id in tasks_to_stop(status, state["failures"]):
         note = block_note(task_id)
@@ -1080,40 +1151,50 @@ def one_task(auth: TokenSource, state: dict, notes: list[str]) -> tuple[str, boo
             return "stop", False
         record(notes, f"{task_id} checks or review failed. Starting another attempt.")
 
-    checkout_task(auth, branch)
-    before = git(CLONE, ["rev-parse", "HEAD"])
-    plan_path = CLONE / "docs/PLAN.md"
-    plan = plan_path.read_text() if plan_path.is_file() else ""
-    model = model_for(effort_for(line, plan_row(plan, task_id)))
-    record(notes, f"{task_id} model {model}")
+    worktree = prepare_worktree(auth, task_id, branch)
+    use_tree(worktree)
+    keep = True
     try:
-        run_agent(task_id, branch, line, model)
-        used_agent = True
-    except SetupError:
-        raise
-    except (LoopError, subprocess.TimeoutExpired) as error:
-        used_agent = True
-        return fail(f"{task_id} agent failed: {error}")
-    if git(CLONE, ["branch", "--show-current"]) != branch or git(CLONE, ["rev-parse", "HEAD"]) == before:
-        return fail(f"{task_id} produced no commit on {branch}")
-    blocked_paths = [path for path in changed_paths() if protected(path)]
-    if blocked_paths:
-        return fail(f"{task_id} touched a protected path: {blocked_paths[0]}")
-    reason = docs_problem(task_id)
-    if reason:
-        return fail(f"{task_id} {reason}")
-    say(f"{task_id} pushing {branch}")
-    push_branch(auth, branch)
-    number = ensure_pr(auth, branch, task_id, line)
-    record(notes, f"{task_id} opened or updated pull request {number}.")
-    phase = wait_for(auth, number, task_id)
-    if phase == "failed":
-        return fail(f"{task_id} pull request failed review or checks")
-    if phase == "merged":
-        record(notes, f"{task_id} merged.")
-        return "continue", True
-    record(notes, f"{task_id} is waiting on checks or review.")
-    return "stop", True
+        before = git(tree(), ["rev-parse", "HEAD"])
+        if worktree_dirty(tree()) or not worktree_unpushed(tree()):
+            plan_path = tree() / "docs/PLAN.md"
+            plan = plan_path.read_text() if plan_path.is_file() else ""
+            model = model_for(effort_for(line, plan_row(plan, task_id)))
+            record(notes, f"{task_id} model {model}")
+            try:
+                run_agent(task_id, branch, line, model)
+                used_agent = True
+            except SetupError:
+                raise
+            except (LoopError, subprocess.TimeoutExpired) as error:
+                used_agent = True
+                return fail(f"{task_id} agent failed: {error}")
+            if git(tree(), ["branch", "--show-current"]) != branch or git(tree(), ["rev-parse", "HEAD"]) == before:
+                return fail(f"{task_id} produced no commit on {branch}")
+        else:
+            say(f"{task_id} resuming unpushed commits")
+        blocked_paths = [path for path in changed_paths() if protected(path)]
+        if blocked_paths:
+            return fail(f"{task_id} touched a protected path: {blocked_paths[0]}")
+        reason = docs_problem(task_id)
+        if reason:
+            return fail(f"{task_id} {reason}")
+        say(f"{task_id} pushing {branch}")
+        push_branch(auth, branch)
+        keep = False
+        number = ensure_pr(auth, branch, task_id, line)
+        record(notes, f"{task_id} opened or updated pull request {number}.")
+        phase = wait_for(auth, number, task_id)
+        if phase == "failed":
+            return fail(f"{task_id} pull request failed review or checks")
+        if phase == "merged":
+            record(notes, f"{task_id} merged.")
+            return "continue", True
+        record(notes, f"{task_id} is waiting on checks or review.")
+        return "stop", True
+    finally:
+        release_worktree(task_id, keep)
+        use_tree(BASE)
 
 
 def self_check() -> None:
@@ -1205,6 +1286,18 @@ None.
 """
     if doc_problem(status, status, "P-01") is not None:
         raise SystemExit("doc identical")
+    if doc_problem(status.rstrip("\n"), status + "\n", "P-01") is not None:
+        raise SystemExit("newline guard")
+    if worktree_for("P-01") != WORKTREES / "P-01":
+        raise SystemExit("worktree path failed")
+    if not keep_worktree(True, False) or not keep_worktree(False, True) or keep_worktree(False, False):
+        raise SystemExit("worktree keep failed")
+    try:
+        worktree_for("P-08")
+    except LoopError:
+        pass
+    else:
+        raise SystemExit("worktree guard failed")
     if doc_problem(status, status.replace("leave this", "start this"), "P-01") != "edits the TBD section":
         raise SystemExit("tbd guard")
     if doc_problem(status, status.replace("None.", "- P-02 moved"), "P-01") != "edits the Blocked section":
@@ -1386,7 +1479,7 @@ def main() -> None:
     for line in notes:
         say(line)
     auth = TokenSource(lambda: installation_token(app_jwt()))
-    ensure_clone(auth)
+    ensure_base(auth)
     state = load_state()
     calls = 0
     try:
