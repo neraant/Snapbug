@@ -38,13 +38,24 @@ TREE = BASE
 MAX_AGENT_CALLS = 5
 TOKEN_MAX_AGE = 45 * 60
 FAILURES_BEFORE_BLOCK = 3
+# Review rounds are separate from crash failures. A request-changes review is
+# not a failure: it never touches the failure counter and never blocks the task.
+# The cap only stops an endless review loop; the worktree is kept when it trips.
+MAX_REVIEW_ROUNDS = 8
 MODELS = {
     "low": "grok-4.7-low",
     "medium": "grok-4.7-medium",
     "high": "grok-4.7-high",
 }
 EFFORTS = ("low", "medium", "high")
-AGENT_TIMEOUT = 30 * 60
+# Agent liveness policy. The base budget is checked first. Past it, the agent
+# keeps running while it still produced output within AGENT_STALL_LIMIT, up to
+# AGENT_HARD_CAP in total. A silent agent past the base budget, or any agent at
+# the hard cap, is killed as before.
+AGENT_TIMEOUT = 60 * 60
+AGENT_STALL_LIMIT = 10 * 60
+AGENT_HARD_CAP = 3 * 60 * 60
+AGENT_POLL = 5
 REQUIRED_CHECKS = ("ci", "agent-review")
 TYPE_BADGES = {
     "chore": "C5DEF5",
@@ -469,9 +480,55 @@ def worktree_dirty(repo: Path) -> bool:
     return bool(git(repo, ["status", "--porcelain"], check=False))
 
 
-def worktree_unpushed(repo: Path) -> bool:
-    count = git(repo, ["rev-list", "--count", "origin/master..HEAD"], check=False)
+def worktree_unpushed(repo: Path, branch: str) -> bool:
+    # Compare with the pushed branch when it exists. Against master alone, a
+    # pushed branch under review looks unpushed forever and the agent never reruns.
+    remote = git(repo, ["rev-parse", "--verify", "--quiet", f"origin/{branch}"], check=False)
+    base = f"origin/{branch}" if remote else "origin/master"
+    count = git(repo, ["rev-list", "--count", f"{base}..HEAD"], check=False)
     return count not in {"", "0"}
+
+
+def review_feedback(pull: dict) -> str:
+    """Body of the latest CHANGES_REQUESTED review, so the agent can address it."""
+    chosen = ""
+    chosen_at = ""
+    for review in pull.get("reviews") or []:
+        if not isinstance(review, dict) or review.get("state") != "CHANGES_REQUESTED":
+            continue
+        submitted = str(review.get("submittedAt") or "")
+        if chosen and submitted < chosen_at:
+            continue
+        chosen = str(review.get("body") or "").strip()
+        chosen_at = submitted
+    return chosen[:4000]
+
+
+def keep_after_phase(phase: str) -> bool:
+    """Release the worktree only once the task no longer needs the agent.
+
+    Changes requested or red checks mean the same task and the same worktree
+    continue. Anything else has the branch pushed and waiting on GitHub, so the
+    worktree can go.
+    """
+    return phase in {"failed", "changes"}
+
+
+def review_rounds(state: dict, task_id: str) -> int:
+    rounds = state.get("reviews")
+    return int(rounds.get(task_id, 0)) if isinstance(rounds, dict) else 0
+
+
+def bump_review_round(state: dict, task_id: str) -> int:
+    rounds = state.setdefault("reviews", {})
+    rounds[task_id] = int(rounds.get(task_id, 0)) + 1
+    save_state(state)
+    return rounds[task_id]
+
+
+def clear_review_rounds(state: dict, task_id: str) -> None:
+    if isinstance(state.get("reviews"), dict) and state["reviews"].pop(task_id, None) is not None:
+        save_state(state)
 
 
 def branch_needs_update(merge_state: str) -> bool:
@@ -531,6 +588,30 @@ def record_failure(state: dict, task_id: str, counted: bool) -> tuple[int, bool]
 def changed_paths() -> list[str]:
     names = git(tree(), DIFF_ARGS, check=False)
     return [line for line in names.splitlines() if line]
+
+
+def touches_e2e(paths: list[str]) -> bool:
+    return any(path.startswith("e2e/") for path in paths)
+
+
+def run_e2e_tests() -> str | None:
+    say("running product e2e tests")
+    try:
+        result = subprocess.run(
+            ["pnpm", "test:e2e"],
+            cwd=tree(),
+            capture_output=True,
+            text=True,
+            timeout=300,
+            check=False,
+        )
+    except subprocess.TimeoutExpired:
+        return "product e2e failed: timed out"
+    if result.returncode != 0:
+        detail = (result.stderr or result.stdout).strip().splitlines()
+        tail = detail[-1][:180] if detail else "pnpm test:e2e failed"
+        return f"product e2e failed: {tail}"
+    return None
 
 
 def task_entries(text: str) -> list[tuple[str, str]]:
@@ -676,6 +757,13 @@ def kill_group(pid: int) -> None:
         return
 
 
+def agent_should_stop(elapsed: float, idle: float) -> bool:
+    """Healthcheck: True when the agent is over budget and not making progress."""
+    if elapsed >= AGENT_HARD_CAP:
+        return True
+    return elapsed >= AGENT_TIMEOUT and idle >= AGENT_STALL_LIMIT
+
+
 def save_agent_log(task_id: str, stdout: str, stderr: str, secrets: list[str]) -> Path:
     folder = HOME_STATE / "agent"
     folder.mkdir(parents=True, exist_ok=True)
@@ -685,7 +773,7 @@ def save_agent_log(task_id: str, stdout: str, stderr: str, secrets: list[str]) -
     return path
 
 
-def run_agent(task_id: str, branch: str, task_line: str, model: str) -> None:
+def run_agent(task_id: str, branch: str, task_line: str, model: str, feedback: str = "") -> None:
     home = Path(tempfile.mkdtemp(prefix="snapbug-agent-home-"))
     key = cursor_key()
     try:
@@ -704,7 +792,18 @@ def run_agent(task_id: str, branch: str, task_line: str, model: str) -> None:
             + "When this task is implemented, move its line from Open to Done in docs/STATUS.md and keep the line text. "
             + "Do not mark any other task done. Do not edit the TBD or Blocked sections. "
             + "If review requested changes and this task is not finished, move its line back to Open.\n"
+            + "If the task is major and changes UI (a new page, or a new user action), add or update one spec "
+            + "at e2e/{context}/{verb}-{object}.spec.ts per the e2e rule (.agents/rules/common/e2e.mdc). "
+            + "Assert role and visible text. Do not assert pixels and do not commit screenshots. "
+            + "A small UI tweak and a backend-only task do not get an e2e test. "
+            + "If the flow needs saved data, write or reuse seed under e2e/shared/seed/. "
+            + "The loop runs pnpm test:e2e before push when the diff has a file under e2e/.\n"
         )
+        if feedback:
+            prompt += (
+                "The reviewer requested changes on the open pull request. Address every point "
+                "with new commits on this branch, then stop:\n" + feedback + "\n"
+            )
         say(f"{task_id} agent started")
         proc = subprocess.Popen(
             [
@@ -728,11 +827,13 @@ def run_agent(task_id: str, branch: str, task_line: str, model: str) -> None:
         )
         stdout_lines: list[str] = []
         stderr_parts: list[str] = []
+        last_output = [time.monotonic()]
 
         def read_stdout() -> None:
             if proc.stdout is None:
                 return
             for raw in proc.stdout:
+                last_output[0] = time.monotonic()
                 stdout_lines.append(raw)
                 message = progress_line(raw)
                 if message:
@@ -748,12 +849,18 @@ def run_agent(task_id: str, branch: str, task_line: str, model: str) -> None:
         stdout_thread.start()
         stderr_thread.start()
         timed_out = False
-        try:
-            proc.wait(timeout=AGENT_TIMEOUT)
-        except subprocess.TimeoutExpired:
-            timed_out = True
-            kill_group(proc.pid)
-            proc.wait(timeout=5)
+        started = time.monotonic()
+        while True:
+            try:
+                proc.wait(timeout=AGENT_POLL)
+                break
+            except subprocess.TimeoutExpired:
+                now = time.monotonic()
+                if agent_should_stop(now - started, now - last_output[0]):
+                    timed_out = True
+                    kill_group(proc.pid)
+                    proc.wait(timeout=5)
+                    break
         stdout_thread.join(timeout=5)
         stderr_thread.join(timeout=5)
         stdout = "".join(stdout_lines)
@@ -1014,15 +1121,22 @@ def ensure_pr(auth: TokenSource, branch: str, task_id: str, task_line: str, titl
         ],
     )
     found = json.loads(existing)
-    if found:
-        number = str(found[0]["number"])
-    else:
-        showed = git_run(tree(), ["show", "origin/master:docs/PLAN.md"])
-        plan = showed.stdout if showed.returncode == 0 else ""
-        body = pull_request_body(load_template(), task_id, task_line, branch, plan)
-        body_path = Path(tempfile.mkstemp(prefix="snapbug-pr-")[1])
-        try:
-            body_path.write_text(body)
+    showed = git_run(tree(), ["show", "origin/master:docs/PLAN.md"])
+    plan = showed.stdout if showed.returncode == 0 else ""
+    body = pull_request_body(
+        load_template(),
+        task_id,
+        task_line,
+        branch,
+        plan,
+        )
+    body_path = Path(tempfile.mkstemp(prefix="snapbug-pr-")[1])
+    try:
+        body_path.write_text(body)
+        if found:
+            number = str(found[0]["number"])
+            gh(auth, ["pr", "edit", number, "--repo", REPO, "--body-file", str(body_path)])
+        else:
             url = gh(
                 auth,
                 [
@@ -1042,9 +1156,9 @@ def ensure_pr(auth: TokenSource, branch: str, task_id: str, task_line: str, titl
                     str(body_path),
                 ],
             )
-        finally:
-            body_path.unlink(missing_ok=True)
-        number = url.rstrip("/").split("/")[-1]
+            number = url.rstrip("/").split("/")[-1]
+    finally:
+        body_path.unlink(missing_ok=True)
     gh(auth, ["pr", "merge", number, "--repo", REPO, "--auto", "--squash"])
     return number
 
@@ -1060,10 +1174,34 @@ def pull_request(auth: TokenSource, number: str) -> dict:
                 "--repo",
                 REPO,
                 "--json",
-                "state,reviewDecision,mergeStateStatus,statusCheckRollup,url",
+                "state,reviewDecision,mergeStateStatus,statusCheckRollup,url,headRefOid,reviews",
             ],
         )
     )
+
+
+def latest_head_review(pull: dict) -> str:
+    head = str(pull.get("headRefOid") or "")
+    if not head:
+        return ""
+    chosen = ""
+    chosen_at = ""
+    for review in pull.get("reviews") or []:
+        if not isinstance(review, dict):
+            continue
+        commit = review.get("commit")
+        oid = str(commit.get("oid") or "") if isinstance(commit, dict) else ""
+        if oid != head:
+            continue
+        state = str(review.get("state") or "")
+        if state not in {"APPROVED", "CHANGES_REQUESTED"}:
+            continue
+        submitted = str(review.get("submittedAt") or "")
+        if chosen and submitted < chosen_at:
+            continue
+        chosen = state
+        chosen_at = submitted
+    return chosen
 
 
 def check_phase(pull: dict) -> str:
@@ -1077,12 +1215,20 @@ def check_phase(pull: dict) -> str:
         conclusion = item.get("conclusion") or item.get("state") or ""
         by_name[name] = str(conclusion).upper()
     if any(by_name.get(name) in {"FAILURE", "CANCELLED", "TIMED_OUT", "ERROR"} for name in REQUIRED_CHECKS):
+        # A reviewer verdict on this head wins over a red check: it is a review round.
+        if latest_head_review(pull) == "CHANGES_REQUESTED":
+            return "changes"
         return "failed"
     if all(by_name.get(name) == "SUCCESS" for name in REQUIRED_CHECKS):
         if pull.get("reviewDecision") == "APPROVED":
             return "ready"
+        head_review = latest_head_review(pull)
+        if head_review == "CHANGES_REQUESTED":
+            return "changes"
+        if head_review == "APPROVED":
+            return "pending"
         if pull.get("reviewDecision") == "CHANGES_REQUESTED":
-            return "failed"
+            return "changes"
         return "pending"
     return "pending"
 
@@ -1146,7 +1292,7 @@ def wait_for(auth: TokenSource, number: str, task_id: str, branch: str) -> str:
             say(f"{task_id} {summary}")
             last = summary
             last_said = now
-        if phase in {"merged", "failed"}:
+        if phase in {"merged", "failed", "changes"}:
             return phase
         if phase == "ready" and branch_needs_update(merge_state) and updates < 2:
             say(f"{task_id} branch is behind master")
@@ -1176,6 +1322,7 @@ def one_task(auth: TokenSource, state: dict, notes: list[str]) -> tuple[str, boo
     line = task_line(status, task_id)
     counted = False
     used_agent = False
+    feedback = ""
 
     def fail(message: str) -> tuple[str, bool]:
         nonlocal counted
@@ -1208,33 +1355,48 @@ def one_task(auth: TokenSource, state: dict, notes: list[str]) -> tuple[str, boo
     if existing:
         phase = wait_for(auth, str(existing[0]["number"]), task_id, branch)
         if phase == "merged":
+            clear_review_rounds(state, task_id)
             record(notes, f"{task_id} merged.")
             return "continue", False
         if phase == "ready":
+            clear_review_rounds(state, task_id)
             record(notes, f"{task_id} is approved and waiting for GitHub to merge.")
             return "stop", False
         if phase == "pending":
             record(notes, f"{task_id} is still waiting on ci or agent-review.")
             return "stop", False
-        record(notes, f"{task_id} checks or review failed. Starting another attempt.")
+        if phase == "changes":
+            if review_rounds(state, task_id) >= MAX_REVIEW_ROUNDS:
+                record(
+                    notes,
+                    f"{task_id} still has changes requested after {MAX_REVIEW_ROUNDS} review rounds. "
+                    f"Stopping. The worktree and branch {branch} are kept for a person to look at.",
+                )
+                return "stop", False
+            round_number = bump_review_round(state, task_id)
+            record(notes, f"{task_id} changes requested. Review round {round_number}/{MAX_REVIEW_ROUNDS}.")
+            feedback = review_feedback(pull_request(auth, str(existing[0]["number"])))
+        else:
+            record(notes, f"{task_id} checks failed. Starting another attempt.")
 
     worktree = prepare_worktree(auth, task_id, branch)
     use_tree(worktree)
     keep = True
     try:
         before = git(tree(), ["rev-parse", "HEAD"])
-        if worktree_dirty(tree()) or not worktree_unpushed(tree()):
+        if worktree_dirty(tree()) or not worktree_unpushed(tree(), branch):
             plan_path = tree() / "docs/PLAN.md"
             plan = plan_path.read_text() if plan_path.is_file() else ""
             model = model_for(effort_for(line, plan_row(plan, task_id)))
             record(notes, f"{task_id} model {model}")
             try:
-                run_agent(task_id, branch, line, model)
-                used_agent = True
+                run_agent(task_id, branch, line, model, feedback)
+                # Review rounds have their own cap, so they do not spend the agent call cap.
+                used_agent = not feedback
             except SetupError:
                 raise
             except (LoopError, subprocess.TimeoutExpired) as error:
-                used_agent = True
+                used_agent = not feedback
                 return fail(f"{task_id} agent failed: {error}")
             if git(tree(), ["branch", "--show-current"]) != branch or git(tree(), ["rev-parse", "HEAD"]) == before:
                 return fail(f"{task_id} produced no commit on {branch}")
@@ -1246,22 +1408,34 @@ def one_task(auth: TokenSource, state: dict, notes: list[str]) -> tuple[str, boo
         reason = docs_problem(task_id)
         if reason:
             return fail(f"{task_id} {reason}")
+        if touches_e2e(changed_paths()):
+            reason = run_e2e_tests()
+            if reason:
+                return fail(f"{task_id} {reason}")
         say(f"{task_id} pushing {branch}")
         push_branch(auth, branch)
-        keep = False
         number = ensure_pr(auth, branch, task_id, line)
         record(notes, f"{task_id} opened or updated pull request {number}.")
         phase = wait_for(auth, number, task_id, branch)
+        # Pushing is not completion. Keep the worktree while the review or checks
+        # are failing so the same task continues in the same tree.
+        keep = keep_after_phase(phase)
+        if phase == "changes":
+            # Not a failure: the next pass re-enters the agent on this worktree.
+            record(notes, f"{task_id} changes requested. Continuing on the same worktree.")
+            return "continue", used_agent
         if phase == "failed":
             return fail(f"{task_id} pull request failed review or checks")
         if phase == "merged":
+            clear_review_rounds(state, task_id)
             record(notes, f"{task_id} merged.")
-            return "continue", True
+            return "continue", used_agent
         if phase == "ready":
+            clear_review_rounds(state, task_id)
             record(notes, f"{task_id} is approved and waiting for GitHub to merge.")
-            return "stop", True
+            return "stop", used_agent
         record(notes, f"{task_id} is waiting on checks or review.")
-        return "stop", True
+        return "stop", used_agent
     finally:
         release_worktree(task_id, keep)
         use_tree(BASE)
@@ -1364,6 +1538,12 @@ None.
         raise SystemExit("worktree keep failed")
     if not branch_needs_update("BEHIND") or branch_needs_update("CLEAN"):
         raise SystemExit("behind guard failed")
+    if (
+        touches_e2e(["packages/server/src/container.ts"])
+        or touches_e2e(["apps/web/src/client/modules/auth/components/sign-in-form.tsx"])
+        or not touches_e2e(["e2e/auth/sign-in.spec.ts"])
+    ):
+        raise SystemExit("e2e guard")
     try:
         worktree_for("P-08")
     except LoopError:
@@ -1540,6 +1720,115 @@ None.
     )
     if summary != "ci=SUCCESS agent-review=waiting review=APPROVED":
         raise SystemExit("check summary failed")
+    green = [
+        {"name": "ci", "conclusion": "SUCCESS"},
+        {"name": "agent-review", "conclusion": "SUCCESS"},
+    ]
+    head = "23fd7795f68368a2d45064561209d7ea24d168f2"
+    changes_on_head = {
+        "state": "CHANGES_REQUESTED",
+        "submittedAt": "2026-11-12T19:24:40Z",
+        "commit": {"oid": head},
+    }
+    if (
+        check_phase(
+            {
+                "reviewDecision": "REVIEW_REQUIRED",
+                "headRefOid": head,
+                "statusCheckRollup": green,
+                "reviews": [changes_on_head],
+            }
+        )
+        != "changes"
+    ):
+        raise SystemExit("head changes stayed pending")
+    if (
+        check_phase(
+            {
+                "reviewDecision": "APPROVED",
+                "headRefOid": head,
+                "statusCheckRollup": green,
+                "reviews": [changes_on_head],
+            }
+        )
+        != "ready"
+    ):
+        raise SystemExit("approved decision lost")
+    if (
+        check_phase(
+            {
+                "reviewDecision": "CHANGES_REQUESTED",
+                "headRefOid": head,
+                "statusCheckRollup": green,
+                "reviews": [
+                    {
+                        "state": "CHANGES_REQUESTED",
+                        "submittedAt": "2026-11-12T18:00:00Z",
+                        "commit": {"oid": "older-commit"},
+                    },
+                    {
+                        "state": "APPROVED",
+                        "submittedAt": "2026-11-12T19:24:40Z",
+                        "commit": {"oid": head},
+                    },
+                ],
+            }
+        )
+        != "pending"
+    ):
+        raise SystemExit("stale changes failed the head")
+    if (
+        check_phase(
+            {
+                "reviewDecision": "CHANGES_REQUESTED",
+                "headRefOid": head,
+                "statusCheckRollup": green,
+                "reviews": [
+                    {
+                        "state": "CHANGES_REQUESTED",
+                        "submittedAt": "2026-11-12T18:00:00Z",
+                        "commit": {"oid": "older-commit"},
+                    }
+                ],
+            }
+        )
+        != "changes"
+    ):
+        raise SystemExit("review decision ignored")
+    red = [{"name": "ci", "conclusion": "FAILURE"}, {"name": "agent-review", "conclusion": "SUCCESS"}]
+    if check_phase({"headRefOid": head, "statusCheckRollup": red, "reviews": []}) != "failed":
+        raise SystemExit("red check must stay a failure")
+    if check_phase({"headRefOid": head, "statusCheckRollup": red, "reviews": [changes_on_head]}) != "changes":
+        raise SystemExit("review verdict must win over a red check")
+    rounds_state = {"failures": {}}
+    for _ in range(MAX_REVIEW_ROUNDS):
+        rounds_state.setdefault("reviews", {})["P-01"] = review_rounds(rounds_state, "P-01") + 1
+    if (
+        review_rounds(rounds_state, "P-01") != MAX_REVIEW_ROUNDS
+        or rounds_state["failures"]
+        or MAX_REVIEW_ROUNDS <= FAILURES_BEFORE_BLOCK
+    ):
+        raise SystemExit("review rounds touched failures")
+    if not keep_after_phase("changes") or not keep_after_phase("failed"):
+        raise SystemExit("changes released the worktree")
+    if any(keep_after_phase(p) for p in ("merged", "ready", "pending")):
+        raise SystemExit("worktree lifecycle failed")
+    if (
+        agent_should_stop(AGENT_TIMEOUT - 1, AGENT_STALL_LIMIT * 2)
+        or agent_should_stop(AGENT_TIMEOUT + 60, 30)
+        or not agent_should_stop(AGENT_TIMEOUT + 60, AGENT_STALL_LIMIT)
+        or not agent_should_stop(AGENT_HARD_CAP, 0)
+    ):
+        raise SystemExit("agent healthcheck failed")
+    asked = {
+        "reviews": [
+            {"state": "CHANGES_REQUESTED", "submittedAt": "1", "body": "old"},
+            {"state": "CHANGES_REQUESTED", "submittedAt": "2", "body": "fix the test"},
+            {"state": "APPROVED", "submittedAt": "3", "body": "ok"},
+        ]
+    }
+    if review_feedback(asked) != "fix the test":
+        raise SystemExit("review feedback failed")
     print("self-check ok")
 
 

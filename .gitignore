@@ -11,6 +11,9 @@ node_modules
 # testing
 coverage
 .vitest/
+test-results/
+playwright-report/
+blob-report/
 
 # next.js
 .next/

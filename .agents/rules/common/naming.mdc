@@ -27,7 +27,7 @@ Module folder = bounded context (`identity`, `auth`). Files inside = aggregate /
 
 ## Suffixes
 
-`.router.ts` · `.contract.ts` · `.use-case.ts` · `.repository.ts` · `.service.ts` · `.entity.ts` · `.factory.ts` · `.mapper.ts` · `.types.ts` · `.port.ts` · `.adapter.ts` · `.middleware.ts` · `.const.ts` · `.schema.ts`
+`.router.ts` · `.contract.ts` · `.use-case.ts` · `.repository.ts` · `.service.ts` · `.entity.ts` · `.factory.ts` · `.mapper.ts` · `.types.ts` · `.port.ts` · `.adapter.ts` · `.middleware.ts` · `.const.ts` · `.schema.ts` · `.test.ts` (unit) · `.spec.ts` (e2e, `e2e/{context}/{verb}-{object}.spec.ts`)
 
 ## Use-case is an endpoint
 
