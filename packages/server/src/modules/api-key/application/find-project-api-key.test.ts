@@ -1,6 +1,5 @@
 import { FindProjectApiKeyUseCase } from "@workspace/server/modules/api-key/application/find-project-api-key.use-case";
 import { ApiKey } from "@workspace/server/modules/api-key/entity/api-key.entity";
-import { ApiKeyMapper } from "@workspace/server/modules/api-key/entity/api-key.mapper";
 import type { MembershipPort } from "@workspace/server/modules/api-key/port/membership.port";
 import type { ProjectPort } from "@workspace/server/modules/api-key/port/project.port";
 import type { ApiKeyRepository } from "@workspace/server/modules/api-key/repository/api-key.repository";
@@ -59,7 +58,11 @@ describe("FindProjectApiKeyUseCase", () => {
 
     expect(apiKeyRepository.findActiveByProjectId).toHaveBeenCalledWith(projectId);
     expect(withTransaction).not.toHaveBeenCalled();
-    expect(result).toEqual(ApiKeyMapper.toProjectApiKeyDto(apiKey));
+    expect(result.key).not.toBe(apiKey.key);
+    expect(result.revealed).toBe(false);
+    expect(result.key.endsWith(apiKey.key.slice(-4))).toBe(true);
+    expect(result.key).toBe(apiKey.key.replace(/.(?=.{4})/g, "\u2022"));
+    expect(result.createdAt).toBe(apiKey.createdAt.toISOString());
   });
 
   it("creates and audits a key when the project has no active key", async () => {
@@ -67,9 +70,13 @@ describe("FindProjectApiKeyUseCase", () => {
 
     const result = await useCase.execute({ projectId }, userId, organizationId);
 
+    const createdApiKey = saveWithAudit.mock.calls[0]?.[0] as ApiKey;
+
     expect(withActor).toHaveBeenCalledWith({ type: "user", id: userId });
     expect(saveWithAudit).toHaveBeenCalledWith(expect.any(ApiKey), "Create API key");
-    expect(result).toEqual(ApiKeyMapper.toProjectApiKeyDto(saveWithAudit.mock.calls[0]?.[0]));
+    expect(result.revealed).toBe(true);
+    expect(result.key).toBe(createdApiKey.key);
+    expect(result.createdAt).toBe(createdApiKey.createdAt.toISOString());
   });
 
   it("rejects a project outside the user's organization without creating a key", async () => {

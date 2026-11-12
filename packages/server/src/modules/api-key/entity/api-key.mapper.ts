@@ -16,8 +16,14 @@ export abstract class ApiKeyMapper {
     return { projectId, createdAt, revokedAt };
   }
 
-  static toProjectApiKeyDto(apiKey: ApiKey): FindProjectApiKeyOutputDtoType {
+  static toProjectApiKeyDto(apiKey: ApiKey, revealed: boolean): FindProjectApiKeyOutputDtoType {
     const { key, createdAt } = apiKey.toObject();
-    return { key, createdAt: createdAt.toISOString() };
+    const maskedKey = key.replace(/.(?=.{4})/g, "\u2022");
+
+    return {
+      key: revealed ? key : maskedKey,
+      createdAt: createdAt.toISOString(),
+      revealed,
+    };
   }
 }

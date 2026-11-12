@@ -41,7 +41,7 @@ export function SdkSetupInitCard({ projectId }: SdkSetupInitCardProps) {
   const code = buildSdkSetupInitSnippet({
     tab,
     apiKey: apiKeyData.key,
-    revealKey,
+    revealKey: apiKeyData.revealed ? revealKey : true,
     widgetSettings,
   });
   const panelTitle = tab === "next" ? texts.init.panelTitle.next : texts.init.panelTitle.react;
@@ -58,15 +58,17 @@ export function SdkSetupInitCard({ projectId }: SdkSetupInitCardProps) {
         description={texts.init.description}
         action={
           <Row align="center" gap="sm">
-            <Button
-              type="button"
-              variant="muted"
-              size="icon-sm"
-              aria-label={revealKey ? texts.init.maskKey : texts.init.revealKey}
-              onClick={() => setRevealKey((current) => !current)}
-            >
-              {revealKey ? <EyeOffIcon /> : <EyeIcon />}
-            </Button>
+            {apiKeyData.revealed ? (
+              <Button
+                type="button"
+                variant="muted"
+                size="icon-sm"
+                aria-label={revealKey ? texts.init.maskKey : texts.init.revealKey}
+                onClick={() => setRevealKey((current) => !current)}
+              >
+                {revealKey ? <EyeOffIcon /> : <EyeIcon />}
+              </Button>
+            ) : null}
             <SegmentedControl
               size="sm"
               aria-label={texts.init.title}

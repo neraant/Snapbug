@@ -26,7 +26,7 @@ export function SdkSetupApiKeyCard({ projectId }: SdkSetupApiKeyCardProps) {
   const [visible, setVisible] = useState(false);
   const { copied, copy } = useCopyText();
 
-  const maskedKey = data.key.replace(/.(?=.{4})/g, "•");
+  const displayKey = data.revealed ? (visible ? data.key : data.key.replace(/.(?=.{4})/g, "•")) : data.key;
   const createdLabel = new Date(data.createdAt).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
@@ -39,31 +39,35 @@ export function SdkSetupApiKeyCard({ projectId }: SdkSetupApiKeyCardProps) {
         title={texts.apiKey.title}
         action={
           <Row align="center" gap="sm" wrap={false}>
-            <Button
-              type="button"
-              variant="muted"
-              size="icon-sm"
-              aria-label={visible ? texts.apiKey.hide : texts.apiKey.show}
-              onClick={() => setVisible((current) => !current)}
-            >
-              {visible ? <EyeOffIcon /> : <EyeIcon />}
-            </Button>
-            <CopyButton
-              copied={copied}
-              onCopy={() => {
-                copy(data.key).catch(() => undefined);
-              }}
-              copyLabel={texts.apiKey.copy}
-              copiedLabel={texts.apiKey.copied}
-              variant="muted"
-              size="sm"
-            />
+            {data.revealed ? (
+              <>
+                <Button
+                  type="button"
+                  variant="muted"
+                  size="icon-sm"
+                  aria-label={visible ? texts.apiKey.hide : texts.apiKey.show}
+                  onClick={() => setVisible((current) => !current)}
+                >
+                  {visible ? <EyeOffIcon /> : <EyeIcon />}
+                </Button>
+                <CopyButton
+                  copied={copied}
+                  onCopy={() => {
+                    copy(data.key).catch(() => undefined);
+                  }}
+                  copyLabel={texts.apiKey.copy}
+                  copiedLabel={texts.apiKey.copied}
+                  variant="muted"
+                  size="sm"
+                />
+              </>
+            ) : null}
             {isAdmin ? <SdkSetupRotateApiKeyDialog projectId={projectId} /> : null}
           </Row>
         }
       />
       <Panel.Content gap="md">
-        <Code code={visible ? data.key : maskedKey} showCopy={false} />
+        <Code code={displayKey} showCopy={false} />
         {/* TODO: last-used metadata */}
         <Typography variant="text-xs" color="muted">
           {texts.apiKey.created(createdLabel)}
