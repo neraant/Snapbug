@@ -15,6 +15,8 @@ Work in multitask. Independent parts of this one task run in parallel through th
 
 When this task is implemented, move its line from `## Open` to `## Done` in `docs/STATUS.md` and keep the line text. Do not mark any other task done. Do not edit the TBD section or the Blocked section. If review requested changes and this task is not finished, move its line back to Open.
 
+If the task is major and changes UI, add or update one spec `e2e/{context}/{verb}-{object}.spec.ts`, following `.agents/rules/common/e2e.mdc`. Major means a new `page.tsx` under `apps/web/src/app/(`, a new user action, or a PLAN row with two or more AC where at least one is a user action. Assert role and visible text. No pixels, no screenshots in git. Small UI tweaks and backend-only tasks do not get an e2e test. If the flow needs saved records, write or reuse seed in `e2e/shared/seed/`. The loop runs `pnpm test:e2e` before push when the diff contains a file under `e2e/`.
+
 Do not edit `.github/**`, `.cursor/**`, `.agents/**`, `docs/SPEC.md`, or `docs/decisions/**`.
 
 Do not read `~/.snapbug` or hunt for tokens. Do not change `package.json`, `turbo.json`, `pnpm-lock.yaml`, or CI scripts in order to make checks pass.

@@ -1,0 +1,38 @@
+---
+description: E2E smoke tests (Playwright) for major UI tasks
+globs: e2e/**
+---
+
+# E2E
+
+E2E is a smoke of the main user action, not branch coverage. Branches stay in unit tests (`.test.ts`).
+
+## When
+
+MUST write or update one spec when the task is major AND it changes UI.
+
+Major means any one of:
+
+- a new `page.tsx` under `apps/web/src/app/(`
+- a new user action (button, form, or navigation that changes data)
+- the PLAN row lists two or more AC and at least one describes a user action
+
+MUST NOT write e2e for:
+
+- backend-only work
+- a small UI tweak (copy, style, reorder, a fix on an existing screen with no new action)
+- TBD tasks (P-08, P-18)
+
+## How
+
+- One file, one happy path: open, do the main action, see the result. A few steps only. No validation errors, empty states, or permission branches.
+- Assert with `getByRole` and a name, plus visible text. No pixels, no `toHaveScreenshot`, no screenshots in git, no `waitForTimeout`, no `data-testid` as the norm.
+- No page objects until two specs share code.
+- Naming: `e2e/{context}/{verb}-{object}.spec.ts`, singular context folder matching `apps/web/src/client/modules/`.
+- If the flow needs saved records, add or reuse a seed helper in `e2e/shared/seed/`. The spec does not import `packages/database` directly when a helper can do it. Do not implement the P-15 widget-to-dashboard scenario as part of another task.
+- Playwright `screenshot` and `video` stay off. Output goes to gitignored `test-results/` and `playwright-report/`.
+
+## Running
+
+- `pnpm test:e2e` (config: `e2e/playwright.config.ts`).
+- Do not add an e2e job to CI. The loop runs `pnpm test:e2e` on the implementer machine before push only when the diff contains a file under `e2e/`.
