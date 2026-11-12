@@ -474,6 +474,24 @@ def worktree_unpushed(repo: Path) -> bool:
     return count not in {"", "0"}
 
 
+def branch_needs_update(merge_state: str) -> bool:
+    return merge_state == "BEHIND"
+
+
+def update_from_master(auth: TokenSource, task_id: str, branch: str) -> None:
+    path = prepare_worktree(auth, task_id, branch)
+    use_tree(path)
+    if worktree_dirty(path):
+        raise LoopError(f"{task_id} worktree is dirty")
+    merged = git_run(path, ["merge", "--no-edit", "origin/master"], auth)
+    if merged.returncode != 0:
+        git(path, ["merge", "--abort"], check=False)
+        raise LoopError(f"{task_id} could not merge master into {branch}")
+    push_branch(auth, branch)
+    say(f"{task_id} updated {branch} from master")
+    release_worktree(task_id, False)
+
+
 def release_worktree(task_id: str, keep: bool) -> None:
     path = worktree_for(task_id)
     if keep:
@@ -1002,7 +1020,7 @@ def pull_request(auth: TokenSource, number: str) -> dict:
                 "--repo",
                 REPO,
                 "--json",
-                "state,reviewDecision,statusCheckRollup,url",
+                "state,reviewDecision,mergeStateStatus,statusCheckRollup,url",
             ],
         )
     )
@@ -1069,25 +1087,34 @@ def check_summary(pull: dict) -> str:
     return " ".join(parts)
 
 
-def wait_for(auth: TokenSource, number: str, label: str) -> str:
+def wait_for(auth: TokenSource, number: str, task_id: str, branch: str) -> str:
     deadline = time.monotonic() + 20 * 60
     phase = "pending"
+    updates = 0
     last = ""
     last_said = 0.0
-    say(f"{label} waiting on ci and agent-review")
+    say(f"{task_id} waiting on ci and agent-review")
     while time.monotonic() < deadline:
         pull = pull_request(auth, number)
         phase = check_phase(pull)
+        merge_state = str(pull.get("mergeStateStatus") or "")
         summary = check_summary(pull)
+        if merge_state:
+            summary = f"{summary} merge={merge_state}"
         now = time.monotonic()
         if summary != last or now - last_said >= 120:
-            say(f"{label} {summary}")
+            say(f"{task_id} {summary}")
             last = summary
             last_said = now
-        if phase != "pending":
+        if phase in {"merged", "failed"}:
             return phase
+        if phase == "ready" and branch_needs_update(merge_state) and updates < 2:
+            say(f"{task_id} branch is behind master")
+            update_from_master(auth, task_id, branch)
+            updates += 1
+            continue
         time.sleep(30)
-    return "pending"
+    return phase
 
 
 def one_task(auth: TokenSource, state: dict, notes: list[str]) -> tuple[str, bool]:
@@ -1139,7 +1166,7 @@ def one_task(auth: TokenSource, state: dict, notes: list[str]) -> tuple[str, boo
         )
     )
     if existing:
-        phase = wait_for(auth, str(existing[0]["number"]), task_id)
+        phase = wait_for(auth, str(existing[0]["number"]), task_id, branch)
         if phase == "merged":
             record(notes, f"{task_id} merged.")
             return "continue", False
@@ -1184,12 +1211,15 @@ def one_task(auth: TokenSource, state: dict, notes: list[str]) -> tuple[str, boo
         keep = False
         number = ensure_pr(auth, branch, task_id, line)
         record(notes, f"{task_id} opened or updated pull request {number}.")
-        phase = wait_for(auth, number, task_id)
+        phase = wait_for(auth, number, task_id, branch)
         if phase == "failed":
             return fail(f"{task_id} pull request failed review or checks")
         if phase == "merged":
             record(notes, f"{task_id} merged.")
             return "continue", True
+        if phase == "ready":
+            record(notes, f"{task_id} is approved and waiting for GitHub to merge.")
+            return "stop", True
         record(notes, f"{task_id} is waiting on checks or review.")
         return "stop", True
     finally:
@@ -1292,6 +1322,8 @@ None.
         raise SystemExit("worktree path failed")
     if not keep_worktree(True, False) or not keep_worktree(False, True) or keep_worktree(False, False):
         raise SystemExit("worktree keep failed")
+    if not branch_needs_update("BEHIND") or branch_needs_update("CLEAN"):
+        raise SystemExit("behind guard failed")
     try:
         worktree_for("P-08")
     except LoopError:
