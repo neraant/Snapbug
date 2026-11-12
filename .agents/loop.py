@@ -582,6 +582,7 @@ def run_agent(task_id: str, branch: str, task_line: str, model: str) -> None:
                 "agent",
                 "-p",
                 "--trust",
+                "--force",
                 "--model",
                 model,
                 "--output-format",
