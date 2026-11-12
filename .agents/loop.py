@@ -17,6 +17,7 @@ import signal
 import subprocess
 import sys
 import tempfile
+import threading
 import time
 import urllib.error
 import urllib.request
@@ -34,7 +35,9 @@ CLONE = HOME_STATE / "src"
 MAX_AGENT_CALLS = 5
 TOKEN_MAX_AGE = 45 * 60
 FAILURES_BEFORE_BLOCK = 3
-MODEL = "grok-4.7"
+MODEL_ID = "cursor-grok-4.7"
+EFFORTS = ("low", "medium", "high")
+AGENT_TIMEOUT = 30 * 60
 REQUIRED_CHECKS = ("ci", "agent-review")
 TYPE_BADGES = {
     "chore": "C5DEF5",
@@ -550,7 +553,7 @@ def save_agent_log(task_id: str, stdout: str, stderr: str, secrets: list[str]) -
     return path
 
 
-def run_agent(task_id: str, branch: str, task_line: str) -> None:
+def run_agent(task_id: str, branch: str, task_line: str, model: str) -> None:
     home = Path(tempfile.mkdtemp(prefix="snapbug-agent-home-"))
     key = cursor_key()
     try:
@@ -560,19 +563,25 @@ def run_agent(task_id: str, branch: str, task_line: str) -> None:
             + f"Task: {task_id}\n"
             + f"Branch: {branch}\n"
             + f"Status line: {task_line}\n"
+            + f"Model: {model}\n"
+            + "Fast mode is off. Do not enable fast mode and do not use a higher model than this one.\n"
+            + "Multitask: independent parts of this task run in parallel with the Task tool. "
+            + "Give every subagent this same model and leave fast mode off. "
+            + "You still implement only this task, on this branch, and you commit.\n"
             + "Implement this task only. Commit on the current branch. Do not push.\n"
             + "Do not edit the TBD or Blocked sections. Do not mark a task done. "
             + "Do not move any task other than this one.\n"
         )
+        say(f"{task_id} agent started")
         proc = subprocess.Popen(
             [
                 "agent",
                 "-p",
                 "--trust",
                 "--model",
-                MODEL,
+                model,
                 "--output-format",
-                "json",
+                "stream-json",
                 "--",
                 prompt,
             ],
@@ -583,18 +592,48 @@ def run_agent(task_id: str, branch: str, task_line: str) -> None:
             text=True,
             start_new_session=True,
         )
+        stdout_lines: list[str] = []
+        stderr_parts: list[str] = []
+
+        def read_stdout() -> None:
+            if proc.stdout is None:
+                return
+            for raw in proc.stdout:
+                stdout_lines.append(raw)
+                message = progress_line(raw)
+                if message:
+                    say(f"{task_id} {redact(message, [key])}")
+
+        def read_stderr() -> None:
+            if proc.stderr is None:
+                return
+            stderr_parts.append(proc.stderr.read())
+
+        stdout_thread = threading.Thread(target=read_stdout)
+        stderr_thread = threading.Thread(target=read_stderr)
+        stdout_thread.start()
+        stderr_thread.start()
+        timed_out = False
         try:
-            stdout, stderr = proc.communicate(timeout=30 * 60)
+            proc.wait(timeout=AGENT_TIMEOUT)
         except subprocess.TimeoutExpired:
+            timed_out = True
             kill_group(proc.pid)
-            stdout, stderr = proc.communicate()
-            save_agent_log(task_id, stdout or "", stderr or "", [key])
-            raise LoopError(f"agent timed out for {task_id}") from None
-        save_agent_log(task_id, stdout or "", stderr or "", [key])
-        if "Keychain" in (stderr or "") or "Security command failed" in (stderr or ""):
+            proc.wait(timeout=5)
+        stdout_thread.join(timeout=5)
+        stderr_thread.join(timeout=5)
+        stdout = "".join(stdout_lines)
+        stderr = "".join(stderr_parts)
+        save_agent_log(task_id, stdout, stderr, [key])
+        if timed_out:
+            raise LoopError(f"agent timed out for {task_id}")
+        if "Keychain" in stderr or "Security command failed" in stderr:
             raise SetupError("the agent called the macOS keychain and failed")
         if proc.returncode != 0:
             raise LoopError(f"agent exited {proc.returncode}")
+        result_error = agent_result_error(stdout_lines)
+        if result_error:
+            raise LoopError(result_error)
     finally:
         shutil.rmtree(home, ignore_errors=True)
 
@@ -628,6 +667,131 @@ def gh(auth: TokenSource, args: list[str]) -> str:
         message = redact((result.stderr or result.stdout).strip(), [token])
         raise LoopError(message.splitlines()[0][:300] if message else "gh failed")
     return result.stdout.strip()
+
+
+def say(message: str) -> None:
+    print(message, flush=True)
+
+
+def record(notes: list[str], message: str) -> None:
+    notes.append(message)
+    say(message)
+
+
+def model_for(effort: str) -> str:
+    if effort not in EFFORTS:
+        raise LoopError(f"unknown effort {effort}")
+    return f"{MODEL_ID}[effort={effort},fast=false]"
+
+
+def plan_row(plan: str, task_id: str) -> str:
+    for raw in normalized(plan).splitlines():
+        match = ROW.match(raw)
+        if match and match.group(1) == task_id:
+            return raw.strip()
+    return ""
+
+
+def effort_for(task_line: str, plan_row_text: str) -> str:
+    """Pick low, medium, or high from the size of the task and the plan row.
+
+    The ceiling is always cursor-grok-4.7 with fast mode off. Word count is the
+    volume. Acceptance criteria and clause breaks stand in for how many
+    behaviors the task packs in.
+    """
+    text = f"{task_line}\n{plan_row_text}"
+    words = re.findall(r"[A-Za-z0-9][A-Za-z0-9'-]*", text)
+    criteria = re.findall(r"AC-\d+", plan_row_text)
+    clauses = text.count(",") + text.count(";")
+    score = 0
+    if len(words) >= 140:
+        score += 2
+    elif len(words) >= 70:
+        score += 1
+    if len(criteria) >= 2:
+        score += 1
+    if clauses >= 12:
+        score += 2
+    elif clauses >= 6:
+        score += 1
+    if score >= 3:
+        return "high"
+    if score >= 1:
+        return "medium"
+    return "low"
+
+
+def tool_name(value: object) -> str:
+    if not isinstance(value, dict):
+        return "tool"
+    tool = value.get("tool")
+    if isinstance(tool, dict):
+        case = tool.get("case")
+        if isinstance(case, str) and case.strip():
+            return case.removesuffix("ToolCall")
+    for key, item in value.items():
+        if key.endswith("ToolCall") and item:
+            return key.removesuffix("ToolCall")
+    name = value.get("name") or value.get("toolName")
+    if isinstance(name, str) and name.strip():
+        return name.strip()
+    return "tool"
+
+
+def assistant_text(event: dict) -> str:
+    message = event.get("message")
+    if not isinstance(message, dict):
+        return ""
+    content = message.get("content")
+    if isinstance(content, str):
+        return content.strip()
+    if not isinstance(content, list):
+        return ""
+    parts = []
+    for item in content:
+        if isinstance(item, dict) and item.get("type") == "text" and isinstance(item.get("text"), str):
+            parts.append(item["text"])
+        elif isinstance(item, str):
+            parts.append(item)
+    return " ".join(parts).strip()
+
+
+def progress_line(raw: str) -> str | None:
+    text = raw.strip()
+    if not text.startswith("{"):
+        return None
+    try:
+        event = json.loads(text)
+    except json.JSONDecodeError:
+        return None
+    if not isinstance(event, dict):
+        return None
+    if event.get("type") == "tool_call" and event.get("subtype") == "started":
+        return tool_name(event.get("tool_call"))
+    if event.get("type") == "assistant":
+        snippet = " ".join(assistant_text(event).split())
+        if not snippet:
+            return None
+        if len(snippet) > 160:
+            snippet = snippet[:157] + "..."
+        return snippet
+    return None
+
+
+def agent_result_error(lines: list[str]) -> str | None:
+    for raw in reversed(lines):
+        text = raw.strip()
+        if not text.startswith("{"):
+            continue
+        try:
+            event = json.loads(text)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(event, dict) and event.get("type") == "result":
+            if event.get("is_error") is True:
+                return "agent reported an error"
+            return None
+    return None
 
 
 def acceptance_criteria(plan: str, task_id: str) -> list[str]:
@@ -807,11 +971,32 @@ def write_handover(lines: list[str]) -> None:
     (HOME_STATE / "HANDOVER.md").write_text("# Handover\n\n" + "\n".join(lines) + "\n")
 
 
-def wait_for(auth: TokenSource, number: str) -> str:
+def check_summary(pull: dict) -> str:
+    by_name: dict[str, str] = {}
+    for item in pull.get("statusCheckRollup") or []:
+        name = item.get("name") or item.get("context")
+        if name in REQUIRED_CHECKS:
+            by_name[str(name)] = str(item.get("conclusion") or item.get("state") or "pending")
+    parts = [f"{name}={by_name.get(name, 'waiting')}" for name in REQUIRED_CHECKS]
+    parts.append(f"review={pull.get('reviewDecision') or 'pending'}")
+    return " ".join(parts)
+
+
+def wait_for(auth: TokenSource, number: str, label: str) -> str:
     deadline = time.monotonic() + 20 * 60
     phase = "pending"
+    last = ""
+    last_said = 0.0
+    say(f"{label} waiting on ci and agent-review")
     while time.monotonic() < deadline:
-        phase = check_phase(pull_request(auth, number))
+        pull = pull_request(auth, number)
+        phase = check_phase(pull)
+        summary = check_summary(pull)
+        now = time.monotonic()
+        if summary != last or now - last_said >= 120:
+            say(f"{label} {summary}")
+            last = summary
+            last_said = now
         if phase != "pending":
             return phase
         time.sleep(30)
@@ -827,11 +1012,11 @@ def one_task(auth: TokenSource, state: dict, notes: list[str]) -> tuple[str, boo
     for task_id in tasks_to_stop(status, state["failures"]):
         note = block_note(task_id)
         if note not in notes:
-            notes.append(note)
+            record(notes, note)
             write_handover(notes)
     task_id = select_task(status, state["failures"])
     if task_id is None:
-        notes.append("No open task left.")
+        record(notes, "No open task left.")
         return "stop", False
     branch = branch_for(task_id)
     line = task_line(status, task_id)
@@ -844,7 +1029,7 @@ def one_task(auth: TokenSource, state: dict, notes: list[str]) -> tuple[str, boo
         count, counted = record_failure(state, task_id, counted)
         if not already:
             save_state(state)
-        notes.append(f"{message} ({count}).")
+        record(notes, f"{message} ({count}).")
         return "continue", used_agent
 
     existing = json.loads(
@@ -867,22 +1052,26 @@ def one_task(auth: TokenSource, state: dict, notes: list[str]) -> tuple[str, boo
         )
     )
     if existing:
-        phase = wait_for(auth, str(existing[0]["number"]))
+        phase = wait_for(auth, str(existing[0]["number"]), task_id)
         if phase == "merged":
-            notes.append(f"{task_id} merged.")
+            record(notes, f"{task_id} merged.")
             return "continue", False
         if phase == "ready":
-            notes.append(f"{task_id} is approved and waiting for GitHub to merge.")
+            record(notes, f"{task_id} is approved and waiting for GitHub to merge.")
             return "stop", False
         if phase == "pending":
-            notes.append(f"{task_id} is still waiting on ci or agent-review.")
+            record(notes, f"{task_id} is still waiting on ci or agent-review.")
             return "stop", False
-        notes.append(f"{task_id} checks or review failed. Starting another attempt.")
+        record(notes, f"{task_id} checks or review failed. Starting another attempt.")
 
     checkout_task(auth, branch)
     before = git(CLONE, ["rev-parse", "HEAD"])
+    plan_path = CLONE / "docs/PLAN.md"
+    plan = plan_path.read_text() if plan_path.is_file() else ""
+    model = model_for(effort_for(line, plan_row(plan, task_id)))
+    record(notes, f"{task_id} model {model}")
     try:
-        run_agent(task_id, branch, line)
+        run_agent(task_id, branch, line, model)
         used_agent = True
     except SetupError:
         raise
@@ -897,16 +1086,17 @@ def one_task(auth: TokenSource, state: dict, notes: list[str]) -> tuple[str, boo
     reason = docs_problem(task_id)
     if reason:
         return fail(f"{task_id} {reason}")
+    say(f"{task_id} pushing {branch}")
     push_branch(auth, branch)
     number = ensure_pr(auth, branch, task_id, line)
-    notes.append(f"{task_id} opened or updated pull request {number}.")
-    phase = wait_for(auth, number)
+    record(notes, f"{task_id} opened or updated pull request {number}.")
+    phase = wait_for(auth, number, task_id)
     if phase == "failed":
         return fail(f"{task_id} pull request failed review or checks")
     if phase == "merged":
-        notes.append(f"{task_id} merged.")
+        record(notes, f"{task_id} merged.")
         return "continue", True
-    notes.append(f"{task_id} is waiting on checks or review.")
+    record(notes, f"{task_id} is waiting on checks or review.")
     return "stop", True
 
 
@@ -1106,6 +1296,63 @@ None.
     sleeper = subprocess.Popen(["sleep", "30"], start_new_session=True)
     kill_group(sleeper.pid)
     sleeper.wait(timeout=5)
+    short = "P-11 an ingest rate limit."
+    short_row = "| P-11 | Ingest is rate-limited per project key | — | AC-25 |"
+    wide = "P-02 administrator-only invitations, domains, masking, and key rotation."
+    wide_row = (
+        "| P-02 | Only an administrator invites people, changes domains and masking, "
+        "and rotates the project key. Rotating is one action. | — | AC-22, AC-05 |"
+    )
+    long = "P-21 " + ("archive restore delete assignee slug " * 20)
+    long_row = "| P-21 | " + ("archive, restore, delete, assignee, email, slug, " * 8) + "| — | AC-37 |"
+    if effort_for(short, short_row) != "low" or effort_for(wide, wide_row) != "medium":
+        raise SystemExit("effort failed")
+    if effort_for(long, long_row) != "high":
+        raise SystemExit("effort failed")
+    packed = "P-21 " + " ".join(["setting"] * 60)
+    packed_row = "| P-21 | " + ", ".join(["behavior"] * 15) + " | — | AC-37 |"
+    if effort_for(packed, packed_row) != "high":
+        raise SystemExit("effort failed")
+    ceiling = model_for("high")
+    if (
+        ceiling != "cursor-grok-4.7[effort=high,fast=false]"
+        or "fast=true" in ceiling
+        or model_for("low") != "cursor-grok-4.7[effort=low,fast=false]"
+        or model_for("medium") != "cursor-grok-4.7[effort=medium,fast=false]"
+    ):
+        raise SystemExit("model failed")
+    try:
+        model_for("max")
+    except LoopError:
+        pass
+    else:
+        raise SystemExit("model failed")
+    if plan_row(plan, "P-02") == "" or "AC-22" not in plan_row(plan, "P-02"):
+        raise SystemExit("plan row failed")
+    started = progress_line(
+        '{"type":"tool_call","subtype":"started","tool_call":{"shellToolCall":{"args":{"command":"ls"}}}}\n'
+    )
+    if started != "shell":
+        raise SystemExit("progress tool failed")
+    spoken = progress_line(
+        '{"type":"assistant","message":{"role":"assistant","content":[{"type":"text","text":"Reading the session use case."}]}}\n'
+    )
+    if spoken != "Reading the session use case.":
+        raise SystemExit("progress text failed")
+    if progress_line("not json\n") is not None:
+        raise SystemExit("progress ignored text")
+    if agent_result_error(['{"type":"result","is_error":true,"result":"no"}\n']) != "agent reported an error":
+        raise SystemExit("result error failed")
+    if agent_result_error(['{"type":"result","is_error":false,"result":"ok"}\n']) is not None:
+        raise SystemExit("result error failed")
+    summary = check_summary(
+        {
+            "reviewDecision": "APPROVED",
+            "statusCheckRollup": [{"name": "ci", "conclusion": "SUCCESS"}],
+        }
+    )
+    if summary != "ci=SUCCESS agent-review=waiting review=APPROVED":
+        raise SystemExit("check summary failed")
     print("self-check ok")
 
 
@@ -1115,7 +1362,13 @@ def main() -> None:
         return
     cursor_key()
     limit = agent_call_cap()
-    notes = [f"Repository: {REPO}", f"Agent call cap: {limit}", f"Model: {MODEL}"]
+    notes = [
+        f"Repository: {REPO}",
+        f"Agent call cap: {limit}",
+        f"Model ceiling: {model_for('high')}",
+    ]
+    for line in notes:
+        say(line)
     auth = TokenSource(lambda: installation_token(app_jwt()))
     ensure_clone(auth)
     state = load_state()
