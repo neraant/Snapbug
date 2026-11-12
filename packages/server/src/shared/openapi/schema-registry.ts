@@ -20,7 +20,6 @@ import {
   findInvitationByTokenOutputDtoSchema,
 } from "@workspace/validation/modules/invitation/dto/find-invitation-by-token.schema";
 import { sendInvitationsInputDtoSchema } from "@workspace/validation/modules/invitation/dto/send-invitation.schema";
-import { createMembershipInputDtoSchema } from "@workspace/validation/modules/membership/dto/create-membership.schema";
 import { findMembershipInputDtoSchema } from "@workspace/validation/modules/membership/dto/find-membership.schema";
 import { findMembershipByUserOutputDtoSchema } from "@workspace/validation/modules/membership/dto/find-membership-by-user.schema";
 import { membershipModelSchema } from "@workspace/validation/modules/membership/dto/membership.model";
@@ -43,7 +42,6 @@ import {
   createUserWithPasswordHashInputDtoSchema,
 } from "@workspace/validation/modules/user/dto/create-user.schema";
 import { findUserByEmailInputDtoSchema } from "@workspace/validation/modules/user/dto/find-user-by-email.schema";
-import { findUserCredentialsByEmailInputDtoSchema } from "@workspace/validation/modules/user/dto/find-user-credentials-by-email.schema";
 import { userModelSchema } from "@workspace/validation/modules/user/dto/user.model";
 
 JSON_SCHEMA_REGISTRY.add(userModelSchema, {
@@ -171,12 +169,6 @@ JSON_SCHEMA_REGISTRY.add(findUserByEmailInputDtoSchema, {
   examples: [{ email: "user@example.com" }],
 });
 
-JSON_SCHEMA_REGISTRY.add(findUserCredentialsByEmailInputDtoSchema, {
-  title: "Find user credentials by email",
-  description: "Stored credentials for an email",
-  examples: [{ email: "user@example.com" }],
-});
-
 JSON_SCHEMA_REGISTRY.add(membershipModelSchema, {
   title: "Membership",
   description: "A user's membership in an organization",
@@ -224,12 +216,6 @@ JSON_SCHEMA_REGISTRY.add(createOrganizationInputDtoSchema, {
 JSON_SCHEMA_REGISTRY.add(createOrganizationOutputDtoSchema, {
   title: "Created organization workspace",
   description: "Organization and its default project",
-});
-
-JSON_SCHEMA_REGISTRY.add(createMembershipInputDtoSchema, {
-  title: "Create membership",
-  description: "Admin membership for an organization that has no members yet",
-  examples: [{ organizationId: "2a8c69a1-1ab1-45a8-8497-eae1e506d9d1" }],
 });
 
 JSON_SCHEMA_REGISTRY.add(updateOrganizationInputDtoSchema, {

@@ -34,14 +34,12 @@ import { WidgetUserAgentService } from "@workspace/server/modules/bug-report/ser
 import { UserAdapter } from "@workspace/server/modules/identity/adapter/user.adapter";
 import { CreateUserUseCase } from "@workspace/server/modules/identity/application/create-user.use-case";
 import { FindUserByEmailUseCase } from "@workspace/server/modules/identity/application/find-user-by-email.use-case";
-import { FindUserCredentialsByEmailUseCase } from "@workspace/server/modules/identity/application/find-user-credentials-by-email.use-case";
 import { UserRepository } from "@workspace/server/modules/identity/repository/user.repository";
 import { AcceptInvitationUseCase } from "@workspace/server/modules/invitation/application/accept-invitation.use-case";
 import { FindInvitationByTokenUseCase } from "@workspace/server/modules/invitation/application/find-invitation-by-token.use-case";
 import { SendInvitationsUseCase } from "@workspace/server/modules/invitation/application/send-invitation.use-case";
 import { InvitationRepository } from "@workspace/server/modules/invitation/repository/invitation.repository";
 import { MembershipAdapter } from "@workspace/server/modules/membership/adapter/membership.adapter";
-import { CreateMembershipUseCase } from "@workspace/server/modules/membership/application/create-membership.use-case";
 import { FindMembershipUseCase } from "@workspace/server/modules/membership/application/find-membership.use-case";
 import { FindMembershipByUserUseCase } from "@workspace/server/modules/membership/application/find-membership-by-user.use-case";
 import { FindMembershipProjectAccessUseCase } from "@workspace/server/modules/membership/application/find-membership-project-access.use-case";
@@ -110,7 +108,6 @@ const projectAdapter = new ProjectAdapter(projectRepository, membershipAdapter, 
 const organizationAdapter = new OrganizationAdapter(organizationRepository);
 const apiKeyAdapter = new ApiKeyAdapter(apiKeyRepository, projectAdapter);
 
-const createMembership = new CreateMembershipUseCase(membershipRepository);
 const findMembership = new FindMembershipUseCase(membershipRepository);
 const findMembershipByUser = new FindMembershipByUserUseCase(membershipRepository);
 const findMembershipsByUser = new FindMembershipsByUserUseCase(membershipRepository);
@@ -138,7 +135,6 @@ const replaceMembershipProjectAccess = new ReplaceMembershipProjectAccessUseCase
 
 const createUser = new CreateUserUseCase(userRepository);
 const findUserByEmail = new FindUserByEmailUseCase(userRepository);
-const findUserCredentialsByEmail = new FindUserCredentialsByEmailUseCase(userRepository);
 
 const createProject = new CreateProjectUseCase(membershipAdapter, projectService, withTransaction);
 const findProjects = new FindProjectsUseCase(membershipAdapter, projectRepository);
@@ -251,7 +247,6 @@ const updateBugReport = new UpdateBugReportUseCase(
 
 export const container = {
   membership: {
-    createMembership,
     findMembership,
     findMembershipByUser,
     findMembershipsByUser,
@@ -262,7 +257,7 @@ export const container = {
     findMembershipProjectAccess,
     replaceMembershipProjectAccess,
   },
-  identity: { createUser, findUserByEmail, findUserCredentialsByEmail },
+  identity: { createUser, findUserByEmail },
   project: { createProject, findProjects, updateProject, findProjectWidgetSetting, updateProjectWidgetSetting },
   organization: {
     findOnboarding,

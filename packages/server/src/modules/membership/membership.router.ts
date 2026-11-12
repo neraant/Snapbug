@@ -11,11 +11,12 @@ const authed = os.use(authedMiddleware);
 const admin = authed.use(adminMiddleware);
 
 export const membershipRouter = os.router({
-  createMembership: authed.createMembership.handler(
-    async ({ input, context }) => await container.membership.createMembership.execute(input, context.user.id),
-  ),
   findMembership: authed.findMembership.handler(
-    async ({ input }) => await container.membership.findMembership.execute(input),
+    async ({ input, context }) =>
+      await container.membership.findMembership.execute({
+        userId: context.user.id,
+        organizationId: input.organizationId,
+      }),
   ),
   findMembershipByUser: authed.findMembershipByUser.handler(
     async ({ context }) =>
