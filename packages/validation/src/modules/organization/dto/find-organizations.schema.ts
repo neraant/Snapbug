@@ -5,6 +5,7 @@ export const findOrganizationsOutputDtoSchema = z.array(
   z.object({
     organizationId: z.uuid(),
     name: z.string(),
+    reports_retention_days: z.number().int(),
     role: z.enum(UserRole),
   }),
 );

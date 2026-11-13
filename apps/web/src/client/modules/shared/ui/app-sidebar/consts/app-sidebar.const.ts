@@ -5,6 +5,7 @@ import {
   FolderKanbanIcon,
   KeyRoundIcon,
   LayoutDashboardIcon,
+  SettingsIcon,
   TicketIcon,
   UsersIcon,
 } from "lucide-react";
@@ -23,4 +24,5 @@ export const appSidebarItems: SidebarItem[] = [
 export const appSidebarAdminItems: SidebarItem[] = [
   { href: url.projects(), label: texts.projects, icon: FolderKanbanIcon },
   { href: url.team(), label: texts.team, icon: UsersIcon },
+  { href: url.settings(), label: texts.settings, icon: SettingsIcon },
 ];

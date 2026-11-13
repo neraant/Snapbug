@@ -8,6 +8,7 @@ export const texts = {
   playground: "Playground",
   projects: "Projects",
   team: "Team",
+  settings: "Settings",
   organization: {
     ariaLabel: "Organization",
     create: "Create organization",

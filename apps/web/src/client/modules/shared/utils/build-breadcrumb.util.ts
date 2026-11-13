@@ -43,6 +43,10 @@ const breadcrumbRoute: BreadcrumbRoute[] = [
     pattern: routePattern.team,
     build: () => [{ href: url.team(), label: texts.team }],
   },
+  {
+    pattern: routePattern.settings,
+    build: () => [{ href: url.settings(), label: texts.settings }],
+  },
 ];
 
 function patternScore(pattern: string) {

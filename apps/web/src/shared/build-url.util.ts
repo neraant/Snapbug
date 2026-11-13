@@ -51,6 +51,7 @@ export const routePattern = {
 
   projects: "/projects",
   team: "/team",
+  settings: "/settings",
 } as const;
 
 export const url = {
@@ -69,4 +70,5 @@ export const url = {
 
   projects: () => routePattern.projects,
   team: () => routePattern.team,
+  settings: () => routePattern.settings,
 } as const;
