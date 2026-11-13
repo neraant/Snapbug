@@ -1362,6 +1362,36 @@ def model_for(effort: str) -> str:
     return model
 
 
+def parse_implementer_choice(raw: str) -> str:
+    """Map a startup answer to auto or one effort. Fast variants are refused."""
+    text = raw.strip().lower()
+    if text in ("", "auto"):
+        return "auto"
+    if "fast" in text:
+        raise LoopError("fast mode is off")
+    if text in EFFORTS:
+        return text
+    for effort, model in MODELS.items():
+        if text == model:
+            return effort
+    raise LoopError("implementer model must be auto, low, medium, or high")
+
+
+def ask_implementer_model() -> str:
+    """Ask which model implements tasks. A non-interactive run keeps auto."""
+    if not sys.stdin.isatty():
+        return "auto"
+    say(
+        "Implementer model: auto, low (grok-4.7-low), "
+        "medium (grok-4.7-medium), high (grok-4.7-high)"
+    )
+    try:
+        entered = input("Choice [auto]: ")
+    except EOFError:
+        return "auto"
+    return parse_implementer_choice(entered)
+
+
 def plan_row(plan: str, task_id: str) -> str:
     for raw in normalized(plan).splitlines():
         match = ROW.match(raw)
@@ -1740,7 +1770,11 @@ def wait_for(auth: TokenSource, number: str, task_id: str, branch: str) -> str:
 
 
 def one_task(
-    auth: TokenSource, state: dict, notes: list[str], skip: set[str] | None = None
+    auth: TokenSource,
+    state: dict,
+    notes: list[str],
+    skip: set[str] | None = None,
+    model_choice: str = "auto",
 ) -> tuple[str, bool]:
     git(BASE, ["fetch", "--prune", "origin"], auth)
     refresh_base()
@@ -1834,7 +1868,8 @@ def one_task(
         had_commits = worktree_unpushed(tree(), branch)
         plan_path = tree() / "docs/PLAN.md"
         plan = plan_path.read_text() if plan_path.is_file() else ""
-        model = model_for(effort_for(line, plan_row(plan, task_id)))
+        effort = effort_for(line, plan_row(plan, task_id))
+        model = model_for(effort if model_choice == "auto" else model_choice)
         addressed_e2e = False
         addressed_docs = False
 
@@ -2296,7 +2331,16 @@ None.
         or ceiling.endswith("-fast")
         or model_for("low") != "grok-4.7-low"
         or model_for("medium") != "grok-4.7-medium"
+        or parse_implementer_choice("") != "auto"
+        or parse_implementer_choice(" HIGH ") != "high"
+        or parse_implementer_choice("grok-4.7-medium") != "medium"
     ):
+        raise SystemExit("model failed")
+    try:
+        parse_implementer_choice("grok-4.7-high-fast")
+    except LoopError:
+        pass
+    else:
         raise SystemExit("model failed")
     try:
         model_for("max")
@@ -2552,11 +2596,14 @@ def main() -> None:
         self_check()
         return
     cursor_key()
+    model_choice = ask_implementer_model()
     limit = agent_call_cap()
+    picked = "auto" if model_choice == "auto" else model_for(model_choice)
     notes = [
         f"Repository: {REPO}",
         f"Agent call cap: {limit}",
         f"Model ceiling: {model_for('high')}",
+        f"Implementer model: {picked}",
     ]
     for line in notes:
         say(line)
@@ -2567,7 +2614,7 @@ def main() -> None:
     skipped: set[str] = set()
     try:
         while calls < limit:
-            outcome, used_agent = one_task(auth, state, notes, skipped)
+            outcome, used_agent = one_task(auth, state, notes, skipped, model_choice)
             if used_agent:
                 calls += 1
             if outcome == "stop":

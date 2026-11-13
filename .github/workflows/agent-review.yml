@@ -130,7 +130,8 @@ jobs:
           )
           pathlib.Path(sys.argv[3]).write_text(text)
           PY
-          agent -p --trust --mode ask --model grok-4.7 --output-format json \
+          # The bare grok-4.7 slug runs as grok-4.7-high-fast. Pin the non-fast model.
+          agent -p --trust --mode ask --model grok-4.7-high --output-format json \
             < "$RUNNER_TEMP/review-prompt.md" > "$RUNNER_TEMP/agent-output.json"
           python3 - "$RUNNER_TEMP/agent-output.json" "$RUNNER_TEMP/review.json" <<'PY'
           import json
