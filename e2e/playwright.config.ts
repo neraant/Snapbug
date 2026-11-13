@@ -148,7 +148,9 @@ export default defineConfig({
   testDir: here,
   testMatch: "**/*.spec.ts",
   outputDir: path.join(here, "test-results"),
+  // One Next dev server and a shared database seed. Spec files must not run at once.
   fullyParallel: false,
+  workers: 1,
   retries: 0,
   timeout: 90_000,
   reporter: [["list"], ["html", { outputFolder: path.join(here, "playwright-report"), open: "never" }]],
