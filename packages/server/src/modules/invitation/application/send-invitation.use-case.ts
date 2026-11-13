@@ -5,6 +5,7 @@ import type { OrganizationPort } from "@workspace/server/modules/invitation/port
 import type { TokenPort } from "@workspace/server/modules/invitation/port/token.port";
 import type { UserPort } from "@workspace/server/modules/invitation/port/user.port";
 import type { InvitationService } from "@workspace/server/modules/invitation/service/invitation.service";
+import type { WithTransactionType } from "@workspace/server/shared/database/transaction.util";
 import type { EmailService } from "@workspace/server/shared/email/service/email.service";
 import { ForbiddenError, NotFoundError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
@@ -24,6 +25,7 @@ export class SendInvitationsUseCase {
     private readonly organizationPort: OrganizationPort,
     private readonly tokenPort: TokenPort,
     private readonly emailService: EmailService,
+    private readonly withTransaction: WithTransactionType,
   ) {}
 
   async execute(
@@ -73,7 +75,12 @@ export class SendInvitationsUseCase {
         expiresAt: new Date(Date.now() + TOKEN_TTL_MS),
       });
 
-      await this.invitationService.withActor({ type: "user", id: userId }).saveWithAudit(invitation, "Send invitation");
+      await this.withTransaction(async (tx) => {
+        await this.invitationService
+          .withTx(tx)
+          .withActor({ type: "user", id: userId })
+          .saveWithAudit(invitation, "Send invitation");
+      });
 
       const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
       const inviteUrl = `${appUrl}/sign-up?invitation=${token}`;

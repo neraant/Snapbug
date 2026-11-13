@@ -71,6 +71,7 @@ import { UpdateOnboardingOrganizationUseCase } from "@workspace/server/modules/o
 import { UpdateOrganizationUseCase } from "@workspace/server/modules/organization/application/update-organization.use-case";
 import { OrganizationRepository } from "@workspace/server/modules/organization/repository/organization.repository";
 import { OrganizationService } from "@workspace/server/modules/organization/service/organization.service";
+import { AuditProjectAdapter } from "@workspace/server/modules/project/adapter/audit-project.adapter";
 import { ProjectAdapter } from "@workspace/server/modules/project/adapter/project.adapter";
 import { CreateProjectUseCase } from "@workspace/server/modules/project/application/create-project.use-case";
 import { FindProjectWidgetSettingUseCase } from "@workspace/server/modules/project/application/find-project-widget-setting.use-case";
@@ -109,7 +110,8 @@ const invitationRepository = new InvitationRepository();
 const bugReportRepository = new BugReportRepository();
 const commentRepository = new CommentRepository();
 const auditLogRepository = new AuditLogRepository();
-const auditLogService = new AuditLogService(auditLogRepository);
+const auditProjectAdapter = new AuditProjectAdapter(projectRepository);
+const auditLogService = new AuditLogService(auditLogRepository, auditProjectAdapter);
 const organizationService = new OrganizationService(organizationRepository, auditLogService);
 const membershipService = new MembershipService(membershipRepository, auditLogService);
 const invitationService = new InvitationService(invitationRepository, auditLogService);
@@ -146,8 +148,8 @@ const findProjectMembers = new FindProjectMembersUseCase(
   projectAdapter,
   userAdapter,
 );
-const updateMembershipRole = new UpdateMembershipRoleUseCase(membershipRepository, membershipService);
-const removeMembership = new RemoveMembershipUseCase(membershipRepository, membershipService);
+const updateMembershipRole = new UpdateMembershipRoleUseCase(membershipRepository, membershipService, withTransaction);
+const removeMembership = new RemoveMembershipUseCase(membershipRepository, membershipService, withTransaction);
 const findMembershipProjectAccess = new FindMembershipProjectAccessUseCase(
   membershipRepository,
   projectAccessRepository,
@@ -187,6 +189,7 @@ const updateOrganization = new UpdateOrganizationUseCase(
   membershipAdapter,
   organizationRepository,
   organizationService,
+  withTransaction,
 );
 const updateOnboardingOrganization = new UpdateOnboardingOrganizationUseCase(
   userAdapter,
@@ -221,6 +224,7 @@ const sendInvitations = new SendInvitationsUseCase(
   organizationAdapter,
   authService,
   emailService,
+  withTransaction,
 );
 const findInvitationByToken = new FindInvitationByTokenUseCase(invitationRepository, organizationAdapter);
 const acceptInvitation = new AcceptInvitationUseCase(

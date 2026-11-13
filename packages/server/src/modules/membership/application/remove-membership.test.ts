@@ -3,6 +3,7 @@ import { Membership } from "@workspace/server/modules/membership/entity/membersh
 import { MembershipMapper } from "@workspace/server/modules/membership/entity/membership.mapper";
 import type { MembershipRepository } from "@workspace/server/modules/membership/repository/membership.repository";
 import type { MembershipService } from "@workspace/server/modules/membership/service/membership.service";
+import type { WithTransactionType } from "@workspace/server/shared/database/transaction.util";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
 import { describe, expect, it, vi } from "vitest";
@@ -30,12 +31,20 @@ function setup(memberships = [currentMembership, otherMembership]) {
     findManyByOrganizationId: vi.fn().mockResolvedValue(memberships),
   };
   const deleteWithAudit = vi.fn();
+  const membershipService = {
+    withTx: vi.fn(),
+    withActor: vi.fn().mockReturnValue({ deleteWithAudit }),
+  };
+  membershipService.withTx.mockReturnValue(membershipService);
+  const withTransaction = vi.fn(async (callback: (tx: unknown) => Promise<unknown>) => await callback({}));
   return {
     membershipRepository,
     deleteWithAudit,
+    withTransaction,
     useCase: new RemoveMembershipUseCase(
       membershipRepository as unknown as MembershipRepository,
-      { withActor: vi.fn().mockReturnValue({ deleteWithAudit }) } as unknown as MembershipService,
+      membershipService as unknown as MembershipService,
+      withTransaction as unknown as WithTransactionType,
     ),
   };
 }

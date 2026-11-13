@@ -1,15 +1,22 @@
 import { AuditLog } from "@workspace/server/shared/audit/audit-log.entity";
 import type { AuditLogRepository } from "@workspace/server/shared/audit/audit-log.repository";
 import type { AuditActor, AuditLogChangesType, AuditSource } from "@workspace/server/shared/audit/audit-log.types";
+import type { AuditProjectPort } from "@workspace/server/shared/audit/project.port";
 import { InternalServerError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import { randomUUID } from "crypto";
 
 export class AuditLogService {
-  constructor(private readonly auditLogRepository: AuditLogRepository) {}
+  constructor(
+    private readonly auditLogRepository: AuditLogRepository,
+    private readonly projectPort: AuditProjectPort,
+  ) {}
 
   withTx(tx: unknown): AuditLogService {
-    return new AuditLogService(this.auditLogRepository.withTx(tx as Parameters<AuditLogRepository["withTx"]>[0]));
+    return new AuditLogService(
+      this.auditLogRepository.withTx(tx as Parameters<AuditLogRepository["withTx"]>[0]),
+      this.projectPort.withTx(tx),
+    );
   }
 
   async save(input: {
@@ -53,7 +60,8 @@ export class AuditLogService {
       throw new InternalServerError(ERROR_CODES.INTERNAL_SERVER_ERROR, "Activity log is missing an organization");
     }
 
-    const resolved = await this.auditLogRepository.findOrganizationIdByProjectId(projectId);
+    const project = await this.projectPort.findById(projectId);
+    const resolved = project?.organizationId ?? null;
     if (!resolved) {
       throw new InternalServerError(ERROR_CODES.INTERNAL_SERVER_ERROR, "Activity log is missing an organization");
     }

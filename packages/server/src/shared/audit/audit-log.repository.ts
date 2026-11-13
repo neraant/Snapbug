@@ -1,6 +1,6 @@
 import type { DbClient } from "@workspace/database";
 import { db as defaultDb } from "@workspace/database";
-import { auditLogTable, projectTable } from "@workspace/database/schema";
+import { auditLogTable } from "@workspace/database/schema";
 import type { AuditLog } from "@workspace/server/shared/audit/audit-log.entity";
 import { AuditLogMapper } from "@workspace/server/shared/audit/audit-log.mapper";
 import type { OpenMetricsAtInstant } from "@workspace/server/shared/audit/audit-log.types";
@@ -24,15 +24,6 @@ export class AuditLogRepository {
 
   withTx(tx: DbClient): AuditLogRepository {
     return new AuditLogRepository(tx);
-  }
-
-  async findOrganizationIdByProjectId(projectId: string): Promise<string | null> {
-    const [row] = await this.db
-      .select({ organizationId: projectTable.organizationId })
-      .from(projectTable)
-      .where(eq(projectTable.id, projectId));
-
-    return row?.organizationId ?? null;
   }
 
   async findManyByOrganizationId(organizationId: string): Promise<AuditLog[]> {

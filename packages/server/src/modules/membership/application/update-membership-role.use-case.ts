@@ -1,6 +1,7 @@
 import { MembershipMapper } from "@workspace/server/modules/membership/entity/membership.mapper";
 import type { MembershipRepository } from "@workspace/server/modules/membership/repository/membership.repository";
 import type { MembershipService } from "@workspace/server/modules/membership/service/membership.service";
+import type { WithTransactionType } from "@workspace/server/shared/database/transaction.util";
 import { ForbiddenError, NotFoundError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import type {
@@ -13,6 +14,7 @@ export class UpdateMembershipRoleUseCase {
   constructor(
     private readonly membershipRepository: MembershipRepository,
     private readonly membershipService: MembershipService,
+    private readonly withTransaction: WithTransactionType,
   ) {}
 
   async execute(
@@ -38,9 +40,12 @@ export class UpdateMembershipRoleUseCase {
     }
 
     const updatedMembership = membership.changeRole(input.role);
-    await this.membershipService
-      .withActor({ type: "user", id: currentUserId })
-      .saveWithAudit(updatedMembership, "Update membership role");
+    await this.withTransaction(async (tx) => {
+      await this.membershipService
+        .withTx(tx)
+        .withActor({ type: "user", id: currentUserId })
+        .saveWithAudit(updatedMembership, "Update membership role");
+    });
 
     return MembershipMapper.toDto(updatedMembership);
   }

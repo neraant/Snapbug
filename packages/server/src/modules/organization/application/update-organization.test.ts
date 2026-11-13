@@ -4,6 +4,7 @@ import { OrganizationMapper } from "@workspace/server/modules/organization/entit
 import type { MembershipPort } from "@workspace/server/modules/organization/port/membership.port";
 import type { OrganizationRepository } from "@workspace/server/modules/organization/repository/organization.repository";
 import type { OrganizationService } from "@workspace/server/modules/organization/service/organization.service";
+import type { WithTransactionType } from "@workspace/server/shared/database/transaction.util";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -29,8 +30,13 @@ const membership = {
 
 const saveWithAudit = vi.fn().mockResolvedValue(undefined);
 const organizationService = {
+  withTx: vi.fn(),
   withActor: vi.fn().mockReturnValue({ saveWithAudit }),
-} as unknown as OrganizationService;
+};
+organizationService.withTx.mockReturnValue(organizationService);
+const withTransaction = vi.fn(
+  async (callback: (tx: unknown) => Promise<unknown>) => await callback({}),
+) as WithTransactionType;
 
 describe("UpdateOrganizationUseCase", () => {
   beforeEach(() => {
@@ -46,7 +52,8 @@ describe("UpdateOrganizationUseCase", () => {
     const useCase = new UpdateOrganizationUseCase(
       membershipPort as unknown as MembershipPort,
       organizationRepository as unknown as OrganizationRepository,
-      organizationService,
+      organizationService as unknown as OrganizationService,
+      withTransaction,
     );
 
     const result = await useCase.execute({ organizationId, name: "Acme" }, userId);
@@ -68,7 +75,8 @@ describe("UpdateOrganizationUseCase", () => {
     const useCase = new UpdateOrganizationUseCase(
       membershipPort as unknown as MembershipPort,
       organizationRepository as unknown as OrganizationRepository,
-      organizationService,
+      organizationService as unknown as OrganizationService,
+      withTransaction,
     );
 
     const result = await useCase.execute({ organizationId, reports_retention_days: 30 }, userId);
@@ -87,7 +95,8 @@ describe("UpdateOrganizationUseCase", () => {
     const useCase = new UpdateOrganizationUseCase(
       membershipPort as unknown as MembershipPort,
       organizationRepository as unknown as OrganizationRepository,
-      organizationService,
+      organizationService as unknown as OrganizationService,
+      withTransaction,
     );
 
     await expect(useCase.execute({ organizationId, name: "Acme" }, userId)).rejects.toMatchObject({
@@ -104,7 +113,8 @@ describe("UpdateOrganizationUseCase", () => {
     const useCase = new UpdateOrganizationUseCase(
       membershipPort as unknown as MembershipPort,
       organizationRepository as unknown as OrganizationRepository,
-      organizationService,
+      organizationService as unknown as OrganizationService,
+      withTransaction,
     );
 
     await expect(useCase.execute({ organizationId, name: "Acme" }, userId)).rejects.toMatchObject({
@@ -120,7 +130,8 @@ describe("UpdateOrganizationUseCase", () => {
     const useCase = new UpdateOrganizationUseCase(
       membershipPort as unknown as MembershipPort,
       organizationRepository as unknown as OrganizationRepository,
-      organizationService,
+      organizationService as unknown as OrganizationService,
+      withTransaction,
     );
 
     await expect(useCase.execute({ organizationId, name: "Acme" }, userId)).rejects.toMatchObject({

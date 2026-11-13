@@ -4,6 +4,7 @@ import type { OrganizationPort } from "@workspace/server/modules/invitation/port
 import type { TokenPort } from "@workspace/server/modules/invitation/port/token.port";
 import type { UserPort } from "@workspace/server/modules/invitation/port/user.port";
 import type { InvitationService } from "@workspace/server/modules/invitation/service/invitation.service";
+import type { WithTransactionType } from "@workspace/server/shared/database/transaction.util";
 import type { EmailService } from "@workspace/server/shared/email/service/email.service";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
@@ -22,12 +23,16 @@ const organization = {
   createdAt: "2026-10-03T09:00:00.000Z",
 };
 
+const withTransaction = vi.fn(async (callback: (tx: unknown) => Promise<unknown>) => await callback({}));
+
 function invitationService(saveWithAudit = vi.fn().mockResolvedValue(undefined)) {
   const service = {
     saveWithAudit,
     withActor: vi.fn(),
+    withTx: vi.fn(),
   };
   service.withActor.mockReturnValue(service);
+  service.withTx.mockReturnValue(service);
   return service;
 }
 
@@ -51,6 +56,7 @@ describe("SendInvitationsUseCase", () => {
       organizationPort(),
       { generatePasswordResetToken: vi.fn() } as unknown as TokenPort,
       { send: vi.fn() } as unknown as EmailService,
+      withTransaction as unknown as WithTransactionType,
     );
 
     await expect(
@@ -73,6 +79,7 @@ describe("SendInvitationsUseCase", () => {
       organizationPort(),
       { generatePasswordResetToken: vi.fn() } as unknown as TokenPort,
       emailService as unknown as EmailService,
+      withTransaction as unknown as WithTransactionType,
     );
 
     await expect(
@@ -101,6 +108,7 @@ describe("SendInvitationsUseCase", () => {
       organizationPort(),
       authService as unknown as TokenPort,
       emailService as unknown as EmailService,
+      withTransaction as unknown as WithTransactionType,
     );
 
     await useCase.execute(
@@ -156,6 +164,7 @@ describe("SendInvitationsUseCase", () => {
       organizations,
       authService as unknown as TokenPort,
       emailService as unknown as EmailService,
+      withTransaction as unknown as WithTransactionType,
     );
 
     await useCase.execute(
@@ -196,6 +205,7 @@ describe("SendInvitationsUseCase", () => {
       organizationPort(false),
       { generatePasswordResetToken: vi.fn() } as unknown as TokenPort,
       emailService as unknown as EmailService,
+      withTransaction as unknown as WithTransactionType,
     );
 
     await expect(
@@ -241,6 +251,7 @@ describe("SendInvitationsUseCase", () => {
       organizationPort(),
       authService as unknown as TokenPort,
       emailService as unknown as EmailService,
+      withTransaction as unknown as WithTransactionType,
     );
 
     await useCase.execute({ organizationId, emails: ["ada@company.com", "blank@company.com"] }, userId, inviterEmail);
