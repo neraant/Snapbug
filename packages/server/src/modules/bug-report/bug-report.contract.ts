@@ -1,6 +1,7 @@
 import { oc } from "@orpc/contract";
 import { oz } from "@orpc/zod";
 import { sessionAuthSpec } from "@workspace/server/shared/openapi/session-auth.const";
+import type { OrpcMetaType } from "@workspace/server/shared/orpc/mcp/walk-mcp-tools";
 import { countOpenByAssigneeOutputDtoSchema } from "@workspace/validation/modules/bug-report/dto/count-open-by-assignee.schema";
 import { countOpenByProjectOutputDtoSchema } from "@workspace/validation/modules/bug-report/dto/count-open-by-project.schema";
 import {
@@ -46,11 +47,10 @@ import {
   updateBugReportOutputDtoSchema,
 } from "@workspace/validation/modules/bug-report/dto/update-bug-report.schema";
 
-const bugReport = oc.$meta<{ mcp?: boolean }>({});
+const bugReport = oc.$meta<OrpcMetaType>({});
 
 export const bugReportContract = {
   create: bugReport
-    .meta({ mcp: true })
     .input(createBugReportInputDtoSchema)
     .output(createBugReportOutputDtoSchema)
     .route({ method: "POST", path: "/bug-reports", tags: ["bug-report"], summary: "Create bug report" }),
@@ -74,23 +74,25 @@ export const bugReportContract = {
       spec: sessionAuthSpec,
     }),
   findOne: bugReport
+    .meta({ mcp: true, name: "get_ticket" })
     .input(findOneInputDtoSchema)
     .output(findOneOutputDtoSchema)
     .route({
       method: "GET",
       path: "/bug-reports/by-short-id",
       tags: ["bug-report"],
-      summary: "Find bug report by short id",
+      summary: "Get a ticket",
       spec: sessionAuthSpec,
     }),
   findScreenshot: bugReport
+    .meta({ mcp: true, name: "get_screenshot" })
     .input(findScreenshotInputDtoSchema)
     .output(oz.blob())
     .route({
       method: "GET",
       path: "/bug-reports/screenshot",
       tags: ["bug-report"],
-      summary: "Bug report screenshot",
+      summary: "Get a ticket screenshot",
       spec: sessionAuthSpec,
     }),
   findReplay: bugReport
@@ -104,13 +106,25 @@ export const bugReportContract = {
       spec: sessionAuthSpec,
     }),
   update: bugReport
+    .meta({ mcp: true, name: "update_ticket", readOnlyHint: false })
     .input(updateBugReportInputDtoSchema)
     .output(updateBugReportOutputDtoSchema)
     .route({
       method: "PATCH",
       path: "/bug-reports",
       tags: ["bug-report"],
-      summary: "Update bug report",
+      summary: "Update a ticket",
+      spec: sessionAuthSpec,
+    }),
+  listTickets: bugReport
+    .meta({ mcp: true, name: "list_tickets" })
+    .input(findBugReportsInputDtoSchema)
+    .output(findBugReportsOutputDtoSchema)
+    .route({
+      method: "GET",
+      path: "/mcp/tickets",
+      tags: ["bug-report"],
+      summary: "List tickets",
       spec: sessionAuthSpec,
     }),
   findStats: bugReport

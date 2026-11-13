@@ -239,4 +239,60 @@ describe("UpdateBugReportUseCase", () => {
 
     expect(withTransaction).not.toHaveBeenCalled();
   });
+
+  it("writes the audit actor as mcp", async () => {
+    const updatedBugReport = bugReport.update({ status: BugReportStatus.IN_PROGRESS });
+    const withActor = vi.fn().mockReturnValue({
+      saveWithAudit: vi.fn().mockResolvedValue(undefined),
+      normalizeBoardOrder: vi.fn().mockResolvedValue(undefined),
+    });
+    const membershipPort = {
+      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
+      findByUserAndOrganization: vi.fn().mockResolvedValue(membership),
+    };
+    const projectPort = { findById: vi.fn().mockResolvedValue(project) };
+    const bugReportRepository = {
+      findById: vi.fn().mockResolvedValueOnce(bugReport).mockResolvedValueOnce(updatedBugReport),
+    };
+    const bugReportService = { withTx: vi.fn().mockReturnValue({ withActor }) };
+    const withTransaction = vi.fn(async (callback) => await callback({}));
+    const useCase = new UpdateBugReportUseCase(
+      membershipPort as unknown as MembershipPort,
+      projectPort as unknown as ProjectPort,
+      bugReportRepository as unknown as BugReportRepository,
+      bugReportService as unknown as BugReportService,
+      withTransaction,
+    );
+    const mcpActor = { type: "mcp" as const, id: userId };
+
+    await useCase.execute({ id: bugReportId, status: BugReportStatus.IN_PROGRESS }, userId, mcpActor);
+
+    expect(withActor).toHaveBeenCalledWith(mcpActor);
+  });
+
+  it("does not update a ticket in a project the member cannot access", async () => {
+    const membershipPort = {
+      filterProjectIds: vi.fn().mockResolvedValue([]),
+      findByUserAndOrganization: vi.fn().mockResolvedValue(membership),
+    };
+    const projectPort = { findById: vi.fn().mockResolvedValue(project) };
+    const bugReportRepository = { findById: vi.fn().mockResolvedValue(bugReport) };
+    const bugReportService = { withTx: vi.fn() };
+    const withTransaction = vi.fn();
+    const useCase = new UpdateBugReportUseCase(
+      membershipPort as unknown as MembershipPort,
+      projectPort as unknown as ProjectPort,
+      bugReportRepository as unknown as BugReportRepository,
+      bugReportService as unknown as BugReportService,
+      withTransaction,
+    );
+
+    await expect(
+      useCase.execute({ id: bugReportId, status: BugReportStatus.CLOSED }, userId, actor),
+    ).rejects.toMatchObject({
+      errorCode: ERROR_CODES.BUG_REPORT_NOT_FOUND,
+    });
+
+    expect(withTransaction).not.toHaveBeenCalled();
+  });
 });

@@ -22,7 +22,9 @@ export class FindScreenshotUseCase {
     userId: string,
     organizationId: string | null,
   ): Promise<FindScreenshotResult> {
-    if (!organizationId) throw new NotFoundError(ERROR_CODES.ORGANIZATION_NOT_FOUND);
+    if (!organizationId) {
+      return await this.readAccessibleScreenshot(input.shortId, userId);
+    }
 
     const membership = await this.membershipPort.findByUserAndOrganization({ userId, organizationId });
     if (!membership) throw new NotFoundError(ERROR_CODES.ORGANIZATION_NOT_FOUND);
@@ -40,5 +42,27 @@ export class FindScreenshotUseCase {
     if (!screenshotKey) throw new NotFoundError(ERROR_CODES.BUG_REPORT_NOT_FOUND);
 
     return await this.fileStoragePort.readBugReportScreenshot(screenshotKey);
+  }
+
+  private async readAccessibleScreenshot(shortId: string, userId: string): Promise<FindScreenshotResult> {
+    const candidates = await this.bugReportRepository.findManyByShortId(shortId);
+
+    for (const candidate of candidates) {
+      const membership = await this.membershipPort.findByUserAndOrganization({
+        userId,
+        organizationId: candidate.organizationId,
+      });
+      if (!membership) continue;
+
+      const allowedProjectIds = await this.membershipPort.filterProjectIds(membership, [candidate.bugReport.projectId]);
+      if (allowedProjectIds.length === 0) continue;
+
+      const screenshotKey = candidate.bugReport.screenshotKey;
+      if (!screenshotKey) throw new NotFoundError(ERROR_CODES.BUG_REPORT_NOT_FOUND);
+
+      return await this.fileStoragePort.readBugReportScreenshot(screenshotKey);
+    }
+
+    throw new NotFoundError(ERROR_CODES.BUG_REPORT_NOT_FOUND);
   }
 }

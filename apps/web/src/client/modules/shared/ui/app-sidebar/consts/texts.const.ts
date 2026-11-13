@@ -4,6 +4,7 @@ export const texts = {
   overview: "Overview",
   tickets: "Tickets",
   sdkSetup: "SDK Setup",
+  mcp: "MCP",
   playground: "Playground",
   projects: "Projects",
   team: "Team",

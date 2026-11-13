@@ -17,7 +17,7 @@ export function createMcpHandler(router: unknown): McpHandlerType {
       const server = new McpServer({ name: "Snapbug MCP", version: "1.0.0" });
 
       for (const tool of listMcpTools(router)) {
-        registerMcpTool(server, tool.name, tool.description, tool.procedure, context);
+        registerMcpTool(server, tool.name, tool.description, tool.readOnlyHint, tool.procedure, context);
       }
 
       const transport = new WebStandardStreamableHTTPServerTransport({
@@ -34,6 +34,7 @@ function registerMcpTool(
   server: McpServer,
   name: string,
   description: string | undefined,
+  readOnlyHint: boolean,
   procedure: AnyProcedure,
   context: object,
 ): void {
@@ -44,11 +45,23 @@ function registerMcpTool(
     {
       description,
       ...(inputSchema ? { inputSchema: inputSchema as never } : {}),
-      annotations: { readOnlyHint: true },
+      annotations: { readOnlyHint },
     },
     async (args) => {
       try {
         const result = await createProcedureClient(procedure, { context })(args);
+        if (result instanceof Blob) {
+          const bytes = new Uint8Array(await result.arrayBuffer());
+          return {
+            content: [
+              {
+                type: "image" as const,
+                data: Buffer.from(bytes).toString("base64"),
+                mimeType: result.type || "application/octet-stream",
+              },
+            ],
+          };
+        }
         return { content: [{ type: "text" as const, text: JSON.stringify(result) }] };
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);

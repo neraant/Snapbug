@@ -5,9 +5,10 @@ export type McpToolType = {
   name: string;
   procedure: AnyProcedure;
   description: string | undefined;
+  readOnlyHint: boolean;
 };
 
-export type OrpcMetaType = { mcp?: boolean };
+export type OrpcMetaType = { mcp?: boolean; name?: string; readOnlyHint?: boolean };
 
 export function listMcpTools(router: unknown): McpToolType[] {
   const tools: McpToolType[] = [];
@@ -21,9 +22,10 @@ function walk(node: unknown, path: string[], tools: McpToolType[]): void {
     if (meta?.mcp !== true) return;
 
     tools.push({
-      name: path.join("_"),
+      name: meta.name ?? path.join("_"),
       procedure: node,
       description: node["~orpc"].route.summary,
+      readOnlyHint: meta.readOnlyHint !== false,
     });
     return;
   }
