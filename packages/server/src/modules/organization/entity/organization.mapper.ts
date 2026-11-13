@@ -35,6 +35,7 @@ export abstract class OrganizationMapper {
         {
           organizationId: organization.id,
           name: organization.name,
+          reports_retention_days: organization.reports_retention_days,
           role: membership.role,
         },
       ];

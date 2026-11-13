@@ -45,6 +45,26 @@ describe("UpdateOrganizationUseCase", () => {
     const saved = organizationRepository.save.mock.calls[0]?.[0];
     expect(result).toEqual(OrganizationMapper.toDto(saved));
     expect(saved.name).toBe("Acme");
+    expect(saved.reports_retention_days).toBe(90);
+  });
+
+  it("updates the organization retention period", async () => {
+    const membershipPort = { findByUserAndOrganization: vi.fn().mockResolvedValue(membership) };
+    const organizationRepository = {
+      findById: vi.fn().mockResolvedValue(existingOrganization),
+      save: vi.fn().mockResolvedValue(undefined),
+    };
+    const useCase = new UpdateOrganizationUseCase(
+      membershipPort as unknown as MembershipPort,
+      organizationRepository as unknown as OrganizationRepository,
+    );
+
+    const result = await useCase.execute({ organizationId, reports_retention_days: 30 }, userId);
+
+    const saved = organizationRepository.save.mock.calls[0]?.[0];
+    expect(saved.reports_retention_days).toBe(30);
+    expect(saved.name).toBe("");
+    expect(result.reports_retention_days).toBe(30);
   });
 
   it("rejects a member without updating the organization", async () => {
