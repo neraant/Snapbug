@@ -1,5 +1,6 @@
 import { apiKeyTable } from "@workspace/database/schema/api-key.const";
 import { bugReportTable } from "@workspace/database/schema/bug-report.const";
+import { commentTable } from "@workspace/database/schema/comment.const";
 import { invitationTable } from "@workspace/database/schema/invitation.const";
 import { membershipTable } from "@workspace/database/schema/membership.const";
 import { organizationTable } from "@workspace/database/schema/organization.const";
@@ -13,6 +14,7 @@ import { defineRelations } from "drizzle-orm";
 const tables = {
   apiKeyTable,
   bugReportTable,
+  commentTable,
   invitationTable,
   membershipTable,
   organizationTable,
@@ -29,6 +31,10 @@ export const relations = defineRelations(tables, (relation) => ({
     assignedBugReports: relation.many.bugReportTable({
       from: relation.userTable.id,
       to: relation.bugReportTable.assignedTo,
+    }),
+    comments: relation.many.commentTable({
+      from: relation.userTable.id,
+      to: relation.commentTable.authorUserId,
     }),
     resetPasswordTokens: relation.many.resetPasswordTokenTable(),
     userTokens: relation.many.userTokenTable(),
@@ -119,6 +125,22 @@ export const relations = defineRelations(tables, (relation) => ({
     assignee: relation.one.userTable({
       from: relation.bugReportTable.assignedTo,
       to: relation.userTable.id,
+    }),
+    comments: relation.many.commentTable({
+      from: relation.bugReportTable.id,
+      to: relation.commentTable.bugReportId,
+    }),
+  },
+  commentTable: {
+    bugReport: relation.one.bugReportTable({
+      from: relation.commentTable.bugReportId,
+      to: relation.bugReportTable.id,
+      optional: false,
+    }),
+    author: relation.one.userTable({
+      from: relation.commentTable.authorUserId,
+      to: relation.userTable.id,
+      optional: false,
     }),
   },
 }));

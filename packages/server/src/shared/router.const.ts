@@ -1,6 +1,7 @@
 import { apiKeyRouter } from "@workspace/server/modules/api-key/api-key.router";
 import { authRouter } from "@workspace/server/modules/auth/auth.router";
 import { bugReportRouter } from "@workspace/server/modules/bug-report/bug-report.router";
+import { commentRouter } from "@workspace/server/modules/comment/comment.router";
 import { identityRouter } from "@workspace/server/modules/identity/identity.router";
 import { invitationRouter } from "@workspace/server/modules/invitation/invitation.router";
 import { membershipRouter } from "@workspace/server/modules/membership/membership.router";
@@ -12,6 +13,7 @@ export const router = {
   apiKey: apiKeyRouter,
   auth: authRouter,
   bugReport: bugReportRouter,
+  comment: commentRouter,
   identity: identityRouter,
   invitation: invitationRouter,
   membership: membershipRouter,

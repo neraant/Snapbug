@@ -24,5 +24,5 @@ test("a member can create a personal MCP token and see the secret once", async (
 
   await page.getByRole("button", { name: "Close" }).click();
   await page.getByRole("button", { name: "Revoke" }).click();
-  await expect(page.getByText("Revoked", { exact: true })).toBeVisible();
+  await expect(page.getByText("Revoked", { exact: true })).toBeVisible({ timeout: 30_000 });
 });

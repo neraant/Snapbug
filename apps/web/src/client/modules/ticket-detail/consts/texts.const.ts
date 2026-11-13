@@ -6,6 +6,15 @@ export const texts = {
     descriptionTitle: "Issue description",
     emptyDescription: "No description provided.",
   },
+  comments: {
+    title: "Comments",
+    description: "Internal notes for the team. The report author does not see them.",
+    empty: "No comments yet.",
+    fieldLabel: "Comment",
+    submit: "Add comment",
+    unknownAuthor: "Teammate",
+    submitError: "Could not add the comment.",
+  },
   screenshot: {
     title: "Screenshot",
     empty: "No screenshot attached.",

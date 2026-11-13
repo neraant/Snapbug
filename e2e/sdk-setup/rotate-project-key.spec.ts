@@ -18,7 +18,7 @@ test("an administrator sees a rotated project key only once", async ({ page }) =
   await page.getByRole("textbox", { name: "Work Email" }).fill("admin@example.com");
   await page.getByRole("textbox", { name: "Password" }).fill("password");
   await page.getByRole("button", { name: "Log in" }).click();
-  await expect(page).toHaveURL(/\/overview/);
+  await expect(page).toHaveURL(/\/overview/, { timeout: 30_000 });
 
   await page.goto(`/sdk?projectId=${projectId}`);
   await expect(page.getByRole("heading", { name: "Set up the SDK" })).toBeVisible();

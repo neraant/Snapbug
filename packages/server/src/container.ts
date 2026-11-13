@@ -11,6 +11,7 @@ import { SignUpUseCase } from "@workspace/server/modules/auth/application/sign-u
 import { VerifyCredentialsUseCase } from "@workspace/server/modules/auth/application/verify-credentials.use-case";
 import { ResetPasswordRepository } from "@workspace/server/modules/auth/repository/reset-password.repository";
 import { AuthService } from "@workspace/server/modules/auth/service/auth.service";
+import { BugReportAdapter } from "@workspace/server/modules/bug-report/adapter/bug-report.adapter";
 import { LocalFileStorageAdapter } from "@workspace/server/modules/bug-report/adapter/local-file-storage.adapter";
 import { VercelBlobFileStorageAdapter } from "@workspace/server/modules/bug-report/adapter/vercel-blob-file-storage.adapter";
 import { CountOpenByAssigneeUseCase } from "@workspace/server/modules/bug-report/application/count-open-by-assignee.use-case";
@@ -33,6 +34,10 @@ import { BugReportService } from "@workspace/server/modules/bug-report/service/b
 import { BugReportStatService } from "@workspace/server/modules/bug-report/service/bug-report-stat.service";
 import { WidgetIngestOriginService } from "@workspace/server/modules/bug-report/service/widget-ingest-origin.service";
 import { WidgetUserAgentService } from "@workspace/server/modules/bug-report/service/widget-user-agent.service";
+import { AddCommentUseCase } from "@workspace/server/modules/comment/application/add-comment.use-case";
+import { FindCommentsUseCase } from "@workspace/server/modules/comment/application/find-comments.use-case";
+import { CommentRepository } from "@workspace/server/modules/comment/repository/comment.repository";
+import { CommentService } from "@workspace/server/modules/comment/service/comment.service";
 import { UserAdapter } from "@workspace/server/modules/identity/adapter/user.adapter";
 import { CreateUserUseCase } from "@workspace/server/modules/identity/application/create-user.use-case";
 import { FindUserByEmailUseCase } from "@workspace/server/modules/identity/application/find-user-by-email.use-case";
@@ -98,8 +103,10 @@ const apiKeyRepository = new ApiKeyRepository();
 const resetPasswordRepository = new ResetPasswordRepository();
 const invitationRepository = new InvitationRepository();
 const bugReportRepository = new BugReportRepository();
+const commentRepository = new CommentRepository();
 const auditLogRepository = new AuditLogRepository();
 const auditLogService = new AuditLogService(auditLogRepository);
+const commentService = new CommentService(commentRepository, auditLogService);
 const bugReportService = new BugReportService(bugReportRepository, auditLogService);
 const projectService = new ProjectService(projectRepository, auditLogService);
 const apiKeyService = new ApiKeyService(apiKeyRepository, auditLogService);
@@ -115,6 +122,7 @@ const userAdapter = new UserAdapter(userRepository);
 const projectAdapter = new ProjectAdapter(projectRepository, membershipAdapter, projectService, withTransaction);
 const organizationAdapter = new OrganizationAdapter(organizationRepository);
 const apiKeyAdapter = new ApiKeyAdapter(apiKeyRepository, projectAdapter);
+const bugReportAdapter = new BugReportAdapter(bugReportRepository);
 
 const findMembership = new FindMembershipUseCase(membershipRepository);
 const findMembershipByUser = new FindMembershipByUserUseCase(membershipRepository);
@@ -266,6 +274,21 @@ const createUserToken = new CreateUserTokenUseCase(userTokenService, userTokenRe
 const findUserTokens = new FindUserTokensUseCase(userTokenRepository);
 const revokeUserToken = new RevokeUserTokenUseCase(userTokenRepository);
 const findUserByToken = new FindUserByTokenUseCase(userTokenService, userTokenRepository, userAdapter);
+const addComment = new AddCommentUseCase(
+  bugReportAdapter,
+  projectAdapter,
+  membershipAdapter,
+  userAdapter,
+  commentService,
+  withTransaction,
+);
+const findComments = new FindCommentsUseCase(
+  bugReportAdapter,
+  projectAdapter,
+  membershipAdapter,
+  userAdapter,
+  commentRepository,
+);
 
 export const container = {
   membership: {
@@ -314,5 +337,9 @@ export const container = {
     findMany: findUserTokens,
     revoke: revokeUserToken,
     findUserByToken,
+  },
+  comment: {
+    addComment,
+    findComments,
   },
 };
