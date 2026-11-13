@@ -33,7 +33,15 @@ export class ApiKeyRepository {
     const values = ApiKeyMapper.toPersistence(apiKey);
 
     try {
-      await this.db.insert(apiKeyTable).values(values);
+      await this.db
+        .insert(apiKeyTable)
+        .values(values)
+        .onConflictDoUpdate({
+          target: apiKeyTable.id,
+          set: {
+            revokedAt: values.revokedAt,
+          },
+        });
     } catch (error) {
       throw new InternalServerError(ERROR_CODES.INTERNAL_SERVER_ERROR, undefined, { cause: error });
     }

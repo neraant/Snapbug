@@ -2,6 +2,7 @@ import { db } from "@workspace/database";
 import { ApiKeyAdapter } from "@workspace/server/modules/api-key/adapter/api-key.adapter";
 import { FindProjectApiKeyUseCase } from "@workspace/server/modules/api-key/application/find-project-api-key.use-case";
 import { FindProjectByKeyUseCase } from "@workspace/server/modules/api-key/application/find-project-by-key.use-case";
+import { RotateProjectApiKeyUseCase } from "@workspace/server/modules/api-key/application/rotate-project-api-key.use-case";
 import { ApiKeyRepository } from "@workspace/server/modules/api-key/repository/api-key.repository";
 import { ApiKeyService } from "@workspace/server/modules/api-key/service/api-key.service";
 import { RequestPasswordResetUseCase } from "@workspace/server/modules/auth/application/request-password-reset.use-case";
@@ -212,6 +213,13 @@ const findProjectApiKey = new FindProjectApiKeyUseCase(
   apiKeyService,
   withTransaction,
 );
+const rotateProjectApiKey = new RotateProjectApiKeyUseCase(
+  membershipAdapter,
+  projectAdapter,
+  apiKeyRepository,
+  apiKeyService,
+  withTransaction,
+);
 const createBugReport = new CreateBugReportUseCase(
   apiKeyAdapter,
   projectAdapter,
@@ -281,7 +289,7 @@ export const container = {
     updateOnboardingOrganization,
     completeOnboarding,
   },
-  apiKey: { findProjectByKey, findProjectApiKey },
+  apiKey: { findProjectByKey, findProjectApiKey, rotateProjectApiKey },
   auth: { signUp, verifyCredentials, requestResetPassword, resetPassword },
   invitation: { sendInvitations, findInvitationByToken, acceptInvitation },
   bugReport: {

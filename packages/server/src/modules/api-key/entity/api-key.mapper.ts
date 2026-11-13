@@ -18,6 +18,10 @@ export abstract class ApiKeyMapper {
 
   static toProjectApiKeyDto(apiKey: ApiKey): FindProjectApiKeyOutputDtoType {
     const { key, createdAt } = apiKey.toObject();
-    return { key, createdAt: createdAt.toISOString() };
+
+    return {
+      key: key.replace(/.(?=.{4})/g, "\u2022"),
+      createdAt: createdAt.toISOString(),
+    };
   }
 }
