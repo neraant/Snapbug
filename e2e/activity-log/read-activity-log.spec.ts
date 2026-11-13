@@ -30,8 +30,9 @@ test("an administrator reads the activity log after changing the organization", 
   await page.getByRole("link", { name: "Activity" }).click();
   await expect(page.getByRole("heading", { name: "Activity log" })).toBeVisible();
   await expect(page.getByRole("columnheader", { name: "Who" })).toBeVisible();
-  await expect(page.getByRole("cell", { name: "admin@example.com" })).toBeVisible();
-  await expect(page.getByRole("cell", { name: "Organization" })).toBeVisible();
-  await expect(page.getByText("Update organization")).toBeVisible();
-  await expect(page.getByText("name: Acme → Acme Studio")).toBeVisible();
+
+  const change = page.getByRole("row").filter({ hasText: "name: Acme → Acme Studio" }).first();
+  await expect(change.getByRole("cell", { name: "admin@example.com", exact: true })).toBeVisible();
+  await expect(change.getByRole("cell", { name: "Organization", exact: true })).toBeVisible();
+  await expect(change.getByText("Update organization", { exact: true })).toBeVisible();
 });

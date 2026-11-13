@@ -17,7 +17,13 @@ export async function seedOrganization(): Promise<OrganizationRow[]> {
     },
   ];
 
-  await db.insert(organizationTable).values(organizationData).onConflictDoNothing({ target: organizationTable.id });
+  await db
+    .insert(organizationTable)
+    .values(organizationData)
+    .onConflictDoUpdate({
+      target: organizationTable.id,
+      set: { name: "Acme", reports_retention_days: 90 },
+    });
 
   return db
     .select()
