@@ -10,3 +10,4 @@ export * from "@workspace/database/schema/project-access.const";
 export * from "@workspace/database/schema/relation.const";
 export * from "@workspace/database/schema/reset-password-token.const";
 export * from "@workspace/database/schema/user.const";
+export * from "@workspace/database/schema/user-token.const";

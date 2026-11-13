@@ -21,6 +21,10 @@ const breadcrumbRoute: BreadcrumbRoute[] = [
     build: () => [{ href: url.sdk(), label: texts.sdkSetup }],
   },
   {
+    pattern: routePattern.mcp,
+    build: () => [{ href: url.mcp(), label: texts.mcp }],
+  },
+  {
     pattern: routePattern.tickets,
     build: () => [{ href: url.ticketsBoard(), label: texts.tickets }],
   },

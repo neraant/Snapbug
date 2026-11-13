@@ -45,6 +45,7 @@ export const routePattern = {
   overview: "/overview",
   playground: "/playground",
   sdk: "/sdk",
+  mcp: "/mcp",
   tickets: `${ticketsBase}`,
   ticket: `${ticketsBase}/:shortId`,
 
@@ -62,6 +63,7 @@ export const url = {
   overview: () => routePattern.overview,
   playground: () => routePattern.playground,
   sdk: () => routePattern.sdk,
+  mcp: () => routePattern.mcp,
   ticketsBoard: () => routePattern.tickets,
   ticket: (shortId: string) => buildUrl(routePattern.ticket, { shortId }),
 

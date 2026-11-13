@@ -1,5 +1,6 @@
 import { oc } from "@orpc/contract";
 import { sessionAuthSpec } from "@workspace/server/shared/openapi/session-auth.const";
+import type { OrpcMetaType } from "@workspace/server/shared/orpc/mcp/walk-mcp-tools";
 import {
   addCommentInputDtoSchema,
   addCommentOutputDtoSchema,
@@ -9,11 +10,11 @@ import {
   findCommentsOutputDtoSchema,
 } from "@workspace/validation/modules/comment/dto/find-comments.schema";
 
-const comment = oc.$meta<{ mcp?: boolean; mcpName?: string }>({});
+const comment = oc.$meta<OrpcMetaType>({});
 
 export const commentContract = {
   addComment: comment
-    .meta({ mcp: true, mcpName: "add_comment" })
+    .meta({ mcp: true, name: "add_comment", readOnlyHint: false })
     .input(addCommentInputDtoSchema)
     .output(addCommentOutputDtoSchema)
     .route({

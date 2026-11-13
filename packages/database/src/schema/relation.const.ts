@@ -8,6 +8,7 @@ import { projectTable } from "@workspace/database/schema/project.const";
 import { projectAccessTable } from "@workspace/database/schema/project-access.const";
 import { resetPasswordTokenTable } from "@workspace/database/schema/reset-password-token.const";
 import { userTable } from "@workspace/database/schema/user.const";
+import { userTokenTable } from "@workspace/database/schema/user-token.const";
 import { defineRelations } from "drizzle-orm";
 
 const tables = {
@@ -21,6 +22,7 @@ const tables = {
   projectTable,
   userTable,
   resetPasswordTokenTable,
+  userTokenTable,
 };
 
 export const relations = defineRelations(tables, (relation) => ({
@@ -35,6 +37,7 @@ export const relations = defineRelations(tables, (relation) => ({
       to: relation.commentTable.authorUserId,
     }),
     resetPasswordTokens: relation.many.resetPasswordTokenTable(),
+    userTokens: relation.many.userTokenTable(),
     sentInvitations: relation.many.invitationTable({
       from: relation.userTable.id,
       to: relation.invitationTable.invitedByUserId,
@@ -103,6 +106,13 @@ export const relations = defineRelations(tables, (relation) => ({
     project: relation.one.projectTable({
       from: relation.apiKeyTable.projectId,
       to: relation.projectTable.id,
+      optional: false,
+    }),
+  },
+  userTokenTable: {
+    user: relation.one.userTable({
+      from: relation.userTokenTable.userId,
+      to: relation.userTable.id,
       optional: false,
     }),
   },

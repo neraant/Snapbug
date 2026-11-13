@@ -99,4 +99,28 @@ describe("createMcpHandler", () => {
     expect(result.isError).toBe(true);
     expect(result.content[0]?.text).toContain("missing");
   });
+
+  it("returns screenshot bytes as an image", async () => {
+    const picture = builder
+      .meta({ mcp: true })
+      .route({ summary: "Picture" })
+      .handler(() => new Blob([Uint8Array.from([1, 2, 3])], { type: "image/png" }));
+    const handler = createMcpHandler({ picture });
+    const request = new Request("http://localhost/api/mcp", {
+      method: "POST",
+      headers: { accept: "application/json, text/event-stream", "content-type": "application/json" },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 4, method: "tools/call", params: { name: "picture", arguments: {} } }),
+    });
+
+    const { response } = await handler.handle(request, { context });
+    const body = (await response.json()) as {
+      result: { content: { type: string; data?: string; mimeType?: string }[] };
+    };
+
+    expect(body.result.content[0]).toEqual({
+      type: "image",
+      data: Buffer.from(Uint8Array.from([1, 2, 3])).toString("base64"),
+      mimeType: "image/png",
+    });
+  });
 });

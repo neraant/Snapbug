@@ -45,13 +45,15 @@ describe("listMcpTools", () => {
     expect(listMcpTools({})).toEqual([]);
   });
 
-  it("uses mcpName when a tool must keep a public name", () => {
+  it("uses the public name add_comment and marks the write", () => {
     const named = builder
-      .meta({ mcp: true, mcpName: "add_comment" })
+      .meta({ mcp: true, name: "add_comment", readOnlyHint: false })
       .route({ summary: "Add comment" })
       .handler(() => ({ ok: true }));
 
-    expect(listMcpTools({ comment: { addComment: named } }).map((tool) => tool.name)).toEqual(["add_comment"]);
+    expect(listMcpTools({ comment: { addComment: named } })).toEqual([
+      expect.objectContaining({ name: "add_comment", description: "Add comment", readOnlyHint: false }),
+    ]);
   });
 
   it("registers add_comment and does not register a replay tool", () => {
@@ -70,7 +72,9 @@ describe("listMcpTools", () => {
     const names = tools.map((tool) => tool.name);
 
     expect(names).toContain("add_comment");
+    expect(tools.find((tool) => tool.name === "add_comment")?.readOnlyHint).toBe(false);
     expect(names.some((name) => name.toLowerCase().includes("replay"))).toBe(false);
+    expect(names).not.toContain("comment_findComments");
   });
 
   it("keeps contract meta after implement", () => {
@@ -89,5 +93,18 @@ describe("listMcpTools", () => {
 
     expect(listMcpTools(router).map((tool) => tool.name)).toEqual(["bugReport_create"]);
     expect(listMcpTools(router)[0]?.description).toBe("Create bug report");
+  });
+
+  it("uses an explicit tool name when meta provides one", () => {
+    const named = builder
+      .meta({ mcp: true, name: "list_tickets", readOnlyHint: false })
+      .route({ summary: "List tickets" })
+      .handler(() => ({ ok: true }));
+
+    const tools = listMcpTools({ bugReport: { listTickets: named } });
+
+    expect(tools).toEqual([
+      expect.objectContaining({ name: "list_tickets", description: "List tickets", readOnlyHint: false }),
+    ]);
   });
 });

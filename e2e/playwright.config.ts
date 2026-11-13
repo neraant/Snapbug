@@ -1,10 +1,148 @@
+import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
+import { mkdirSync, readFileSync, statSync, unlinkSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import path from "node:path";
 
 import { defineConfig, devices } from "@playwright/test";
 
 const here = __dirname;
-const port = 3000;
-const baseURL = `http://127.0.0.1:${port}`;
+// The dev server may take the whole webServer timeout to boot. Workers load this
+// file again after that, and must keep the port the server already bound.
+const portCacheMs = 180_000;
+
+// A bind on 127.0.0.1 can succeed while another process is already serving
+// 0.0.0.0:3000 or [::1]:3000. Connect on both stacks so this run does not open
+// that other app. Workers load this file again; they must keep the chosen port.
+const choosePortScript = `
+const net = require("net");
+
+function accepts(port, host) {
+  return new Promise((resolve) => {
+    const socket = net.connect({ port, host });
+    let settled = false;
+    const finish = (value) => {
+      if (settled) return;
+      settled = true;
+      socket.destroy();
+      resolve(value);
+    };
+    socket.setTimeout(200);
+    socket.once("connect", () => finish(true));
+    socket.once("timeout", () => finish(true));
+    socket.once("error", () => finish(false));
+  });
+}
+
+function available(port) {
+  return Promise.all([accepts(port, "127.0.0.1"), accepts(port, "::1")]).then(
+    ([ipv4, ipv6]) => !ipv4 && !ipv6,
+  );
+}
+
+(async () => {
+  const preferred = [3000];
+  for (let port = 3100; port < 3200; port += 1) preferred.push(port);
+  for (const port of preferred) {
+    if (await available(port)) {
+      process.stdout.write(String(port));
+      return;
+    }
+  }
+  process.stderr.write("no free e2e port\\n");
+  process.exit(1);
+})().catch((error) => {
+  process.stderr.write(String(error) + "\\n");
+  process.exit(1);
+});
+`;
+
+function sleepSync(ms: number) {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+}
+
+function portFiles() {
+  const id = createHash("sha256").update(here).digest("hex").slice(0, 16);
+  const dir = path.join(tmpdir(), "snapbug-e2e");
+  mkdirSync(dir, { recursive: true });
+  return {
+    port: path.join(dir, `${id}.port`),
+    lock: path.join(dir, `${id}.lock`),
+  };
+}
+
+function readCachedPort(file: string): number | undefined {
+  try {
+    const info = statSync(file);
+    if (Date.now() - info.mtimeMs > portCacheMs) return undefined;
+    const port = Number(readFileSync(file, "utf8").trim());
+    if (!Number.isInteger(port) || port < 1 || port > 65535) return undefined;
+    return port;
+  } catch {
+    return undefined;
+  }
+}
+
+function rememberPort(file: string, port: number) {
+  writeFileSync(file, `${port}\n`);
+  process.env.E2E_PORT = String(port);
+  return port;
+}
+
+function chooseFreePort(): number {
+  const output = execFileSync(process.execPath, ["-e", choosePortScript], {
+    encoding: "utf8",
+    timeout: 5_000,
+    env: { ...process.env, E2E_PORT: "" },
+  });
+  const port = Number(output.trim());
+  if (!Number.isInteger(port) || port < 1 || port > 65535) {
+    throw new Error(`Could not choose an e2e port (received ${JSON.stringify(output)})`);
+  }
+  return port;
+}
+
+function e2ePort(): number {
+  const fromEnv = Number(process.env.E2E_PORT);
+  if (Number.isInteger(fromEnv) && fromEnv >= 1 && fromEnv <= 65535) return fromEnv;
+
+  const files = portFiles();
+  const cached = readCachedPort(files.port);
+  if (cached) return rememberPort(files.port, cached);
+
+  try {
+    writeFileSync(files.lock, String(process.pid), { flag: "wx" });
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+    const deadline = Date.now() + 5_000;
+    while (Date.now() < deadline) {
+      const port = readCachedPort(files.port);
+      if (port) return rememberPort(files.port, port);
+      sleepSync(50);
+    }
+    try {
+      unlinkSync(files.lock);
+    } catch {
+      // The lock owner finished between the timeout and the delete.
+    }
+    return e2ePort();
+  }
+
+  try {
+    const port = readCachedPort(files.port) ?? chooseFreePort();
+    return rememberPort(files.port, port);
+  } finally {
+    try {
+      unlinkSync(files.lock);
+    } catch {
+      // The waiter may already have removed a stale lock.
+    }
+  }
+}
+
+const port = e2ePort();
+// Next.js dev hydrates the page when the browser origin is localhost.
+const baseURL = `http://localhost:${port}`;
 
 export default defineConfig({
   testDir: here,
@@ -12,6 +150,7 @@ export default defineConfig({
   outputDir: path.join(here, "test-results"),
   fullyParallel: false,
   retries: 0,
+  timeout: 90_000,
   reporter: [["list"], ["html", { outputFolder: path.join(here, "playwright-report"), open: "never" }]],
   use: {
     baseURL,
@@ -21,7 +160,7 @@ export default defineConfig({
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
-    command: "pnpm exec next dev --webpack -p 3000",
+    command: `pnpm exec next dev --webpack -p ${port}`,
     cwd: path.join(here, "..", "apps", "web"),
     url: `${baseURL}/sign-in`,
     reuseExistingServer: false,

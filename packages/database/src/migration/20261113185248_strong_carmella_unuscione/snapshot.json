@@ -3,7 +3,7 @@
   "dialect": "postgres",
   "id": "9418f2e0-f30b-43ed-93ab-f0102d8c5923",
   "prevIds": [
-    "70dac2b7-b828-455b-a1b6-f457a1db26b5"
+    "368db51e-d1a1-4858-aba0-c356a7dc93f0"
   ],
   "ddl": [
     {
@@ -69,6 +69,12 @@
     {
       "isRlsEnabled": false,
       "name": "users",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "user_tokens",
       "entityType": "tables",
       "schema": "public"
     },
@@ -1178,6 +1184,84 @@
       "table": "users"
     },
     {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "user_tokens"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "user_id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "user_tokens"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "token_hash",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "user_tokens"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "prefix",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "user_tokens"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "user_tokens"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "revoked_at",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "user_tokens"
+    },
+    {
       "nameExplicit": true,
       "columns": [
         {
@@ -1239,6 +1323,27 @@
       "entityType": "indexes",
       "schema": "public",
       "table": "comments"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "user_id",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "user_tokens_user_id_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "user_tokens"
     },
     {
       "nameExplicit": false,
@@ -1479,6 +1584,23 @@
       "table": "reset_password_tokens"
     },
     {
+      "nameExplicit": false,
+      "columns": [
+        "user_id"
+      ],
+      "schemaTo": "public",
+      "tableTo": "users",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "NO ACTION",
+      "name": "user_tokens_user_id_users_id_fkey",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "user_tokens"
+    },
+    {
       "columns": [
         "id"
       ],
@@ -1589,6 +1711,16 @@
       "entityType": "pks"
     },
     {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "user_tokens_pkey",
+      "schema": "public",
+      "table": "user_tokens",
+      "entityType": "pks"
+    },
+    {
       "nameExplicit": true,
       "columns": [
         "key"
@@ -1644,6 +1776,17 @@
       "entityType": "uniques",
       "schema": "public",
       "table": "users"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "token_hash"
+      ],
+      "nullsNotDistinct": false,
+      "name": "user_token_hash_unique",
+      "entityType": "uniques",
+      "schema": "public",
+      "table": "user_tokens"
     }
   ],
   "renames": []

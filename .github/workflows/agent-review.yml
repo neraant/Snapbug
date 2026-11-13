@@ -130,8 +130,8 @@ jobs:
           )
           pathlib.Path(sys.argv[3]).write_text(text)
           PY
-          agent -p --trust --mode ask --model grok-4.7 --output-format json -- \
-            "$(cat "$RUNNER_TEMP/review-prompt.md")" > "$RUNNER_TEMP/agent-output.json"
+          agent -p --trust --mode ask --model grok-4.7 --output-format json \
+            < "$RUNNER_TEMP/review-prompt.md" > "$RUNNER_TEMP/agent-output.json"
           python3 - "$RUNNER_TEMP/agent-output.json" "$RUNNER_TEMP/review.json" <<'PY'
           import json
           import re
@@ -216,7 +216,7 @@ jobs:
         with:
           client-id: Iv23liaMk0S9lkvKh5WR
           private-key: ${{ secrets.REVIEWER_PRIVATE_KEY }}
-          permission-contents: read
+          permission-contents: write
           permission-pull-requests: write
 
       - name: Submit review
