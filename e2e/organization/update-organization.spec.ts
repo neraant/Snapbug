@@ -20,6 +20,11 @@ test("an administrator saves the organization name and retention period", async 
   await page.goto("/settings");
   await expect(page.getByRole("heading", { name: "Organization settings" })).toBeVisible();
   await expect(page.getByText("Days to keep reports for this organization.")).toBeVisible();
+  await page.waitForFunction(() => {
+    const form = document.querySelector("form");
+    if (!form) return false;
+    return Object.getOwnPropertyNames(form).some((name) => name.startsWith("__reactProps$"));
+  });
 
   await page.getByRole("textbox", { name: "Name" }).fill("Acme Studio");
   await page.getByRole("textbox", { name: "Retention period" }).fill("45");
