@@ -35,7 +35,12 @@ export function ActivityLog() {
               <Typography variant="text-sm">{formatActivityWhen(entry.occurredAt)}</Typography>
             </Table.Cell>
             <Table.Cell>
-              <Typography variant="text-sm">{formatActivityObject(entry.entityType)}</Typography>
+              <Column gap="none">
+                <Typography variant="text-sm">{formatActivityObject(entry.entityType)}</Typography>
+                <Typography variant="text-xs" color="muted">
+                  {entry.entityId}
+                </Typography>
+              </Column>
             </Table.Cell>
             <Table.Cell>
               <Typography variant="text-sm">{texts.source[entry.source]}</Typography>

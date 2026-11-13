@@ -26,7 +26,9 @@ export class FindActivityLogsUseCase {
     const auditLogs = await this.auditLogRepository.findManyByOrganizationId(organizationId);
     const actorIds = [
       ...new Set(
-        auditLogs.flatMap((auditLog) => (auditLog.actorType === "user" && auditLog.actorId ? [auditLog.actorId] : [])),
+        auditLogs.flatMap((auditLog) =>
+          auditLog.actorId && (auditLog.actorType === "user" || auditLog.actorType === "mcp") ? [auditLog.actorId] : [],
+        ),
       ),
     ];
     const users = actorIds.length === 0 ? [] : await this.userPort.findManyByIds(actorIds);
@@ -38,9 +40,8 @@ export class FindActivityLogsUseCase {
   }
 
   private actorLabel(actorType: string | null, actorId: string | null, labelByUserId: Map<string, string>): string {
-    if (actorType === "mcp") return "MCP";
+    if ((actorType === "user" || actorType === "mcp") && actorId) return labelByUserId.get(actorId) ?? "Unknown";
     if (actorType === "api-key") return "API key";
-    if (actorType === "user" && actorId) return labelByUserId.get(actorId) ?? "Unknown";
     return "Unknown";
   }
 }

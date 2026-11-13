@@ -40,8 +40,7 @@ export class AuditLogRepository {
       .select()
       .from(auditLogTable)
       .where(eq(auditLogTable.organizationId, organizationId))
-      .orderBy(desc(auditLogTable.occurredAt), desc(auditLogTable.id))
-      .limit(100);
+      .orderBy(desc(auditLogTable.occurredAt), desc(auditLogTable.id));
 
     return rows.map((row) => AuditLogMapper.fromPersistence(row));
   }

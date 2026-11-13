@@ -33,6 +33,7 @@ test("an administrator reads the activity log after changing the organization", 
 
   const change = page.getByRole("row").filter({ hasText: "name: Acme → Acme Studio" }).first();
   await expect(change.getByRole("cell", { name: "admin@example.com", exact: true })).toBeVisible();
-  await expect(change.getByRole("cell", { name: "Organization", exact: true })).toBeVisible();
+  await expect(change.getByText("Organization", { exact: true })).toBeVisible();
+  await expect(change.getByText("2a8c69a1-1ab1-45a8-8497-eae1e506d9d1", { exact: true })).toBeVisible();
   await expect(change.getByText("Update organization", { exact: true })).toBeVisible();
 });
