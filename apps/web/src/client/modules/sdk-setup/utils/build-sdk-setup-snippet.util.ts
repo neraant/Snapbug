@@ -30,10 +30,6 @@ export function buildSdkSetupInstallSnippet(tab: SdkSetupInstallTab, apiKey: str
   }
 }
 
-function maskApiKey(apiKey: string): string {
-  return apiKey.replace(/.(?=.{4})/g, "•");
-}
-
 function escapeSingleQuoted(value: string): string {
   return value.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
 }
@@ -111,15 +107,13 @@ function buildInitConfigObject(
 export function buildSdkSetupInitSnippet(input: {
   tab: SdkSetupInitTab;
   apiKey: string;
-  revealKey: boolean;
   hostExample?: string;
   widgetSettings?: ProjectWidgetSettingModelType;
 }): string {
-  const displayKey = input.revealKey ? input.apiKey : maskApiKey(input.apiKey);
   const host = input.hostExample ?? "https://your-app.com";
   const widgetOptions = input.widgetSettings ? buildSnapbugWidgetInitOptions(input.widgetSettings) : {};
   const initConfigIndent = "    ";
-  const configObject = buildInitConfigObject(displayKey, host, widgetOptions, initConfigIndent);
+  const configObject = buildInitConfigObject(input.apiKey, host, widgetOptions, initConfigIndent);
 
   if (input.tab === "next") {
     return `'use client';
@@ -150,13 +144,4 @@ export function App() {
 
   return <YourApplicationRoot />;
 }`;
-}
-
-export function buildSdkSetupInitSnippetForCopy(input: {
-  tab: SdkSetupInitTab;
-  apiKey: string;
-  hostExample?: string;
-  widgetSettings?: ProjectWidgetSettingModelType;
-}): string {
-  return buildSdkSetupInitSnippet({ ...input, revealKey: true });
 }

@@ -59,7 +59,6 @@ describe("FindProjectApiKeyUseCase", () => {
     expect(apiKeyRepository.findActiveByProjectId).toHaveBeenCalledWith(projectId);
     expect(withTransaction).not.toHaveBeenCalled();
     expect(result.key).not.toBe(apiKey.key);
-    expect(result.revealed).toBe(false);
     expect(result.key.endsWith(apiKey.key.slice(-4))).toBe(true);
     expect(result.key).toBe(apiKey.key.replace(/.(?=.{4})/g, "\u2022"));
     expect(result.createdAt).toBe(apiKey.createdAt.toISOString());
@@ -74,8 +73,10 @@ describe("FindProjectApiKeyUseCase", () => {
 
     expect(withActor).toHaveBeenCalledWith({ type: "user", id: userId });
     expect(saveWithAudit).toHaveBeenCalledWith(expect.any(ApiKey), "Create API key");
-    expect(result.revealed).toBe(true);
-    expect(result.key).toBe(createdApiKey.key);
+    expect(createdApiKey.key).toMatch(/^snb_pk_live_/);
+    expect(result.key).not.toBe(createdApiKey.key);
+    expect(result.key).toBe(createdApiKey.key.replace(/.(?=.{4})/g, "\u2022"));
+    expect(result.key.endsWith(createdApiKey.key.slice(-4))).toBe(true);
     expect(result.createdAt).toBe(createdApiKey.createdAt.toISOString());
   });
 

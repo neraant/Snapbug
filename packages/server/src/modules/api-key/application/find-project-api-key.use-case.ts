@@ -48,9 +48,9 @@ export class FindProjectApiKeyUseCase {
           .withActor({ type: "user", id: userId })
           .saveWithAudit(createdApiKey, "Create API key");
       });
-      return ApiKeyMapper.toProjectApiKeyDto(createdApiKey, true);
+      return ApiKeyMapper.toProjectApiKeyDto(createdApiKey);
     }
 
-    return ApiKeyMapper.toProjectApiKeyDto(activeApiKey, false);
+    return ApiKeyMapper.toProjectApiKeyDto(activeApiKey);
   }
 }

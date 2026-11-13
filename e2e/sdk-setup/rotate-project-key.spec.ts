@@ -41,4 +41,6 @@ test("an administrator sees a rotated project key only once", async ({ page }) =
   await expect(page.getByText(secret)).toBeHidden();
   await expect(page.getByText(previousKey)).toBeHidden();
   await expect(page.getByRole("heading", { name: "Set up the SDK" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Show" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Reveal key" })).toHaveCount(0);
 });
