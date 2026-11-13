@@ -216,7 +216,7 @@ jobs:
         with:
           client-id: Iv23liaMk0S9lkvKh5WR
           private-key: ${{ secrets.REVIEWER_PRIVATE_KEY }}
-          permission-contents: read
+          permission-contents: write
           permission-pull-requests: write
 
       - name: Submit review

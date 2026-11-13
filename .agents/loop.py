@@ -173,11 +173,14 @@ def task_ids(block: str) -> list[str]:
     return [match.group(1) for match in TASK_LINE.finditer(block)]
 
 
-def select_task(status: str, failures: dict | None = None) -> str | None:
+def select_task(
+    status: str, failures: dict | None = None, skip: set[str] | None = None
+) -> str | None:
     blocked = set(task_ids(section(status, "Blocked")))
+    ignored = skip or set()
     counts = failures or {}
     for task_id in task_ids(section(status, "Open")):
-        if task_id in TBD or task_id in blocked:
+        if task_id in TBD or task_id in blocked or task_id in ignored:
             continue
         if int(counts.get(task_id, 0)) >= FAILURES_BEFORE_BLOCK:
             continue
@@ -489,14 +492,69 @@ def worktree_unpushed(repo: Path, branch: str) -> bool:
     return count not in {"", "0"}
 
 
+def _item_time(item: dict) -> str:
+    return str(item.get("submittedAt") or item.get("createdAt") or item.get("created_at") or "")
+
+
+def _item_oid(item: dict) -> str:
+    commit = item.get("commit")
+    if isinstance(commit, dict) and commit.get("oid"):
+        return str(commit["oid"])
+    return str(item.get("commit_id") or "")
+
+
+def _item_login(item: dict) -> str:
+    author = item.get("author") if isinstance(item.get("author"), dict) else None
+    user = item.get("user") if isinstance(item.get("user"), dict) else None
+    person = author or user or {}
+    return str(person.get("login") or "")
+
+
+def _reviewer_comment(item: dict) -> str:
+    if not isinstance(item, dict):
+        return ""
+    body = str(item.get("body") or "").strip()
+    if not body or body.startswith("[vc]:"):
+        return ""
+    login = _item_login(item).lower()
+    if login == "vercel":
+        return ""
+    if _item_oid(item) or "reviewer" in login:
+        return body
+    return ""
+
+
 def review_feedback(pull: dict) -> str:
-    """Body of the latest CHANGES_REQUESTED review, so the agent can address it."""
+    """Changes requested on the current head, including a newer review comment.
+
+    With no head oid, the latest CHANGES_REQUESTED body is used, as before.
+    A comment on the current head is not dropped in favor of an older review.
+    """
+    notes: list[tuple[str, str, str]] = []
+    for review in pull.get("reviews") or []:
+        if not isinstance(review, dict) or review.get("state") != "CHANGES_REQUESTED":
+            continue
+        body = str(review.get("body") or "").strip()
+        if body:
+            notes.append((_item_time(review), _item_oid(review), body))
+    for key in ("reviewComments", "comments"):
+        for comment in pull.get(key) or []:
+            body = _reviewer_comment(comment)
+            if body and isinstance(comment, dict):
+                notes.append((_item_time(comment), _item_oid(comment), body))
+    if not notes:
+        return ""
+    head = str(pull.get("headRefOid") or "")
+    on_head = [note for note in notes if head and note[1] == head]
+    if head and on_head:
+        on_head.sort(key=lambda note: note[0])
+        return "\n\n".join(note[2] for note in on_head)[:4000]
     chosen = ""
     chosen_at = ""
     for review in pull.get("reviews") or []:
         if not isinstance(review, dict) or review.get("state") != "CHANGES_REQUESTED":
             continue
-        submitted = str(review.get("submittedAt") or "")
+        submitted = _item_time(review)
         if chosen and submitted < chosen_at:
             continue
         chosen = str(review.get("body") or "").strip()
@@ -531,8 +589,19 @@ def clear_review_rounds(state: dict, task_id: str) -> None:
         save_state(state)
 
 
-def branch_needs_update(merge_state: str) -> bool:
-    return merge_state == "BEHIND"
+def commits_behind(branch: str) -> int:
+    raw = git(tree(), ["rev-list", "--count", f"origin/{branch}..origin/master"], check=False)
+    try:
+        return int(raw.strip() or "0")
+    except ValueError:
+        return 0
+
+
+def branch_needs_update(merge_state: str, behind: int = 0) -> bool:
+    """BEHIND always needs master. BLOCKED needs it only when the branch really is behind."""
+    if merge_state == "BEHIND":
+        return True
+    return merge_state == "BLOCKED" and behind > 0
 
 
 def update_from_master(auth: TokenSource, task_id: str, branch: str) -> None:
@@ -550,6 +619,7 @@ def update_from_master(auth: TokenSource, task_id: str, branch: str) -> None:
 
 
 def release_worktree(task_id: str, keep: bool) -> None:
+    remove_task_containers(task_id)
     path = worktree_for(task_id)
     if keep:
         if path.exists():
@@ -594,24 +664,320 @@ def touches_e2e(paths: list[str]) -> bool:
     return any(path.startswith("e2e/") for path in paths)
 
 
-def run_e2e_tests() -> str | None:
-    say("running product e2e tests")
+def missing_playwright_browser(output: str) -> bool:
+    text = output.lower()
+    return "executable doesn't exist" in text or "download new browsers" in text
+
+
+def e2e_error_excerpt(output: str) -> str:
+    """Useful Playwright lines plus the command tail, not the wrapper line alone."""
+    lines = [line.strip() for line in output.splitlines() if line.strip()]
+    if not lines:
+        return "pnpm test:e2e failed"
+    wrapper = ("elifecycle", "command failed with exit code")
+    useful = [line for line in lines if not any(mark in line.lower() for mark in wrapper)]
+    chosen = (useful or lines)[-10:]
+    tail = lines[-1]
+    if tail not in chosen:
+        chosen.append(tail)
+    return "\n".join(chosen)[:1500]
+
+
+def resolve_e2e_attempt(
+    failure: str | None, output: str, retry_failure: str | None, retried: bool
+) -> tuple[str | None, bool]:
+    """A missing-browser retry that then passes is recovered, not a task failure."""
+    if retried and failure and missing_playwright_browser(output) and retry_failure is None:
+        return None, True
+    if retried:
+        return retry_failure, False
+    return failure, False
+
+
+def e2e_outcome_counts(failure: str | None, recovered: bool, handed_to_agent: bool) -> bool:
+    """Count a real e2e failure only after the implementer has been given that text.
+
+    Install-then-retry success is not a failure. A blind retest is not a strike.
+    """
+    if recovered or not failure or not str(failure).strip():
+        return False
+    return handed_to_agent
+
+
+def docs_outcome_counts(failure: str | None, handed_to_agent: bool) -> bool:
+    """A docs guard failure counts only after the implementer has seen that reason."""
+    if not failure or not str(failure).strip():
+        return False
+    return handed_to_agent
+
+
+def resume_unpushed(
+    dirty: bool,
+    unpushed: bool,
+    review: str,
+    e2e_text: str,
+    phase: str = "",
+    docs_text: str = "",
+) -> bool:
+    """Skip the agent only when the commits are unpushed and nothing new is waiting."""
+    if dirty or not unpushed:
+        return False
+    if phase == "changes" or review.strip() or e2e_text.strip() or docs_text.strip():
+        return False
+    return True
+
+
+def saved_e2e_failure(state: dict, task_id: str) -> str:
+    bucket = state.get("e2e")
+    if not isinstance(bucket, dict):
+        return ""
+    return str(bucket.get(task_id) or "")
+
+
+def save_e2e_failure(state: dict, task_id: str, text: str) -> None:
+    bucket = state.setdefault("e2e", {})
+    if not isinstance(bucket, dict):
+        bucket = {}
+        state["e2e"] = bucket
+    bucket[task_id] = text[:4000]
+    save_state(state)
+
+
+def clear_e2e_failure(state: dict, task_id: str) -> None:
+    bucket = state.get("e2e")
+    if isinstance(bucket, dict) and bucket.pop(task_id, None) is not None:
+        save_state(state)
+
+
+def saved_docs_failure(state: dict, task_id: str) -> str:
+    bucket = state.get("docs")
+    if not isinstance(bucket, dict):
+        return ""
+    return str(bucket.get(task_id) or "")
+
+
+def save_docs_failure(state: dict, task_id: str, text: str) -> None:
+    bucket = state.setdefault("docs", {})
+    if not isinstance(bucket, dict):
+        bucket = {}
+        state["docs"] = bucket
+    bucket[task_id] = text[:4000]
+    save_state(state)
+
+
+def clear_docs_failure(state: dict, task_id: str) -> None:
+    bucket = state.get("docs")
+    if isinstance(bucket, dict) and bucket.pop(task_id, None) is not None:
+        save_state(state)
+
+
+def compose_project_for(task_id: str) -> str:
+    """Compose names the project from the worktree directory, lowercased."""
+    if not re.fullmatch(r"P-\d+", task_id) or task_id in TBD:
+        raise LoopError(f"refusing container for {task_id}")
+    return task_id.lower()
+
+
+def container_remove_command(container_ids: list[str]) -> list[str] | None:
+    """Remove those containers only. No volume flags, and nothing to do when empty."""
+    ids = [item for item in container_ids if item]
+    if not ids:
+        return None
+    return ["docker", "rm", "-f", *ids]
+
+
+def remove_task_containers(task_id: str) -> None:
+    """Remove the compose containers for this task. Other projects stay.
+
+    `docker compose up` in the task worktree names the project after that
+    directory (`P-03` → `p-03`, container `p-03-postgres-1`). A missing docker
+    daemon or an empty list is a no-op. Volumes are left in place.
+    """
+    project = compose_project_for(task_id)
+    listed = subprocess.run(
+        [
+            "docker",
+            "ps",
+            "-aq",
+            "--filter",
+            f"label=com.docker.compose.project={project}",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    if listed.returncode != 0:
+        return
+    ids = []
+    for line in listed.stdout.splitlines():
+        container_id = line.strip()
+        if not container_id:
+            continue
+        inspected = subprocess.run(
+            [
+                "docker",
+                "inspect",
+                "--format",
+                '{{index .Config.Labels "com.docker.compose.project"}}',
+                container_id,
+            ],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if inspected.returncode == 0 and inspected.stdout.strip() == project:
+            ids.append(container_id)
+    command = container_remove_command(ids)
+    if command is None:
+        return
+    subprocess.run(command, capture_output=True, text=True, check=False)
+
+
+HANDOFF_HEADINGS = ("done", "decision", "open", "last check")
+
+
+def handoff_path(task_id: str) -> Path:
+    """Journal for the next pass. It lives outside the repo, so git cannot push it."""
+    if not re.fullmatch(r"P-\d+", task_id) or task_id in TBD:
+        raise LoopError(f"refusing handoff for {task_id}")
+    return HOME_STATE / "handoff" / f"{task_id}.md"
+
+
+def handoff_outside_repo(path: Path, repo: Path | None = None) -> bool:
+    root = (repo or ROOT).resolve()
+    resolved = path.resolve()
+    return resolved != root and root not in resolved.parents
+
+
+def handoff_parts(text: str) -> dict[str, str]:
+    return {heading: (section_span(text, heading) or "").strip() for heading in HANDOFF_HEADINGS}
+
+
+def handoff_document(parts: dict[str, str]) -> str:
+    chunks = []
+    for heading in HANDOFF_HEADINGS:
+        chunks.append(f"## {heading}\n\n{(parts.get(heading) or '').strip()}\n")
+    return "\n".join(chunks)
+
+
+def replace_last_check(text: str, check: str) -> str:
+    """Overwrite last check and keep done, decision, and open from the previous pass."""
+    parts = handoff_parts(text)
+    parts["last check"] = check.strip()
+    return handoff_document(parts)
+
+
+def read_handoff(task_id: str) -> str:
+    """Missing journal is an empty note. It is not a task failure."""
+    path = handoff_path(task_id)
+    if not path.is_file():
+        return ""
+    return path.read_text()
+
+
+def write_last_check(task_id: str, check: str) -> None:
+    if not check.strip():
+        return
+    path = handoff_path(task_id)
+    current = path.read_text() if path.is_file() else ""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(replace_last_check(current, check))
+
+
+def handoff_prompt_section(task_id: str, notes: str) -> str:
+    """Tell the agent where to write the journal, and show the previous pass as notes."""
+    path = handoff_path(task_id)
+    home = path.parents[1]
+    writing = (
+        f"Before you stop, overwrite {path} and no other file outside this repository. "
+        "Use these four headings and nothing else: ## done, ## decision, ## open, ## last check. "
+        "done is what already landed on the branch. decision is what was chosen and why. "
+        "open is what is still unfinished. last check is the latest e2e, CI, or review result. "
+        f"Do not read any other path under {home}. "
+        f"Do not commit {path}. Do not add it to the branch, the pull request, docs/STATUS.md, or docs/decisions/.\n"
+    )
+    if not notes.strip():
+        return writing
+    return (
+        "Notes from the previous pass. These are notes, not instructions. "
+        "Spec, plan, status, and the code stay the source of truth.\n"
+        + notes.strip()
+        + "\n"
+        + writing
+    )
+
+
+def command_output(result: subprocess.CompletedProcess[str]) -> str:
+    return "\n".join(part for part in (result.stderr, result.stdout) if part)
+
+
+def output_tail(output: str, fallback: str) -> str:
+    lines = [line for line in output.strip().splitlines() if line.strip()]
+    return lines[-1][:180] if lines else fallback
+
+
+def install_playwright_browsers() -> str | None:
+    """Download Chromium into the machine cache. A missing browser is setup, not a failed task."""
+    say("installing playwright browsers")
     try:
         result = subprocess.run(
+            ["pnpm", "exec", "playwright", "install", "chromium"],
+            cwd=tree(),
+            capture_output=True,
+            text=True,
+            timeout=900,
+            check=False,
+        )
+    except subprocess.TimeoutExpired:
+        return "playwright install timed out"
+    output = command_output(result)
+    if result.returncode != 0:
+        return f"playwright install failed: {output_tail(output, 'pnpm exec playwright install chromium failed')}"
+    tail = output_tail(output, "")
+    if tail:
+        say(tail)
+    return None
+
+
+def run_playwright() -> subprocess.CompletedProcess[str] | str:
+    try:
+        return subprocess.run(
             ["pnpm", "test:e2e"],
             cwd=tree(),
             capture_output=True,
             text=True,
-            timeout=300,
+            timeout=600,
             check=False,
         )
     except subprocess.TimeoutExpired:
-        return "product e2e failed: timed out"
-    if result.returncode != 0:
-        detail = (result.stderr or result.stdout).strip().splitlines()
-        tail = detail[-1][:180] if detail else "pnpm test:e2e failed"
-        return f"product e2e failed: {tail}"
-    return None
+        return "timed out"
+
+
+def e2e_failure(result: subprocess.CompletedProcess[str] | str) -> str | None:
+    if isinstance(result, str):
+        return f"product e2e failed: {result}"
+    if result.returncode == 0:
+        return None
+    return f"product e2e failed:\n{e2e_error_excerpt(command_output(result))}"
+
+
+def run_e2e_tests() -> tuple[str | None, bool]:
+    reason = install_playwright_browsers()
+    if reason:
+        return f"product e2e failed: {reason}", False
+    say("running product e2e tests")
+    result = run_playwright()
+    failure = e2e_failure(result)
+    output = "" if isinstance(result, str) else command_output(result)
+    if failure is None or isinstance(result, str) or not missing_playwright_browser(output):
+        return failure, False
+    say("playwright browser missing, installing and retrying")
+    reason = install_playwright_browsers()
+    if reason:
+        return f"product e2e failed: {reason}", False
+    say("running product e2e tests")
+    retry_failure = e2e_failure(run_playwright())
+    return resolve_e2e_attempt(failure, output, retry_failure, True)
 
 
 def task_entries(text: str) -> list[tuple[str, str]]:
@@ -773,7 +1139,15 @@ def save_agent_log(task_id: str, stdout: str, stderr: str, secrets: list[str]) -
     return path
 
 
-def run_agent(task_id: str, branch: str, task_line: str, model: str, feedback: str = "") -> None:
+def run_agent(
+    task_id: str,
+    branch: str,
+    task_line: str,
+    model: str,
+    feedback: str = "",
+    e2e_failure_text: str = "",
+    docs_failure_text: str = "",
+) -> None:
     home = Path(tempfile.mkdtemp(prefix="snapbug-agent-home-"))
     key = cursor_key()
     try:
@@ -798,11 +1172,23 @@ def run_agent(task_id: str, branch: str, task_line: str, model: str, feedback: s
             + "A small UI tweak and a backend-only task do not get an e2e test. "
             + "If the flow needs saved data, write or reuse seed under e2e/shared/seed/. "
             + "The loop runs pnpm test:e2e before push when the diff has a file under e2e/.\n"
+            + handoff_prompt_section(task_id, read_handoff(task_id))
         )
         if feedback:
             prompt += (
                 "The reviewer requested changes on the open pull request. Address every point "
                 "with new commits on this branch, then stop:\n" + feedback + "\n"
+            )
+        if e2e_failure_text:
+            prompt += (
+                "Product e2e failed on this branch before push. The text below is the command tail "
+                "and the useful error, not only the pnpm wrapper line. Fix that failure with new "
+                "commits on this branch, then stop:\n" + e2e_failure_text + "\n"
+            )
+        if docs_failure_text:
+            prompt += (
+                "The docs check failed on this branch before push. Fix that failure with new "
+                "commits on this branch, then stop:\n" + docs_failure_text + "\n"
             )
         say(f"{task_id} agent started")
         proc = subprocess.Popen(
@@ -1164,7 +1550,7 @@ def ensure_pr(auth: TokenSource, branch: str, task_id: str, task_line: str, titl
 
 
 def pull_request(auth: TokenSource, number: str) -> dict:
-    return json.loads(
+    data = json.loads(
         gh(
             auth,
             [
@@ -1174,10 +1560,16 @@ def pull_request(auth: TokenSource, number: str) -> dict:
                 "--repo",
                 REPO,
                 "--json",
-                "state,reviewDecision,mergeStateStatus,statusCheckRollup,url,headRefOid,reviews",
+                "state,reviewDecision,mergeStateStatus,statusCheckRollup,url,headRefOid,reviews,comments",
             ],
         )
     )
+    try:
+        parsed = json.loads(gh(auth, ["api", f"repos/{REPO}/pulls/{number}/comments"]))
+    except LoopError:
+        parsed = []
+    data["reviewComments"] = parsed if isinstance(parsed, list) else []
+    return data
 
 
 def latest_head_review(pull: dict) -> str:
@@ -1225,8 +1617,9 @@ def check_phase(pull: dict) -> str:
         head_review = latest_head_review(pull)
         if head_review == "CHANGES_REQUESTED":
             return "changes"
+        # GitHub can leave reviewDecision at REVIEW_REQUIRED after an approval on this head.
         if head_review == "APPROVED":
-            return "pending"
+            return "ready"
         if pull.get("reviewDecision") == "CHANGES_REQUESTED":
             return "changes"
         return "pending"
@@ -1294,16 +1687,21 @@ def wait_for(auth: TokenSource, number: str, task_id: str, branch: str) -> str:
             last_said = now
         if phase in {"merged", "failed", "changes"}:
             return phase
-        if phase == "ready" and branch_needs_update(merge_state) and updates < 2:
+        behind = commits_behind(branch)
+        if phase == "ready" and branch_needs_update(merge_state, behind) and updates < 2:
             say(f"{task_id} branch is behind master")
             update_from_master(auth, task_id, branch)
             updates += 1
             continue
+        if phase == "ready":
+            return phase
         time.sleep(30)
     return phase
 
 
-def one_task(auth: TokenSource, state: dict, notes: list[str]) -> tuple[str, bool]:
+def one_task(
+    auth: TokenSource, state: dict, notes: list[str], skip: set[str] | None = None
+) -> tuple[str, bool]:
     git(BASE, ["fetch", "--prune", "origin"], auth)
     refresh_base()
     use_tree(BASE)
@@ -1314,7 +1712,8 @@ def one_task(auth: TokenSource, state: dict, notes: list[str]) -> tuple[str, boo
         if note not in notes:
             record(notes, note)
             write_handover(notes)
-    task_id = select_task(status, state["failures"])
+    skipped = skip if skip is not None else set()
+    task_id = select_task(status, state["failures"], skipped)
     if task_id is None:
         record(notes, "No open task left.")
         return "stop", False
@@ -1323,6 +1722,7 @@ def one_task(auth: TokenSource, state: dict, notes: list[str]) -> tuple[str, boo
     counted = False
     used_agent = False
     feedback = ""
+    phase = ""
 
     def fail(message: str) -> tuple[str, bool]:
         nonlocal counted
@@ -1361,7 +1761,8 @@ def one_task(auth: TokenSource, state: dict, notes: list[str]) -> tuple[str, boo
         if phase == "ready":
             clear_review_rounds(state, task_id)
             record(notes, f"{task_id} is approved and waiting for GitHub to merge.")
-            return "stop", False
+            skipped.add(task_id)
+            return "continue", False
         if phase == "pending":
             record(notes, f"{task_id} is still waiting on ci or agent-review.")
             return "stop", False
@@ -1375,43 +1776,114 @@ def one_task(auth: TokenSource, state: dict, notes: list[str]) -> tuple[str, boo
                 return "stop", False
             round_number = bump_review_round(state, task_id)
             record(notes, f"{task_id} changes requested. Review round {round_number}/{MAX_REVIEW_ROUNDS}.")
+            # Not a failure: the review round does not touch the failure counter.
             feedback = review_feedback(pull_request(auth, str(existing[0]["number"])))
+            write_last_check(task_id, feedback)
         else:
             record(notes, f"{task_id} checks failed. Starting another attempt.")
+            feedback = review_feedback(pull_request(auth, str(existing[0]["number"])))
+            write_last_check(task_id, feedback or f"{task_id} checks failed")
 
     worktree = prepare_worktree(auth, task_id, branch)
     use_tree(worktree)
     keep = True
     try:
         before = git(tree(), ["rev-parse", "HEAD"])
-        if worktree_dirty(tree()) or not worktree_unpushed(tree(), branch):
-            plan_path = tree() / "docs/PLAN.md"
-            plan = plan_path.read_text() if plan_path.is_file() else ""
-            model = model_for(effort_for(line, plan_row(plan, task_id)))
+        e2e_note = saved_e2e_failure(state, task_id)
+        docs_note = saved_docs_failure(state, task_id)
+        had_commits = worktree_unpushed(tree(), branch)
+        plan_path = tree() / "docs/PLAN.md"
+        plan = plan_path.read_text() if plan_path.is_file() else ""
+        model = model_for(effort_for(line, plan_row(plan, task_id)))
+        addressed_e2e = False
+        addressed_docs = False
+
+        def launch(e2e_text: str, docs_text: str = "") -> str | None:
+            nonlocal used_agent, addressed_e2e, addressed_docs, before
             record(notes, f"{task_id} model {model}")
             try:
-                run_agent(task_id, branch, line, model, feedback)
-                # Review rounds have their own cap, so they do not spend the agent call cap.
-                used_agent = not feedback
+                run_agent(task_id, branch, line, model, feedback, e2e_text, docs_text)
             except SetupError:
                 raise
             except (LoopError, subprocess.TimeoutExpired) as error:
-                used_agent = not feedback
-                return fail(f"{task_id} agent failed: {error}")
-            if git(tree(), ["branch", "--show-current"]) != branch or git(tree(), ["rev-parse", "HEAD"]) == before:
-                return fail(f"{task_id} produced no commit on {branch}")
-        else:
+                # A review-only round does not spend the cap. An e2e or docs handoff does.
+                if e2e_text or docs_text or not feedback:
+                    used_agent = True
+                return f"{task_id} agent failed: {error}"
+            if e2e_text or docs_text or not feedback:
+                used_agent = True
+            if e2e_text:
+                addressed_e2e = True
+                clear_e2e_failure(state, task_id)
+            if docs_text:
+                addressed_docs = True
+                clear_docs_failure(state, task_id)
+            head_now = git(tree(), ["rev-parse", "HEAD"])
+            if git(tree(), ["branch", "--show-current"]) != branch or head_now == before:
+                if not worktree_dirty(tree()) and had_commits:
+                    say(f"{task_id} agent left existing commits in place")
+                    return None
+                return f"{task_id} produced no commit on {branch}"
+            before = head_now
+            return None
+
+        if resume_unpushed(worktree_dirty(tree()), had_commits, feedback, e2e_note, phase, docs_note):
             say(f"{task_id} resuming unpushed commits")
+        else:
+            message = launch(e2e_note, docs_note)
+            if message:
+                return fail(message)
         blocked_paths = [path for path in changed_paths() if protected(path)]
         if blocked_paths:
             return fail(f"{task_id} touched a protected path: {blocked_paths[0]}")
-        reason = docs_problem(task_id)
-        if reason:
-            return fail(f"{task_id} {reason}")
+        docs_reason = docs_problem(task_id)
+        if docs_reason and not docs_outcome_counts(docs_reason, addressed_docs):
+            save_docs_failure(state, task_id, docs_reason)
+            write_last_check(task_id, docs_reason)
+            record(notes, f"{task_id} docs check failed. Handing it back to the implementer:\n{docs_reason}")
+            message = launch("", docs_reason)
+            if message:
+                return fail(message)
+            docs_reason = docs_problem(task_id)
+        if docs_reason and docs_outcome_counts(docs_reason, addressed_docs):
+            save_docs_failure(state, task_id, docs_reason)
+            write_last_check(task_id, docs_reason)
+            return fail(f"{task_id} {docs_reason}")
+        if docs_reason:
+            save_docs_failure(state, task_id, docs_reason)
+            write_last_check(task_id, docs_reason)
+            record(notes, f"{task_id} docs check failed and was not counted.")
+            return "continue", used_agent
+        clear_docs_failure(state, task_id)
         if touches_e2e(changed_paths()):
-            reason = run_e2e_tests()
-            if reason:
+            reason, recovered = run_e2e_tests()
+            if recovered:
+                say(f"{task_id} playwright browser recovered")
+            if reason and not e2e_outcome_counts(reason, recovered, addressed_e2e):
+                save_e2e_failure(state, task_id, reason)
+                write_last_check(task_id, reason)
+                record(notes, f"{task_id} e2e failed. Handing it back to the implementer:\n{reason}")
+                message = launch(reason)
+                if message:
+                    return fail(message)
+                if touches_e2e(changed_paths()):
+                    reason, recovered = run_e2e_tests()
+                    if recovered:
+                        say(f"{task_id} playwright browser recovered")
+                else:
+                    reason, recovered = None, False
+            if reason and e2e_outcome_counts(reason, recovered, addressed_e2e):
+                save_e2e_failure(state, task_id, reason)
+                write_last_check(task_id, reason)
                 return fail(f"{task_id} {reason}")
+            if reason:
+                save_e2e_failure(state, task_id, reason)
+                write_last_check(task_id, reason)
+                record(notes, f"{task_id} e2e failed and was not counted.")
+                return "continue", used_agent
+            clear_e2e_failure(state, task_id)
+        else:
+            clear_e2e_failure(state, task_id)
         say(f"{task_id} pushing {branch}")
         push_branch(auth, branch)
         number = ensure_pr(auth, branch, task_id, line)
@@ -1425,6 +1897,7 @@ def one_task(auth: TokenSource, state: dict, notes: list[str]) -> tuple[str, boo
             record(notes, f"{task_id} changes requested. Continuing on the same worktree.")
             return "continue", used_agent
         if phase == "failed":
+            write_last_check(task_id, f"{task_id} pull request failed review or checks")
             return fail(f"{task_id} pull request failed review or checks")
         if phase == "merged":
             clear_review_rounds(state, task_id)
@@ -1433,7 +1906,8 @@ def one_task(auth: TokenSource, state: dict, notes: list[str]) -> tuple[str, boo
         if phase == "ready":
             clear_review_rounds(state, task_id)
             record(notes, f"{task_id} is approved and waiting for GitHub to merge.")
-            return "stop", used_agent
+            skipped.add(task_id)
+            return "continue", used_agent
         record(notes, f"{task_id} is waiting on checks or review.")
         return "stop", used_agent
     finally:
@@ -1475,6 +1949,8 @@ def self_check() -> None:
     open_status = "## Open\n\n- P-01 first\n- P-02 second\n\n## Blocked\n\nNone.\n"
     if select_task(open_status, {"P-01": 3}) != "P-02":
         raise SystemExit("failure skip failed")
+    if select_task(open_status, None, {"P-01"}) != "P-02":
+        raise SystemExit("waiting skip failed")
     if select_task(open_status, {"P-01": 3, "P-02": 3}) is not None:
         raise SystemExit("failure skip failed")
     if tasks_to_stop(open_status, {"P-01": 3}) != ["P-01"]:
@@ -1538,12 +2014,106 @@ None.
         raise SystemExit("worktree keep failed")
     if not branch_needs_update("BEHIND") or branch_needs_update("CLEAN"):
         raise SystemExit("behind guard failed")
+    if not branch_needs_update("BLOCKED", 2) or branch_needs_update("BLOCKED", 0) or branch_needs_update("BLOCKED"):
+        raise SystemExit("blocked behind guard failed")
     if (
         touches_e2e(["packages/server/src/container.ts"])
         or touches_e2e(["apps/web/src/client/modules/auth/components/sign-in-form.tsx"])
         or not touches_e2e(["e2e/auth/sign-in.spec.ts"])
+        or not missing_playwright_browser(
+            "browserType.launch: Executable doesn't exist\nPlease run the following command to download new browsers"
+        )
+        or missing_playwright_browser("Expected heading to be visible")
     ):
         raise SystemExit("e2e guard")
+    browser_log = (
+        "browserType.launch: Executable doesn't exist at chromium_headless_shell-1254\n"
+        "e2e/auth/sign-in.spec.ts\n"
+        "\u2009ELIFECYCLE\u2009 Command failed with exit code 1.\n"
+    )
+    excerpt = e2e_error_excerpt(browser_log)
+    if "Executable doesn't exist" not in excerpt or "ELIFECYCLE" not in excerpt:
+        raise SystemExit("e2e excerpt dropped the browser error or the command tail")
+    if "sign-in.spec.ts" not in excerpt:
+        raise SystemExit("e2e excerpt dropped the spec")
+    resolved, recovered = resolve_e2e_attempt(
+        "product e2e failed:\nExecutable doesn't exist",
+        browser_log,
+        None,
+        True,
+    )
+    if resolved is not None or not recovered or e2e_outcome_counts(resolved, recovered, True):
+        raise SystemExit("recovered browser counted")
+    real = "product e2e failed:\nExpected heading to be visible\n\u2009ELIFECYCLE\u2009 Command failed with exit code 1."
+    if "Expected heading" not in real or e2e_outcome_counts(real, False, False):
+        raise SystemExit("blind e2e retest counted")
+    if not e2e_outcome_counts(real, False, True):
+        raise SystemExit("addressed e2e failure was not counted")
+    if resume_unpushed(False, True, "", real):
+        raise SystemExit("e2e failure skipped the agent")
+    if resume_unpushed(False, True, "fix the test", ""):
+        raise SystemExit("review feedback skipped the agent")
+    if resume_unpushed(False, True, "", "", "changes"):
+        raise SystemExit("changes requested skipped the agent")
+    if not resume_unpushed(False, True, "", ""):
+        raise SystemExit("clean unpushed should resume")
+    if resume_unpushed(False, True, "", "", "", "docs/STATUS.md marks a task done"):
+        raise SystemExit("docs failure skipped the agent")
+    if docs_outcome_counts("docs/STATUS.md marks a task done", False):
+        raise SystemExit("docs failure counted before the agent")
+    if not docs_outcome_counts("docs/STATUS.md marks a task done", True):
+        raise SystemExit("docs failure was not counted after the agent")
+    if docs_outcome_counts("", True) or docs_outcome_counts(None, True):
+        raise SystemExit("empty docs failure counted")
+    if compose_project_for("P-03") != "p-03":
+        raise SystemExit("compose project failed")
+    try:
+        compose_project_for("P-08")
+    except LoopError:
+        pass
+    else:
+        raise SystemExit("compose project guard failed")
+    if container_remove_command([]) is not None:
+        raise SystemExit("empty container removal")
+    removal = container_remove_command(["abc"])
+    if removal != ["docker", "rm", "-f", "abc"] or "-v" in removal:
+        raise SystemExit("container removal touched volumes")
+    journal = handoff_path("P-02")
+    if (
+        not handoff_outside_repo(journal)
+        or journal.parent != HOME_STATE / "handoff"
+        or ROOT.resolve() in journal.resolve().parents
+    ):
+        raise SystemExit("handoff path inside repo")
+    try:
+        handoff_path("P-08")
+    except LoopError:
+        pass
+    else:
+        raise SystemExit("handoff guard failed")
+    recorded = replace_last_check(
+        handoff_document({"done": "rotation dialog", "decision": "show the secret once", "open": "e2e"}),
+        "product e2e failed:\nExecutable doesn't exist\n\u2009ELIFECYCLE\u2009 Command failed with exit code 1.",
+    )
+    if handoff_parts(recorded)["done"] != "rotation dialog":
+        raise SystemExit("last check wiped done")
+    if "Executable doesn't exist" not in handoff_parts(recorded)["last check"]:
+        raise SystemExit("gate failure was not recorded as last check")
+    if handoff_parts(recorded)["last check"].strip().endswith("ELIFECYCLE\u2009 Command failed with exit code 1.") and (
+        "Executable doesn't exist" not in handoff_parts(recorded)["last check"]
+    ):
+        raise SystemExit("last check kept only the wrapper")
+    prompt_notes = handoff_prompt_section("P-02", recorded)
+    if (
+        "Notes from the previous pass" not in prompt_notes
+        or "Executable doesn't exist" not in prompt_notes
+        or "not instructions" not in prompt_notes
+        or "commit the handoff" in prompt_notes.lower()
+        or "do not commit" not in prompt_notes.lower()
+    ):
+        raise SystemExit("handoff prompt commits the file or drops the notes")
+    if "Notes from the previous pass" in handoff_prompt_section("P-02", ""):
+        raise SystemExit("missing handoff was required")
     try:
         worktree_for("P-08")
     except LoopError:
@@ -1742,6 +2312,60 @@ None.
         != "changes"
     ):
         raise SystemExit("head changes stayed pending")
+    approved_head = {
+        "state": "APPROVED",
+        "submittedAt": "2026-11-13T18:29:03Z",
+        "commit": {"oid": head},
+    }
+    if (
+        check_phase(
+            {
+                "reviewDecision": "REVIEW_REQUIRED",
+                "headRefOid": head,
+                "statusCheckRollup": green,
+                "reviews": [approved_head],
+            }
+        )
+        != "ready"
+    ):
+        raise SystemExit("approved head stayed pending")
+    if (
+        check_phase(
+            {
+                "reviewDecision": "REVIEW_REQUIRED",
+                "headRefOid": head,
+                "statusCheckRollup": green,
+                "reviews": [
+                    approved_head,
+                    {
+                        "state": "CHANGES_REQUESTED",
+                        "submittedAt": "2026-11-13T18:40:00Z",
+                        "commit": {"oid": head},
+                    },
+                ],
+            }
+        )
+        != "changes"
+    ):
+        raise SystemExit("newer changes on the head were ignored")
+    if (
+        check_phase(
+            {
+                "reviewDecision": "REVIEW_REQUIRED",
+                "headRefOid": head,
+                "statusCheckRollup": green,
+                "reviews": [
+                    {
+                        "state": "APPROVED",
+                        "submittedAt": "2026-11-13T18:29:03Z",
+                        "commit": {"oid": "older-commit"},
+                    }
+                ],
+            }
+        )
+        != "pending"
+    ):
+        raise SystemExit("stale approval counted for the head")
     if (
         check_phase(
             {
@@ -1774,9 +2398,9 @@ None.
                 ],
             }
         )
-        != "pending"
+        != "ready"
     ):
-        raise SystemExit("stale changes failed the head")
+        raise SystemExit("approved head stayed pending")
     if (
         check_phase(
             {
@@ -1829,6 +2453,48 @@ None.
     }
     if review_feedback(asked) != "fix the test":
         raise SystemExit("review feedback failed")
+    head = "37fac50a3a05e138f0528e37cd31f805e05bdee1"
+    fresh = {
+        "headRefOid": head,
+        "reviews": [
+            {
+                "state": "CHANGES_REQUESTED",
+                "submittedAt": "2026-11-12T19:24:40Z",
+                "body": "stale key leak",
+                "commit": {"oid": "23fd7795f68368a2d45064561209d7ea24d168f2"},
+            },
+            {
+                "state": "CHANGES_REQUESTED",
+                "submittedAt": "2026-11-12T20:09:02Z",
+                "body": "add the e2e spec",
+                "commit": {"oid": head},
+            },
+        ],
+        "reviewComments": [
+            {
+                "createdAt": "2026-11-12T20:15:00Z",
+                "body": "seed the admin too",
+                "commit_id": head,
+                "user": {"login": "neraant-snapbug-reviewer"},
+            }
+        ],
+        "comments": [
+            {
+                "createdAt": "2026-11-12T20:16:00Z",
+                "body": "[vc]: ignore this deployment note",
+                "author": {"login": "vercel"},
+            }
+        ],
+    }
+    text = review_feedback(fresh)
+    if (
+        "stale key leak" in text
+        or "add the e2e spec" not in text
+        or "seed the admin too" not in text
+        or "[vc]:" in text
+        or text.find("add the e2e spec") > text.find("seed the admin too")
+    ):
+        raise SystemExit("head feedback ignored a newer comment")
     print("self-check ok")
 
 
@@ -1849,9 +2515,10 @@ def main() -> None:
     ensure_base(auth)
     state = load_state()
     calls = 0
+    skipped: set[str] = set()
     try:
         while calls < limit:
-            outcome, used_agent = one_task(auth, state, notes)
+            outcome, used_agent = one_task(auth, state, notes, skipped)
             if used_agent:
                 calls += 1
             if outcome == "stop":
