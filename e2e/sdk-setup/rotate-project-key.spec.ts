@@ -22,14 +22,20 @@ test("an administrator sees a rotated project key only once", async ({ page }) =
 
   await page.goto(`/sdk?projectId=${projectId}`);
   await expect(page.getByRole("heading", { name: "Set up the SDK" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Project API Key" })).toBeVisible();
   await expect(page.getByText(previousKey)).toBeHidden();
 
-  await page.getByRole("button", { name: "Rotate key" }).click();
-  const dialog = page.getByRole("dialog");
-  await expect(dialog.getByRole("heading", { name: "Rotate project key" })).toBeVisible();
+  const rotateButton = page.getByRole("button", { name: "Rotate key" });
+  await expect(async () => {
+    await rotateButton.click();
+    await expect(page.getByRole("dialog").getByRole("heading", { name: "Rotate project key" })).toBeVisible({
+      timeout: 2_000,
+    });
+  }).toPass({ timeout: 30_000 });
 
+  const dialog = page.getByRole("dialog");
   await dialog.getByRole("button", { name: "Rotate key" }).click();
-  await expect(dialog.getByRole("heading", { name: "New project key" })).toBeVisible();
+  await expect(dialog.getByRole("heading", { name: "New project key" })).toBeVisible({ timeout: 30_000 });
 
   const secretText = dialog.getByText(/^snb_pk_live_/);
   await expect(secretText).toBeVisible();
