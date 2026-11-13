@@ -3,6 +3,7 @@ import { Grid } from "@workspace/design-system/components/layout/grid";
 import { Separator } from "@workspace/design-system/components/ui/separator";
 import { Skeleton } from "@workspace/design-system/components/ui/skeleton";
 
+import { TicketDetailCommentSection } from "@/client/modules/ticket-detail/components/ticket-detail-comment-section";
 import { TicketDetailDiagnosticsCard } from "@/client/modules/ticket-detail/components/ticket-detail-diagnostics-card";
 import { TicketDetailHeader } from "@/client/modules/ticket-detail/components/ticket-detail-header";
 import { TicketDetailIssueSection } from "@/client/modules/ticket-detail/components/ticket-detail-issue-section";
@@ -29,6 +30,7 @@ export function TicketDetail({ shortId }: TicketDetailProps) {
         <Grid columns="responsive-3" gap="lg">
           <Column gap="lg" minWidth="0" width="full" className="min-w-0 lg:col-span-2">
             <TicketDetailIssueSection shortId={shortId} />
+            <TicketDetailCommentSection shortId={shortId} />
             {showActiveOrganizationData ? (
               <TicketDetailScreenshotSection shortId={shortId} />
             ) : (

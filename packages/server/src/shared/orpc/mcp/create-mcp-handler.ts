@@ -39,12 +39,15 @@ function registerMcpTool(
 ): void {
   const inputSchema = procedure["~orpc"].inputSchema;
 
+  const method = (procedure["~orpc"].route as { method?: string } | undefined)?.method;
+  const writes = method === "POST" || method === "PATCH" || method === "PUT" || method === "DELETE";
+
   server.registerTool(
     name,
     {
       description,
       ...(inputSchema ? { inputSchema: inputSchema as never } : {}),
-      annotations: { readOnlyHint: true },
+      annotations: { readOnlyHint: !writes },
     },
     async (args) => {
       try {

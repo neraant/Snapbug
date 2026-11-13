@@ -7,7 +7,7 @@ export type McpToolType = {
   description: string | undefined;
 };
 
-export type OrpcMetaType = { mcp?: boolean };
+export type OrpcMetaType = { mcp?: boolean; mcpName?: string };
 
 export function listMcpTools(router: unknown): McpToolType[] {
   const tools: McpToolType[] = [];
@@ -20,8 +20,9 @@ function walk(node: unknown, path: string[], tools: McpToolType[]): void {
     const meta = node["~orpc"].meta as OrpcMetaType | undefined;
     if (meta?.mcp !== true) return;
 
+    const mcpName = meta.mcpName?.trim();
     tools.push({
-      name: path.join("_"),
+      name: mcpName ? mcpName : path.join("_"),
       procedure: node,
       description: node["~orpc"].route.summary,
     });
