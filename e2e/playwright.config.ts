@@ -7,21 +7,37 @@ import path from "node:path";
 import { defineConfig, devices } from "@playwright/test";
 
 const here = __dirname;
-const portCacheMs = 30_000;
+// The dev server may take the whole webServer timeout to boot. Workers load this
+// file again after that, and must keep the port the server already bound.
+const portCacheMs = 180_000;
 
-// Bind the first free port so a server already on :3000 does not abort this run.
-// Workers load this file again; they must keep the port chosen for the web server.
+// A bind on 127.0.0.1 can succeed while another process is already serving
+// 0.0.0.0:3000 or [::1]:3000. Connect on both stacks so this run does not open
+// that other app. Workers load this file again; they must keep the chosen port.
 const choosePortScript = `
 const net = require("net");
 
-function available(port) {
+function accepts(port, host) {
   return new Promise((resolve) => {
-    const server = net.createServer();
-    server.once("error", () => resolve(false));
-    server.listen({ port, host: "127.0.0.1", exclusive: true }, () => {
-      server.close(() => resolve(true));
-    });
+    const socket = net.connect({ port, host });
+    let settled = false;
+    const finish = (value) => {
+      if (settled) return;
+      settled = true;
+      socket.destroy();
+      resolve(value);
+    };
+    socket.setTimeout(200);
+    socket.once("connect", () => finish(true));
+    socket.once("timeout", () => finish(true));
+    socket.once("error", () => finish(false));
   });
+}
+
+function available(port) {
+  return Promise.all([accepts(port, "127.0.0.1"), accepts(port, "::1")]).then(
+    ([ipv4, ipv6]) => !ipv4 && !ipv6,
+  );
 }
 
 (async () => {
@@ -134,6 +150,7 @@ export default defineConfig({
   outputDir: path.join(here, "test-results"),
   fullyParallel: false,
   retries: 0,
+  timeout: 90_000,
   reporter: [["list"], ["html", { outputFolder: path.join(here, "playwright-report"), open: "never" }]],
   use: {
     baseURL,
