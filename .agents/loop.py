@@ -271,6 +271,16 @@ def github(method: str, url: str, token: str, body: dict | None = None) -> dict:
     return json.loads(raw) if raw else {}
 
 
+# contents write is not enough to publish `.github/workflows`. GitHub rejects
+# that push unless the installation token also has workflows write.
+TOKEN_PERMISSIONS = {
+    "contents": "write",
+    "pull_requests": "write",
+    "metadata": "read",
+    "workflows": "write",
+}
+
+
 def installation_token(jwt: str) -> str:
     installation = github(
         "GET",
@@ -280,19 +290,20 @@ def installation_token(jwt: str) -> str:
     installation_id = installation.get("id")
     if not isinstance(installation_id, int):
         raise LoopError("implementer app is not installed on this repository")
-    minted = github(
-        "POST",
-        f"https://api.github.com/app/installations/{installation_id}/access_tokens",
-        jwt,
-        {
-            "repositories": [NAME],
-            "permissions": {
-                "contents": "write",
-                "pull_requests": "write",
-                "metadata": "read",
-            },
-        },
-    )
+    try:
+        minted = github(
+            "POST",
+            f"https://api.github.com/app/installations/{installation_id}/access_tokens",
+            jwt,
+            {"repositories": [NAME], "permissions": TOKEN_PERMISSIONS},
+        )
+    except LoopError as error:
+        if "not granted to this installation" in str(error):
+            raise LoopError(
+                "implementer installation is missing Workflows: Read and write. "
+                "Grant it on the GitHub App and accept it for this repository"
+            ) from error
+        raise
     token = minted.get("token")
     if not isinstance(token, str) or not token:
         raise LoopError("GitHub did not return an installation token")
@@ -364,6 +375,35 @@ def git_run(
     )
 
 
+def git_failure_line(text: str, limit: int = 300) -> str:
+    """One log line with the git failure, including the remote rejection reason.
+
+    `git push` prints `To https://…` before `! [rejected]` or `! [remote rejected]`.
+    The first line is only the remote URL, so a log that keeps that line hides
+    the hook or ruleset that actually declined the update.
+    """
+    lines = [line.strip() for line in normalized(text).splitlines() if line.strip()]
+    useful = [
+        line
+        for line in lines
+        if line.startswith(("fatal:", "error:", "remote:", "! [rejected]", "! [remote rejected]"))
+        and line != "remote:"
+    ]
+    if not useful:
+        useful = [line for line in lines if not line.startswith("To ")] or lines[:1]
+    rejections = [line for line in useful if line.startswith("! [")]
+    others = [line for line in useful if not line.startswith("! [")]
+    message = " ".join([*rejections, *others])
+    if len(message) <= limit:
+        return message or "git failed"
+    reason = " ".join(rejections)
+    if reason and len(reason) <= limit:
+        return reason
+    if reason:
+        return reason[-limit:]
+    return message[:limit]
+
+
 def git(
     repo: Path,
     args: list[str],
@@ -377,7 +417,7 @@ def git(
         if resolved:
             secrets.append(base64.b64encode(f"x-access-token:{resolved}".encode()).decode())
         message = redact((result.stderr or result.stdout).strip(), secrets)
-        raise LoopError(message.splitlines()[0][:300] if message else "git failed")
+        raise LoopError(git_failure_line(message) if message else "git failed")
     return result.stdout.strip()
 
 
@@ -2495,6 +2535,15 @@ None.
         or text.find("add the e2e spec") > text.find("seed the admin too")
     ):
         raise SystemExit("head feedback ignored a newer comment")
+    rejection = (
+        "To https://github.com/neraant/Snapbug.git\n"
+        " ! [remote rejected] feat/P-03 -> feat/P-03 (protected branch hook declined)"
+    )
+    failure = git_failure_line(rejection)
+    if "protected branch hook declined" not in failure or failure.startswith("To https://"):
+        raise SystemExit("git rejection hidden")
+    if TOKEN_PERMISSIONS.get("workflows") != "write" or TOKEN_PERMISSIONS.get("contents") != "write":
+        raise SystemExit("token permissions")
     print("self-check ok")
 
 
