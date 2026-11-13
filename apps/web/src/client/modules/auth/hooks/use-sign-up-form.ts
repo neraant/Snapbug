@@ -3,6 +3,7 @@ import { toast } from "@workspace/design-system/components/ui/toast";
 import { getAppErrorMessage } from "@workspace/server/error/get-app-error-message";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { texts } from "@/client/modules/auth/consts/texts.const";
@@ -21,6 +22,11 @@ export function useSignUpForm({ invitationToken, defaultEmail = "" }: UseSignUpF
   const router = useRouter();
   const { mutateAsync: signUp } = useSignUp();
   const { mutateAsync: acceptInvitation } = useAcceptInvitation();
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
   const form = useForm<SignUpSchemaType>({
     resolver: zodResolver(signUpSchema),
     defaultValues: { email: defaultEmail, name: "", password: "" },
@@ -62,6 +68,7 @@ export function useSignUpForm({ invitationToken, defaultEmail = "" }: UseSignUpF
 
   return {
     ...form,
+    hydrated,
     onSubmit: form.handleSubmit(onSubmit),
   };
 }

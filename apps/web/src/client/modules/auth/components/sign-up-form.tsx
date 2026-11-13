@@ -53,7 +53,7 @@ type SignUpFormFieldsInternalProps = SignUpFormFieldsProps & {
 };
 
 function SignUpFormFields({ invitationToken, defaultEmail = "", organizationName }: SignUpFormFieldsInternalProps) {
-  const { control, onSubmit, formState } = useSignUpForm({
+  const { control, hydrated, onSubmit, formState } = useSignUpForm({
     invitationToken,
     defaultEmail,
   });
@@ -88,7 +88,7 @@ function SignUpFormFields({ invitationToken, defaultEmail = "", organizationName
           placeholder={texts.field.password.placeholder}
           autoComplete="new-password"
         />
-        <SubmitButton loading={formState.isSubmitting} size="lg" className="w-full">
+        <SubmitButton disabled={!hydrated} loading={formState.isSubmitting} size="lg" className="w-full">
           {texts.signUp.submit}
         </SubmitButton>
       </FieldGroup>
