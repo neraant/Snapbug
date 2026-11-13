@@ -4,12 +4,14 @@ import { invitationContract } from "@workspace/server/modules/invitation/invitat
 import { authedMiddleware } from "@workspace/server/shared/orpc/authed.middleware";
 import type { OrpcContext } from "@workspace/server/shared/orpc/context.const";
 import { mapAppErrorMiddleware } from "@workspace/server/shared/orpc/map-app-error.middleware";
+import { adminMiddleware } from "@workspace/server/shared/orpc/require-role.middleware";
 
 const os = implement(invitationContract).$context<OrpcContext>().use(mapAppErrorMiddleware);
 const authed = os.use(authedMiddleware);
+const admin = authed.use(adminMiddleware);
 
 export const invitationRouter = os.router({
-  sendInvitations: authed.sendInvitations.handler(
+  sendInvitations: admin.sendInvitations.handler(
     async ({ input, context }) =>
       await container.invitation.sendInvitations.execute(input, context.user.id, context.user.email),
   ),

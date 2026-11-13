@@ -1,17 +1,13 @@
-import { Row } from "@workspace/design-system/components/layout/row";
-import { Button } from "@workspace/design-system/components/ui/button";
 import { Code } from "@workspace/design-system/components/ui/code";
 import { Panel } from "@workspace/design-system/components/ui/panel";
 import { SegmentedControl } from "@workspace/design-system/components/ui/segmented-control";
 import { Skeleton } from "@workspace/design-system/components/ui/skeleton";
 import { Typography } from "@workspace/design-system/components/ui/typography";
-import { EyeIcon, EyeOffIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { texts } from "@/client/modules/sdk-setup/consts/texts.const";
 import {
   buildSdkSetupInitSnippet,
-  buildSdkSetupInitSnippetForCopy,
   type SdkSetupInitTab,
 } from "@/client/modules/sdk-setup/utils/build-sdk-setup-snippet.util";
 import { useFindProjectApiKey } from "@/client/modules/shared/queries/use-find-project-api-key";
@@ -27,7 +23,6 @@ export function SdkSetupInitCard({ projectId }: SdkSetupInitCardProps) {
   const { data: apiKeyData } = useFindProjectApiKey({ projectId });
   const { data: widgetSettings } = useFindProjectWidgetSetting({ projectId });
   const [tab, setTab] = useState<SdkSetupInitTab>("react");
-  const [revealKey, setRevealKey] = useState(false);
 
   const items = useMemo(
     () =>
@@ -41,15 +36,9 @@ export function SdkSetupInitCard({ projectId }: SdkSetupInitCardProps) {
   const code = buildSdkSetupInitSnippet({
     tab,
     apiKey: apiKeyData.key,
-    revealKey,
     widgetSettings,
   });
   const panelTitle = tab === "next" ? texts.init.panelTitle.next : texts.init.panelTitle.react;
-  const copyText = buildSdkSetupInitSnippetForCopy({
-    tab,
-    apiKey: apiKeyData.key,
-    widgetSettings,
-  });
 
   return (
     <Panel id="step-init">
@@ -57,24 +46,13 @@ export function SdkSetupInitCard({ projectId }: SdkSetupInitCardProps) {
         title={texts.init.title}
         description={texts.init.description}
         action={
-          <Row align="center" gap="sm">
-            <Button
-              type="button"
-              variant="muted"
-              size="icon-sm"
-              aria-label={revealKey ? texts.init.maskKey : texts.init.revealKey}
-              onClick={() => setRevealKey((current) => !current)}
-            >
-              {revealKey ? <EyeOffIcon /> : <EyeIcon />}
-            </Button>
-            <SegmentedControl
-              size="sm"
-              aria-label={texts.init.title}
-              value={tab}
-              items={items}
-              onValueChange={(value) => setTab(value as SdkSetupInitTab)}
-            />
-          </Row>
+          <SegmentedControl
+            size="sm"
+            aria-label={texts.init.title}
+            value={tab}
+            items={items}
+            onValueChange={(value) => setTab(value as SdkSetupInitTab)}
+          />
         }
       />
       <Panel.Content gap="md">
@@ -82,7 +60,7 @@ export function SdkSetupInitCard({ projectId }: SdkSetupInitCardProps) {
         <Code
           title={panelTitle}
           code={code}
-          copyText={copyText}
+          copyText={code}
           copyLabel={texts.install.copy}
           copiedLabel={texts.install.copied}
         />

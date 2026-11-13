@@ -15,6 +15,10 @@ export class ApiKey {
     this.revokedAt = apiKey.revokedAt;
   }
 
+  revoke(revokedAt: Date): ApiKey {
+    return new ApiKey({ ...this.toObject(), revokedAt });
+  }
+
   toObject(): ApiKeyPersistedType {
     return {
       id: this.id,

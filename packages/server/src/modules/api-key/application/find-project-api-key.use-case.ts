@@ -39,8 +39,8 @@ export class FindProjectApiKeyUseCase {
     const [allowedProjectId] = await this.membershipPort.filterProjectIds(membership, [project.id]);
     if (!allowedProjectId) throw new NotFoundError(ERROR_CODES.PROJECT_NOT_FOUND);
 
-    let apiKey = await this.apiKeyRepository.findActiveByProjectId(project.id);
-    if (!apiKey) {
+    const activeApiKey = await this.apiKeyRepository.findActiveByProjectId(project.id);
+    if (!activeApiKey) {
       const createdApiKey = ApiKeyFactory.create(project.id);
       await this.withTransaction(async (tx) => {
         await this.apiKeyService
@@ -48,9 +48,9 @@ export class FindProjectApiKeyUseCase {
           .withActor({ type: "user", id: userId })
           .saveWithAudit(createdApiKey, "Create API key");
       });
-      apiKey = createdApiKey;
+      return ApiKeyMapper.toProjectApiKeyDto(createdApiKey);
     }
 
-    return ApiKeyMapper.toProjectApiKeyDto(apiKey);
+    return ApiKeyMapper.toProjectApiKeyDto(activeApiKey);
   }
 }

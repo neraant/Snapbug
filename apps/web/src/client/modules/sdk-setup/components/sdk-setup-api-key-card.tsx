@@ -1,15 +1,12 @@
-import { Row } from "@workspace/design-system/components/layout/row";
-import { Button } from "@workspace/design-system/components/ui/button";
 import { Code } from "@workspace/design-system/components/ui/code";
-import { CopyButton } from "@workspace/design-system/components/ui/copy-button";
 import { Panel } from "@workspace/design-system/components/ui/panel";
 import { Skeleton } from "@workspace/design-system/components/ui/skeleton";
 import { Typography } from "@workspace/design-system/components/ui/typography";
-import { useCopyText } from "@workspace/design-system/hooks/use-copy-text";
-import { EyeIcon, EyeOffIcon } from "lucide-react";
-import { useState } from "react";
+import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
 
+import { SdkSetupRotateApiKeyDialog } from "@/client/modules/sdk-setup/components/sdk-setup-rotate-api-key-dialog";
 import { texts } from "@/client/modules/sdk-setup/consts/texts.const";
+import { useFindMembershipByUser } from "@/client/modules/shared/queries/use-find-membership-by-user";
 import { useFindProjectApiKey } from "@/client/modules/shared/queries/use-find-project-api-key";
 
 type SdkSetupApiKeyCardProps = {
@@ -18,10 +15,9 @@ type SdkSetupApiKeyCardProps = {
 
 export function SdkSetupApiKeyCard({ projectId }: SdkSetupApiKeyCardProps) {
   const { data } = useFindProjectApiKey({ projectId });
-  const [visible, setVisible] = useState(false);
-  const { copied, copy } = useCopyText();
+  const { data: membership } = useFindMembershipByUser();
+  const isAdmin = membership?.role === UserRole.ADMIN;
 
-  const maskedKey = data.key.replace(/.(?=.{4})/g, "•");
   const createdLabel = new Date(data.createdAt).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
@@ -32,31 +28,11 @@ export function SdkSetupApiKeyCard({ projectId }: SdkSetupApiKeyCardProps) {
     <Panel>
       <Panel.Header
         title={texts.apiKey.title}
-        action={
-          <Row align="center" gap="sm" wrap={false}>
-            <Button
-              type="button"
-              variant="muted"
-              size="icon-sm"
-              aria-label={visible ? texts.apiKey.hide : texts.apiKey.show}
-              onClick={() => setVisible((current) => !current)}
-            >
-              {visible ? <EyeOffIcon /> : <EyeIcon />}
-            </Button>
-            <CopyButton
-              copied={copied}
-              onCopy={() => copy(data.key)}
-              copyLabel={texts.apiKey.copy}
-              copiedLabel={texts.apiKey.copied}
-              variant="muted"
-              size="sm"
-            />
-          </Row>
-        }
+        action={isAdmin ? <SdkSetupRotateApiKeyDialog projectId={projectId} /> : undefined}
       />
       <Panel.Content gap="md">
-        <Code code={visible ? data.key : maskedKey} showCopy={false} />
-        {/* TODO: Regenerate key modal and last-used metadata */}
+        <Code code={data.key} showCopy={false} />
+        {/* TODO: last-used metadata */}
         <Typography variant="text-xs" color="muted">
           {texts.apiKey.created(createdLabel)}
         </Typography>

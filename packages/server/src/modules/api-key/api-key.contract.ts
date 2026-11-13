@@ -8,6 +8,10 @@ import {
   findProjectByKeyInputDtoSchema,
   findProjectByKeyOutputDtoSchema,
 } from "@workspace/validation/modules/api-key/dto/find-project-by-key.schema";
+import {
+  rotateProjectApiKeyInputDtoSchema,
+  rotateProjectApiKeyOutputDtoSchema,
+} from "@workspace/validation/modules/api-key/dto/rotate-project-api-key.schema";
 
 export const apiKeyContract = {
   findProjectByKey: oc
@@ -22,6 +26,16 @@ export const apiKeyContract = {
       path: "/api-keys/project-key",
       tags: ["api-key"],
       summary: "Find project API key",
+      spec: sessionAuthSpec,
+    }),
+  rotateProjectApiKey: oc
+    .input(rotateProjectApiKeyInputDtoSchema)
+    .output(rotateProjectApiKeyOutputDtoSchema)
+    .route({
+      method: "POST",
+      path: "/api-keys/rotate",
+      tags: ["api-key"],
+      summary: "Rotate project API key",
       spec: sessionAuthSpec,
     }),
 };

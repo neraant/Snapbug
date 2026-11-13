@@ -62,6 +62,10 @@ function PlaygroundSnapbugScoped({ projectId }: PlaygroundSnapbugScopedProps) {
   const widgetOptions = useMemo(() => buildSnapbugWidgetInitOptions(widgetSettings), [widgetSettings]);
 
   useEffect(() => {
+    if (apiKeyData.key.includes("\u2022")) {
+      return;
+    }
+
     snapbug.init({
       apiKey: apiKeyData.key,
       host: window.location.origin,

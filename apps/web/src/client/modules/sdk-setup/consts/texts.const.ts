@@ -23,8 +23,6 @@ export const texts = {
   init: {
     title: "2. Initialize the widget",
     description: "Paste into your application root. Use your project API key and ingestion host.",
-    revealKey: "Reveal key",
-    maskKey: "Mask key",
     tip: "Call snapbug.init once during client-side hydration. No server-side runtime code is required.",
     tabs: {
       react: "React",
@@ -40,9 +38,16 @@ export const texts = {
     label: "Public Ingestion Key",
     copy: "Copy",
     copied: "Copied",
-    show: "Show",
-    hide: "Hide",
     created: (date: string) => `Created: ${date}`,
+    rotate: "Rotate key",
+    rotateTitle: "Rotate project key",
+    rotateDescription: "This issues a new key and stops the previous key immediately.",
+    confirm: "Rotate key",
+    cancel: "Cancel",
+    revealedTitle: "New project key",
+    revealedDescription: "Copy this key into your app. It is shown here once. The previous key has stopped working.",
+    close: "Done",
+    rotateError: "Could not rotate the project key. Please try again.",
   },
   widgetSettings: {
     title: "Widget settings",
@@ -87,6 +92,7 @@ export const texts = {
       georgia: "Georgia",
       monospace: "Mono",
     },
+    domainsAndMaskingAdmin: "Only an administrator can change domains and masking.",
     allowedDomains: {
       label: "Allowed domains",
       description: "Hosts that may submit bug reports from the widget. Leave empty to allow any origin.",
