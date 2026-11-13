@@ -8,6 +8,7 @@ import { GrantMembershipProjectsUseCase } from "@workspace/server/modules/member
 import { GrantProjectToMembersUseCase } from "@workspace/server/modules/membership/application/grant-project-to-members.use-case";
 import type { MembershipRepository } from "@workspace/server/modules/membership/repository/membership.repository";
 import type { ProjectAccessRepository } from "@workspace/server/modules/membership/repository/project-access.repository";
+import type { MembershipService } from "@workspace/server/modules/membership/service/membership.service";
 import type { ProjectAccessService } from "@workspace/server/modules/membership/service/project-access.service";
 import type { MembershipPort as OrganizationMembershipPort } from "@workspace/server/modules/organization/port/membership.port";
 import type {
@@ -34,11 +35,12 @@ export class MembershipAdapter implements OrganizationMembershipPort {
     private readonly membershipRepository: MembershipRepository,
     private readonly projectAccessRepository: ProjectAccessRepository,
     private readonly projectAccessService: ProjectAccessService,
+    private readonly membershipService: MembershipService,
   ) {
     this.findMembership = new FindMembershipUseCase(membershipRepository);
     this.findMembershipsByUser = new FindMembershipsByUserUseCase(membershipRepository);
     this.findMembershipsByOrganization = new FindMembershipsByOrganizationUseCase(membershipRepository);
-    this.createMembership = new CreateMembershipUseCase(membershipRepository);
+    this.createMembership = new CreateMembershipUseCase(membershipRepository, membershipService);
     this.filterProjectIdsUseCase = new FilterProjectIdsUseCase(projectAccessRepository);
     this.grantProjectToMembersUseCase = new GrantProjectToMembersUseCase(
       membershipRepository,
@@ -56,6 +58,7 @@ export class MembershipAdapter implements OrganizationMembershipPort {
       this.membershipRepository.withTx(tx as DbClient),
       this.projectAccessRepository.withTx(tx as DbClient),
       this.projectAccessService.withTx(tx as DbClient),
+      this.membershipService.withTx(tx as DbClient),
     );
   }
 

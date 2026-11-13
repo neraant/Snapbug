@@ -1,6 +1,6 @@
 import type { DbClient } from "@workspace/database";
 import { db as defaultDb } from "@workspace/database";
-import { auditLogTable } from "@workspace/database/schema";
+import { auditLogTable, projectTable } from "@workspace/database/schema";
 import type { AuditLog } from "@workspace/server/shared/audit/audit-log.entity";
 import { AuditLogMapper } from "@workspace/server/shared/audit/audit-log.mapper";
 import type { OpenMetricsAtInstant } from "@workspace/server/shared/audit/audit-log.types";
@@ -8,7 +8,7 @@ import { InternalServerError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import { BugReportSeverity } from "@workspace/validation/modules/bug-report/consts/bug-report-severity.const";
 import { BugReportStatus } from "@workspace/validation/modules/bug-report/consts/bug-report-status.const";
-import { and, asc, eq, inArray, lte } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, lte } from "drizzle-orm";
 
 const BUG_REPORT_ENTITY_TYPE = "bug-report";
 const openStatuses = new Set<string>([BugReportStatus.NEW, BugReportStatus.IN_PROGRESS]);
@@ -24,6 +24,26 @@ export class AuditLogRepository {
 
   withTx(tx: DbClient): AuditLogRepository {
     return new AuditLogRepository(tx);
+  }
+
+  async findOrganizationIdByProjectId(projectId: string): Promise<string | null> {
+    const [row] = await this.db
+      .select({ organizationId: projectTable.organizationId })
+      .from(projectTable)
+      .where(eq(projectTable.id, projectId));
+
+    return row?.organizationId ?? null;
+  }
+
+  async findManyByOrganizationId(organizationId: string): Promise<AuditLog[]> {
+    const rows = await this.db
+      .select()
+      .from(auditLogTable)
+      .where(eq(auditLogTable.organizationId, organizationId))
+      .orderBy(desc(auditLogTable.occurredAt), desc(auditLogTable.id))
+      .limit(100);
+
+    return rows.map((row) => AuditLogMapper.fromPersistence(row));
   }
 
   async append(auditLog: AuditLog): Promise<void> {

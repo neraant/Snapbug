@@ -1,5 +1,6 @@
 import { MembershipMapper } from "@workspace/server/modules/membership/entity/membership.mapper";
 import type { MembershipRepository } from "@workspace/server/modules/membership/repository/membership.repository";
+import type { MembershipService } from "@workspace/server/modules/membership/service/membership.service";
 import { ForbiddenError, NotFoundError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import type {
@@ -9,7 +10,10 @@ import type {
 import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
 
 export class RemoveMembershipUseCase {
-  constructor(private readonly membershipRepository: MembershipRepository) {}
+  constructor(
+    private readonly membershipRepository: MembershipRepository,
+    private readonly membershipService: MembershipService,
+  ) {}
 
   async execute(
     input: RemoveMembershipInputDtoType,
@@ -33,7 +37,9 @@ export class RemoveMembershipUseCase {
       throw new ForbiddenError(ERROR_CODES.LAST_ADMIN_REQUIRED, "The organization must keep at least one admin");
     }
 
-    await this.membershipRepository.delete(membership);
+    await this.membershipService
+      .withActor({ type: "user", id: currentUserId })
+      .deleteWithAudit(membership, "Remove membership");
 
     return MembershipMapper.toDto(membership);
   }

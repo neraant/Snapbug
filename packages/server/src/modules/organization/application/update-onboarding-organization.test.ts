@@ -4,6 +4,7 @@ import { OrganizationMapper } from "@workspace/server/modules/organization/entit
 import type { MembershipPort } from "@workspace/server/modules/organization/port/membership.port";
 import type { UserPort } from "@workspace/server/modules/organization/port/user.port";
 import type { OrganizationRepository } from "@workspace/server/modules/organization/repository/organization.repository";
+import type { OrganizationService } from "@workspace/server/modules/organization/service/organization.service";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
 import { describe, expect, it, vi } from "vitest";
@@ -37,18 +38,20 @@ describe("UpdateOnboardingOrganizationUseCase", () => {
     const membershipPort = { findByUserAndOrganization: vi.fn().mockResolvedValue(membership) };
     const organizationRepository = {
       findById: vi.fn().mockResolvedValue(existingOrganization),
-      save: vi.fn().mockResolvedValue(undefined),
     };
+    const saveWithAudit = vi.fn().mockResolvedValue(undefined);
+    const organizationService = { withActor: vi.fn().mockReturnValue({ saveWithAudit }) };
     const useCase = new UpdateOnboardingOrganizationUseCase(
       userPort as unknown as UserPort,
       membershipPort as unknown as MembershipPort,
       organizationRepository as unknown as OrganizationRepository,
+      organizationService as unknown as OrganizationService,
     );
 
     const result = await useCase.execute({ organizationId, name: "Acme Labs" }, userId);
 
-    expect(organizationRepository.save).toHaveBeenCalledOnce();
-    const saved = organizationRepository.save.mock.calls[0]?.[0];
+    expect(saveWithAudit).toHaveBeenCalledOnce();
+    const saved = saveWithAudit.mock.calls[0]?.[0];
     expect(saved.name).toBe("Acme Labs");
     expect(result).toEqual(OrganizationMapper.toDto(saved));
   });
@@ -62,10 +65,12 @@ describe("UpdateOnboardingOrganizationUseCase", () => {
     };
     const membershipPort = { findByUserAndOrganization: vi.fn() };
     const organizationRepository = { findById: vi.fn(), save: vi.fn() };
+    const saveWithAudit = vi.fn();
     const useCase = new UpdateOnboardingOrganizationUseCase(
       userPort as unknown as UserPort,
       membershipPort as unknown as MembershipPort,
       organizationRepository as unknown as OrganizationRepository,
+      { withActor: vi.fn().mockReturnValue({ saveWithAudit }) } as unknown as OrganizationService,
     );
 
     await expect(useCase.execute({ organizationId, name: "Acme Labs" }, userId)).rejects.toMatchObject({
@@ -74,7 +79,7 @@ describe("UpdateOnboardingOrganizationUseCase", () => {
 
     expect(membershipPort.findByUserAndOrganization).not.toHaveBeenCalled();
     expect(organizationRepository.findById).not.toHaveBeenCalled();
-    expect(organizationRepository.save).not.toHaveBeenCalled();
+    expect(saveWithAudit).not.toHaveBeenCalled();
   });
 
   it("rejects a user who does not belong to the organization without saving", async () => {
@@ -85,10 +90,12 @@ describe("UpdateOnboardingOrganizationUseCase", () => {
     };
     const membershipPort = { findByUserAndOrganization: vi.fn().mockResolvedValue(null) };
     const organizationRepository = { findById: vi.fn(), save: vi.fn() };
+    const saveWithAudit = vi.fn();
     const useCase = new UpdateOnboardingOrganizationUseCase(
       userPort as unknown as UserPort,
       membershipPort as unknown as MembershipPort,
       organizationRepository as unknown as OrganizationRepository,
+      { withActor: vi.fn().mockReturnValue({ saveWithAudit }) } as unknown as OrganizationService,
     );
 
     await expect(useCase.execute({ organizationId, name: "Acme Labs" }, userId)).rejects.toMatchObject({
@@ -96,6 +103,6 @@ describe("UpdateOnboardingOrganizationUseCase", () => {
     });
 
     expect(organizationRepository.findById).not.toHaveBeenCalled();
-    expect(organizationRepository.save).not.toHaveBeenCalled();
+    expect(saveWithAudit).not.toHaveBeenCalled();
   });
 });

@@ -2,7 +2,7 @@ import { OrganizationFactory } from "@workspace/server/modules/organization/enti
 import { OrganizationMapper } from "@workspace/server/modules/organization/entity/organization.mapper";
 import type { MembershipPort } from "@workspace/server/modules/organization/port/membership.port";
 import type { ProjectPort } from "@workspace/server/modules/organization/port/project.port";
-import type { OrganizationRepository } from "@workspace/server/modules/organization/repository/organization.repository";
+import type { OrganizationService } from "@workspace/server/modules/organization/service/organization.service";
 import type {
   CreateOrganizationInputDtoType,
   CreateOrganizationOutputDtoType,
@@ -13,7 +13,7 @@ const DEFAULT_PROJECT_NAME = "Default project";
 
 export class CreateOrganizationUseCase {
   constructor(
-    private readonly organizationRepository: OrganizationRepository,
+    private readonly organizationService: OrganizationService,
     private readonly membershipPort: MembershipPort,
     private readonly projectPort: ProjectPort,
   ) {}
@@ -25,7 +25,9 @@ export class CreateOrganizationUseCase {
         reports_retention_days: input.reports_retention_days,
       }),
     });
-    await this.organizationRepository.save(organization);
+    await this.organizationService
+      .withActor({ type: "user", id: userId })
+      .saveWithAudit(organization, "Create organization");
 
     await this.membershipPort.create({ organizationId: organization.id }, userId);
     const project = await this.projectPort.create(

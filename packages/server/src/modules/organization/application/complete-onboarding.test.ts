@@ -3,7 +3,7 @@ import type { FindOnboardingUseCase } from "@workspace/server/modules/organizati
 import type { MembershipPort } from "@workspace/server/modules/organization/port/membership.port";
 import type { ProjectPort } from "@workspace/server/modules/organization/port/project.port";
 import type { UserPort } from "@workspace/server/modules/organization/port/user.port";
-import type { OrganizationRepository } from "@workspace/server/modules/organization/repository/organization.repository";
+import type { OrganizationService } from "@workspace/server/modules/organization/service/organization.service";
 import type { WithTransactionType } from "@workspace/server/shared/database/transaction.util";
 import { describe, expect, it, vi } from "vitest";
 
@@ -32,7 +32,7 @@ describe("CompleteOnboardingUseCase", () => {
     const useCase = new CompleteOnboardingUseCase(
       userPort as unknown as UserPort,
       membershipPort as unknown as MembershipPort,
-      { withTx: vi.fn() } as unknown as OrganizationRepository,
+      { withTx: vi.fn() } as unknown as OrganizationService,
       { withTx: vi.fn() } as unknown as ProjectPort,
       findOnboarding as unknown as FindOnboardingUseCase,
       withTransaction as unknown as WithTransactionType,
@@ -45,7 +45,7 @@ describe("CompleteOnboardingUseCase", () => {
   });
 
   it("provisions a workspace and marks onboarding complete inside a transaction", async () => {
-    const organizationRepository = { save: vi.fn().mockResolvedValue(undefined) };
+    const saveWithAudit = vi.fn().mockResolvedValue(undefined);
     const membershipInTx = { create: vi.fn().mockResolvedValue({}) };
     const projectInTx = { create: vi.fn().mockResolvedValue({}), findManyByOrganizationId: vi.fn() };
     const userInTx = { markOnboardingComplete: vi.fn().mockResolvedValue(undefined) };
@@ -58,7 +58,9 @@ describe("CompleteOnboardingUseCase", () => {
       withTx: vi.fn().mockReturnValue(membershipInTx),
     };
     const projectPort = { withTx: vi.fn().mockReturnValue(projectInTx) };
-    const repository = { withTx: vi.fn().mockReturnValue(organizationRepository) };
+    const repository = {
+      withTx: vi.fn().mockReturnValue({ withActor: vi.fn().mockReturnValue({ saveWithAudit }) }),
+    };
     const findOnboarding = {
       execute: vi.fn().mockResolvedValue({ ...snapshot, completedAt: new Date("2026-10-06T09:00:00.000Z") }),
     };
@@ -66,7 +68,7 @@ describe("CompleteOnboardingUseCase", () => {
     const useCase = new CompleteOnboardingUseCase(
       userPort as unknown as UserPort,
       membershipPort as unknown as MembershipPort,
-      repository as unknown as OrganizationRepository,
+      repository as unknown as OrganizationService,
       projectPort as unknown as ProjectPort,
       findOnboarding as unknown as FindOnboardingUseCase,
       withTransaction as unknown as WithTransactionType,
@@ -75,8 +77,8 @@ describe("CompleteOnboardingUseCase", () => {
     await useCase.execute({ organizationName: "Acme Labs", projectName: "Store" }, userId, null);
 
     expect(repository.withTx).toHaveBeenCalledWith(tx);
-    expect(organizationRepository.save).toHaveBeenCalledOnce();
-    const savedOrganization = organizationRepository.save.mock.calls[0]?.[0];
+    expect(saveWithAudit).toHaveBeenCalledOnce();
+    const savedOrganization = saveWithAudit.mock.calls[0]?.[0];
     expect(savedOrganization.name).toBe("Acme Labs");
     expect(membershipInTx.create).toHaveBeenCalledOnce();
     expect(projectInTx.create).toHaveBeenCalledWith(expect.objectContaining({ name: "Store" }), userId);
@@ -85,7 +87,7 @@ describe("CompleteOnboardingUseCase", () => {
   });
 
   it("creates a project when the user already has an organization", async () => {
-    const organizationRepository = { save: vi.fn() };
+    const saveWithAudit = vi.fn();
     const projectInTx = {
       create: vi.fn().mockResolvedValue({}),
       findManyByOrganizationId: vi.fn().mockResolvedValue([]),
@@ -102,13 +104,15 @@ describe("CompleteOnboardingUseCase", () => {
       withTx: vi.fn().mockReturnValue(membershipInTx),
     };
     const projectPort = { withTx: vi.fn().mockReturnValue(projectInTx) };
-    const repository = { withTx: vi.fn().mockReturnValue(organizationRepository) };
+    const repository = {
+      withTx: vi.fn().mockReturnValue({ withActor: vi.fn().mockReturnValue({ saveWithAudit }) }),
+    };
     const findOnboarding = { execute: vi.fn().mockResolvedValue(snapshot) };
     const withTransaction = vi.fn(async (callback) => await callback(tx));
     const useCase = new CompleteOnboardingUseCase(
       userPort as unknown as UserPort,
       membershipPort as unknown as MembershipPort,
-      repository as unknown as OrganizationRepository,
+      repository as unknown as OrganizationService,
       projectPort as unknown as ProjectPort,
       findOnboarding as unknown as FindOnboardingUseCase,
       withTransaction as unknown as WithTransactionType,
@@ -116,7 +120,7 @@ describe("CompleteOnboardingUseCase", () => {
 
     await useCase.execute({ projectName: "Checkout" }, userId, organizationId);
 
-    expect(organizationRepository.save).not.toHaveBeenCalled();
+    expect(saveWithAudit).not.toHaveBeenCalled();
     expect(projectInTx.create).toHaveBeenCalledWith(
       expect.objectContaining({ organizationId, name: "Checkout" }),
       userId,
@@ -125,7 +129,7 @@ describe("CompleteOnboardingUseCase", () => {
   });
 
   it("marks onboarding complete without creating a workspace when the user already belongs to an organization", async () => {
-    const organizationRepository = { save: vi.fn() };
+    const saveWithAudit = vi.fn();
     const membershipInTx = {
       create: vi.fn(),
       findByUserAndOrganization: vi.fn().mockResolvedValue({ organizationId }),
@@ -144,13 +148,15 @@ describe("CompleteOnboardingUseCase", () => {
       withTx: vi.fn().mockReturnValue(membershipInTx),
     };
     const projectPort = { withTx: vi.fn().mockReturnValue(projectInTx) };
-    const repository = { withTx: vi.fn().mockReturnValue(organizationRepository) };
+    const repository = {
+      withTx: vi.fn().mockReturnValue({ withActor: vi.fn().mockReturnValue({ saveWithAudit }) }),
+    };
     const findOnboarding = { execute: vi.fn().mockResolvedValue(snapshot) };
     const withTransaction = vi.fn(async (callback) => await callback(tx));
     const useCase = new CompleteOnboardingUseCase(
       userPort as unknown as UserPort,
       membershipPort as unknown as MembershipPort,
-      repository as unknown as OrganizationRepository,
+      repository as unknown as OrganizationService,
       projectPort as unknown as ProjectPort,
       findOnboarding as unknown as FindOnboardingUseCase,
       withTransaction as unknown as WithTransactionType,
@@ -158,7 +164,7 @@ describe("CompleteOnboardingUseCase", () => {
 
     await useCase.execute({ organizationName: "Personal" }, userId, null);
 
-    expect(organizationRepository.save).not.toHaveBeenCalled();
+    expect(saveWithAudit).not.toHaveBeenCalled();
     expect(membershipInTx.create).not.toHaveBeenCalled();
     expect(projectInTx.create).not.toHaveBeenCalled();
     expect(userInTx.markOnboardingComplete).toHaveBeenCalledWith(userId);
