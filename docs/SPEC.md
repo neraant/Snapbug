@@ -69,6 +69,8 @@ Marks: **test** — already covered by the named test; **needs a test**; **judgm
 | AC-40 | A failed request returns the real status the application throws, including 400, 401, 403, 404, 500, and any other real code. The product does not present every failure as one static 500 page                                                                                                      | needs a test (the error screen always shows 500)                                                       |
 | AC-41 | Comments are at the bottom of the ticket card. Each comment shows who wrote it, when, and the text. The author can edit and delete their own comment. Another member cannot                                                                                                                                 | needs a test                                                                                           |
 | AC-42 | An MCP user token is created with a name. The member's list shows that name, when the token was created, and revoke. The secret is shown once and stored as a hash                                                                                                                                  | needs a test                                                                                           |
+| AC-43 | The activity log table uses the same layout, type, and components as the other dashboard screens and `@workspace/design-system`. The recorded facts do not change                                                                                                                                   | judgment                                                                                               |
+| AC-44 | The settings screen uses the same layout, type, and components as the other dashboard screens and `@workspace/design-system`. The settings themselves do not change                                                                                                                                | judgment                                                                                               |
 
 The path SDK → form → ingest → ticket in the dashboard is not covered by its own test. It is a check for AC-08 and AC-20 together. It has no id of its own until there is one verifiable run.
 
@@ -98,6 +100,8 @@ Retired id; do not reuse: AC-19.
 20. Error responses surface the real status the application throws (400, 401, 403, 404, 500, and any other real code). One static 500 page is not the only error. That is P-24.
 21. Ticket comments sit at the bottom of the card. The thread shows the author, the time, and the text. The author can edit and delete their own comment. That is P-25.
 22. An MCP user token has a name chosen at creation. The list shows the name, when it was created, and revoke. The secret is shown once and stored as a hash. That is P-26. `docker compose` starts Postgres only, not the app.
+23. The activity page table is brought in line with the current dashboard and `@workspace/design-system`. The reference is those existing screens, not a new visual language. What the log records does not change. That is P-27.
+24. The settings screen is brought in line with the current dashboard and `@workspace/design-system`. The reference is those existing screens, not a new visual language. Which settings exist does not change. That is P-28.
 
 ## Description and code
 
