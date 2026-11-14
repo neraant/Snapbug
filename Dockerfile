@@ -19,9 +19,25 @@ RUN pnpm install --frozen-lockfile
 
 COPY . .
 
+# `next build` imports the server container, which parses these immediately.
+ARG DATABASE_URL=postgres://postgres:postgres@postgres:5432/snapbug
+ARG AUTH_SECRET=dev-auth-secret-change-me
+ARG RESEND_API_KEY=re_local_placeholder
+ARG EMAIL_FROM=noreply@snapbug.com
+ARG NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+ENV DATABASE_URL=$DATABASE_URL \
+    AUTH_SECRET=$AUTH_SECRET \
+    RESEND_API_KEY=$RESEND_API_KEY \
+    EMAIL_FROM=$EMAIL_FROM \
+    NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL \
+    NODE_ENV=production
+
 RUN pnpm --filter @workspace/web build
 
-ENV NODE_ENV=production
 EXPOSE 3000
 
-CMD ["pnpm", "--filter", "@workspace/web", "start"]
+COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]

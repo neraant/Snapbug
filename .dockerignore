@@ -2,5 +2,9 @@ node_modules
 **/.next
 .git
 .data
+.env
+.env.*
+**/.env
+**/.env.*
 e2e/test-results
 e2e/playwright-report

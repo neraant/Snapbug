@@ -19,6 +19,12 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        DATABASE_URL: postgres://postgres:postgres@postgres:5432/snapbug
+        AUTH_SECRET: ${AUTH_SECRET:-dev-auth-secret-change-me}
+        RESEND_API_KEY: ${RESEND_API_KEY:-re_local_placeholder}
+        EMAIL_FROM: ${EMAIL_FROM:-noreply@snapbug.com}
+        NEXT_PUBLIC_APP_URL: http://localhost:3000
     ports:
       - 3000:3000
     environment:
