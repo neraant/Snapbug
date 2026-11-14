@@ -23,17 +23,17 @@ Do not start tasks marked TBD: an implementer agent must not take them.
 - A playground screen exists (`apps/web/src/app/(app)/playground`) and stays in the product.
 - Audit of some changes to a project, a key, a ticket, and project access: `packages/server/src/shared/audit`.
 - Postgres in `docker-compose.yaml`. Drizzle migrations in `packages/database/src/migration`. Seed of text tickets: `packages/database/src/seed`.
-- P-10 screenshot and replay files in the seed, stored in Blob.
 - Retention is one organization column, `reports_retention_days`. There is no project-level retention.
 - P-01 a session must not return the password hash or a membership in another organization.
 - P-02 administrator-only invitations, domains, masking, and key rotation. Rotation issues a new key, stops the previous key immediately, and shows the new secret once.
 - P-03 MCP through a normal client and a user token. A project key is not accepted. Tools are `list_tickets`, `get_ticket`, `get_screenshot`, and `update_ticket`. The secret is shown once and can be revoked.
 - P-04 comments, and the `add_comment` tool. No replay tool.
 - P-06 organization settings on a screen: name and the one retention period.
+- P-07 the activity log for every application-object change: who, when, which object, and what changed.
+- P-10 screenshot and replay files in the seed, stored in Blob.
 
 ## Open
 
-- P-07 the activity log for every application-object change: who, when, which object, and what changed.
 - P-09 ticket files in Vercel Blob; `docker compose` starts the app and Postgres.
 - P-11 an ingest rate limit.
 - P-12 a hashed invitation token.
