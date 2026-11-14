@@ -31,10 +31,10 @@ Do not start tasks marked TBD: an implementer agent must not take them.
 - P-04 comments, and the `add_comment` tool. No replay tool.
 - P-06 organization settings on a screen: name and the one retention period.
 - P-07 the activity log for every application-object change: who, when, which object, and what changed.
+- P-10 screenshot and replay files in the seed, stored in Blob.
 
 ## Open
 
-- P-10 screenshot and replay files in the seed, stored in Blob.
 - P-11 an ingest rate limit.
 - P-12 a hashed invitation token.
 - P-13 passwords always masked.
