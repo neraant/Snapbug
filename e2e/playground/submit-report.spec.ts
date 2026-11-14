@@ -20,7 +20,7 @@ test("playground submit stays on the page and shows the capture", async ({ page 
   await expect(page).toHaveURL(/\/overview/, { timeout: 30_000 });
 
   await page.goto("/playground");
-  await expect(page.getByRole("heading", { name: "Playground" })).toBeVisible();
+  await expect(page.getByText("A sample customer page. Submit stays here and shows the capture.")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Sample checkout" })).toBeVisible();
 
   await page.getByRole("button", { name: "Report a bug" }).click();
