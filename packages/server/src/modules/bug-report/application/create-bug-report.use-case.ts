@@ -4,10 +4,11 @@ import type { FileStoragePort } from "@workspace/server/modules/bug-report/port/
 import type { ProjectPort } from "@workspace/server/modules/bug-report/port/project.port";
 import type { BugReportService } from "@workspace/server/modules/bug-report/service/bug-report.service";
 import type { WidgetIngestOriginService } from "@workspace/server/modules/bug-report/service/widget-ingest-origin.service";
+import { WidgetIngestRateLimitService } from "@workspace/server/modules/bug-report/service/widget-ingest-rate-limit.service";
 import type { WidgetUserAgentService } from "@workspace/server/modules/bug-report/service/widget-user-agent.service";
 import type { AuditActor } from "@workspace/server/shared/audit/audit-log.types";
 import type { WithTransactionType } from "@workspace/server/shared/database/transaction.util";
-import { BadRequestError, UnauthorizedError } from "@workspace/server/shared/error/app-errors";
+import { BadRequestError, RateLimitedError, UnauthorizedError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import {
   BUG_REPORT_REPLAY_ALLOWED_MIME_TYPES,
@@ -44,6 +45,7 @@ export class CreateBugReportUseCase {
     private readonly widgetIngestOriginService: WidgetIngestOriginService,
     private readonly widgetUserAgentService: WidgetUserAgentService,
     private readonly fileStoragePort: FileStoragePort,
+    private readonly widgetIngestRateLimitService = new WidgetIngestRateLimitService(),
   ) {}
 
   async execute(
@@ -62,6 +64,10 @@ export class CreateBugReportUseCase {
 
     const project = await this.apiKeyPort.findProjectByKey({ key: input.apiKey });
     if (!project) throw new UnauthorizedError(ERROR_CODES.INVALID_API_KEY);
+
+    if (!this.widgetIngestRateLimitService.consume(input.apiKey)) {
+      throw new RateLimitedError(ERROR_CODES.RATE_LIMITED);
+    }
 
     const widgetSetting = await this.projectPort.findWidgetSetting(project.id);
     const allowedDomains = widgetSetting?.allowedDomains ?? projectWidgetSettingModelDefaults.allowedDomains;

@@ -33,6 +33,7 @@ import { BugReportRepository } from "@workspace/server/modules/bug-report/reposi
 import { BugReportService } from "@workspace/server/modules/bug-report/service/bug-report.service";
 import { BugReportStatService } from "@workspace/server/modules/bug-report/service/bug-report-stat.service";
 import { WidgetIngestOriginService } from "@workspace/server/modules/bug-report/service/widget-ingest-origin.service";
+import { WidgetIngestRateLimitService } from "@workspace/server/modules/bug-report/service/widget-ingest-rate-limit.service";
 import { WidgetUserAgentService } from "@workspace/server/modules/bug-report/service/widget-user-agent.service";
 import { AddCommentUseCase } from "@workspace/server/modules/comment/application/add-comment.use-case";
 import { FindCommentsUseCase } from "@workspace/server/modules/comment/application/find-comments.use-case";
@@ -119,6 +120,7 @@ const bugReportService = new BugReportService(bugReportRepository, auditLogServi
 const projectService = new ProjectService(projectRepository, auditLogService);
 const apiKeyService = new ApiKeyService(apiKeyRepository, auditLogService);
 const widgetIngestOriginService = new WidgetIngestOriginService();
+const widgetIngestRateLimitService = new WidgetIngestRateLimitService();
 const widgetUserAgentService = new WidgetUserAgentService();
 const bugReportFileStorage = new VercelBlobFileStorageAdapter(env.BLOB_READ_WRITE_TOKEN);
 
@@ -262,6 +264,7 @@ const createBugReport = new CreateBugReportUseCase(
   widgetIngestOriginService,
   widgetUserAgentService,
   bugReportFileStorage,
+  widgetIngestRateLimitService,
 );
 const findWidgetConfig = new FindWidgetConfigUseCase(apiKeyAdapter, projectAdapter, widgetIngestOriginService);
 const findBugReports = new FindBugReportsUseCase(membershipAdapter, projectAdapter, bugReportRepository);

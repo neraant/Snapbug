@@ -6,6 +6,7 @@ import type { FileStoragePort } from "@workspace/server/modules/bug-report/port/
 import type { ProjectPort } from "@workspace/server/modules/bug-report/port/project.port";
 import type { BugReportService } from "@workspace/server/modules/bug-report/service/bug-report.service";
 import { WidgetIngestOriginService } from "@workspace/server/modules/bug-report/service/widget-ingest-origin.service";
+import { WidgetIngestRateLimitService } from "@workspace/server/modules/bug-report/service/widget-ingest-rate-limit.service";
 import { WidgetUserAgentService } from "@workspace/server/modules/bug-report/service/widget-user-agent.service";
 import type { WithTransactionType } from "@workspace/server/shared/database/transaction.util";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
@@ -79,6 +80,7 @@ function createUseCase(deps: {
   widgetIngestOriginService?: WidgetIngestOriginService;
   widgetUserAgentService?: WidgetUserAgentService;
   fileStoragePort?: FileStoragePort;
+  widgetIngestRateLimitService?: WidgetIngestRateLimitService;
 }) {
   return new CreateBugReportUseCase(
     deps.apiKeyPort,
@@ -88,6 +90,7 @@ function createUseCase(deps: {
     deps.widgetIngestOriginService ?? new WidgetIngestOriginService(),
     deps.widgetUserAgentService ?? new WidgetUserAgentService(),
     deps.fileStoragePort ?? fileStoragePortStub,
+    deps.widgetIngestRateLimitService ?? new WidgetIngestRateLimitService(),
   );
 }
 
@@ -689,5 +692,65 @@ describe("CreateBugReportUseCase", () => {
 
     expect(deleteStorage).toHaveBeenCalledWith(screenshotKey);
     expect(deleteStorage).toHaveBeenCalledWith(replayKey);
+  });
+
+  it("stops ingest for a project key that is over the limit and still accepts another key", async () => {
+    const rateLimit = new WidgetIngestRateLimitService(1, 60_000, () => 1_700_000_000_000);
+    const createWithAudit = vi.fn(async (createInput) =>
+      bugReportFromCreateInput({
+        ...createInput,
+        shortId: "SNB-9",
+      }),
+    );
+    const apiKeyPort = {
+      findProjectByKey: vi.fn().mockResolvedValue({
+        id: projectId,
+        name: "Store",
+        organizationId,
+        createdAt: "2026-10-03T09:00:00.000Z",
+      }),
+    };
+    const projectPort = {
+      findManyByOrganizationId: vi.fn(),
+      findById: vi.fn(),
+      findWidgetSetting: vi.fn().mockResolvedValue(widgetSettingBase),
+    };
+    const bugReportService = {
+      withTx: vi.fn().mockReturnValue({
+        withActor: vi.fn().mockReturnValue({ createWithAudit }),
+      }),
+    };
+    const withTransaction = vi.fn(async (callback) => await callback({}));
+    const saveBugReportScreenshot = vi.fn();
+    const useCase = createUseCase({
+      apiKeyPort: apiKeyPort as unknown as ApiKeyPort,
+      projectPort: projectPort as unknown as ProjectPort,
+      bugReportService: bugReportService as unknown as BugReportService,
+      withTransaction: withTransaction as WithTransactionType,
+      widgetIngestRateLimitService: rateLimit,
+      fileStoragePort: {
+        ...fileStoragePortStub,
+        saveBugReportScreenshot,
+      },
+    });
+
+    await useCase.execute(input, actor, "https://app.example.com");
+
+    await expect(
+      useCase.execute(
+        { ...input, title: "Second report" },
+        actor,
+        "https://app.example.com",
+        { data: new Uint8Array([1]), mimeType: "image/png" },
+      ),
+    ).rejects.toMatchObject({ errorCode: ERROR_CODES.RATE_LIMITED });
+
+    expect(createWithAudit).toHaveBeenCalledOnce();
+    expect(saveBugReportScreenshot).not.toHaveBeenCalled();
+    expect(projectPort.findWidgetSetting).toHaveBeenCalledOnce();
+
+    await useCase.execute({ ...input, apiKey: "other_key" }, actor, "https://app.example.com");
+
+    expect(createWithAudit).toHaveBeenCalledTimes(2);
   });
 });
