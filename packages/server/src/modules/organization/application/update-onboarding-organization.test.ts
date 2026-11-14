@@ -5,6 +5,7 @@ import type { MembershipPort } from "@workspace/server/modules/organization/port
 import type { UserPort } from "@workspace/server/modules/organization/port/user.port";
 import type { OrganizationRepository } from "@workspace/server/modules/organization/repository/organization.repository";
 import type { OrganizationService } from "@workspace/server/modules/organization/service/organization.service";
+import type { WithTransactionType } from "@workspace/server/shared/database/transaction.util";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
 import { describe, expect, it, vi } from "vitest";
@@ -28,6 +29,20 @@ const membership = {
   createdAt: persistedAt.toISOString(),
 };
 
+const tx = { id: "tx" };
+const withTransaction = vi.fn(
+  async (callback: (transaction: unknown) => Promise<unknown>) => await callback(tx),
+) as WithTransactionType;
+
+function organizationServiceWith(saveWithAudit: ReturnType<typeof vi.fn>) {
+  const service = {
+    withTx: vi.fn(),
+    withActor: vi.fn().mockReturnValue({ saveWithAudit }),
+  };
+  service.withTx.mockReturnValue(service);
+  return service;
+}
+
 describe("UpdateOnboardingOrganizationUseCase", () => {
   it("renames the organization a member joined while onboarding is open", async () => {
     const userPort = {
@@ -40,16 +55,18 @@ describe("UpdateOnboardingOrganizationUseCase", () => {
       findById: vi.fn().mockResolvedValue(existingOrganization),
     };
     const saveWithAudit = vi.fn().mockResolvedValue(undefined);
-    const organizationService = { withActor: vi.fn().mockReturnValue({ saveWithAudit }) };
+    const organizationService = organizationServiceWith(saveWithAudit);
     const useCase = new UpdateOnboardingOrganizationUseCase(
       userPort as unknown as UserPort,
       membershipPort as unknown as MembershipPort,
       organizationRepository as unknown as OrganizationRepository,
       organizationService as unknown as OrganizationService,
+      withTransaction,
     );
 
     const result = await useCase.execute({ organizationId, name: "Acme Labs" }, userId);
 
+    expect(organizationService.withTx).toHaveBeenCalledWith(tx);
     expect(saveWithAudit).toHaveBeenCalledOnce();
     const saved = saveWithAudit.mock.calls[0]?.[0];
     expect(saved.name).toBe("Acme Labs");
@@ -70,7 +87,8 @@ describe("UpdateOnboardingOrganizationUseCase", () => {
       userPort as unknown as UserPort,
       membershipPort as unknown as MembershipPort,
       organizationRepository as unknown as OrganizationRepository,
-      { withActor: vi.fn().mockReturnValue({ saveWithAudit }) } as unknown as OrganizationService,
+      organizationServiceWith(saveWithAudit) as unknown as OrganizationService,
+      withTransaction,
     );
 
     await expect(useCase.execute({ organizationId, name: "Acme Labs" }, userId)).rejects.toMatchObject({
@@ -95,7 +113,8 @@ describe("UpdateOnboardingOrganizationUseCase", () => {
       userPort as unknown as UserPort,
       membershipPort as unknown as MembershipPort,
       organizationRepository as unknown as OrganizationRepository,
-      { withActor: vi.fn().mockReturnValue({ saveWithAudit }) } as unknown as OrganizationService,
+      organizationServiceWith(saveWithAudit) as unknown as OrganizationService,
+      withTransaction,
     );
 
     await expect(useCase.execute({ organizationId, name: "Acme Labs" }, userId)).rejects.toMatchObject({

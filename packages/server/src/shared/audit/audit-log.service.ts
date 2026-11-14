@@ -89,6 +89,9 @@ export class AuditLogService {
     if (left instanceof Date && right instanceof Date) {
       return left.getTime() === right.getTime();
     }
+    if (left !== null && right !== null && typeof left === "object" && typeof right === "object") {
+      return JSON.stringify(left) === JSON.stringify(right);
+    }
     return Object.is(left, right);
   }
 }

@@ -184,7 +184,12 @@ const findOnboarding = new FindOnboardingUseCase(
   organizationRepository,
   projectAdapter,
 );
-const createOrganization = new CreateOrganizationUseCase(organizationService, membershipAdapter, projectAdapter);
+const createOrganization = new CreateOrganizationUseCase(
+  organizationService,
+  membershipAdapter,
+  projectAdapter,
+  withTransaction,
+);
 const updateOrganization = new UpdateOrganizationUseCase(
   membershipAdapter,
   organizationRepository,
@@ -196,6 +201,7 @@ const updateOnboardingOrganization = new UpdateOnboardingOrganizationUseCase(
   membershipAdapter,
   organizationRepository,
   organizationService,
+  withTransaction,
 );
 const completeOnboarding = new CompleteOnboardingUseCase(
   userAdapter,

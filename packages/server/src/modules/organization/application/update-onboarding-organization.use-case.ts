@@ -3,6 +3,7 @@ import type { MembershipPort } from "@workspace/server/modules/organization/port
 import type { UserPort } from "@workspace/server/modules/organization/port/user.port";
 import type { OrganizationRepository } from "@workspace/server/modules/organization/repository/organization.repository";
 import type { OrganizationService } from "@workspace/server/modules/organization/service/organization.service";
+import type { WithTransactionType } from "@workspace/server/shared/database/transaction.util";
 import { ForbiddenError, NotFoundError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import type {
@@ -16,6 +17,7 @@ export class UpdateOnboardingOrganizationUseCase {
     private readonly membershipPort: MembershipPort,
     private readonly organizationRepository: OrganizationRepository,
     private readonly organizationService: OrganizationService,
+    private readonly withTransaction: WithTransactionType,
   ) {}
 
   async execute(
@@ -37,9 +39,12 @@ export class UpdateOnboardingOrganizationUseCase {
     if (!organization) throw new NotFoundError(ERROR_CODES.ORGANIZATION_NOT_FOUND);
 
     const updatedOrganization = organization.update({ name: input.name });
-    await this.organizationService
-      .withActor({ type: "user", id: userId })
-      .saveWithAudit(updatedOrganization, "Update organization");
+    await this.withTransaction(async (tx) => {
+      await this.organizationService
+        .withTx(tx)
+        .withActor({ type: "user", id: userId })
+        .saveWithAudit(updatedOrganization, "Update organization");
+    });
     return OrganizationMapper.toDto(updatedOrganization);
   }
 }

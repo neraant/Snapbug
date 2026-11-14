@@ -38,6 +38,8 @@ export abstract class BugReportMapper {
       severity: row.severity,
       assignedTo: row.assignedTo,
       title: row.title,
+      description: row.description,
+      stepsToReproduce: row.stepsToReproduce,
       reporterEmail: row.reporterEmail,
       url: row.url,
       userAgent: row.userAgent,
@@ -47,6 +49,9 @@ export abstract class BugReportMapper {
       viewportWidth: row.viewportWidth,
       viewportHeight: row.viewportHeight,
       hasReplay: row.hasReplay,
+      consoleLogs: row.consoleLogs,
+      networkLogs: row.networkLogs,
+      customContext: row.customContext,
       resolvedAt: row.resolvedAt,
     };
   }
