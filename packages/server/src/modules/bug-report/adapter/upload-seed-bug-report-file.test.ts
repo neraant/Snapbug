@@ -44,13 +44,18 @@ describe("uploadSeedBugReportFiles", () => {
       token,
     });
     expect(replayCall?.[0]).toBe(replayKey);
-    expect(JSON.parse(gunzipSync(replayCall?.[1] ?? Buffer.alloc(0)).toString())).toEqual([
-      {
-        type: 4,
-        data: { href: "https://store.acme.test/", width: 1440, height: 900 },
-        timestamp: 1,
-      },
-    ]);
+    const replayEvents = JSON.parse(gunzipSync(replayCall?.[1] ?? Buffer.alloc(0)).toString()) as Array<{
+      type: number;
+    }>;
+    expect(replayEvents.map((event) => event.type)).toEqual([4, 2]);
+    expect(replayEvents[0]).toMatchObject({
+      type: 4,
+      data: { href: "https://store.acme.test/", width: 1440, height: 900 },
+    });
+    expect(replayEvents[1]).toMatchObject({
+      type: 2,
+      data: { initialOffset: { left: 0, top: 0 } },
+    });
     expect(replayCall?.[2]).toEqual({
       access: "private",
       contentType: "application/gzip",

@@ -29,6 +29,36 @@ const SEED_REPLAY_EVENTS = [
     data: { href: "https://store.acme.test/", width: 1440, height: 900 },
     timestamp: 1,
   },
+  {
+    type: 2,
+    data: {
+      node: {
+        type: 0,
+        id: 1,
+        childNodes: [
+          { type: 1, id: 2, name: "html", publicId: "", systemId: "" },
+          {
+            type: 2,
+            id: 3,
+            tagName: "html",
+            attributes: { lang: "en" },
+            childNodes: [
+              { type: 2, id: 4, tagName: "head", attributes: {}, childNodes: [] },
+              {
+                type: 2,
+                id: 5,
+                tagName: "body",
+                attributes: {},
+                childNodes: [{ type: 3, id: 6, textContent: "Pay" }],
+              },
+            ],
+          },
+        ],
+      },
+      initialOffset: { left: 0, top: 0 },
+    },
+    timestamp: 2,
+  },
 ];
 
 export function seedScreenshotBytes(): Buffer {
