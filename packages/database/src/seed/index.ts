@@ -29,7 +29,7 @@ async function main() {
 function seedBugReportFile(): Promise<void> {
   const require = createRequire(import.meta.url);
   const tsx = require.resolve("tsx/cli");
-  const script = new URL("../../../../server/src/modules/bug-report/seed-bug-report-file-main.ts", import.meta.url);
+  const script = new URL("../../../server/src/modules/bug-report/seed-bug-report-file-main.ts", import.meta.url);
 
   return new Promise((resolve, reject) => {
     const child = spawn(process.execPath, [tsx, fileURLToPath(script)], { stdio: "inherit", env: process.env });

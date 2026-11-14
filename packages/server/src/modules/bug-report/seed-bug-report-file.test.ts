@@ -1,3 +1,6 @@
+import { existsSync, readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+
 import { seedBugReportFile } from "@workspace/server/modules/bug-report/seed-bug-report-file";
 import { describe, expect, it, vi } from "vitest";
 
@@ -45,5 +48,16 @@ describe("seedBugReportFile", () => {
 
     expect(storage.saveBugReportScreenshot).not.toHaveBeenCalled();
     expect(storage.saveBugReportReplay).not.toHaveBeenCalled();
+  });
+});
+
+describe("database seed launcher", () => {
+  it("starts the Blob upload script under packages/server", () => {
+    const seed = new URL("../../../../database/src/seed/index.ts", import.meta.url);
+    const source = readFileSync(seed, "utf8");
+    const match = source.match(/new URL\("(\.\.\/[^"]*seed-bug-report-file-main\.ts)"/);
+    expect(match).not.toBeNull();
+    const script = fileURLToPath(new URL(match![1], seed));
+    expect(existsSync(script)).toBe(true);
   });
 });
