@@ -1,6 +1,6 @@
 import { gunzipSync } from "node:zlib";
 
-import { type SeedBlobPut, uploadSeedBugReportFiles } from "@workspace/database/seed/bug-report-file";
+import { loadSeedBlobPut, type SeedBlobPut, uploadSeedBugReportFiles } from "@workspace/database/seed/bug-report-file";
 import { describe, expect, it, vi } from "vitest";
 
 const token = "vercel_blob_rw_test";
@@ -58,5 +58,9 @@ describe("uploadSeedBugReportFiles", () => {
       allowOverwrite: true,
       token,
     });
+  });
+
+  it("loads put from the server package that depends on Blob", () => {
+    expect(loadSeedBlobPut()).toEqual(expect.any(Function));
   });
 });

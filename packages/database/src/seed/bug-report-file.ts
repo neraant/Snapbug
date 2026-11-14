@@ -73,10 +73,7 @@ export async function uploadSeedBugReportFiles(
 }
 
 export function loadSeedBlobPut(): SeedBlobPut {
-  const serverPackageJson = path.resolve(
-    path.dirname(fileURLToPath(import.meta.url)),
-    "../../../../server/package.json",
-  );
+  const serverPackageJson = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../server/package.json");
   const require = createRequire(serverPackageJson);
   const blob = require("@vercel/blob") as { put: SeedBlobPut };
   return blob.put.bind(blob);
