@@ -20,7 +20,7 @@ export class InvitationRepository {
   }
 
   async findByToken(token: string): Promise<Invitation | null> {
-    const [row] = await this.db.select().from(invitationTable).where(eq(invitationTable.token, token));
+    const [row] = await this.db.select().from(invitationTable).where(eq(invitationTable.tokenHash, token));
     return row ? InvitationMapper.fromPersistence(row) : null;
   }
 
@@ -34,7 +34,7 @@ export class InvitationRepository {
         .onConflictDoUpdate({
           target: [invitationTable.organizationId, invitationTable.email],
           set: {
-            token: values.token,
+            tokenHash: values.tokenHash,
             expiresAt: values.expiresAt,
             invitedByUserId: values.invitedByUserId,
             acceptedAt: values.acceptedAt,

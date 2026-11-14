@@ -70,7 +70,7 @@ export class SendInvitationsUseCase {
       const invitation = InvitationFactory.create({
         organizationId: input.organizationId,
         email,
-        token,
+        tokenHash: this.invitationService.hashToken(token),
         invitedByUserId: userId,
         expiresAt: new Date(Date.now() + TOKEN_TTL_MS),
       });

@@ -50,6 +50,7 @@ MODELS = {
 # A pinned choice ignores task size and always runs this model.
 PINNED_MODELS = {
     "kimi": "kimi-k2.7-code",
+    "composer": "composer-2.5",
 }
 EFFORTS = ("low", "medium", "high")
 # Agent liveness policy. The base budget is checked first. Past it, the agent
@@ -725,12 +726,19 @@ def release_worktree(task_id: str, keep: bool) -> None:
     if not path.exists():
         return
     current = tree()
-    git(BASE, ["worktree", "remove", "--force", str(path)])
-    git(BASE, ["worktree", "prune"])
+    git_run(BASE, ["worktree", "remove", "--force", str(path)])
+    git_run(BASE, ["worktree", "prune"])
     # gh and git use this path as cwd. A removed worktree makes the next
     # subprocess fail with FileNotFoundError before it can start.
     if current == path:
         use_tree(BASE)
+    # macOS .DS_Store and other untracked files can make `worktree remove` fail
+    # with "Directory not empty" even after git drops the worktree registration.
+    if path.exists():
+        remove_tree(path)
+        git_run(BASE, ["worktree", "prune"])
+    if path.exists():
+        raise LoopError(f"could not remove {path}")
     say(f"{task_id} worktree removed")
 
 
@@ -1453,7 +1461,7 @@ def parse_implementer_choice(raw: str) -> str:
     for name, model in PINNED_MODELS.items():
         if text == model:
             return name
-    raise LoopError("implementer model must be auto, low, medium, high, or kimi")
+    raise LoopError("implementer model must be auto, low, medium, high, kimi, or composer")
 
 
 def ask_implementer_model() -> str:
@@ -1462,7 +1470,8 @@ def ask_implementer_model() -> str:
         return "auto"
     say(
         "Implementer model: auto, low (grok-4.7-low), "
-        "medium (grok-4.7-medium), high (grok-4.7-high), kimi (kimi-k2.7-code)"
+        "medium (grok-4.7-medium), high (grok-4.7-high), "
+        "kimi (kimi-k2.7-code), composer (composer-2.5)"
     )
     try:
         entered = input("Choice [auto]: ")
@@ -2444,7 +2453,10 @@ None.
         or parse_implementer_choice("grok-4.7-medium") != "medium"
         or parse_implementer_choice("kimi") != "kimi"
         or parse_implementer_choice("kimi-k2.7-code") != "kimi"
+        or parse_implementer_choice("composer") != "composer"
+        or parse_implementer_choice("composer-2.5") != "composer"
         or implementer_model("kimi", "low") != "kimi-k2.7-code"
+        or implementer_model("composer", "low") != "composer-2.5"
         or implementer_model("auto", "low") != "grok-4.7-low"
     ):
         raise SystemExit("model failed")
