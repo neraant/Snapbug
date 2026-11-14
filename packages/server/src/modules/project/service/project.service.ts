@@ -30,6 +30,7 @@ export class ProjectService {
       action,
       entityType: PROJECT_ENTITY_TYPE,
       entityId: project.id,
+      organizationId: project.organizationId,
       projectId: project.id,
       actor: this.actor,
       oldSnapshot: previous ? ProjectMapper.toAudit(previous) : null,

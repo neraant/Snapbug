@@ -3,9 +3,11 @@ import { Organization } from "@workspace/server/modules/organization/entity/orga
 import { OrganizationMapper } from "@workspace/server/modules/organization/entity/organization.mapper";
 import type { MembershipPort } from "@workspace/server/modules/organization/port/membership.port";
 import type { OrganizationRepository } from "@workspace/server/modules/organization/repository/organization.repository";
+import type { OrganizationService } from "@workspace/server/modules/organization/service/organization.service";
+import type { WithTransactionType } from "@workspace/server/shared/database/transaction.util";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const organizationId = "2a8c69a1-1ab1-45a8-8497-eae1e506d9d1";
 const userId = "0a8c69a1-1ab1-45a8-8497-eae1e506d9d4";
@@ -26,7 +28,21 @@ const membership = {
   createdAt: persistedAt.toISOString(),
 };
 
+const saveWithAudit = vi.fn().mockResolvedValue(undefined);
+const organizationService = {
+  withTx: vi.fn(),
+  withActor: vi.fn().mockReturnValue({ saveWithAudit }),
+};
+organizationService.withTx.mockReturnValue(organizationService);
+const withTransaction = vi.fn(
+  async (callback: (tx: unknown) => Promise<unknown>) => await callback({}),
+) as WithTransactionType;
+
 describe("UpdateOrganizationUseCase", () => {
+  beforeEach(() => {
+    saveWithAudit.mockClear();
+  });
+
   it("updates the organization and returns a public dto", async () => {
     const membershipPort = { findByUserAndOrganization: vi.fn().mockResolvedValue(membership) };
     const organizationRepository = {
@@ -36,13 +52,15 @@ describe("UpdateOrganizationUseCase", () => {
     const useCase = new UpdateOrganizationUseCase(
       membershipPort as unknown as MembershipPort,
       organizationRepository as unknown as OrganizationRepository,
+      organizationService as unknown as OrganizationService,
+      withTransaction,
     );
 
     const result = await useCase.execute({ organizationId, name: "Acme" }, userId);
 
     expect(membershipPort.findByUserAndOrganization).toHaveBeenCalledWith({ userId, organizationId });
-    expect(organizationRepository.save).toHaveBeenCalledOnce();
-    const saved = organizationRepository.save.mock.calls[0]?.[0];
+    expect(saveWithAudit).toHaveBeenCalledOnce();
+    const saved = saveWithAudit.mock.calls[0]?.[0];
     expect(result).toEqual(OrganizationMapper.toDto(saved));
     expect(saved.name).toBe("Acme");
     expect(saved.reports_retention_days).toBe(90);
@@ -57,11 +75,13 @@ describe("UpdateOrganizationUseCase", () => {
     const useCase = new UpdateOrganizationUseCase(
       membershipPort as unknown as MembershipPort,
       organizationRepository as unknown as OrganizationRepository,
+      organizationService as unknown as OrganizationService,
+      withTransaction,
     );
 
     const result = await useCase.execute({ organizationId, reports_retention_days: 30 }, userId);
 
-    const saved = organizationRepository.save.mock.calls[0]?.[0];
+    const saved = saveWithAudit.mock.calls[0]?.[0];
     expect(saved.reports_retention_days).toBe(30);
     expect(saved.name).toBe("");
     expect(result.reports_retention_days).toBe(30);
@@ -75,6 +95,8 @@ describe("UpdateOrganizationUseCase", () => {
     const useCase = new UpdateOrganizationUseCase(
       membershipPort as unknown as MembershipPort,
       organizationRepository as unknown as OrganizationRepository,
+      organizationService as unknown as OrganizationService,
+      withTransaction,
     );
 
     await expect(useCase.execute({ organizationId, name: "Acme" }, userId)).rejects.toMatchObject({
@@ -82,7 +104,7 @@ describe("UpdateOrganizationUseCase", () => {
     });
 
     expect(organizationRepository.findById).not.toHaveBeenCalled();
-    expect(organizationRepository.save).not.toHaveBeenCalled();
+    expect(saveWithAudit).not.toHaveBeenCalled();
   });
 
   it("throws when the user is not a member", async () => {
@@ -91,13 +113,15 @@ describe("UpdateOrganizationUseCase", () => {
     const useCase = new UpdateOrganizationUseCase(
       membershipPort as unknown as MembershipPort,
       organizationRepository as unknown as OrganizationRepository,
+      organizationService as unknown as OrganizationService,
+      withTransaction,
     );
 
     await expect(useCase.execute({ organizationId, name: "Acme" }, userId)).rejects.toMatchObject({
       errorCode: ERROR_CODES.ORGANIZATION_NOT_FOUND,
     });
 
-    expect(organizationRepository.save).not.toHaveBeenCalled();
+    expect(saveWithAudit).not.toHaveBeenCalled();
   });
 
   it("throws when the organization is missing", async () => {
@@ -106,12 +130,14 @@ describe("UpdateOrganizationUseCase", () => {
     const useCase = new UpdateOrganizationUseCase(
       membershipPort as unknown as MembershipPort,
       organizationRepository as unknown as OrganizationRepository,
+      organizationService as unknown as OrganizationService,
+      withTransaction,
     );
 
     await expect(useCase.execute({ organizationId, name: "Acme" }, userId)).rejects.toMatchObject({
       errorCode: ERROR_CODES.ORGANIZATION_NOT_FOUND,
     });
 
-    expect(organizationRepository.save).not.toHaveBeenCalled();
+    expect(saveWithAudit).not.toHaveBeenCalled();
   });
 });

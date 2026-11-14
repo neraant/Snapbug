@@ -14,6 +14,13 @@ export class MembershipRepository {
     return new MembershipRepository(tx);
   }
 
+  async findById(id: string): Promise<Membership | null> {
+    const membership = await this.db.query.membershipTable.findFirst({
+      where: { id },
+    });
+    return membership ? MembershipMapper.fromPersistence(membership) : null;
+  }
+
   async findByUserAndOrganization(userId: string, organizationId: string): Promise<Membership | null> {
     const membership = await this.db.query.membershipTable.findFirst({
       where: { userId, organizationId },

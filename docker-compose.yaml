@@ -9,6 +9,34 @@ services:
       - 5432:5432
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d snapbug"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        DATABASE_URL: postgres://postgres:postgres@postgres:5432/snapbug
+        AUTH_SECRET: ${AUTH_SECRET:-dev-auth-secret-change-me}
+        RESEND_API_KEY: ${RESEND_API_KEY:-re_local_placeholder}
+        EMAIL_FROM: ${EMAIL_FROM:-noreply@snapbug.com}
+        NEXT_PUBLIC_APP_URL: http://localhost:3000
+    ports:
+      - 3000:3000
+    environment:
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/snapbug
+      AUTH_SECRET: ${AUTH_SECRET:-dev-auth-secret-change-me}
+      RESEND_API_KEY: ${RESEND_API_KEY:-re_local_placeholder}
+      EMAIL_FROM: ${EMAIL_FROM:-noreply@snapbug.com}
+      BLOB_READ_WRITE_TOKEN: ${BLOB_READ_WRITE_TOKEN:-}
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 volumes:
   postgres_data:

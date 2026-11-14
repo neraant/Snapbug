@@ -14,6 +14,11 @@ export class InvitationRepository {
     return new InvitationRepository(tx);
   }
 
+  async findById(id: string): Promise<Invitation | null> {
+    const [row] = await this.db.select().from(invitationTable).where(eq(invitationTable.id, id));
+    return row ? InvitationMapper.fromPersistence(row) : null;
+  }
+
   async findByToken(token: string): Promise<Invitation | null> {
     const [row] = await this.db.select().from(invitationTable).where(eq(invitationTable.token, token));
     return row ? InvitationMapper.fromPersistence(row) : null;

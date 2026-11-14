@@ -5,6 +5,7 @@ import { FindProjectByKeyUseCase } from "@workspace/server/modules/api-key/appli
 import { RotateProjectApiKeyUseCase } from "@workspace/server/modules/api-key/application/rotate-project-api-key.use-case";
 import { ApiKeyRepository } from "@workspace/server/modules/api-key/repository/api-key.repository";
 import { ApiKeyService } from "@workspace/server/modules/api-key/service/api-key.service";
+import { FindActivityLogsUseCase } from "@workspace/server/modules/audit/application/find-activity-logs.use-case";
 import { RequestPasswordResetUseCase } from "@workspace/server/modules/auth/application/request-password-reset.use-case";
 import { ResetPasswordUseCase } from "@workspace/server/modules/auth/application/reset-password.use-case";
 import { SignUpUseCase } from "@workspace/server/modules/auth/application/sign-up.use-case";
@@ -12,7 +13,6 @@ import { VerifyCredentialsUseCase } from "@workspace/server/modules/auth/applica
 import { ResetPasswordRepository } from "@workspace/server/modules/auth/repository/reset-password.repository";
 import { AuthService } from "@workspace/server/modules/auth/service/auth.service";
 import { BugReportAdapter } from "@workspace/server/modules/bug-report/adapter/bug-report.adapter";
-import { LocalFileStorageAdapter } from "@workspace/server/modules/bug-report/adapter/local-file-storage.adapter";
 import { VercelBlobFileStorageAdapter } from "@workspace/server/modules/bug-report/adapter/vercel-blob-file-storage.adapter";
 import { CountOpenByAssigneeUseCase } from "@workspace/server/modules/bug-report/application/count-open-by-assignee.use-case";
 import { CountOpenByProjectUseCase } from "@workspace/server/modules/bug-report/application/count-open-by-project.use-case";
@@ -46,6 +46,7 @@ import { AcceptInvitationUseCase } from "@workspace/server/modules/invitation/ap
 import { FindInvitationByTokenUseCase } from "@workspace/server/modules/invitation/application/find-invitation-by-token.use-case";
 import { SendInvitationsUseCase } from "@workspace/server/modules/invitation/application/send-invitation.use-case";
 import { InvitationRepository } from "@workspace/server/modules/invitation/repository/invitation.repository";
+import { InvitationService } from "@workspace/server/modules/invitation/service/invitation.service";
 import { MembershipAdapter } from "@workspace/server/modules/membership/adapter/membership.adapter";
 import { FindMembershipUseCase } from "@workspace/server/modules/membership/application/find-membership.use-case";
 import { FindMembershipByUserUseCase } from "@workspace/server/modules/membership/application/find-membership-by-user.use-case";
@@ -58,6 +59,7 @@ import { ReplaceMembershipProjectAccessUseCase } from "@workspace/server/modules
 import { UpdateMembershipRoleUseCase } from "@workspace/server/modules/membership/application/update-membership-role.use-case";
 import { MembershipRepository } from "@workspace/server/modules/membership/repository/membership.repository";
 import { ProjectAccessRepository } from "@workspace/server/modules/membership/repository/project-access.repository";
+import { MembershipService } from "@workspace/server/modules/membership/service/membership.service";
 import { ProjectAccessService } from "@workspace/server/modules/membership/service/project-access.service";
 import { OrganizationAdapter } from "@workspace/server/modules/organization/adapter/organization.adapter";
 import { CompleteOnboardingUseCase } from "@workspace/server/modules/organization/application/complete-onboarding.use-case";
@@ -67,6 +69,8 @@ import { FindOrganizationsUseCase } from "@workspace/server/modules/organization
 import { UpdateOnboardingOrganizationUseCase } from "@workspace/server/modules/organization/application/update-onboarding-organization.use-case";
 import { UpdateOrganizationUseCase } from "@workspace/server/modules/organization/application/update-organization.use-case";
 import { OrganizationRepository } from "@workspace/server/modules/organization/repository/organization.repository";
+import { OrganizationService } from "@workspace/server/modules/organization/service/organization.service";
+import { AuditProjectAdapter } from "@workspace/server/modules/project/adapter/audit-project.adapter";
 import { ProjectAdapter } from "@workspace/server/modules/project/adapter/project.adapter";
 import { CreateProjectUseCase } from "@workspace/server/modules/project/application/create-project.use-case";
 import { FindProjectWidgetSettingUseCase } from "@workspace/server/modules/project/application/find-project-widget-setting.use-case";
@@ -105,19 +109,26 @@ const invitationRepository = new InvitationRepository();
 const bugReportRepository = new BugReportRepository();
 const commentRepository = new CommentRepository();
 const auditLogRepository = new AuditLogRepository();
-const auditLogService = new AuditLogService(auditLogRepository);
+const auditProjectAdapter = new AuditProjectAdapter(projectRepository);
+const auditLogService = new AuditLogService(auditLogRepository, auditProjectAdapter);
+const organizationService = new OrganizationService(organizationRepository, auditLogService);
+const membershipService = new MembershipService(membershipRepository, auditLogService);
+const invitationService = new InvitationService(invitationRepository, auditLogService);
 const commentService = new CommentService(commentRepository, auditLogService);
 const bugReportService = new BugReportService(bugReportRepository, auditLogService);
 const projectService = new ProjectService(projectRepository, auditLogService);
 const apiKeyService = new ApiKeyService(apiKeyRepository, auditLogService);
 const widgetIngestOriginService = new WidgetIngestOriginService();
 const widgetUserAgentService = new WidgetUserAgentService();
-const bugReportFileStorage = env.BLOB_READ_WRITE_TOKEN
-  ? new VercelBlobFileStorageAdapter(env.BLOB_READ_WRITE_TOKEN)
-  : new LocalFileStorageAdapter();
+const bugReportFileStorage = new VercelBlobFileStorageAdapter(env.BLOB_READ_WRITE_TOKEN);
 
 const projectAccessService = new ProjectAccessService(projectAccessRepository, auditLogService);
-const membershipAdapter = new MembershipAdapter(membershipRepository, projectAccessRepository, projectAccessService);
+const membershipAdapter = new MembershipAdapter(
+  membershipRepository,
+  projectAccessRepository,
+  projectAccessService,
+  membershipService,
+);
 const userAdapter = new UserAdapter(userRepository);
 const projectAdapter = new ProjectAdapter(projectRepository, membershipAdapter, projectService, withTransaction);
 const organizationAdapter = new OrganizationAdapter(organizationRepository);
@@ -134,8 +145,8 @@ const findProjectMembers = new FindProjectMembersUseCase(
   projectAdapter,
   userAdapter,
 );
-const updateMembershipRole = new UpdateMembershipRoleUseCase(membershipRepository);
-const removeMembership = new RemoveMembershipUseCase(membershipRepository);
+const updateMembershipRole = new UpdateMembershipRoleUseCase(membershipRepository, membershipService, withTransaction);
+const removeMembership = new RemoveMembershipUseCase(membershipRepository, membershipService, withTransaction);
 const findMembershipProjectAccess = new FindMembershipProjectAccessUseCase(
   membershipRepository,
   projectAccessRepository,
@@ -170,17 +181,29 @@ const findOnboarding = new FindOnboardingUseCase(
   organizationRepository,
   projectAdapter,
 );
-const createOrganization = new CreateOrganizationUseCase(organizationRepository, membershipAdapter, projectAdapter);
-const updateOrganization = new UpdateOrganizationUseCase(membershipAdapter, organizationRepository);
+const createOrganization = new CreateOrganizationUseCase(
+  organizationService,
+  membershipAdapter,
+  projectAdapter,
+  withTransaction,
+);
+const updateOrganization = new UpdateOrganizationUseCase(
+  membershipAdapter,
+  organizationRepository,
+  organizationService,
+  withTransaction,
+);
 const updateOnboardingOrganization = new UpdateOnboardingOrganizationUseCase(
   userAdapter,
   membershipAdapter,
   organizationRepository,
+  organizationService,
+  withTransaction,
 );
 const completeOnboarding = new CompleteOnboardingUseCase(
   userAdapter,
   membershipAdapter,
-  organizationRepository,
+  organizationService,
   projectAdapter,
   findOnboarding,
   withTransaction,
@@ -198,12 +221,13 @@ const requestResetPassword = new RequestPasswordResetUseCase(
 const resetPassword = new ResetPasswordUseCase(resetPasswordRepository, userAdapter, authService);
 
 const sendInvitations = new SendInvitationsUseCase(
-  invitationRepository,
+  invitationService,
   membershipAdapter,
   userAdapter,
   organizationAdapter,
   authService,
   emailService,
+  withTransaction,
 );
 const findInvitationByToken = new FindInvitationByTokenUseCase(invitationRepository, organizationAdapter);
 const acceptInvitation = new AcceptInvitationUseCase(
@@ -211,7 +235,9 @@ const acceptInvitation = new AcceptInvitationUseCase(
   membershipAdapter,
   projectAdapter,
   withTransaction,
+  invitationService,
 );
+const findActivityLogs = new FindActivityLogsUseCase(membershipAdapter, userAdapter, auditLogRepository);
 
 const findProjectByKey = new FindProjectByKeyUseCase(apiKeyRepository, projectAdapter);
 const findProjectApiKey = new FindProjectApiKeyUseCase(
@@ -291,6 +317,7 @@ const findComments = new FindCommentsUseCase(
 );
 
 export const container = {
+  audit: { findActivityLogs },
   membership: {
     findMembership,
     findMembershipByUser,
