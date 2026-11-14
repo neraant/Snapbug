@@ -1,4 +1,6 @@
-export const texts = {
+import { localize } from "@/client/modules/shared/locale/interface-language";
+
+const en = {
   step: {
     of: (current: number, total: number) => `Step ${current} of ${total}`,
     organization: "Organization",
@@ -68,3 +70,76 @@ export const texts = {
     },
   },
 } as const;
+
+const ru = {
+  step: {
+    of: (current: number, total: number) => `Шаг ${current} из ${total}`,
+    organization: "Организация",
+    project: "Подключение приложения",
+    teammate: "Команда",
+  },
+  action: {
+    back: "Назад",
+    continue: "Продолжить",
+    skip: "Пропустить онбординг",
+  },
+  toast: {
+    completeError: "Не удалось завершить онбординг. Попробуйте ещё раз.",
+  },
+  organization: {
+    title: "Назовите организацию",
+    description: "Здесь живут проекты, лента разбора и настройки. Название можно сменить в любой момент.",
+    joined: {
+      title: "Ваша организация",
+      description: "Вы присоединились к этой организации. При необходимости смените название до конца настройки.",
+    },
+    field: {
+      label: "Название организации",
+      placeholder: "Acme Labs",
+      hint: "Если оставить пустым, подставим имя из email",
+    },
+    toast: {
+      error: "Не удалось сохранить организацию. Попробуйте ещё раз.",
+    },
+  },
+  project: {
+    title: "Подключите приложение",
+    description: "Назовите первый проект. SDK можно подключить позже в настройках проекта.",
+    field: {
+      name: {
+        label: "Название проекта",
+        placeholder: "Проект по умолчанию",
+        hint: "По умолчанию: «Проект по умолчанию» (можно изменить в настройках проекта).",
+      },
+    },
+    toast: {
+      error: "Не удалось сохранить проект. Попробуйте ещё раз.",
+    },
+  },
+  teammate: {
+    title: "Пригласите коллег",
+    description: "Вместе баги ловятся быстрее. Онбординг можно пропустить и пригласить людей позже в настройках.",
+    field: {
+      label: "Email",
+      placeholder: "colleague@company.com",
+    },
+    addAnother: "Добавить ещё одного",
+    removeInvite: "Убрать участника",
+    ready: {
+      title: "Всё готово",
+      description: "Откроем живую ленту разбора вашего проекта.",
+    },
+    finish: "Завершить и открыть",
+    skip: "Пропустить онбординг",
+    validation: {
+      invalidEmail: "Введите корректный адрес email",
+      duplicateEmail: "Этот email уже в списке",
+      tooManyInvites: "За раз можно пригласить не больше 10 человек",
+    },
+    toast: {
+      sendError: "Не удалось отправить приглашения. Попробуйте ещё раз.",
+    },
+  },
+} as const;
+
+export const texts: typeof en = localize(en, ru as never);

@@ -1,4 +1,6 @@
-export const texts = {
+import { localize } from "@/client/modules/shared/locale/interface-language";
+
+const en = {
   title: "Set up the SDK",
   description: "Add the Snapbug widget to your app so users can report bugs with screenshots, session replay and logs.",
   docsLink: "Read the docs",
@@ -127,3 +129,136 @@ export const texts = {
     },
   },
 } as const;
+
+const ru = {
+  title: "Настройка SDK",
+  description:
+    "Добавьте виджет Snapbug в приложение, чтобы пользователи сообщали о багах со скриншотом, записью сессии и логами.",
+  docsLink: "Документация",
+  docsHref: "https://github.com/neraant/Snapbug",
+  selectProject: "Выберите проект в боковой панели, чтобы увидеть шаги установки и API-ключ этого проекта.",
+  install: {
+    title: "1. Установите пакет",
+    description: "Выберите менеджер пакетов или вставьте лёгкий CDN-тег script.",
+    copy: "Копировать",
+    copied: "Скопировано",
+    tabs: {
+      npm: "npm",
+      pnpm: "pnpm",
+      yarn: "yarn",
+      script: "Тег script",
+    },
+    panelTitle: {
+      terminal: "Терминал",
+      script: "index.html",
+    },
+  },
+  init: {
+    title: "2. Инициализируйте виджет",
+    description: "Вставьте в корень приложения. Укажите API-ключ проекта и хост приёма.",
+    tip: "Вызовите snapbug.init один раз при гидратации на клиенте. Серверный рантайм не нужен.",
+    tabs: {
+      react: "React",
+      next: "Next.js",
+    },
+    panelTitle: {
+      react: "src/App.tsx",
+      next: "app/providers.tsx",
+    },
+  },
+  apiKey: {
+    title: "API-ключ проекта",
+    label: "Публичный ключ приёма",
+    copy: "Копировать",
+    copied: "Скопировано",
+    created: (date: string) => `Создан: ${date}`,
+    rotate: "Сменить ключ",
+    rotateTitle: "Смена ключа проекта",
+    rotateDescription: "Будет выпущен новый ключ, а предыдущий сразу перестанет работать.",
+    confirm: "Сменить ключ",
+    cancel: "Отмена",
+    revealedTitle: "Новый ключ проекта",
+    revealedDescription: "Скопируйте ключ в приложение. Он показан здесь один раз. Предыдущий ключ больше не работает.",
+    close: "Готово",
+    rotateError: "Не удалось сменить ключ проекта. Попробуйте ещё раз.",
+  },
+  widgetSettings: {
+    title: "Настройки виджета",
+    description: "Как выглядит кнопка Snapbug и какие данные маскируются до отправки отчёта из браузера.",
+    position: {
+      label: "Положение кнопки",
+      bottomRight: "Снизу справа",
+      bottomLeft: "Снизу слева",
+    },
+    buttonLabel: {
+      label: "Подпись кнопки",
+    },
+    theme: {
+      label: "Тема",
+      auto: "Авто",
+      light: "Светлая",
+      dark: "Тёмная",
+    },
+    accent: {
+      label: "Акцентный цвет",
+      swatchLabel: (color: string) => `Акцент ${color}`,
+    },
+    background: {
+      label: "Фон окна",
+    },
+    text: {
+      label: "Текст окна",
+    },
+    mutedText: {
+      label: "Приглушённый текст",
+    },
+    hexColor: {
+      clear: "Сбросить",
+      defaultHint: "По умолчанию",
+      hueSlider: "Оттенок",
+      hexInput: "Цвет в hex",
+    },
+    font: {
+      label: "Шрифт",
+      default: "По умолчанию",
+      systemUi: "Системный",
+      georgia: "Georgia",
+      monospace: "Моно",
+    },
+    domainsAndMaskingAdmin: "Домены и маскирование может менять только администратор.",
+    allowedDomains: {
+      label: "Разрешённые домены",
+      description: "Хосты, с которых виджет может отправлять отчёты. Пустой список разрешает любой origin.",
+      placeholder: "Добавить домен",
+      removeTag: (domain: string) => `Удалить ${domain}`,
+    },
+    privacy: {
+      heading: "Конфиденциальность",
+      maskText: {
+        label: "Маскировать текст",
+        description: "Скрывать видимый текст страницы в записи сессии и убирать его из логов отчёта.",
+      },
+      maskInputs: {
+        label: "Маскировать поля",
+        description: "Скрывать значения полей в записи сессии и убирать их из логов отчёта.",
+      },
+      blockSelectors: {
+        label: "Исключить CSS-селекторы",
+        description: "Не включать совпавшие элементы в запись сессии и в проверку маскирования логов.",
+        placeholder: "Добавить селектор",
+        removeTag: (selector: string) => `Удалить ${selector}`,
+      },
+    },
+  },
+  testReport: {
+    title: "3. Тестовый отчёт",
+    description: "Отправьте пробный отчёт из приложения и убедитесь, что виджет достучался до Snapbug.",
+    connection: {
+      connected: "Подключено",
+      waiting: "Ждём тестовый отчёт с вашего сайта.",
+      notConnected: "Нет подключения",
+    },
+  },
+} as const;
+
+export const texts: typeof en = localize(en, ru as never);

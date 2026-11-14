@@ -5,6 +5,7 @@ export class User {
   readonly name: UserPersistedType["name"];
   readonly email: UserPersistedType["email"];
   readonly passwordHash: UserPersistedType["passwordHash"];
+  readonly interfaceLanguage: UserPersistedType["interfaceLanguage"];
   readonly passwordChangedAt: UserPersistedType["passwordChangedAt"];
   readonly onboardingCompletedAt: UserPersistedType["onboardingCompletedAt"];
   readonly createdAt: UserPersistedType["createdAt"];
@@ -15,6 +16,7 @@ export class User {
     this.name = user.name;
     this.email = user.email;
     this.passwordHash = user.passwordHash;
+    this.interfaceLanguage = user.interfaceLanguage;
     this.passwordChangedAt = user.passwordChangedAt;
     this.onboardingCompletedAt = user.onboardingCompletedAt;
     this.createdAt = user.createdAt;
@@ -41,6 +43,7 @@ export class User {
       name: this.name,
       email: this.email,
       passwordHash: this.passwordHash,
+      interfaceLanguage: this.interfaceLanguage,
       passwordChangedAt: this.passwordChangedAt,
       onboardingCompletedAt: this.onboardingCompletedAt,
       createdAt: this.createdAt,

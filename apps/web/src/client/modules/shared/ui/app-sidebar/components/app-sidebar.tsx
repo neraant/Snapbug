@@ -9,6 +9,7 @@ import { type PropsWithChildren, Suspense, useMemo } from "react";
 import { ActiveOrganizationProvider } from "@/client/modules/shared/components/active-organization-provider";
 import { texts as sharedTexts } from "@/client/modules/shared/consts/texts.const";
 import { useProjectScopeSearchParam } from "@/client/modules/shared/hooks/use-project-scope-search-param";
+import { useInterfaceLanguage } from "@/client/modules/shared/locale/use-interface-language";
 import { AppSidebarHeader } from "@/client/modules/shared/ui/app-sidebar/components/app-sidebar-header";
 import { AppSidebarOrganizationSwitcher } from "@/client/modules/shared/ui/app-sidebar/components/app-sidebar-organization-switcher";
 import { AppSidebarProjectScope } from "@/client/modules/shared/ui/app-sidebar/components/app-sidebar-project-scope";
@@ -36,6 +37,7 @@ export function AppSidebar({
   children,
 }: AppSidebarProps) {
   const pathname = usePathname();
+  const language = useInterfaceLanguage();
   const { projectId } = useProjectScopeSearchParam();
   const sidebarItems = useMemo(() => {
     const items = isAdmin ? [...appSidebarItems, ...appSidebarAdminItems] : appSidebarItems;
@@ -44,7 +46,7 @@ export function AppSidebar({
       ...item,
       href: buildPathWithProjectScopeSearchParam(item.href, projectId),
     }));
-  }, [isAdmin, projectId]);
+  }, [isAdmin, language, projectId]);
 
   return (
     <ActiveOrganizationProvider organizationId={activeOrganizationId}>

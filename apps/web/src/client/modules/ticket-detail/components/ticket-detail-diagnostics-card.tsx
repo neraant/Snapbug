@@ -17,9 +17,27 @@ import {
 } from "@/client/modules/ticket-detail/utils/format-ticket-detail-diagnostics.util";
 
 const diagnosticsTabItems = [
-  { value: ticketDetailDiagnosticsTabs.console, label: texts.diagnostics.console, icon: TerminalIcon },
-  { value: ticketDetailDiagnosticsTabs.network, label: texts.diagnostics.network, icon: GlobeIcon },
-  { value: ticketDetailDiagnosticsTabs.customContext, label: texts.diagnostics.customContext, icon: BracesIcon },
+  {
+    value: ticketDetailDiagnosticsTabs.console,
+    get label() {
+      return texts.diagnostics.console;
+    },
+    icon: TerminalIcon,
+  },
+  {
+    value: ticketDetailDiagnosticsTabs.network,
+    get label() {
+      return texts.diagnostics.network;
+    },
+    icon: GlobeIcon,
+  },
+  {
+    value: ticketDetailDiagnosticsTabs.customContext,
+    get label() {
+      return texts.diagnostics.customContext;
+    },
+    icon: BracesIcon,
+  },
 ];
 
 type TicketDetailDiagnosticsCardProps = {

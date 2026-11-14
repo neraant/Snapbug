@@ -1,6 +1,8 @@
 import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
 
-export const texts = {
+import { localize } from "@/client/modules/shared/locale/interface-language";
+
+const en = {
   overview: "Overview",
   tickets: "Tickets",
   sdkSetup: "SDK Setup",
@@ -30,3 +32,36 @@ export const texts = {
     },
   },
 } as const;
+
+const ru = {
+  overview: "Обзор",
+  tickets: "Тикеты",
+  sdkSetup: "Настройка SDK",
+  mcp: "MCP",
+  playground: "Песочница",
+  projects: "Проекты",
+  team: "Команда",
+  settings: "Настройки",
+  activity: "Журнал",
+  organization: {
+    ariaLabel: "Организация",
+    create: "Создать организацию",
+    empty: "Нет организации",
+    switchError: "Не удалось переключить организацию. Попробуйте ещё раз.",
+    role: {
+      [UserRole.ADMIN]: "Администратор",
+      [UserRole.USER]: "Участник",
+    },
+    dialog: {
+      title: "Создать организацию",
+      description: "Проекты и тикеты этой организации не смешиваются с остальными.",
+      nameLabel: "Название",
+      namePlaceholder: "Acme",
+      cancel: "Отмена",
+      submit: "Создать",
+      error: "Не удалось создать организацию. Попробуйте ещё раз.",
+    },
+  },
+} as const;
+
+export const texts: typeof en = localize(en, ru as never);

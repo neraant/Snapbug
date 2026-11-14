@@ -28,6 +28,7 @@ const assignee = {
   id: assigneeId,
   name: "Jane Doe",
   email: "jane@example.com",
+  interfaceLanguage: "en" as const,
   onboardingCompletedAt: null,
 };
 

@@ -18,6 +18,7 @@ export class UpdateUserUseCase {
       ...(input.name !== undefined && { name: input.name }),
       ...(input.email !== undefined && { email: input.email }),
       ...(input.passwordHash !== undefined && { passwordHash: input.passwordHash }),
+      ...(input.interfaceLanguage !== undefined && { interfaceLanguage: input.interfaceLanguage }),
       ...(input.onboardingCompletedAt !== undefined && { onboardingCompletedAt: input.onboardingCompletedAt }),
     });
     await this.userRepository.save(updatedUser);

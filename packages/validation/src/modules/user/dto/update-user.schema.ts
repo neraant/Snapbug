@@ -1,3 +1,4 @@
+import { interfaceLanguageSchema } from "@workspace/validation/modules/user/consts/interface-language.const";
 import { z } from "zod";
 
 export const updateUserInputDtoSchema = z
@@ -6,6 +7,7 @@ export const updateUserInputDtoSchema = z
     name: z.string().min(1).nullable().optional(),
     email: z.email().optional(),
     passwordHash: z.string().min(1).optional(),
+    interfaceLanguage: interfaceLanguageSchema.optional(),
     onboardingCompletedAt: z.coerce.date().nullable().optional(),
   })
   .refine(
@@ -13,6 +15,7 @@ export const updateUserInputDtoSchema = z
       data.name !== undefined ||
       data.email !== undefined ||
       data.passwordHash !== undefined ||
+      data.interfaceLanguage !== undefined ||
       data.onboardingCompletedAt !== undefined,
     {
       message: "At least one field must be provided",
