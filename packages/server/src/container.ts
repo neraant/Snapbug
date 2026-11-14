@@ -12,7 +12,6 @@ import { VerifyCredentialsUseCase } from "@workspace/server/modules/auth/applica
 import { ResetPasswordRepository } from "@workspace/server/modules/auth/repository/reset-password.repository";
 import { AuthService } from "@workspace/server/modules/auth/service/auth.service";
 import { BugReportAdapter } from "@workspace/server/modules/bug-report/adapter/bug-report.adapter";
-import { LocalFileStorageAdapter } from "@workspace/server/modules/bug-report/adapter/local-file-storage.adapter";
 import { VercelBlobFileStorageAdapter } from "@workspace/server/modules/bug-report/adapter/vercel-blob-file-storage.adapter";
 import { CountOpenByAssigneeUseCase } from "@workspace/server/modules/bug-report/application/count-open-by-assignee.use-case";
 import { CountOpenByProjectUseCase } from "@workspace/server/modules/bug-report/application/count-open-by-project.use-case";
@@ -112,9 +111,7 @@ const projectService = new ProjectService(projectRepository, auditLogService);
 const apiKeyService = new ApiKeyService(apiKeyRepository, auditLogService);
 const widgetIngestOriginService = new WidgetIngestOriginService();
 const widgetUserAgentService = new WidgetUserAgentService();
-const bugReportFileStorage = env.BLOB_READ_WRITE_TOKEN
-  ? new VercelBlobFileStorageAdapter(env.BLOB_READ_WRITE_TOKEN)
-  : new LocalFileStorageAdapter();
+const bugReportFileStorage = new VercelBlobFileStorageAdapter(env.BLOB_READ_WRITE_TOKEN);
 
 const projectAccessService = new ProjectAccessService(projectAccessRepository, auditLogService);
 const membershipAdapter = new MembershipAdapter(membershipRepository, projectAccessRepository, projectAccessService);

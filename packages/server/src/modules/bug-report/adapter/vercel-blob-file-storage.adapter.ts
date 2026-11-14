@@ -21,22 +21,24 @@ function contentTypeForReplayKey(key: string): string {
 }
 
 export class VercelBlobFileStorageAdapter implements FileStoragePort {
-  constructor(private readonly token: string) {}
+  constructor(private readonly token: string | undefined) {}
 
   async saveBugReportScreenshot(input: SaveBugReportScreenshotInput): Promise<string> {
+    const token = this.requireToken();
     const key = `bug-reports/${input.reportId}/screenshot.${extensionForContentType(input.contentType)}`;
     await put(key, Buffer.from(input.bytes), {
       access: "private",
       contentType: input.contentType,
       addRandomSuffix: false,
       allowOverwrite: true,
-      token: this.token,
+      token,
     });
     return key;
   }
 
   async readBugReportScreenshot(key: string) {
-    const result = await get(key, { access: "private", token: this.token });
+    const token = this.requireToken();
+    const result = await get(key, { access: "private", token });
     if (!result) {
       throw new Error(`Screenshot not found: ${key}`);
     }
@@ -47,19 +49,21 @@ export class VercelBlobFileStorageAdapter implements FileStoragePort {
   }
 
   async saveBugReportReplay(input: SaveBugReportReplayInput): Promise<string> {
+    const token = this.requireToken();
     const key = `bug-reports/${input.reportId}/replay.json.gz`;
     await put(key, Buffer.from(input.bytes), {
       access: "private",
       contentType: input.contentType,
       addRandomSuffix: false,
       allowOverwrite: true,
-      token: this.token,
+      token,
     });
     return key;
   }
 
   async readBugReportReplay(key: string) {
-    const result = await get(key, { access: "private", token: this.token });
+    const token = this.requireToken();
+    const result = await get(key, { access: "private", token });
     if (!result) {
       throw new Error(`Replay not found: ${key}`);
     }
@@ -70,6 +74,14 @@ export class VercelBlobFileStorageAdapter implements FileStoragePort {
   }
 
   async delete(key: string): Promise<void> {
-    await del(key, { token: this.token });
+    const token = this.requireToken();
+    await del(key, { token });
+  }
+
+  private requireToken(): string {
+    if (!this.token) {
+      throw new Error("BLOB_READ_WRITE_TOKEN is not set");
+    }
+    return this.token;
   }
 }
