@@ -1,5 +1,5 @@
 import { db } from "@workspace/database";
-import { bugReportTable } from "@workspace/database/schema";
+import { bugReportTable, commentTable } from "@workspace/database/schema";
 import type { ProjectRow } from "@workspace/database/seed/project";
 import type { UserRow } from "@workspace/database/seed/user";
 import { BugReportSeverity } from "@workspace/validation/modules/bug-report/consts/bug-report-severity.const";
@@ -305,6 +305,7 @@ export async function seedBugReport(projects: ProjectRow[], users: UserRow[]) {
 
   const seededIds = bugReportData.map((bugReport) => bugReport.id);
   await db.delete(bugReportTable).where(notInArray(bugReportTable.id, seededIds));
+  await db.delete(commentTable).where(inArray(commentTable.bugReportId, seededIds));
   await db.insert(bugReportTable).values(bugReportData).onConflictDoNothing({ target: bugReportTable.id });
 
   return db.select().from(bugReportTable).where(inArray(bugReportTable.id, seededIds));
