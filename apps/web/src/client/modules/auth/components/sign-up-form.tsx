@@ -60,6 +60,10 @@ function SignUpFormFields({ invitationToken, defaultEmail = "", organizationName
 
   const invitationEmailLocked = organizationName != null;
 
+  if (!hydrated) {
+    return <SignUpFormFallback />;
+  }
+
   return (
     <Column as="form" gap="none" width="full" onSubmit={onSubmit}>
       <FieldGroup>
@@ -88,7 +92,7 @@ function SignUpFormFields({ invitationToken, defaultEmail = "", organizationName
           placeholder={texts.field.password.placeholder}
           autoComplete="new-password"
         />
-        <SubmitButton disabled={!hydrated} loading={formState.isSubmitting} size="lg" className="w-full">
+        <SubmitButton loading={formState.isSubmitting} size="lg" className="w-full">
           {texts.signUp.submit}
         </SubmitButton>
       </FieldGroup>
