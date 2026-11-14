@@ -50,6 +50,13 @@ export const appSidebarItems: SidebarItem[] = [
     },
     icon: BugPlayIcon,
   },
+  {
+    href: url.settings(),
+    get label() {
+      return texts.settings;
+    },
+    icon: SettingsIcon,
+  },
 ];
 
 export const appSidebarAdminItems: SidebarItem[] = [
@@ -66,13 +73,6 @@ export const appSidebarAdminItems: SidebarItem[] = [
       return texts.team;
     },
     icon: UsersIcon,
-  },
-  {
-    href: url.settings(),
-    get label() {
-      return texts.settings;
-    },
-    icon: SettingsIcon,
   },
   {
     href: url.activity(),
