@@ -3,6 +3,7 @@ import { Invitation } from "@workspace/server/modules/invitation/entity/invitati
 import type { MembershipPort } from "@workspace/server/modules/invitation/port/membership.port";
 import type { ProjectPort } from "@workspace/server/modules/invitation/port/project.port";
 import type { InvitationRepository } from "@workspace/server/modules/invitation/repository/invitation.repository";
+import type { InvitationService } from "@workspace/server/modules/invitation/service/invitation.service";
 import type { WithTransactionType } from "@workspace/server/shared/database/transaction.util";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
@@ -61,9 +62,21 @@ function createTransactionalDeps() {
   };
   invitationRepository.withTx.mockReturnValue(invitationRepository);
 
+  const saveWithAudit = vi.fn().mockResolvedValue(undefined);
+  const invitationService = {
+    saveWithAudit,
+    withTx: vi.fn(),
+    withActor: vi.fn(),
+  };
+  const transactionalInvitation = {
+    saveWithAudit,
+    withActor: vi.fn().mockReturnValue({ saveWithAudit }),
+  };
+  invitationService.withTx.mockReturnValue(transactionalInvitation);
+
   const withTransactionFn: WithTransactionType = vi.fn(async (callback) => await callback({} as never));
 
-  return { membershipPort, projectPort, invitationRepository, withTransactionFn };
+  return { membershipPort, projectPort, invitationRepository, invitationService, withTransactionFn };
 }
 
 describe("AcceptInvitationUseCase", () => {
@@ -74,6 +87,7 @@ describe("AcceptInvitationUseCase", () => {
       { findByUserAndOrganization: vi.fn() } as unknown as MembershipPort,
       { findManyByOrganizationId: vi.fn(), withTx: vi.fn() } as unknown as ProjectPort,
       vi.fn() as WithTransactionType,
+      { withTx: vi.fn(), withActor: vi.fn() } as unknown as InvitationService,
     );
 
     await expect(useCase.execute({ token }, userId, "invitee@company.com")).rejects.toMatchObject({
@@ -82,12 +96,14 @@ describe("AcceptInvitationUseCase", () => {
   });
 
   it("throws when the signed-in email does not match the invitation", async () => {
-    const { membershipPort, projectPort, invitationRepository, withTransactionFn } = createTransactionalDeps();
+    const { membershipPort, projectPort, invitationRepository, invitationService, withTransactionFn } =
+      createTransactionalDeps();
     const useCase = new AcceptInvitationUseCase(
       invitationRepository as unknown as InvitationRepository,
       membershipPort as unknown as MembershipPort,
       projectPort as unknown as ProjectPort,
       withTransactionFn,
+      invitationService as unknown as InvitationService,
     );
 
     await expect(useCase.execute({ token }, userId, "other@company.com")).rejects.toMatchObject({
@@ -98,7 +114,8 @@ describe("AcceptInvitationUseCase", () => {
   });
 
   it("throws when the user is already a member of the invited organization", async () => {
-    const { membershipPort, projectPort, invitationRepository, withTransactionFn } = createTransactionalDeps();
+    const { membershipPort, projectPort, invitationRepository, invitationService, withTransactionFn } =
+      createTransactionalDeps();
     membershipPort.findByUserAndOrganization.mockResolvedValue({
       id: "1a8c69a1-1ab1-45a8-8497-eae1e506d9d1",
       userId,
@@ -111,6 +128,7 @@ describe("AcceptInvitationUseCase", () => {
       membershipPort as unknown as MembershipPort,
       projectPort as unknown as ProjectPort,
       withTransactionFn,
+      invitationService as unknown as InvitationService,
     );
 
     await expect(useCase.execute({ token }, userId, "invitee@company.com")).rejects.toMatchObject({
@@ -121,12 +139,14 @@ describe("AcceptInvitationUseCase", () => {
   });
 
   it("creates a user membership and marks the invitation accepted", async () => {
-    const { membershipPort, projectPort, invitationRepository, withTransactionFn } = createTransactionalDeps();
+    const { membershipPort, projectPort, invitationRepository, invitationService, withTransactionFn } =
+      createTransactionalDeps();
     const useCase = new AcceptInvitationUseCase(
       invitationRepository as unknown as InvitationRepository,
       membershipPort as unknown as MembershipPort,
       projectPort as unknown as ProjectPort,
       withTransactionFn,
+      invitationService as unknown as InvitationService,
     );
 
     const result = await useCase.execute({ token }, userId, "invitee@company.com");
@@ -138,19 +158,21 @@ describe("AcceptInvitationUseCase", () => {
       [projectId],
       userId,
     );
-    expect(invitationRepository.save).toHaveBeenCalledOnce();
+    expect(invitationService.saveWithAudit).toHaveBeenCalledOnce();
     expect(membershipPort.findByUserAndOrganization).toHaveBeenCalledWith({ userId, organizationId });
     expect(result.userId).toBe(userId);
     expect(result.organizationId).toBe(organizationId);
   });
 
   it("accepts an invitation when the user already belongs to another organization", async () => {
-    const { membershipPort, projectPort, invitationRepository, withTransactionFn } = createTransactionalDeps();
+    const { membershipPort, projectPort, invitationRepository, invitationService, withTransactionFn } =
+      createTransactionalDeps();
     const useCase = new AcceptInvitationUseCase(
       invitationRepository as unknown as InvitationRepository,
       membershipPort as unknown as MembershipPort,
       projectPort as unknown as ProjectPort,
       withTransactionFn,
+      invitationService as unknown as InvitationService,
     );
 
     const result = await useCase.execute({ token }, userId, "invitee@company.com");

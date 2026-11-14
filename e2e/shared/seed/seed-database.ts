@@ -3,11 +3,11 @@ import path from "node:path";
 
 const root = path.resolve(__dirname, "../../..");
 
-export function seedDatabase(): Promise<void> {
+function runDatabaseScript(script: "db:migrate" | "db:seed"): Promise<void> {
   return new Promise((resolve, reject) => {
     execFile(
       "pnpm",
-      ["--filter", "@workspace/database", "db:seed"],
+      ["--filter", "@workspace/database", script],
       {
         cwd: root,
         env: {
@@ -17,7 +17,7 @@ export function seedDatabase(): Promise<void> {
       },
       (error, stdout, stderr) => {
         if (error) {
-          reject(new Error(`Database seed failed.\n${stdout}\n${stderr}`));
+          reject(new Error(`Database ${script} failed.\n${stdout}\n${stderr}`));
           return;
         }
 
@@ -25,4 +25,9 @@ export function seedDatabase(): Promise<void> {
       },
     );
   });
+}
+
+export async function seedDatabase(): Promise<void> {
+  await runDatabaseScript("db:migrate");
+  await runDatabaseScript("db:seed");
 }

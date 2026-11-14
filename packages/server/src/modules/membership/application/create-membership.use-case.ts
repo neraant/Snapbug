@@ -1,6 +1,7 @@
 import { MembershipFactory } from "@workspace/server/modules/membership/entity/membership.factory";
 import { MembershipMapper } from "@workspace/server/modules/membership/entity/membership.mapper";
 import type { MembershipRepository } from "@workspace/server/modules/membership/repository/membership.repository";
+import type { MembershipService } from "@workspace/server/modules/membership/service/membership.service";
 import { ConflictError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import type {
@@ -10,7 +11,10 @@ import type {
 import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
 
 export class CreateMembershipUseCase {
-  constructor(private readonly membershipRepository: MembershipRepository) {}
+  constructor(
+    private readonly membershipRepository: MembershipRepository,
+    private readonly membershipService: MembershipService,
+  ) {}
 
   async execute(
     input: CreateMembershipInputDtoType,
@@ -25,7 +29,7 @@ export class CreateMembershipUseCase {
       organizationId: input.organizationId,
       role,
     });
-    await this.membershipRepository.save(membership);
+    await this.membershipService.withActor({ type: "user", id: userId }).saveWithAudit(membership, "Create membership");
     return MembershipMapper.toDto(membership);
   }
 }

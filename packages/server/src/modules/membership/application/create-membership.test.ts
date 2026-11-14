@@ -2,6 +2,7 @@ import { CreateMembershipUseCase } from "@workspace/server/modules/membership/ap
 import { Membership } from "@workspace/server/modules/membership/entity/membership.entity";
 import { MembershipMapper } from "@workspace/server/modules/membership/entity/membership.mapper";
 import type { MembershipRepository } from "@workspace/server/modules/membership/repository/membership.repository";
+import type { MembershipService } from "@workspace/server/modules/membership/service/membership.service";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
 import { describe, expect, it, vi } from "vitest";
@@ -13,14 +14,17 @@ describe("CreateMembershipUseCase", () => {
   it("creates an admin membership when the user is not already in the organization", async () => {
     const membershipRepository = {
       findByUserAndOrganization: vi.fn().mockResolvedValue(null),
-      save: vi.fn().mockResolvedValue(undefined),
     };
-    const useCase = new CreateMembershipUseCase(membershipRepository as unknown as MembershipRepository);
+    const saveWithAudit = vi.fn().mockResolvedValue(undefined);
+    const useCase = new CreateMembershipUseCase(
+      membershipRepository as unknown as MembershipRepository,
+      { withActor: vi.fn().mockReturnValue({ saveWithAudit }) } as unknown as MembershipService,
+    );
 
     const result = await useCase.execute({ organizationId }, userId);
 
-    expect(membershipRepository.save).toHaveBeenCalledOnce();
-    const saved = membershipRepository.save.mock.calls[0]?.[0];
+    expect(saveWithAudit).toHaveBeenCalledOnce();
+    const saved = saveWithAudit.mock.calls[0]?.[0];
     expect(result).toEqual(MembershipMapper.toDto(saved));
     expect(saved.userId).toBe(userId);
     expect(saved.role).toBe(UserRole.ADMIN);
@@ -38,7 +42,10 @@ describe("CreateMembershipUseCase", () => {
       findByUserAndOrganization: vi.fn().mockResolvedValue(existing),
       save: vi.fn(),
     };
-    const useCase = new CreateMembershipUseCase(membershipRepository as unknown as MembershipRepository);
+    const useCase = new CreateMembershipUseCase(
+      membershipRepository as unknown as MembershipRepository,
+      { withActor: vi.fn().mockReturnValue({ saveWithAudit: vi.fn() }) } as unknown as MembershipService,
+    );
 
     await expect(useCase.execute({ organizationId }, userId)).rejects.toMatchObject({
       errorCode: ERROR_CODES.MEMBERSHIP_ALREADY_EXISTS,

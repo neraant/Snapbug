@@ -53,12 +53,16 @@ type SignUpFormFieldsInternalProps = SignUpFormFieldsProps & {
 };
 
 function SignUpFormFields({ invitationToken, defaultEmail = "", organizationName }: SignUpFormFieldsInternalProps) {
-  const { control, onSubmit, formState } = useSignUpForm({
+  const { control, hydrated, onSubmit, formState } = useSignUpForm({
     invitationToken,
     defaultEmail,
   });
 
   const invitationEmailLocked = organizationName != null;
+
+  if (!hydrated) {
+    return <SignUpFormFallback />;
+  }
 
   return (
     <Column as="form" gap="none" width="full" onSubmit={onSubmit}>
