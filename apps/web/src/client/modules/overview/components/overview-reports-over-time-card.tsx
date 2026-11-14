@@ -19,20 +19,39 @@ type OverviewReportsOverTimeCardProps = {
 };
 
 const seriesItems = [
-  { value: reportsOverTimeSeriesId.ALL, label: texts.chart.reportsOverTime.series.all },
-  { value: reportsOverTimeSeriesId.CREATED, label: texts.chart.reportsOverTime.series.created },
-  { value: reportsOverTimeSeriesId.RESOLVED, label: texts.chart.reportsOverTime.series.resolved },
+  {
+    value: reportsOverTimeSeriesId.ALL,
+    get label() {
+      return texts.chart.reportsOverTime.series.all;
+    },
+  },
+  {
+    value: reportsOverTimeSeriesId.CREATED,
+    get label() {
+      return texts.chart.reportsOverTime.series.created;
+    },
+  },
+  {
+    value: reportsOverTimeSeriesId.RESOLVED,
+    get label() {
+      return texts.chart.reportsOverTime.series.resolved;
+    },
+  },
 ];
 
 const seriesCatalog = [
   {
     key: reportsOverTimeSeriesId.CREATED,
-    label: texts.chart.reportsOverTime.legend.created,
+    get label() {
+      return texts.chart.reportsOverTime.legend.created;
+    },
     color: reportsOverTimeSeriesColor.created,
   },
   {
     key: reportsOverTimeSeriesId.RESOLVED,
-    label: texts.chart.reportsOverTime.legend.resolved,
+    get label() {
+      return texts.chart.reportsOverTime.legend.resolved;
+    },
     color: reportsOverTimeSeriesColor.resolved,
   },
 ];

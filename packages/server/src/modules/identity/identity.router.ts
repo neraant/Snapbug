@@ -13,4 +13,10 @@ export const identityRouter = os.router({
   findUserByEmail: authed.findUserByEmail.handler(
     async ({ input }) => await container.identity.findUserByEmail.execute(input.email),
   ),
+  updateInterfaceLanguage: authed.updateInterfaceLanguage.handler(
+    async ({ input, context }) => await container.identity.updateInterfaceLanguage.execute(context.user.id, input),
+  ),
+  findCurrentUser: authed.findCurrentUser.handler(
+    async ({ context }) => await container.identity.findCurrentUser.execute(context.user.id),
+  ),
 });

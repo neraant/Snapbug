@@ -18,21 +18,49 @@ type TicketBoardFiltersProps = {
 };
 
 const periodOptions = [
-  { value: "all", periodDays: ticketBoardPeriodDays.all, label: texts.filter.period.all },
-  { value: "7", periodDays: ticketBoardPeriodDays.last7, label: texts.filter.period.last7Days },
-  { value: "30", periodDays: ticketBoardPeriodDays.last30, label: texts.filter.period.last30Days },
-  { value: "90", periodDays: ticketBoardPeriodDays.last90, label: texts.filter.period.last90Days },
+  {
+    value: "all",
+    periodDays: ticketBoardPeriodDays.all,
+    get label() {
+      return texts.filter.period.all;
+    },
+  },
+  {
+    value: "7",
+    periodDays: ticketBoardPeriodDays.last7,
+    get label() {
+      return texts.filter.period.last7Days;
+    },
+  },
+  {
+    value: "30",
+    periodDays: ticketBoardPeriodDays.last30,
+    get label() {
+      return texts.filter.period.last30Days;
+    },
+  },
+  {
+    value: "90",
+    periodDays: ticketBoardPeriodDays.last90,
+    get label() {
+      return texts.filter.period.last90Days;
+    },
+  },
 ] as const;
 
 const statusOptions = ticketBoardStatuses.map((status) => ({
   value: status,
-  label: texts.column[status].label,
+  get label() {
+    return texts.column[status].label;
+  },
   leading: <StatusIndicator status={status} />,
 }));
 
 const severityOptions = bugReportSeverities.map((severity) => ({
   value: severity,
-  label: texts.severityLabels[severity],
+  get label() {
+    return texts.severityLabels[severity];
+  },
 }));
 
 export function TicketBoardFiltersBar({ filters, onFiltersChange, onClearFilters }: TicketBoardFiltersProps) {

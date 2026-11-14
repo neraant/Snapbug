@@ -1,7 +1,9 @@
 import { BugReportSeverity } from "@workspace/validation/modules/bug-report/consts/bug-report-severity.const";
 import { BugReportStatus } from "@workspace/validation/modules/bug-report/consts/bug-report-status.const";
 
-export const texts = {
+import { localize } from "@/client/modules/shared/locale/interface-language";
+
+const en = {
   issue: {
     descriptionTitle: "Issue description",
     emptyDescription: "No description provided.",
@@ -77,3 +79,82 @@ export const texts = {
     updateFailed: "Could not update ticket",
   },
 } as const;
+
+const ru = {
+  issue: {
+    descriptionTitle: "Описание проблемы",
+    emptyDescription: "Описание не указано.",
+  },
+  comments: {
+    title: "Комментарии",
+    description: "Внутренние заметки для команды. Автор отчёта их не видит.",
+    empty: "Комментариев пока нет.",
+    fieldLabel: "Комментарий",
+    submit: "Добавить комментарий",
+    unknownAuthor: "Участник",
+    submitError: "Не удалось добавить комментарий.",
+  },
+  screenshot: {
+    title: "Скриншот",
+    empty: "Скриншот не приложен.",
+    imageAlt: "Скриншот отчёта об ошибке",
+  },
+  replay: {
+    title: "Запись сессии",
+    empty: "Запись сессии не приложена.",
+    loadFailed: "Не удалось загрузить запись сессии.",
+    playSession: "Воспроизвести запись сессии",
+  },
+  diagnostics: {
+    title: "Техническая диагностика",
+    console: "Консоль",
+    network: "Сеть",
+    customContext: "Пользовательский контекст",
+    emptyConsole: "Логи консоли не записаны.",
+    emptyNetwork: "Сетевые логи не записаны.",
+    emptyCustomContext: "Пользовательский контекст не передан.",
+    ariaLabel: "Вид диагностики",
+  },
+  sidebar: {
+    propertiesTitle: "Свойства тикета",
+    environmentTitle: "Окружение клиента",
+    status: "Статус",
+    severity: "Важность",
+    assignee: "Исполнитель",
+    project: "Проект",
+    reporter: "Автор",
+    created: "Создан",
+    updated: "Обновлён",
+    browser: "Браузер",
+    os: "OS",
+    device: "Устройство",
+    viewport: "Область просмотра",
+    pageUrl: "URL страницы",
+    unassigned: "Не назначен",
+    copyUrl: "Копировать URL",
+    copiedUrl: "Скопировано",
+  },
+  header: {
+    statusAriaLabel: "Статус тикета",
+    severityAriaLabel: "Важность тикета",
+  },
+  statusLabels: {
+    [BugReportStatus.NEW]: "Новые",
+    [BugReportStatus.IN_PROGRESS]: "В работе",
+    [BugReportStatus.RESOLVED]: "Решено",
+    [BugReportStatus.CLOSED]: "Закрыто",
+  },
+  severityLabels: {
+    [BugReportSeverity.CRITICAL]: "Критическая",
+    [BugReportSeverity.HIGH]: "Высокая",
+    [BugReportSeverity.MEDIUM]: "Средняя",
+    [BugReportSeverity.LOW]: "Низкая",
+  },
+  toast: {
+    statusUpdated: "Статус тикета обновлён",
+    severityUpdated: "Важность тикета обновлена",
+    updateFailed: "Не удалось обновить тикет",
+  },
+} as const;
+
+export const texts: typeof en = localize(en, ru as never);

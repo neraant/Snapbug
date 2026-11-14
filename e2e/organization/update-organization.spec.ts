@@ -28,7 +28,7 @@ test("an administrator saves the organization name and retention period", async 
 
   await page.getByRole("textbox", { name: "Name" }).fill("Acme Studio");
   await page.getByRole("textbox", { name: "Retention period" }).fill("45");
-  await page.getByRole("button", { name: "Save" }).click();
+  await page.getByRole("button", { name: "Save", exact: true }).click();
 
   await expect(page.getByText("Organization settings saved")).toBeVisible({ timeout: 30_000 });
   await expect(page.getByRole("textbox", { name: "Name" })).toHaveValue("Acme Studio");

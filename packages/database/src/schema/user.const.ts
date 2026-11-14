@@ -1,3 +1,4 @@
+import type { InterfaceLanguage } from "@workspace/validation/modules/user/consts/interface-language.const";
 import { pgTable, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
 
 export const userTable = pgTable(
@@ -7,6 +8,7 @@ export const userTable = pgTable(
     name: text("name"),
     email: text("email").notNull(),
     passwordHash: text("password_hash").notNull(),
+    interfaceLanguage: text("interface_language").$type<InterfaceLanguage>().notNull().default("en"),
     passwordChangedAt: timestamp("password_changed_at", { withTimezone: true, mode: "date" }),
     onboardingCompletedAt: timestamp("onboarding_completed_at", { withTimezone: true, mode: "date" }),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull(),

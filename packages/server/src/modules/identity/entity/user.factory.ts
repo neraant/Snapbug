@@ -9,6 +9,7 @@ export abstract class UserFactory {
       name: user.name ?? null,
       email: user.email,
       passwordHash: user.passwordHash,
+      interfaceLanguage: "en",
       passwordChangedAt: null,
       onboardingCompletedAt: null,
       createdAt: new Date(),

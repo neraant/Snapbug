@@ -41,7 +41,9 @@ import { CommentRepository } from "@workspace/server/modules/comment/repository/
 import { CommentService } from "@workspace/server/modules/comment/service/comment.service";
 import { UserAdapter } from "@workspace/server/modules/identity/adapter/user.adapter";
 import { CreateUserUseCase } from "@workspace/server/modules/identity/application/create-user.use-case";
+import { FindUserUseCase } from "@workspace/server/modules/identity/application/find-user.use-case";
 import { FindUserByEmailUseCase } from "@workspace/server/modules/identity/application/find-user-by-email.use-case";
+import { UpdateInterfaceLanguageUseCase } from "@workspace/server/modules/identity/application/update-interface-language.use-case";
 import { UserRepository } from "@workspace/server/modules/identity/repository/user.repository";
 import { AcceptInvitationUseCase } from "@workspace/server/modules/invitation/application/accept-invitation.use-case";
 import { FindInvitationByTokenUseCase } from "@workspace/server/modules/invitation/application/find-invitation-by-token.use-case";
@@ -164,6 +166,8 @@ const replaceMembershipProjectAccess = new ReplaceMembershipProjectAccessUseCase
 
 const createUser = new CreateUserUseCase(userRepository);
 const findUserByEmail = new FindUserByEmailUseCase(userRepository);
+const findCurrentUser = new FindUserUseCase(userRepository);
+const updateInterfaceLanguage = new UpdateInterfaceLanguageUseCase(userRepository);
 
 const createProject = new CreateProjectUseCase(membershipAdapter, projectService, withTransaction);
 const findProjects = new FindProjectsUseCase(membershipAdapter, projectRepository);
@@ -336,7 +340,7 @@ export const container = {
     findMembershipProjectAccess,
     replaceMembershipProjectAccess,
   },
-  identity: { createUser, findUserByEmail },
+  identity: { createUser, findUserByEmail, findCurrentUser, updateInterfaceLanguage },
   project: { createProject, findProjects, updateProject, findProjectWidgetSetting, updateProjectWidgetSetting },
   organization: {
     findOnboarding,

@@ -16,7 +16,6 @@ import {
 import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
 import { projectWidgetSettingFontValues } from "@workspace/validation/shared/project-widget-setting-font.schema";
 import { InfoIcon } from "lucide-react";
-import { useMemo } from "react";
 
 import { SdkSetupWidgetColorPicker } from "@/client/modules/sdk-setup/components/sdk-setup-widget-color-picker";
 import { SdkSetupWidgetSettingField } from "@/client/modules/sdk-setup/components/sdk-setup-widget-setting-field";
@@ -56,38 +55,28 @@ export function SdkSetupWidgetSettingsCard({ projectId }: SdkSetupWidgetSettings
     commitButtonLabel,
   } = useSdkSetupWidgetSetting(projectId);
 
-  const positionItems = useMemo(
-    () => [
-      { value: "bottom-right", label: texts.widgetSettings.position.bottomRight },
-      { value: "bottom-left", label: texts.widgetSettings.position.bottomLeft },
-    ],
-    [],
-  );
+  const positionItems = [
+    { value: "bottom-right" as const, label: texts.widgetSettings.position.bottomRight },
+    { value: "bottom-left" as const, label: texts.widgetSettings.position.bottomLeft },
+  ];
 
-  const themeItems = useMemo(
-    () => [
-      { value: "auto", label: texts.widgetSettings.theme.auto },
-      { value: "light", label: texts.widgetSettings.theme.light },
-      { value: "dark", label: texts.widgetSettings.theme.dark },
-    ],
-    [],
-  );
+  const themeItems = [
+    { value: "auto" as const, label: texts.widgetSettings.theme.auto },
+    { value: "light" as const, label: texts.widgetSettings.theme.light },
+    { value: "dark" as const, label: texts.widgetSettings.theme.dark },
+  ];
 
-  const fontItems = useMemo(
-    () =>
-      projectWidgetSettingFontValues.map((value) => ({
-        value,
-        label:
-          value === "default"
-            ? texts.widgetSettings.font.default
-            : value === "system-ui"
-              ? texts.widgetSettings.font.systemUi
-              : value === "georgia"
-                ? texts.widgetSettings.font.georgia
-                : texts.widgetSettings.font.monospace,
-      })),
-    [],
-  );
+  const fontItems = projectWidgetSettingFontValues.map((value) => ({
+    value,
+    label:
+      value === "default"
+        ? texts.widgetSettings.font.default
+        : value === "system-ui"
+          ? texts.widgetSettings.font.systemUi
+          : value === "georgia"
+            ? texts.widgetSettings.font.georgia
+            : texts.widgetSettings.font.monospace,
+  }));
 
   return (
     <Panel>

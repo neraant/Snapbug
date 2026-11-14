@@ -10,9 +10,15 @@ type SdkSetupTestReportStatusRowProps = {
 };
 
 const statusLabel: Record<SdkSetupTestReportConnectionState, string> = {
-  connected: texts.testReport.connection.connected,
-  listening: texts.testReport.connection.waiting,
-  "not-connected": texts.testReport.connection.notConnected,
+  get connected() {
+    return texts.testReport.connection.connected;
+  },
+  get listening() {
+    return texts.testReport.connection.waiting;
+  },
+  get "not-connected"() {
+    return texts.testReport.connection.notConnected;
+  },
 };
 
 const statusDotClassName = "size-2 shrink-0 rounded-full animate-pulse";
