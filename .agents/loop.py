@@ -725,12 +725,19 @@ def release_worktree(task_id: str, keep: bool) -> None:
     if not path.exists():
         return
     current = tree()
-    git(BASE, ["worktree", "remove", "--force", str(path)])
-    git(BASE, ["worktree", "prune"])
+    git_run(BASE, ["worktree", "remove", "--force", str(path)])
+    git_run(BASE, ["worktree", "prune"])
     # gh and git use this path as cwd. A removed worktree makes the next
     # subprocess fail with FileNotFoundError before it can start.
     if current == path:
         use_tree(BASE)
+    # macOS .DS_Store and other untracked files can make `worktree remove` fail
+    # with "Directory not empty" even after git drops the worktree registration.
+    if path.exists():
+        remove_tree(path)
+        git_run(BASE, ["worktree", "prune"])
+    if path.exists():
+        raise LoopError(f"could not remove {path}")
     say(f"{task_id} worktree removed")
 
 
