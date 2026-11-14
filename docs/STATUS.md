@@ -33,11 +33,11 @@ Do not start tasks marked TBD: an implementer agent must not take them.
 - P-07 the activity log for every application-object change: who, when, which object, and what changed.
 - P-10 screenshot and replay files in the seed, stored in Blob.
 - P-11 an ingest rate limit.
+- P-12 a hashed invitation token.
 - P-13 passwords always masked.
 
 ## Open
 
-- P-12 a hashed invitation token.
 - P-14 reproduction steps on the form.
 - P-15 an end-to-end run.
 - P-16 interface language: English and Russian only, with a switch in settings.
