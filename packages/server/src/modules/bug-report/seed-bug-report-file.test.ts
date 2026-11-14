@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import { gunzipSync } from "node:zlib";
 
 import { seedBugReportFile } from "@workspace/server/modules/bug-report/seed-bug-report-file";
 import { describe, expect, it, vi } from "vitest";
@@ -36,6 +37,9 @@ describe("seedBugReportFile", () => {
       bytes: expect.any(Uint8Array),
       contentType: "application/gzip",
     });
+    const replay = storage.saveBugReportReplay.mock.calls[0]?.[0] as { bytes: Uint8Array };
+    const events = JSON.parse(gunzipSync(replay.bytes).toString()) as unknown[];
+    expect(events.length).toBeGreaterThan(0);
   });
 
   it("does not write a row that has no file keys", async () => {

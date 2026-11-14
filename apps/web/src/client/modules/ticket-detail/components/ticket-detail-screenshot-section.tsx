@@ -23,9 +23,9 @@ export function TicketDetailScreenshotSection({ shortId }: TicketDetailScreensho
             src={buildBugReportScreenshotUrl(shortId)}
             alt={texts.screenshot.imageAlt}
             unoptimized
-            width={1}
-            height={1}
-            className="h-auto w-auto max-w-full rounded-md border border-border"
+            width={ticket.viewportWidth ?? 1280}
+            height={ticket.viewportHeight ?? 800}
+            className="h-auto w-full max-w-full rounded-md border border-border"
           />
         ) : (
           <Typography variant="text-sm" color="muted">

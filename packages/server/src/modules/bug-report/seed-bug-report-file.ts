@@ -9,7 +9,27 @@ const SEEDED_SCREENSHOT_PNG = Uint8Array.from(
   ),
 );
 
-const SEEDED_REPLAY_GZIP = Uint8Array.from(gzipSync(Buffer.from("[]")));
+const SEEDED_REPLAY_EVENTS = [
+  {
+    type: 4,
+    data: { href: "https://store.acme.test/cart", width: 1280, height: 800 },
+    timestamp: 1_700_000_000_000,
+  },
+  {
+    type: 2,
+    data: {
+      node: {
+        type: 0,
+        childNodes: [{ type: 1, name: "html", publicId: "", systemId: "", id: 2, childNodes: [] }],
+        id: 1,
+      },
+      initialOffset: { top: 0, left: 0 },
+    },
+    timestamp: 1_700_000_000_001,
+  },
+];
+
+const SEEDED_REPLAY_GZIP = Uint8Array.from(gzipSync(Buffer.from(JSON.stringify(SEEDED_REPLAY_EVENTS))));
 
 type SeedBugReportFileRow = {
   screenshotKey: string | null;
