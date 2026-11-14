@@ -34,6 +34,7 @@ function bugReportFromCreateInput(createInput: {
   shortId: string;
   title: string;
   description: string;
+  stepsToReproduce?: string | null;
   url: string;
   userAgent?: string | null;
   browser?: string | null;
@@ -438,6 +439,43 @@ describe("CreateBugReportUseCase", () => {
     expect(result.customContext).toEqual(customContext);
   });
 
+  it("persists reproduction steps from the create input", async () => {
+    const stepsToReproduce = "1. Open checkout\n2. Click Pay";
+    const apiKeyPort = {
+      findProjectByKey: vi.fn().mockResolvedValue({
+        id: projectId,
+        name: "Store",
+        organizationId,
+        createdAt: "2026-10-03T09:00:00.000Z",
+      }),
+    };
+    const projectPort = {
+      findManyByOrganizationId: vi.fn(),
+      findById: vi.fn(),
+      findWidgetSetting: vi.fn().mockResolvedValue(widgetSettingBase),
+    };
+    const createWithAudit = vi.fn(async (createInput) =>
+      bugReportFromCreateInput({
+        ...createInput,
+        shortId: "SNB-10",
+      }),
+    );
+    const withActor = vi.fn().mockReturnValue({ createWithAudit });
+    const bugReportService = { withTx: vi.fn().mockReturnValue({ withActor }) };
+    const withTransaction = vi.fn(async (callback) => await callback({}));
+    const useCase = createUseCase({
+      apiKeyPort: apiKeyPort as unknown as ApiKeyPort,
+      projectPort: projectPort as unknown as ProjectPort,
+      bugReportService: bugReportService as unknown as BugReportService,
+      withTransaction: withTransaction as WithTransactionType,
+    });
+
+    const result = await useCase.execute({ ...input, stepsToReproduce }, actor, "https://app.example.com");
+
+    expect(createWithAudit).toHaveBeenCalledWith(expect.objectContaining({ stepsToReproduce }), "Create bug report");
+    expect(result.stepsToReproduce).toBe(stepsToReproduce);
+  });
+
   it("persists screenshot key when a screenshot is provided", async () => {
     const screenshotKey = "bug-reports/6a8c69a1-1ab1-45a8-8497-eae1e506d901/screenshot.png";
     const saveBugReportScreenshot = vi.fn().mockResolvedValue(screenshotKey);
@@ -737,12 +775,10 @@ describe("CreateBugReportUseCase", () => {
     await useCase.execute(input, actor, "https://app.example.com");
 
     await expect(
-      useCase.execute(
-        { ...input, title: "Second report" },
-        actor,
-        "https://app.example.com",
-        { data: new Uint8Array([1]), mimeType: "image/png" },
-      ),
+      useCase.execute({ ...input, title: "Second report" }, actor, "https://app.example.com", {
+        data: new Uint8Array([1]),
+        mimeType: "image/png",
+      }),
     ).rejects.toMatchObject({ errorCode: ERROR_CODES.RATE_LIMITED });
 
     expect(createWithAudit).toHaveBeenCalledOnce();

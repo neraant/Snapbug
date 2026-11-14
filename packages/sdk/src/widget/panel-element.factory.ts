@@ -31,13 +31,14 @@ export function createPanelElements(trigger: HTMLButtonElement, options: Resolve
   const titleError = document.createElement("p");
   const descriptionError = document.createElement("p");
   const descriptionCounter = document.createElement("span");
+  const steps = document.createElement("textarea");
   const actions = document.createElement("div");
   const submit = document.createElement("button");
   const cancel = document.createElement("button");
 
   configurePanelShell(panel, options);
   configureFormIntro(form, header, intro, closeButton, body, heading, subtitle);
-  configureFormFields(title, titleError, descriptionError, descriptionCounter, actions, submit, cancel);
+  configureFormFields(title, titleError, descriptionError, descriptionCounter, steps, actions, submit, cancel);
 
   const success = createSuccessBlock();
   const error = createErrorBlock();
@@ -59,6 +60,7 @@ export function createPanelElements(trigger: HTMLButtonElement, options: Resolve
     description,
     descriptionError,
     descriptionCounter,
+    steps,
     severity: createSeverityControl(PANEL_SEVERITY_LABEL_ID),
     email: createEmailControl(),
     diagnostic: createDiagnosticControl(),
@@ -125,6 +127,7 @@ function configureFormFields(
   titleError: HTMLParagraphElement,
   descriptionError: HTMLParagraphElement,
   descriptionCounter: HTMLSpanElement,
+  steps: HTMLTextAreaElement,
   actions: HTMLDivElement,
   submit: HTMLButtonElement,
   cancel: HTMLButtonElement,
@@ -140,6 +143,9 @@ function configureFormFields(
   descriptionError.hidden = true;
   descriptionCounter.className = "snapbug-counter";
   descriptionCounter.setAttribute("aria-live", "polite");
+  steps.className = "snapbug-textarea";
+  steps.rows = 4;
+  steps.placeholder = COPY.stepsPlaceholder;
   actions.className = "snapbug-actions";
   submit.type = "submit";
   submit.className = "snapbug-primary";

@@ -61,6 +61,7 @@ export type CreateBugReportType = {
   shortId: string;
   title: string;
   description: string;
+  stepsToReproduce?: string | null;
   url: string;
   userAgent?: string | null;
   browser?: string | null;

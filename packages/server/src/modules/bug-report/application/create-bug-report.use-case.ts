@@ -111,6 +111,7 @@ export class CreateBugReportUseCase {
             ...(reportId ? { id: reportId } : {}),
             title: input.title,
             description: input.description,
+            ...(input.stepsToReproduce ? { stepsToReproduce: input.stepsToReproduce } : {}),
             url: input.url,
             userAgent: input.userAgent ?? null,
             browser: parsedUserAgent.browser,

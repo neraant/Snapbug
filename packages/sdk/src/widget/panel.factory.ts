@@ -28,11 +28,13 @@ function appendPanelContent(session: ReturnType<typeof createPanelElements>) {
   const titleField = createField(COPY.titleLabel, session.title);
   titleField.append(session.titleError);
   const descriptionField = createDescriptionField(session);
+  const stepsField = createField(COPY.stepsLabel, session.steps);
   const severityField = createSeverityField(session);
 
   session.body.append(
     titleField,
     descriptionField,
+    stepsField,
     severityField,
     session.email.root,
     session.screenshotBlock,

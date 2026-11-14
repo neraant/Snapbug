@@ -30,6 +30,7 @@ export const createBugReportInputDtoSchema = bugReportModelSchema
     userAgent: z.string().optional(),
     viewportWidth: z.int().optional(),
     viewportHeight: z.int().optional(),
+    stepsToReproduce: z.string().trim().min(1).optional(),
     reporterEmail: bugReportModelSchema.shape.reporterEmail.nullish(),
     customContext: bugReportCustomContextInputSchema.nullish(),
     consoleLogs: z.array(bugReportConsoleLogEntrySchema).max(BUG_REPORT_CONSOLE_LOG_MAX_ENTRIES).optional(),
