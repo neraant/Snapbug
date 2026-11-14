@@ -20,11 +20,14 @@ export function startReplayCollector() {
     ...(privacy?.blockSelectors ?? []),
   ];
 
+  const maskInputs = privacy?.maskInputs ?? true;
+
   try {
     stopRecording = record({
       emit: (event, isCheckout) => pushReplayEvent(event, isCheckout),
       checkoutEveryNms: REPLAY_CHECKOUT_INTERVAL_MS,
-      maskAllInputs: privacy?.maskInputs ?? true,
+      maskAllInputs: maskInputs,
+      maskInputOptions: { password: true },
       ...(privacy?.maskText ? { maskTextSelector: "*" } : {}),
       blockClass: WIDGET_ROOT_CLASS,
       blockSelector: blockSelectors.join(","),
