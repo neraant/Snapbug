@@ -4,6 +4,7 @@ import { InvitationMapper } from "@workspace/server/modules/invitation/entity/in
 import type { InvitationRepository } from "@workspace/server/modules/invitation/repository/invitation.repository";
 import type { AuditLogService } from "@workspace/server/shared/audit/audit-log.service";
 import type { AuditActor } from "@workspace/server/shared/audit/audit-log.types";
+import { createHash } from "crypto";
 
 const INVITATION_ENTITY_TYPE = "invitation";
 
@@ -20,6 +21,10 @@ export class InvitationService {
 
   withActor(actor: AuditActor | null): InvitationService {
     return new InvitationService(this.invitationRepository, this.auditLogService, actor);
+  }
+
+  hashToken(token: string): string {
+    return createHash("sha256").update(token).digest("hex");
   }
 
   async saveWithAudit(invitation: Invitation, action: string): Promise<void> {

@@ -2,7 +2,7 @@ export type InvitationPersistedType = {
   id: string;
   organizationId: string;
   email: string;
-  token: string;
+  tokenHash: string;
   invitedByUserId: string;
   expiresAt: Date;
   acceptedAt: Date | null;
@@ -12,7 +12,7 @@ export type InvitationPersistedType = {
 export type CreateInvitationType = {
   organizationId: string;
   email: string;
-  token: string;
+  tokenHash: string;
   invitedByUserId: string;
   expiresAt: Date;
 };

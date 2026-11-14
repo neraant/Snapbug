@@ -7,7 +7,12 @@ import type { InvitationService } from "@workspace/server/modules/invitation/ser
 import type { WithTransactionType } from "@workspace/server/shared/database/transaction.util";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
+import { createHash } from "crypto";
 import { describe, expect, it, vi } from "vitest";
+
+function hashToken(value: string): string {
+  return createHash("sha256").update(value).digest("hex");
+}
 
 const userId = "0a8c69a1-1ab1-45a8-8497-eae1e506d9d4";
 const organizationId = "2a8c69a1-1ab1-45a8-8497-eae1e506d9d1";
@@ -19,7 +24,7 @@ const pendingInvitation = new Invitation({
   id: "3a8c69a1-1ab1-45a8-8497-eae1e506d9d1",
   organizationId,
   email: "invitee@company.com",
-  token,
+  tokenHash: hashToken(token),
   invitedByUserId: "9a8c69a1-1ab1-45a8-8497-eae1e506d9d4",
   expiresAt: new Date(Date.now() + 60_000),
   acceptedAt: null,
@@ -65,6 +70,7 @@ function createTransactionalDeps() {
   const saveWithAudit = vi.fn().mockResolvedValue(undefined);
   const invitationService = {
     saveWithAudit,
+    hashToken,
     withTx: vi.fn(),
     withActor: vi.fn(),
   };
@@ -87,7 +93,7 @@ describe("AcceptInvitationUseCase", () => {
       { findByUserAndOrganization: vi.fn() } as unknown as MembershipPort,
       { findManyByOrganizationId: vi.fn(), withTx: vi.fn() } as unknown as ProjectPort,
       vi.fn() as WithTransactionType,
-      { withTx: vi.fn(), withActor: vi.fn() } as unknown as InvitationService,
+      { hashToken, withTx: vi.fn(), withActor: vi.fn() } as unknown as InvitationService,
     );
 
     await expect(useCase.execute({ token }, userId, "invitee@company.com")).rejects.toMatchObject({
@@ -151,6 +157,7 @@ describe("AcceptInvitationUseCase", () => {
 
     const result = await useCase.execute({ token }, userId, "invitee@company.com");
 
+    expect(invitationRepository.findByToken).toHaveBeenCalledWith(hashToken(token));
     expect(withTransactionFn).toHaveBeenCalledOnce();
     expect(membershipPort.createInvited).toHaveBeenCalledWith(organizationId, userId);
     expect(membershipPort.grantProjects).toHaveBeenCalledWith(

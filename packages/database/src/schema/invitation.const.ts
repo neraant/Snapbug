@@ -10,7 +10,7 @@ export const invitationTable = pgTable(
       .references(() => organizationTable.id)
       .notNull(),
     email: text("email").notNull(),
-    token: text("token").notNull(),
+    tokenHash: text("token_hash").notNull(),
     invitedByUserId: uuid("invited_by_user_id")
       .references(() => userTable.id)
       .notNull(),
@@ -20,6 +20,6 @@ export const invitationTable = pgTable(
   },
   (table) => [
     unique("invitation_organization_email_unique").on(table.organizationId, table.email),
-    unique("invitation_token_unique").on(table.token),
+    unique("invitation_token_hash_unique").on(table.tokenHash),
   ],
 );

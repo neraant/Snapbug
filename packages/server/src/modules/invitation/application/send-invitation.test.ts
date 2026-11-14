@@ -8,9 +8,14 @@ import type { WithTransactionType } from "@workspace/server/shared/database/tran
 import type { EmailService } from "@workspace/server/shared/email/service/email.service";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
+import { createHash } from "crypto";
 import type { ReactElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
+
+function hashToken(token: string): string {
+  return createHash("sha256").update(token).digest("hex");
+}
 
 const userId = "0a8c69a1-1ab1-45a8-8497-eae1e506d9d4";
 const organizationId = "2a8c69a1-1ab1-45a8-8497-eae1e506d9d1";
@@ -28,6 +33,7 @@ const withTransaction = vi.fn(async (callback: (tx: unknown) => Promise<unknown>
 function invitationService(saveWithAudit = vi.fn().mockResolvedValue(undefined)) {
   const service = {
     saveWithAudit,
+    hashToken,
     withActor: vi.fn(),
     withTx: vi.fn(),
   };
@@ -186,8 +192,13 @@ describe("SendInvitationsUseCase", () => {
       }),
     );
 
+    const saved = invitations.saveWithAudit.mock.calls[0]?.[0];
+    expect(saved.tokenHash).toBe(hashToken(tokens[0]!));
+    expect(saved.tokenHash).not.toBe(tokens[0]);
+
     const sent = emailService.send.mock.calls.find((call) => call[0].to === "new@company.com")?.[0];
     const markup = emailMarkup(sent?.react as ReactElement);
+    expect(markup).toContain(`invitation=${tokens[0]}`);
     expect(markup).toContain("Join Acme");
     expect(markup).toContain("You're invited to join Acme");
     expect(markup).not.toContain("Ada Lovelace");
