@@ -4,6 +4,11 @@ test("a member can create a personal MCP token and see the secret once", async (
   const email = `mcp-${Date.now()}@example.com`;
 
   await page.goto("/sign-up");
+  await page.waitForFunction(() => {
+    const form = document.querySelector("form");
+    if (!form) return false;
+    return Object.getOwnPropertyNames(form).some((name) => name.startsWith("__reactProps$"));
+  });
   await page.getByRole("textbox", { name: "Full Name" }).fill("MCP Member");
   await page.getByRole("textbox", { name: "Work Email" }).fill(email);
   await page.getByRole("textbox", { name: "Password" }).fill("password1");
