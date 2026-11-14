@@ -1,0 +1,28 @@
+export const texts = {
+  sample: {
+    title: "Sample checkout",
+    description: "A customer page. The widget on this page is the real Snapbug widget.",
+    email: "Email",
+    pay: "Pay",
+  },
+  capture: {
+    screenshotTitle: "Screenshot",
+    screenshotEmpty: "No screenshot attached.",
+    screenshotAlt: "Bug report screenshot",
+    replayTitle: "Session replay",
+    replayEmpty: "No session replay attached.",
+    playSession: "Play session replay",
+    environmentTitle: "Client environment",
+    browser: "Browser",
+    os: "OS",
+    device: "Device",
+    viewport: "Viewport",
+    pageUrl: "Page URL",
+    diagnosticsTitle: "Technical diagnostics",
+    console: "Console",
+    network: "Network",
+    emptyConsole: "No console logs captured.",
+    emptyNetwork: "No network logs captured.",
+    diagnosticsAria: "Diagnostics view",
+  },
+} as const;

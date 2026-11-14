@@ -14,6 +14,6 @@ export const texts = {
   },
   playground: {
     title: "Playground",
-    description: "Preview the Snapbug widget.",
+    description: "A sample customer page. Submit stays here and shows the capture.",
   },
 } as const;

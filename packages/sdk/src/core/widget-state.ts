@@ -1,9 +1,12 @@
 import type { ProjectWidgetSettingModelType } from "@workspace/validation/modules/project/dto/project-widget-setting.model";
 
+import type { WidgetPreviewCapture } from "./widget-config.types";
+
 export class WidgetState {
   apiKey: string | null = null;
   host: string | null = null;
   privacy: ProjectWidgetSettingModelType["privacy"] | null = null;
+  preview: ((capture: WidgetPreviewCapture) => void) | null = null;
   identifiedEmail: string | null = null;
   customContext: Record<string, unknown> | null = null;
   outsideClick: ((event: MouseEvent) => void) | null = null;
@@ -27,6 +30,7 @@ export class WidgetState {
     this.apiKey = null;
     this.host = null;
     this.privacy = null;
+    this.preview = null;
     this.identifiedEmail = null;
     this.customContext = null;
   }
