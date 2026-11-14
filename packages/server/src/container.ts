@@ -231,7 +231,11 @@ const sendInvitations = new SendInvitationsUseCase(
   emailService,
   withTransaction,
 );
-const findInvitationByToken = new FindInvitationByTokenUseCase(invitationRepository, organizationAdapter);
+const findInvitationByToken = new FindInvitationByTokenUseCase(
+  invitationService,
+  invitationRepository,
+  organizationAdapter,
+);
 const acceptInvitation = new AcceptInvitationUseCase(
   invitationRepository,
   membershipAdapter,

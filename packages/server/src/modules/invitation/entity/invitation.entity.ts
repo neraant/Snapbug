@@ -4,7 +4,7 @@ export class Invitation {
   readonly id: InvitationPersistedType["id"];
   readonly organizationId: InvitationPersistedType["organizationId"];
   readonly email: InvitationPersistedType["email"];
-  readonly token: InvitationPersistedType["token"];
+  readonly tokenHash: InvitationPersistedType["tokenHash"];
   readonly invitedByUserId: InvitationPersistedType["invitedByUserId"];
   readonly expiresAt: InvitationPersistedType["expiresAt"];
   readonly acceptedAt: InvitationPersistedType["acceptedAt"];
@@ -14,7 +14,7 @@ export class Invitation {
     this.id = invitation.id;
     this.organizationId = invitation.organizationId;
     this.email = invitation.email;
-    this.token = invitation.token;
+    this.tokenHash = invitation.tokenHash;
     this.invitedByUserId = invitation.invitedByUserId;
     this.expiresAt = invitation.expiresAt;
     this.acceptedAt = invitation.acceptedAt;
@@ -37,7 +37,7 @@ export class Invitation {
       id: this.id,
       organizationId: this.organizationId,
       email: this.email,
-      token: this.token,
+      tokenHash: this.tokenHash,
       invitedByUserId: this.invitedByUserId,
       expiresAt: this.expiresAt,
       acceptedAt: this.acceptedAt,

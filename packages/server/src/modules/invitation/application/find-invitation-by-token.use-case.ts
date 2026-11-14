@@ -1,6 +1,7 @@
 import { InvitationMapper } from "@workspace/server/modules/invitation/entity/invitation.mapper";
 import type { OrganizationPort } from "@workspace/server/modules/invitation/port/organization.port";
 import type { InvitationRepository } from "@workspace/server/modules/invitation/repository/invitation.repository";
+import type { InvitationService } from "@workspace/server/modules/invitation/service/invitation.service";
 import { NotFoundError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import type {
@@ -10,12 +11,13 @@ import type {
 
 export class FindInvitationByTokenUseCase {
   constructor(
+    private readonly invitationService: InvitationService,
     private readonly invitationRepository: InvitationRepository,
     private readonly organizationPort: OrganizationPort,
   ) {}
 
   async execute(input: FindInvitationByTokenInputDtoType): Promise<FindInvitationByTokenOutputDtoType> {
-    const invitation = await this.invitationRepository.findByToken(input.token);
+    const invitation = await this.invitationRepository.findByToken(this.invitationService.hashToken(input.token));
     if (!invitation?.isPending()) {
       throw new NotFoundError(ERROR_CODES.INVALID_INVITATION_TOKEN);
     }

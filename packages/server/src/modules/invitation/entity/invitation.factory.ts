@@ -8,7 +8,7 @@ export abstract class InvitationFactory {
       id: randomUUID(),
       organizationId: invitation.organizationId,
       email: invitation.email,
-      token: invitation.token,
+      tokenHash: invitation.tokenHash,
       invitedByUserId: invitation.invitedByUserId,
       expiresAt: invitation.expiresAt,
       acceptedAt: null,

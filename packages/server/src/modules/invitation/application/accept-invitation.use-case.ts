@@ -24,7 +24,7 @@ export class AcceptInvitationUseCase {
     userId: string,
     userEmail: string,
   ): Promise<AcceptInvitationOutputDtoType> {
-    const invitation = await this.invitationRepository.findByToken(input.token);
+    const invitation = await this.invitationRepository.findByToken(this.invitationService.hashToken(input.token));
     if (!invitation?.isPending()) {
       throw new BadRequestError(ERROR_CODES.INVALID_INVITATION_TOKEN);
     }
