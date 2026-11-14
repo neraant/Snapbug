@@ -69,6 +69,7 @@ export function bindPanelSubmit(session: PanelSession) {
       const shortId = await submitReport({
         title,
         description,
+        steps: session.steps.value.trim(),
         severity: session.severity.getValue(),
         email,
         diagnostics: session.diagnostic.getValues(),

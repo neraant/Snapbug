@@ -18,7 +18,7 @@ export abstract class BugReportFactory {
       severity: bugReport.severity ?? BugReportSeverity.MEDIUM,
       title: bugReport.title,
       description: bugReport.description,
-      stepsToReproduce: null,
+      stepsToReproduce: bugReport.stepsToReproduce ?? null,
       reporterEmail: bugReport.reporterEmail ?? null,
       url: bugReport.url,
       userAgent: bugReport.userAgent ?? null,

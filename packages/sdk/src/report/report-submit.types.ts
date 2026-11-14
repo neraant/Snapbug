@@ -14,6 +14,7 @@ export type SubmitReportDiagnostics = {
 export type SubmitReportInput = {
   title: string;
   description: string;
+  steps: string;
   severity: ReportSeverity;
   email: string;
   diagnostics: SubmitReportDiagnostics;

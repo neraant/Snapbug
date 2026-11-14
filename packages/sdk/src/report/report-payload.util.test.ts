@@ -29,6 +29,7 @@ describe("buildReportPayload", () => {
     const payload = buildReportPayload("key-1", {
       title: "Title",
       description: "Details",
+      steps: "",
       severity: "high",
       email: "",
       diagnostics: {
@@ -47,12 +48,14 @@ describe("buildReportPayload", () => {
     expect(payload.consoleLogs).toBeUndefined();
     expect(payload.networkLogs).toBeUndefined();
     expect(payload.severity).toBe("high");
+    expect(payload.stepsToReproduce).toBeUndefined();
   });
 
   it("includes environment and log fields when toggles are on", () => {
     const payload = buildReportPayload("key-1", {
       title: "Title",
       description: "Details",
+      steps: "1. Open checkout\n2. Click Pay",
       severity: "critical",
       email: "",
       diagnostics: {
@@ -68,5 +71,6 @@ describe("buildReportPayload", () => {
     expect(payload.viewportWidth).toBe(window.innerWidth);
     expect(payload.consoleLogs).toHaveLength(1);
     expect(payload.networkLogs).toHaveLength(1);
+    expect(payload.stepsToReproduce).toBe("1. Open checkout\n2. Click Pay");
   });
 });

@@ -15,7 +15,6 @@ export function createEmailControl(): EmailControl {
   const root = document.createElement("div");
   const label = document.createElement("label");
   const input = document.createElement("input");
-  const hint = document.createElement("p");
   const error = document.createElement("p");
 
   root.className = "snapbug-field";
@@ -27,12 +26,10 @@ export function createEmailControl(): EmailControl {
   input.autocomplete = "email";
   input.className = "snapbug-input";
   input.placeholder = COPY.emailPlaceholder;
-  hint.className = "snapbug-hint";
-  hint.textContent = COPY.emailHint;
   error.className = "snapbug-field-error";
   error.id = PANEL_EMAIL_ERROR_ID;
   error.hidden = true;
-  root.append(label, input, hint, error);
+  root.append(label, input, error);
 
   const identified = () => widgetState.identifiedEmail ?? "";
 

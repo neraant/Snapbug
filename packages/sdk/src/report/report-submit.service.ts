@@ -66,6 +66,7 @@ function reportFormData(payload: ReportPayload, screenshot: Blob | null, replay:
   formData.set("apiKey", payload.apiKey);
   formData.set("title", payload.title);
   formData.set("description", payload.description);
+  if (payload.stepsToReproduce) formData.set("stepsToReproduce", payload.stepsToReproduce);
   formData.set("severity", payload.severity);
   formData.set("url", payload.url);
   if (payload.userAgent !== undefined) formData.set("userAgent", payload.userAgent);

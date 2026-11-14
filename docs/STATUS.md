@@ -35,10 +35,10 @@ Do not start tasks marked TBD: an implementer agent must not take them.
 - P-11 an ingest rate limit.
 - P-12 a hashed invitation token.
 - P-13 passwords always masked.
+- P-14 reproduction steps on the form.
 
 ## Open
 
-- P-14 reproduction steps on the form.
 - P-15 an end-to-end run.
 - P-16 interface language: English and Russian only, with a switch in settings.
 - P-17 Playground is a sample customer page with the real widget. Submit stays on the page and shows the captured screenshot, replay, environment, and logs. Nothing is written to the database or to Blob.

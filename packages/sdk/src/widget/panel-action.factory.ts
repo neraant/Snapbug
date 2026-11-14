@@ -96,6 +96,7 @@ function resetTriggerAboveSheet(session: PanelSession) {
 function resetPanelForm(session: PanelSession) {
   session.title.value = "";
   session.description.clear();
+  session.steps.value = "";
   session.severity.reset();
   session.email.reset();
   session.diagnostic.reset();

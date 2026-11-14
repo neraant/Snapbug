@@ -21,6 +21,7 @@ export type PanelSession = {
   description: DescriptionEditorControl;
   descriptionError: HTMLParagraphElement;
   descriptionCounter: HTMLSpanElement;
+  steps: HTMLTextAreaElement;
   severity: SeverityControl;
   email: EmailControl;
   diagnostic: DiagnosticControl;

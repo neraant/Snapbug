@@ -14,6 +14,7 @@ export type ReportPayload = {
   apiKey: string;
   title: string;
   description: string;
+  stepsToReproduce?: string;
   severity: ReportSeverity;
   url: string;
   userAgent?: string;
@@ -37,11 +38,13 @@ export function buildReportPayload(apiKey: string, input: SubmitReportInput): Re
   const customContext = widgetState.customContext;
   const scrubbedContext = customContext !== null ? scrubCustomContext(customContext) : undefined;
   const reporterEmail = resolveReporterEmail(input.email);
+  const stepsToReproduce = input.steps.trim();
 
   return {
     apiKey,
     title: input.title,
     description: input.description,
+    ...(stepsToReproduce.length > 0 ? { stepsToReproduce } : {}),
     severity: input.severity,
     url: scrubbed.url,
     ...(diagnostics.environment
