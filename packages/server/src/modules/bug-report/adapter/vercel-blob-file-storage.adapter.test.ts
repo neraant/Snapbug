@@ -69,6 +69,20 @@ describe("VercelBlobFileStorageAdapter", () => {
     );
   });
 
+  it("does not write to Blob when the token is missing", async () => {
+    const adapter = new VercelBlobFileStorageAdapter(undefined);
+
+    await expect(
+      adapter.saveBugReportScreenshot({
+        reportId,
+        bytes: new Uint8Array([1]),
+        contentType: "image/png",
+      }),
+    ).rejects.toThrow("BLOB_READ_WRITE_TOKEN is not set");
+
+    expect(put).not.toHaveBeenCalled();
+  });
+
   it("deletes a screenshot by pathname", async () => {
     vi.mocked(del).mockResolvedValue(undefined);
     const adapter = new VercelBlobFileStorageAdapter(token);

@@ -19,6 +19,7 @@ Do not start tasks marked TBD: an implementer agent must not take them.
 - Overview, kanban with columns New, In progress, Fixed, and Closed, in-browser filters, a card with screenshot, logs, environment, and rrweb-player, and changes of status, severity, and assignee. An SDK page with the snippet and the ingest status. Screens in `apps/web/src/app/(app)`.
 - Isolation of someone else's ticket and project in the ticket procedures: `find-bug-reports.test.ts`, `find-one.use-case.test.ts`, `find-screenshot.use-case.test.ts`, `find-replay.use-case.test.ts`.
 - A Vercel Blob adapter exists. Without `BLOB_READ_WRITE_TOKEN` nothing is written to Blob.
+- P-09 ticket files in Vercel Blob; `docker compose` starts the app and Postgres.
 - Password reset, analytics (`packages/analytics`), and the widget theme are already in the code and stay in the product.
 - A playground screen exists (`apps/web/src/app/(app)/playground`) and stays in the product.
 - Audit of some changes to a project, a key, a ticket, and project access: `packages/server/src/shared/audit`.
@@ -33,7 +34,6 @@ Do not start tasks marked TBD: an implementer agent must not take them.
 
 ## Open
 
-- P-09 ticket files in Vercel Blob; `docker compose` starts the app and Postgres.
 - P-10 screenshot and replay files in the seed, stored in Blob.
 - P-11 an ingest rate limit.
 - P-12 a hashed invitation token.
