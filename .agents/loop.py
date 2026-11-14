@@ -47,6 +47,10 @@ MODELS = {
     "medium": "grok-4.7-medium",
     "high": "grok-4.7-high",
 }
+# A pinned choice ignores task size and always runs this model.
+PINNED_MODELS = {
+    "kimi": "kimi-k2.7-code",
+}
 EFFORTS = ("low", "medium", "high")
 # Agent liveness policy. The base budget is checked first. Past it, the agent
 # keeps running while it still produced output within AGENT_STALL_LIMIT, up to
@@ -57,6 +61,12 @@ AGENT_STALL_LIMIT = 10 * 60
 AGENT_HARD_CAP = 3 * 60 * 60
 AGENT_POLL = 5
 REQUIRED_CHECKS = ("ci", "agent-review")
+# A required check that never appears will not show up later on this SHA.
+# When a sibling check has already finished, rerun at once. When nothing has
+# reported yet, wait this long so a slow webhook can still land.
+CHECK_ABSENT_LIMIT = 3 * 60
+MAX_CHECK_RERUNS = 1
+SETTLED_CONCLUSIONS = {"SUCCESS", "FAILURE", "CANCELLED", "TIMED_OUT", "ERROR", "SKIPPED", "NEUTRAL"}
 TYPE_BADGES = {
     "chore": "C5DEF5",
     "ci": "5319E7",
@@ -644,6 +654,53 @@ def branch_needs_update(merge_state: str, behind: int = 0) -> bool:
     return merge_state == "BLOCKED" and behind > 0
 
 
+def merge_conflicts(merge_state: str) -> bool:
+    return merge_state == "DIRTY"
+
+
+def required_check_map(pull: dict) -> dict[str, str]:
+    found: dict[str, str] = {}
+    for item in pull.get("statusCheckRollup") or []:
+        if not isinstance(item, dict):
+            continue
+        name = item.get("name") or item.get("context")
+        if name not in REQUIRED_CHECKS:
+            continue
+        found[str(name)] = str(item.get("conclusion") or item.get("state") or "").upper()
+    return found
+
+
+def absent_required_checks(pull: dict) -> list[str]:
+    found = required_check_map(pull)
+    return [name for name in REQUIRED_CHECKS if name not in found]
+
+
+def required_check_settled(pull: dict) -> bool:
+    """True when one required check has finished, so a missing sibling will not appear."""
+    return any(conclusion in SETTLED_CONCLUSIONS for conclusion in required_check_map(pull).values())
+
+
+def conflict_instructions(task_id: str, branch: str) -> str:
+    return (
+        f"This branch conflicts with origin/master. Merge origin/master into {branch} and resolve every conflict. "
+        f"In docs/STATUS.md keep every task that is Done on origin/master in Done. "
+        f"Only {task_id} may move because of this branch. "
+        "Do not edit the TBD or Blocked sections. Commit the merge on this branch. Do not push.\n"
+    )
+
+
+def retrigger_checks(auth: TokenSource, task_id: str, branch: str) -> None:
+    """Push an empty commit so GitHub creates the pull_request workflows for this head."""
+    path = prepare_worktree(auth, task_id, branch)
+    use_tree(path)
+    if worktree_dirty(path):
+        raise LoopError(f"{task_id} worktree is dirty")
+    configure_identity(path)
+    git(path, ["commit", "--allow-empty", "-m", "ci: rerun checks"])
+    push_branch(auth, branch)
+    say(f"{task_id} pushed an empty commit to rerun checks")
+
+
 def update_from_master(auth: TokenSource, task_id: str, branch: str) -> None:
     path = prepare_worktree(auth, task_id, branch)
     use_tree(path)
@@ -667,8 +724,13 @@ def release_worktree(task_id: str, keep: bool) -> None:
         return
     if not path.exists():
         return
+    current = tree()
     git(BASE, ["worktree", "remove", "--force", str(path)])
     git(BASE, ["worktree", "prune"])
+    # gh and git use this path as cwd. A removed worktree makes the next
+    # subprocess fail with FileNotFoundError before it can start.
+    if current == path:
+        use_tree(BASE)
     say(f"{task_id} worktree removed")
 
 
@@ -758,11 +820,12 @@ def resume_unpushed(
     e2e_text: str,
     phase: str = "",
     docs_text: str = "",
+    conflict_text: str = "",
 ) -> bool:
     """Skip the agent only when the commits are unpushed and nothing new is waiting."""
     if dirty or not unpushed:
         return False
-    if phase == "changes" or review.strip() or e2e_text.strip() or docs_text.strip():
+    if phase == "changes" or phase == "conflict" or review.strip() or e2e_text.strip() or docs_text.strip() or conflict_text.strip():
         return False
     return True
 
@@ -1187,6 +1250,7 @@ def run_agent(
     feedback: str = "",
     e2e_failure_text: str = "",
     docs_failure_text: str = "",
+    conflict_text: str = "",
 ) -> None:
     home = Path(tempfile.mkdtemp(prefix="snapbug-agent-home-"))
     key = cursor_key()
@@ -1230,6 +1294,8 @@ def run_agent(
                 "The docs check failed on this branch before push. Fix that failure with new "
                 "commits on this branch, then stop:\n" + docs_failure_text + "\n"
             )
+        if conflict_text:
+            prompt += conflict_text
         say(f"{task_id} agent started")
         proc = subprocess.Popen(
             [
@@ -1362,19 +1428,32 @@ def model_for(effort: str) -> str:
     return model
 
 
+def implementer_model(choice: str, effort: str) -> str:
+    """Resolve the startup choice. auto follows the task size. A pin does not."""
+    if choice == "auto":
+        return model_for(effort)
+    pinned = PINNED_MODELS.get(choice, "")
+    if pinned:
+        return pinned
+    return model_for(choice)
+
+
 def parse_implementer_choice(raw: str) -> str:
-    """Map a startup answer to auto or one effort. Fast variants are refused."""
+    """Map a startup answer to auto, an effort, or a pinned model. Fast variants are refused."""
     text = raw.strip().lower()
     if text in ("", "auto"):
         return "auto"
     if "fast" in text:
         raise LoopError("fast mode is off")
-    if text in EFFORTS:
+    if text in EFFORTS or text in PINNED_MODELS:
         return text
     for effort, model in MODELS.items():
         if text == model:
             return effort
-    raise LoopError("implementer model must be auto, low, medium, or high")
+    for name, model in PINNED_MODELS.items():
+        if text == model:
+            return name
+    raise LoopError("implementer model must be auto, low, medium, high, or kimi")
 
 
 def ask_implementer_model() -> str:
@@ -1383,7 +1462,7 @@ def ask_implementer_model() -> str:
         return "auto"
     say(
         "Implementer model: auto, low (grok-4.7-low), "
-        "medium (grok-4.7-medium), high (grok-4.7-high)"
+        "medium (grok-4.7-medium), high (grok-4.7-high), kimi (kimi-k2.7-code)"
     )
     try:
         entered = input("Choice [auto]: ")
@@ -1738,8 +1817,10 @@ def check_summary(pull: dict) -> str:
 
 def wait_for(auth: TokenSource, number: str, task_id: str, branch: str) -> str:
     deadline = time.monotonic() + 20 * 60
+    started = time.monotonic()
     phase = "pending"
     updates = 0
+    reruns = 0
     last = ""
     last_said = 0.0
     say(f"{task_id} waiting on ci and agent-review")
@@ -1755,8 +1836,18 @@ def wait_for(auth: TokenSource, number: str, task_id: str, branch: str) -> str:
             say(f"{task_id} {summary}")
             last = summary
             last_said = now
+        if merge_conflicts(merge_state):
+            say(f"{task_id} conflicts with master")
+            return "conflict"
         if phase in {"merged", "failed", "changes"}:
             return phase
+        absent = absent_required_checks(pull)
+        absent_long_enough = required_check_settled(pull) or now - started >= CHECK_ABSENT_LIMIT
+        if absent and absent_long_enough and reruns < MAX_CHECK_RERUNS:
+            say(f"{task_id} {', '.join(absent)} never started. Pushing an empty commit to rerun checks.")
+            retrigger_checks(auth, task_id, branch)
+            reruns += 1
+            continue
         behind = commits_behind(branch)
         if phase == "ready" and branch_needs_update(merge_state, behind) and updates < 2:
             say(f"{task_id} branch is behind master")
@@ -1840,7 +1931,9 @@ def one_task(
         if phase == "pending":
             record(notes, f"{task_id} is still waiting on ci or agent-review.")
             return "stop", False
-        if phase == "changes":
+        if phase == "conflict":
+            record(notes, f"{task_id} conflicts with master. Handing the merge to the implementer.")
+        elif phase == "changes":
             if review_rounds(state, task_id) >= MAX_REVIEW_ROUNDS:
                 record(
                     notes,
@@ -1866,10 +1959,11 @@ def one_task(
         e2e_note = saved_e2e_failure(state, task_id)
         docs_note = saved_docs_failure(state, task_id)
         had_commits = worktree_unpushed(tree(), branch)
+        conflict_text = conflict_instructions(task_id, branch) if phase == "conflict" else ""
         plan_path = tree() / "docs/PLAN.md"
         plan = plan_path.read_text() if plan_path.is_file() else ""
         effort = effort_for(line, plan_row(plan, task_id))
-        model = model_for(effort if model_choice == "auto" else model_choice)
+        model = implementer_model(model_choice, effort)
         addressed_e2e = False
         addressed_docs = False
 
@@ -1877,7 +1971,7 @@ def one_task(
             nonlocal used_agent, addressed_e2e, addressed_docs, before
             record(notes, f"{task_id} model {model}")
             try:
-                run_agent(task_id, branch, line, model, feedback, e2e_text, docs_text)
+                run_agent(task_id, branch, line, model, feedback, e2e_text, docs_text, conflict_text)
             except SetupError:
                 raise
             except (LoopError, subprocess.TimeoutExpired) as error:
@@ -1902,7 +1996,7 @@ def one_task(
             before = head_now
             return None
 
-        if resume_unpushed(worktree_dirty(tree()), had_commits, feedback, e2e_note, phase, docs_note):
+        if resume_unpushed(worktree_dirty(tree()), had_commits, feedback, e2e_note, phase, docs_note, conflict_text):
             say(f"{task_id} resuming unpushed commits")
         else:
             message = launch(e2e_note, docs_note)
@@ -1967,6 +2061,9 @@ def one_task(
         # Pushing is not completion. Keep the worktree while the review or checks
         # are failing so the same task continues in the same tree.
         keep = keep_after_phase(phase)
+        if phase == "conflict":
+            record(notes, f"{task_id} conflicts with master. Continuing on the same worktree.")
+            return "continue", used_agent
         if phase == "changes":
             # Not a failure: the next pass re-enters the agent on this worktree.
             record(notes, f"{task_id} changes requested. Continuing on the same worktree.")
@@ -2091,6 +2188,15 @@ None.
         raise SystemExit("behind guard failed")
     if not branch_needs_update("BLOCKED", 2) or branch_needs_update("BLOCKED", 0) or branch_needs_update("BLOCKED"):
         raise SystemExit("blocked behind guard failed")
+    if not merge_conflicts("DIRTY") or merge_conflicts("BEHIND") or merge_conflicts("CLEAN"):
+        raise SystemExit("conflict guard failed")
+    settled = {"statusCheckRollup": [{"name": "agent-review", "conclusion": "SUCCESS"}]}
+    if absent_required_checks(settled) != ["ci"] or not required_check_settled(settled):
+        raise SystemExit("absent check guard failed")
+    if absent_required_checks({"statusCheckRollup": []}) != ["ci", "agent-review"] or required_check_settled({"statusCheckRollup": []}):
+        raise SystemExit("unreported checks guard failed")
+    if "Merge origin/master" not in conflict_instructions("P-10", "feat/P-10"):
+        raise SystemExit("conflict instructions failed")
     if (
         touches_e2e(["packages/server/src/container.ts"])
         or touches_e2e(["apps/web/src/client/modules/auth/components/sign-in-form.tsx"])
@@ -2134,6 +2240,8 @@ None.
         raise SystemExit("clean unpushed should resume")
     if resume_unpushed(False, True, "", "", "", "docs/STATUS.md marks a task done"):
         raise SystemExit("docs failure skipped the agent")
+    if resume_unpushed(False, True, "", "", "conflict"):
+        raise SystemExit("conflict resumed")
     if docs_outcome_counts("docs/STATUS.md marks a task done", False):
         raise SystemExit("docs failure counted before the agent")
     if not docs_outcome_counts("docs/STATUS.md marks a task done", True):
@@ -2334,6 +2442,10 @@ None.
         or parse_implementer_choice("") != "auto"
         or parse_implementer_choice(" HIGH ") != "high"
         or parse_implementer_choice("grok-4.7-medium") != "medium"
+        or parse_implementer_choice("kimi") != "kimi"
+        or parse_implementer_choice("kimi-k2.7-code") != "kimi"
+        or implementer_model("kimi", "low") != "kimi-k2.7-code"
+        or implementer_model("auto", "low") != "grok-4.7-low"
     ):
         raise SystemExit("model failed")
     try:
@@ -2598,7 +2710,7 @@ def main() -> None:
     cursor_key()
     model_choice = ask_implementer_model()
     limit = agent_call_cap()
-    picked = "auto" if model_choice == "auto" else model_for(model_choice)
+    picked = "auto" if model_choice == "auto" else implementer_model(model_choice, "high")
     notes = [
         f"Repository: {REPO}",
         f"Agent call cap: {limit}",
