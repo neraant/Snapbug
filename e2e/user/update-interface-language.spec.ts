@@ -19,7 +19,8 @@ test("an administrator switches the interface language to Russian", async ({ pag
 
   await page.goto("/settings");
   await expect(page.getByRole("heading", { name: "Organization settings" })).toBeVisible();
-  await expect(page.getByText("Interface language")).toBeVisible();
+  await expect(page.getByRole("radio", { name: "English" })).toBeVisible();
+  await expect(page.getByRole("radio", { name: "Русский" })).toBeVisible();
   await page.waitForFunction(() => {
     const form = document.querySelector("form");
     if (!form) return false;
@@ -30,6 +31,6 @@ test("an administrator switches the interface language to Russian", async ({ pag
   await page.getByRole("button", { name: "Save language" }).click();
 
   await expect(page.getByRole("heading", { name: "Настройки организации" })).toBeVisible({ timeout: 30_000 });
-  await expect(page.getByText("Язык интерфейса")).toBeVisible();
+  await expect(page.getByRole("radio", { name: "Русский" })).toBeChecked();
   await expect(page.getByRole("link", { name: "Настройки" })).toBeVisible();
 });

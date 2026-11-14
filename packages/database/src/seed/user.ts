@@ -42,7 +42,13 @@ export async function seedUser(): Promise<UserRow[]> {
     },
   ];
 
-  await db.insert(userTable).values(userData).onConflictDoNothing({ target: userTable.email });
+  await db
+    .insert(userTable)
+    .values(userData.map((user) => ({ ...user, interfaceLanguage: "en" as const })))
+    .onConflictDoUpdate({
+      target: userTable.email,
+      set: { interfaceLanguage: "en" },
+    });
 
   return db
     .select()
