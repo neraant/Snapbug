@@ -1,6 +1,7 @@
 import type { MembershipPort } from "@workspace/server/modules/invitation/port/membership.port";
 import type { ProjectPort } from "@workspace/server/modules/invitation/port/project.port";
 import type { InvitationRepository } from "@workspace/server/modules/invitation/repository/invitation.repository";
+import type { InvitationService } from "@workspace/server/modules/invitation/service/invitation.service";
 import type { WithTransactionType } from "@workspace/server/shared/database/transaction.util";
 import { BadRequestError, ConflictError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
@@ -15,6 +16,7 @@ export class AcceptInvitationUseCase {
     private readonly membershipPort: MembershipPort,
     private readonly projectPort: ProjectPort,
     private readonly withTransaction: WithTransactionType,
+    private readonly invitationService: InvitationService,
   ) {}
 
   async execute(
@@ -44,7 +46,7 @@ export class AcceptInvitationUseCase {
     const membership = await this.withTransaction(async (tx) => {
       const membershipPort = this.membershipPort.withTx(tx);
       const projectPort = this.projectPort.withTx(tx);
-      const invitationRepository = this.invitationRepository.withTx(tx);
+      const invitationService = this.invitationService.withTx(tx).withActor({ type: "user", id: userId });
       const createdMembership = await membershipPort.createInvited(invitation.organizationId, userId);
       const projects = await projectPort.findManyByOrganizationId({ organizationId: invitation.organizationId });
       await membershipPort.grantProjects(
@@ -52,7 +54,7 @@ export class AcceptInvitationUseCase {
         projects.map((project) => project.id),
         userId,
       );
-      await invitationRepository.save(acceptedInvitation);
+      await invitationService.saveWithAudit(acceptedInvitation, "Accept invitation");
       return createdMembership;
     });
 

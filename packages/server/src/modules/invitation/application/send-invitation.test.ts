@@ -3,7 +3,8 @@ import type { MembershipPort } from "@workspace/server/modules/invitation/port/m
 import type { OrganizationPort } from "@workspace/server/modules/invitation/port/organization.port";
 import type { TokenPort } from "@workspace/server/modules/invitation/port/token.port";
 import type { UserPort } from "@workspace/server/modules/invitation/port/user.port";
-import type { InvitationRepository } from "@workspace/server/modules/invitation/repository/invitation.repository";
+import type { InvitationService } from "@workspace/server/modules/invitation/service/invitation.service";
+import type { WithTransactionType } from "@workspace/server/shared/database/transaction.util";
 import type { EmailService } from "@workspace/server/shared/email/service/email.service";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
@@ -22,6 +23,19 @@ const organization = {
   createdAt: "2026-10-03T09:00:00.000Z",
 };
 
+const withTransaction = vi.fn(async (callback: (tx: unknown) => Promise<unknown>) => await callback({}));
+
+function invitationService(saveWithAudit = vi.fn().mockResolvedValue(undefined)) {
+  const service = {
+    saveWithAudit,
+    withActor: vi.fn(),
+    withTx: vi.fn(),
+  };
+  service.withActor.mockReturnValue(service);
+  service.withTx.mockReturnValue(service);
+  return service;
+}
+
 function organizationPort(found = true): OrganizationPort {
   return { findById: vi.fn().mockResolvedValue(found ? organization : null) };
 }
@@ -36,12 +50,13 @@ describe("SendInvitationsUseCase", () => {
       findByUserAndOrganization: vi.fn().mockResolvedValue(null),
     };
     const useCase = new SendInvitationsUseCase(
-      { save: vi.fn() } as unknown as InvitationRepository,
+      invitationService() as unknown as InvitationService,
       membershipPort as unknown as MembershipPort,
       { findByEmail: vi.fn() } as unknown as UserPort,
       organizationPort(),
       { generatePasswordResetToken: vi.fn() } as unknown as TokenPort,
       { send: vi.fn() } as unknown as EmailService,
+      withTransaction as unknown as WithTransactionType,
     );
 
     await expect(
@@ -55,15 +70,16 @@ describe("SendInvitationsUseCase", () => {
     const membershipPort = {
       findByUserAndOrganization: vi.fn().mockResolvedValue({ role: UserRole.USER }),
     };
-    const invitationRepository = { save: vi.fn() };
+    const invitations = invitationService();
     const emailService = { send: vi.fn() };
     const useCase = new SendInvitationsUseCase(
-      invitationRepository as unknown as InvitationRepository,
+      invitations as unknown as InvitationService,
       membershipPort as unknown as MembershipPort,
       { findByEmail: vi.fn() } as unknown as UserPort,
       organizationPort(),
       { generatePasswordResetToken: vi.fn() } as unknown as TokenPort,
       emailService as unknown as EmailService,
+      withTransaction as unknown as WithTransactionType,
     );
 
     await expect(
@@ -72,7 +88,7 @@ describe("SendInvitationsUseCase", () => {
       errorCode: ERROR_CODES.ADMIN_REQUIRED,
     });
 
-    expect(invitationRepository.save).not.toHaveBeenCalled();
+    expect(invitations.saveWithAudit).not.toHaveBeenCalled();
     expect(emailService.send).not.toHaveBeenCalled();
   });
 
@@ -82,16 +98,17 @@ describe("SendInvitationsUseCase", () => {
       findByUserAndOrganization: vi.fn().mockResolvedValue({ role: UserRole.ADMIN }),
     };
     const userPort = { findByEmail: vi.fn().mockResolvedValue(null) };
-    const invitationRepository = { save: vi.fn().mockResolvedValue(undefined) };
+    const invitations = invitationService();
     const authService = { generatePasswordResetToken: vi.fn().mockResolvedValue(token) };
     const emailService = { send: vi.fn().mockResolvedValue(undefined) };
     const useCase = new SendInvitationsUseCase(
-      invitationRepository as unknown as InvitationRepository,
+      invitations as unknown as InvitationService,
       membershipPort as unknown as MembershipPort,
       userPort as unknown as UserPort,
       organizationPort(),
       authService as unknown as TokenPort,
       emailService as unknown as EmailService,
+      withTransaction as unknown as WithTransactionType,
     );
 
     await useCase.execute(
@@ -103,7 +120,7 @@ describe("SendInvitationsUseCase", () => {
       inviterEmail,
     );
 
-    expect(invitationRepository.save).toHaveBeenCalledTimes(2);
+    expect(invitations.saveWithAudit).toHaveBeenCalledTimes(2);
     expect(emailService.send).toHaveBeenCalledTimes(2);
     expect(authService.generatePasswordResetToken).toHaveBeenCalledTimes(2);
   });
@@ -130,7 +147,7 @@ describe("SendInvitationsUseCase", () => {
         return null;
       }),
     };
-    const invitationRepository = { save: vi.fn().mockResolvedValue(undefined) };
+    const invitations = invitationService();
     const authService = {
       generatePasswordResetToken: vi
         .fn()
@@ -141,12 +158,13 @@ describe("SendInvitationsUseCase", () => {
     const emailService = { send: vi.fn().mockResolvedValue(undefined) };
     const organizations = organizationPort();
     const useCase = new SendInvitationsUseCase(
-      invitationRepository as unknown as InvitationRepository,
+      invitations as unknown as InvitationService,
       membershipPort as unknown as MembershipPort,
       userPort as unknown as UserPort,
       organizations,
       authService as unknown as TokenPort,
       emailService as unknown as EmailService,
+      withTransaction as unknown as WithTransactionType,
     );
 
     await useCase.execute(
@@ -158,7 +176,7 @@ describe("SendInvitationsUseCase", () => {
       inviterEmail,
     );
 
-    expect(invitationRepository.save).toHaveBeenCalledTimes(2);
+    expect(invitations.saveWithAudit).toHaveBeenCalledTimes(2);
     expect(emailService.send).toHaveBeenCalledTimes(2);
     expect(organizations.findById).toHaveBeenCalledOnce();
     expect(emailService.send).toHaveBeenCalledWith(
@@ -181,12 +199,13 @@ describe("SendInvitationsUseCase", () => {
     };
     const emailService = { send: vi.fn() };
     const useCase = new SendInvitationsUseCase(
-      { save: vi.fn() } as unknown as InvitationRepository,
+      invitationService() as unknown as InvitationService,
       membershipPort as unknown as MembershipPort,
       { findByEmail: vi.fn() } as unknown as UserPort,
       organizationPort(false),
       { generatePasswordResetToken: vi.fn() } as unknown as TokenPort,
       emailService as unknown as EmailService,
+      withTransaction as unknown as WithTransactionType,
     );
 
     await expect(
@@ -217,7 +236,7 @@ describe("SendInvitationsUseCase", () => {
         return null;
       }),
     };
-    const invitationRepository = { save: vi.fn().mockResolvedValue(undefined) };
+    const invitations = invitationService();
     const authService = {
       generatePasswordResetToken: vi
         .fn()
@@ -226,12 +245,13 @@ describe("SendInvitationsUseCase", () => {
     };
     const emailService = { send: vi.fn().mockResolvedValue(undefined) };
     const useCase = new SendInvitationsUseCase(
-      invitationRepository as unknown as InvitationRepository,
+      invitations as unknown as InvitationService,
       membershipPort as unknown as MembershipPort,
       userPort as unknown as UserPort,
       organizationPort(),
       authService as unknown as TokenPort,
       emailService as unknown as EmailService,
+      withTransaction as unknown as WithTransactionType,
     );
 
     await useCase.execute({ organizationId, emails: ["ada@company.com", "blank@company.com"] }, userId, inviterEmail);

@@ -16,6 +16,11 @@ export abstract class OrganizationMapper {
     return organization.toObject();
   }
 
+  static toAudit(organization: Organization): Record<string, unknown> {
+    const { name, reports_retention_days } = organization.toObject();
+    return { name, reports_retention_days };
+  }
+
   static toDto(organization: Organization): OrganizationModelType {
     const { id, name, reports_retention_days, createdAt } = organization.toObject();
     return { id, name, reports_retention_days, createdAt: createdAt.toISOString() };

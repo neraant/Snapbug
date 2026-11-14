@@ -11,6 +11,11 @@ export abstract class InvitationMapper {
     return invitation.toObject();
   }
 
+  static toAudit(invitation: Invitation): Record<string, unknown> {
+    const { email, invitedByUserId, expiresAt, acceptedAt } = invitation.toObject();
+    return { email, invitedByUserId, expiresAt, acceptedAt };
+  }
+
   static toFindByTokenOutput(invitation: Invitation, organizationName: string): FindInvitationByTokenOutputDtoType {
     return { email: invitation.email, organizationName };
   }

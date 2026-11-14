@@ -1,4 +1,5 @@
 import { apiKeyRouter } from "@workspace/server/modules/api-key/api-key.router";
+import { auditRouter } from "@workspace/server/modules/audit/audit.router";
 import { authRouter } from "@workspace/server/modules/auth/auth.router";
 import { bugReportRouter } from "@workspace/server/modules/bug-report/bug-report.router";
 import { commentRouter } from "@workspace/server/modules/comment/comment.router";
@@ -11,6 +12,7 @@ import { userTokenRouter } from "@workspace/server/modules/user-token/user-token
 
 export const router = {
   apiKey: apiKeyRouter,
+  audit: auditRouter,
   auth: authRouter,
   bugReport: bugReportRouter,
   comment: commentRouter,

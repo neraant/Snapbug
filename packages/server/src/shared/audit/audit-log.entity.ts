@@ -7,7 +7,9 @@ export class AuditLog {
   readonly actorId: AuditLogPersistedType["actorId"];
   readonly entityType: AuditLogPersistedType["entityType"];
   readonly entityId: AuditLogPersistedType["entityId"];
+  readonly organizationId: AuditLogPersistedType["organizationId"];
   readonly projectId: AuditLogPersistedType["projectId"];
+  readonly source: AuditLogPersistedType["source"];
   readonly occurredAt: AuditLogPersistedType["occurredAt"];
   readonly changes: AuditLogPersistedType["changes"];
 
@@ -18,7 +20,9 @@ export class AuditLog {
     this.actorId = row.actorId;
     this.entityType = row.entityType;
     this.entityId = row.entityId;
+    this.organizationId = row.organizationId;
     this.projectId = row.projectId;
+    this.source = row.source;
     this.occurredAt = row.occurredAt;
     this.changes = row.changes;
   }
@@ -31,7 +35,9 @@ export class AuditLog {
       actorId: this.actorId,
       entityType: this.entityType,
       entityId: this.entityId,
+      organizationId: this.organizationId,
       projectId: this.projectId,
+      source: this.source,
       occurredAt: this.occurredAt,
       changes: this.changes,
     };

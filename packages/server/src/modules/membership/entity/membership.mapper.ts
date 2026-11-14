@@ -13,6 +13,11 @@ export abstract class MembershipMapper {
     return membership.toObject();
   }
 
+  static toAudit(membership: Membership): Record<string, unknown> {
+    const { userId, organizationId, role } = membership.toObject();
+    return { userId, organizationId, role };
+  }
+
   static toDto(membership: Membership): MembershipModelType {
     const row = membership.toObject();
     return {

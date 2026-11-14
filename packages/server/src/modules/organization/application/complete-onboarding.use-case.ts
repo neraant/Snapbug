@@ -3,7 +3,7 @@ import { OrganizationFactory } from "@workspace/server/modules/organization/enti
 import type { MembershipPort } from "@workspace/server/modules/organization/port/membership.port";
 import type { ProjectPort } from "@workspace/server/modules/organization/port/project.port";
 import type { UserPort } from "@workspace/server/modules/organization/port/user.port";
-import type { OrganizationRepository } from "@workspace/server/modules/organization/repository/organization.repository";
+import type { OrganizationService } from "@workspace/server/modules/organization/service/organization.service";
 import type { WithTransactionType } from "@workspace/server/shared/database/transaction.util";
 import { NotFoundError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
@@ -18,7 +18,7 @@ export class CompleteOnboardingUseCase {
   constructor(
     private readonly userPort: UserPort,
     private readonly membershipPort: MembershipPort,
-    private readonly organizationRepository: OrganizationRepository,
+    private readonly organizationService: OrganizationService,
     private readonly projectPort: ProjectPort,
     private readonly findOnboarding: FindOnboardingUseCase,
     private readonly withTransaction: WithTransactionType,
@@ -41,7 +41,7 @@ export class CompleteOnboardingUseCase {
     }
 
     await this.withTransaction(async (tx) => {
-      const organizationRepository = this.organizationRepository.withTx(tx);
+      const organizationService = this.organizationService.withTx(tx).withActor({ type: "user", id: userId });
       const membershipPort = this.membershipPort.withTx(tx);
       const projectPort = this.projectPort.withTx(tx);
       const userPort = this.userPort.withTx(tx);
@@ -50,7 +50,7 @@ export class CompleteOnboardingUseCase {
         const organizationName = input.organizationName || DEFAULT_ORGANIZATION_NAME;
         const projectName = input.projectName || DEFAULT_PROJECT_NAME;
         const organization = OrganizationFactory.create({ name: organizationName });
-        await organizationRepository.save(organization);
+        await organizationService.saveWithAudit(organization, "Create organization");
         await membershipPort.create({ organizationId: organization.id }, userId);
         await projectPort.create(
           { organizationId: organization.id, name: projectName, color: projectColorDefault },

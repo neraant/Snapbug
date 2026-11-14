@@ -1,6 +1,7 @@
-import type { auditActorTypes } from "@workspace/database/schema/audit-log.const";
+import type { auditActorTypes, auditSources } from "@workspace/database/schema/audit-log.const";
 
 export type AuditActorType = (typeof auditActorTypes)[number];
+export type AuditSource = (typeof auditSources)[number];
 
 export type AuditActor = {
   type: AuditActorType;
@@ -16,7 +17,9 @@ export type AuditLogPersistedType = {
   actorId: string | null;
   entityType: string;
   entityId: string;
-  projectId: string;
+  organizationId: string;
+  projectId: string | null;
+  source: AuditSource;
   occurredAt: Date;
   changes: AuditLogChangesType;
 };
