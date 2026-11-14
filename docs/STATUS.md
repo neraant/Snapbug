@@ -19,7 +19,7 @@ Do not start tasks marked TBD: an implementer agent must not take them.
 - Overview, kanban with columns New, In progress, Fixed, and Closed, in-browser filters, a card with screenshot, logs, environment, and rrweb-player, and changes of status, severity, and assignee. An SDK page with the snippet and the ingest status. Screens in `apps/web/src/app/(app)`.
 - Isolation of someone else's ticket and project in the ticket procedures: `find-bug-reports.test.ts`, `find-one.use-case.test.ts`, `find-screenshot.use-case.test.ts`, `find-replay.use-case.test.ts`.
 - A Vercel Blob adapter exists. Without `BLOB_READ_WRITE_TOKEN` nothing is written to Blob.
-- P-09 ticket files in Vercel Blob; `docker compose` starts the app and Postgres.
+- P-09 ticket files in Vercel Blob.
 - Password reset, analytics (`packages/analytics`), and the widget theme are already in the code and stay in the product.
 - A playground screen exists (`apps/web/src/app/(app)/playground`) and stays in the product.
 - Audit of some changes to a project, a key, a ticket, and project access: `packages/server/src/shared/audit`.
@@ -48,6 +48,8 @@ Do not start tasks marked TBD: an implementer agent must not take them.
 - P-22 invitation resend, revoke, and copy link. Expiry after 7 days already rejects acceptance.
 - P-23 require 2FA, one invite email domain, GDPR mode, and delete workspace. Administrator only.
 - P-24 error responses that return the real status, including 400, 401, 403, 404, 500, and any other real code. The error screen always shows 500.
+- P-25 ticket comments sit at the bottom of the card, read like a Jira thread, and the author can edit or delete their own comment.
+- P-26 an MCP user token has a name. The list shows that name, when it was created, and revoke. The secret is shown once.
 
 ## TBD
 
