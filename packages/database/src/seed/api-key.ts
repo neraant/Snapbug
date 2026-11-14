@@ -37,7 +37,18 @@ export async function seedApiKey(projects: ProjectRow[]) {
 
   if (apiKeyData.length === 0) return [];
 
-  await db.insert(apiKeyTable).values(apiKeyData).onConflictDoNothing({ target: apiKeyTable.id });
+  for (const apiKey of apiKeyData) {
+    await db
+      .insert(apiKeyTable)
+      .values(apiKey)
+      .onConflictDoUpdate({
+        target: apiKeyTable.id,
+        set: {
+          key: apiKey.key,
+          revokedAt: apiKey.revokedAt ?? null,
+        },
+      });
+  }
 
   return db
     .select()

@@ -7,10 +7,12 @@ export function useAddComment() {
 
   return useMutation(
     orpcQuery.comment.addComment.mutationOptions({
-      onSuccess: async () => {
-        await queryClient.invalidateQueries({
-          queryKey: orpcQuery.comment.findComments.key(),
-        });
+      onSuccess: () => {
+        queryClient
+          .invalidateQueries({
+            queryKey: orpcQuery.comment.findComments.key(),
+          })
+          .catch(() => undefined);
       },
     }),
   );

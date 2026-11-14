@@ -1,11 +1,11 @@
 import { db } from "@workspace/database";
-import { bugReportTable } from "@workspace/database/schema";
+import { bugReportTable, commentTable } from "@workspace/database/schema";
 import type { ProjectRow } from "@workspace/database/seed/project";
 import type { UserRow } from "@workspace/database/seed/user";
 import { BugReportSeverity } from "@workspace/validation/modules/bug-report/consts/bug-report-severity.const";
 import { formatBugReportShortId } from "@workspace/validation/modules/bug-report/consts/bug-report-short-id.const";
 import { BugReportStatus } from "@workspace/validation/modules/bug-report/consts/bug-report-status.const";
-import { inArray, type InferInsertModel } from "drizzle-orm";
+import { inArray, type InferInsertModel, notInArray } from "drizzle-orm";
 
 type BugReportInsert = InferInsertModel<typeof bugReportTable>;
 type BugReportDraft = Omit<BugReportInsert, "shortId">;
@@ -303,17 +303,12 @@ export async function seedBugReport(projects: ProjectRow[], users: UserRow[]) {
   const bugReportData = assignShortIds(bugReportDrafts, projects);
   if (bugReportData.length === 0) return [];
 
+  const seededIds = bugReportData.map((bugReport) => bugReport.id);
+  await db.delete(bugReportTable).where(notInArray(bugReportTable.id, seededIds));
+  await db.delete(commentTable).where(inArray(commentTable.bugReportId, seededIds));
   await db.insert(bugReportTable).values(bugReportData).onConflictDoNothing({ target: bugReportTable.id });
 
-  return db
-    .select()
-    .from(bugReportTable)
-    .where(
-      inArray(
-        bugReportTable.id,
-        bugReportData.map((bugReport) => bugReport.id),
-      ),
-    );
+  return db.select().from(bugReportTable).where(inArray(bugReportTable.id, seededIds));
 }
 
 function report(values: BugReportDraft): BugReportDraft {
