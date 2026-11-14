@@ -50,6 +50,7 @@ MODELS = {
 # A pinned choice ignores task size and always runs this model.
 PINNED_MODELS = {
     "kimi": "kimi-k2.7-code",
+    "composer": "composer-2.5",
 }
 EFFORTS = ("low", "medium", "high")
 # Agent liveness policy. The base budget is checked first. Past it, the agent
@@ -1460,7 +1461,7 @@ def parse_implementer_choice(raw: str) -> str:
     for name, model in PINNED_MODELS.items():
         if text == model:
             return name
-    raise LoopError("implementer model must be auto, low, medium, high, or kimi")
+    raise LoopError("implementer model must be auto, low, medium, high, kimi, or composer")
 
 
 def ask_implementer_model() -> str:
@@ -1469,7 +1470,8 @@ def ask_implementer_model() -> str:
         return "auto"
     say(
         "Implementer model: auto, low (grok-4.7-low), "
-        "medium (grok-4.7-medium), high (grok-4.7-high), kimi (kimi-k2.7-code)"
+        "medium (grok-4.7-medium), high (grok-4.7-high), "
+        "kimi (kimi-k2.7-code), composer (composer-2.5)"
     )
     try:
         entered = input("Choice [auto]: ")
@@ -2451,7 +2453,10 @@ None.
         or parse_implementer_choice("grok-4.7-medium") != "medium"
         or parse_implementer_choice("kimi") != "kimi"
         or parse_implementer_choice("kimi-k2.7-code") != "kimi"
+        or parse_implementer_choice("composer") != "composer"
+        or parse_implementer_choice("composer-2.5") != "composer"
         or implementer_model("kimi", "low") != "kimi-k2.7-code"
+        or implementer_model("composer", "low") != "composer-2.5"
         or implementer_model("auto", "low") != "grok-4.7-low"
     ):
         raise SystemExit("model failed")
