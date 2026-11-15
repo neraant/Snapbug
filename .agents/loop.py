@@ -35,7 +35,7 @@ BASE = HOME_STATE / "repo"
 WORKTREES = HOME_STATE / "worktrees"
 LEGACY = HOME_STATE / "src"
 TREE = BASE
-MAX_AGENT_CALLS = 5
+MAX_AGENT_CALLS = 10
 TOKEN_MAX_AGE = 45 * 60
 FAILURES_BEFORE_BLOCK = 3
 # Review rounds are separate from crash failures. A request-changes review is
@@ -978,19 +978,28 @@ def replace_last_check(text: str, check: str) -> str:
     return handoff_document(parts)
 
 
+def read_note(path: Path) -> str:
+    """Handoff notes are agent prose. A cp1252 quote must not kill the loop."""
+    raw = path.read_bytes()
+    try:
+        return raw.decode("utf-8")
+    except UnicodeDecodeError:
+        return raw.decode("cp1252")
+
+
 def read_handoff(task_id: str) -> str:
     """Missing journal is an empty note. It is not a task failure."""
     path = handoff_path(task_id)
     if not path.is_file():
         return ""
-    return path.read_text()
+    return read_note(path)
 
 
 def write_last_check(task_id: str, check: str) -> None:
     if not check.strip():
         return
     path = handoff_path(task_id)
-    current = path.read_text() if path.is_file() else ""
+    current = read_note(path) if path.is_file() else ""
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(replace_last_check(current, check))
 

@@ -10,7 +10,7 @@ export const snapbug = {
 
     const host = config.host.trim().replace(/\/$/, "");
     const normalized = { ...config, apiKey, host };
-    const remote = await fetchRemoteWidgetConfig(host, apiKey);
+    const remote = config.preview ? null : await fetchRemoteWidgetConfig(host, apiKey);
 
     mountWidget(mergeWidgetConfig(normalized, remote));
   },

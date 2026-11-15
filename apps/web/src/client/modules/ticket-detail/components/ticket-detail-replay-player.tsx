@@ -1,5 +1,5 @@
 import "rrweb-player/dist/style.css";
-import "@/client/modules/ticket-detail/styles/ticket-detail-replay-player.css";
+import "@workspace/design-system/rrweb-replay-player.css";
 
 import type { eventWithTime } from "@rrweb/types";
 import { CirclePlayIcon } from "lucide-react";
@@ -80,23 +80,23 @@ export function TicketDetailReplayPlayer({ events }: TicketDetailReplayPlayerPro
 
   return (
     <div
-      className="ticket-detail-replay-player-shell"
+      className="rrweb-replay-player-shell"
       style={
         {
-          "--ticket-detail-replay-controller-height": `${TICKET_DETAIL_REPLAY_CONTROLLER_HEIGHT}px`,
-          "--ticket-detail-replay-viewport-height": `${TICKET_DETAIL_REPLAY_VIEWPORT_HEIGHT}px`,
+          "--rrweb-replay-controller-height": `${TICKET_DETAIL_REPLAY_CONTROLLER_HEIGHT}px`,
+          "--rrweb-replay-viewport-height": `${TICKET_DETAIL_REPLAY_VIEWPORT_HEIGHT}px`,
         } as CSSProperties
       }
     >
-      <div ref={targetRef} className="ticket-detail-replay-player" />
+      <div ref={targetRef} className="rrweb-replay-player" />
       {showPlayOverlay ? (
         <button
           type="button"
-          className="ticket-detail-replay-player-shell__play-overlay"
+          className="rrweb-replay-player-shell__play-overlay"
           aria-label={texts.replay.playSession}
           onClick={startPlayback}
         >
-          <span className="ticket-detail-replay-player-shell__play-icon">
+          <span className="rrweb-replay-player-shell__play-icon">
             <CirclePlayIcon aria-hidden />
           </span>
         </button>

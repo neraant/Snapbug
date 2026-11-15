@@ -41,6 +41,7 @@
   },
   "exports": {
     "./globals.css": "./src/styles/globals.css",
+    "./rrweb-replay-player.css": "./src/styles/rrweb-replay-player.css",
     "./postcss.config": "./postcss.config.mjs",
     "./lib/*": "./src/lib/*.ts",
     "./components/*": "./src/components/*.tsx",

@@ -3,10 +3,10 @@ import { expect, test } from "@playwright/test";
 import { seedDatabase } from "../shared/seed/seed-database";
 
 const ticketTitle = "Pay button throws when the cart is empty";
-const commentBody = "The empty cart should not read a price.";
 
 test("a teammate adds an internal comment on the ticket", async ({ page }) => {
   test.setTimeout(90_000);
+  const commentBody = `E2E comment ${Date.now()}`;
   await seedDatabase();
 
   await page.goto("/sign-in");
@@ -42,6 +42,10 @@ test("a teammate adds an internal comment on the ticket", async ({ page }) => {
   await commentBox.fill(commentBody);
   await page.getByRole("button", { name: "Add comment" }).click();
 
-  await expect(page.getByRole("paragraph").filter({ hasText: commentBody })).toBeVisible({ timeout: 30_000 });
+  const commentsPanel = page
+    .getByRole("heading", { name: "Comments" })
+    .locator("xpath=ancestor::*[@data-slot='panel'][1]");
+  await expect(commentsPanel.getByText(commentBody, { exact: true })).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByRole("textbox", { name: "Comment" })).toHaveValue("");
   await expect(page.getByText("Internal notes for the team. The report author does not see them.")).toBeVisible();
 });

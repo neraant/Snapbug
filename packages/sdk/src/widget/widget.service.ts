@@ -35,6 +35,7 @@ export function mountWidget(config: WidgetConfig) {
   widgetState.apiKey = config.apiKey;
   widgetState.host = config.host;
   widgetState.privacy = options.privacy;
+  widgetState.preview = config.preview ?? null;
 
   ensureStyles();
 
