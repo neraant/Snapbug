@@ -39,6 +39,7 @@ describe("getAppErrorHttpStatus", () => {
     const routeError = attachRouteErrorHttpStatus(source);
 
     expect(routeError.httpStatus).toBe(403);
+    expect(routeError.digest).toContain("snapbug:http=403");
     expect(getAppErrorHttpStatus(routeError)).toBe(403);
     expect(getAppErrorHttpStatus(new Error(routeError.message))).toBe(403);
   });

@@ -40,8 +40,38 @@ function hasStampedHttpStatus(error: Error): error is ErrorWithHttpStatus {
   return typeof (error as ErrorWithHttpStatus).httpStatus === "number";
 }
 
+function simpleMessageDigestSeed(message: string): string {
+  let hash = 2_166_136_261;
+  for (let index = 0; index < message.length; index += 1) {
+    hash ^= message.charCodeAt(index);
+    hash = Math.imul(hash, 16_777_619);
+  }
+  return String(hash >>> 0);
+}
+
+export function formatRouteErrorDigest(status: number, message: string, existingDigest?: string): string {
+  const suffix = `snapbug:http=${status}`;
+  if (typeof existingDigest === "string" && existingDigest.includes(suffix)) {
+    return existingDigest;
+  }
+  const base =
+    typeof existingDigest === "string" && existingDigest.length > 0
+      ? existingDigest
+      : simpleMessageDigestSeed(`${status}\0${message}`);
+  return `${base};${suffix}`;
+}
+
+function stampRouteErrorDigest(error: ErrorWithHttpStatus, status: number, existingDigest?: string): void {
+  error.digest = formatRouteErrorDigest(
+    status,
+    stripRouteErrorHttpStatusFromMessage(error.message),
+    existingDigest ?? error.digest,
+  );
+}
+
 export function attachRouteErrorHttpStatus(error: unknown): ErrorWithHttpStatus {
   if (error instanceof Error && hasStampedHttpStatus(error)) {
+    stampRouteErrorDigest(error, error.httpStatus!);
     return error;
   }
 
@@ -54,6 +84,7 @@ export function attachRouteErrorHttpStatus(error: unknown): ErrorWithHttpStatus 
   if (error instanceof Error) {
     routeError.cause = error;
   }
+  stampRouteErrorDigest(routeError, status, error instanceof Error ? (error as ErrorWithHttpStatus).digest : undefined);
   return routeError;
 }
 
@@ -108,6 +139,11 @@ export function getAppErrorHttpStatus(error: unknown): number {
       if (fromDigest !== null) {
         return fromDigest;
       }
+    }
+
+    const orpcStatus = readOrpcHttpStatus(error);
+    if (orpcStatus !== null) {
+      return orpcStatus;
     }
 
     if (error.cause !== undefined) {
