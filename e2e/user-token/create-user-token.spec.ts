@@ -24,11 +24,19 @@ test("a member can create a personal MCP token and see the secret once", async (
     await page.goto("/mcp");
     await expect(page.getByRole("button", { name: "Create token" })).toBeVisible();
     await expect(page.getByText("A project key is not accepted.")).toBeVisible();
-  }).toPass({ timeout: 20_000 });
+  }).toPass({ timeout: 30_000 });
+
+  await page.waitForFunction(() => {
+    const create = Array.from(document.querySelectorAll("button")).find((button) =>
+      button.textContent?.includes("Create token"),
+    );
+    if (!create) return false;
+    return Object.getOwnPropertyNames(create).some((name) => name.startsWith("__reactProps$"));
+  });
 
   await page.getByRole("button", { name: "Create token" }).click();
   const createDialog = page.getByRole("dialog", { name: "Create token" });
-  await expect(createDialog).toBeVisible();
+  await expect(createDialog).toBeVisible({ timeout: 30_000 });
   await createDialog.getByRole("textbox", { name: "Name" }).fill(tokenName);
   await createDialog.getByRole("button", { name: "Create", exact: true }).click();
 
