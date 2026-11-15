@@ -25,6 +25,7 @@ export const ERROR_CODES = {
   EMAIL_SEND_FAILED: "email-send-failed",
   INVALID_RESET_PASSWORD_TOKEN: "invalid-reset-password-token",
   INVALID_INVITATION_TOKEN: "invalid-invitation-token",
+  INVITATION_NOT_FOUND: "invitation-not-found",
   INVITATION_EMAIL_MISMATCH: "invitation-email-mismatch",
   SCREENSHOT_TOO_LARGE: "screenshot-too-large",
   INVALID_SCREENSHOT: "invalid-screenshot",

@@ -4,6 +4,8 @@ import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import type { ReactNode } from "react";
 import type { Resend } from "resend";
 
+export const PLACEHOLDER_RESEND_API_KEY = "your-resend-api-key-here";
+
 type SendParamsType = {
   to: string;
   subject: string;
@@ -14,6 +16,10 @@ export class EmailService {
   constructor(private readonly resend: Resend) {}
 
   async send({ to, subject, react }: SendParamsType) {
+    if (env.RESEND_API_KEY === PLACEHOLDER_RESEND_API_KEY) {
+      return;
+    }
+
     const { error } = await this.resend.emails.send({
       from: env.EMAIL_FROM,
       to,

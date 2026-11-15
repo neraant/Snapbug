@@ -1,6 +1,7 @@
 import { Invitation } from "@workspace/server/modules/invitation/entity/invitation.entity";
 import type { InvitationPersistedType } from "@workspace/server/modules/invitation/entity/invitation.types";
 import type { FindInvitationByTokenOutputDtoType } from "@workspace/validation/modules/invitation/dto/find-invitation-by-token.schema";
+import type { InvitationModelType } from "@workspace/validation/modules/invitation/dto/invitation.model";
 
 export abstract class InvitationMapper {
   static fromPersistence(row: InvitationPersistedType): Invitation {
@@ -11,9 +12,20 @@ export abstract class InvitationMapper {
     return invitation.toObject();
   }
 
+  static toDto(invitation: Invitation): InvitationModelType {
+    const { id, email, expiresAt, createdAt, revokedAt } = invitation.toObject();
+    return {
+      id,
+      email,
+      expiresAt: expiresAt.toISOString(),
+      createdAt: createdAt.toISOString(),
+      revokedAt: revokedAt?.toISOString() ?? null,
+    };
+  }
+
   static toAudit(invitation: Invitation): Record<string, unknown> {
-    const { email, invitedByUserId, expiresAt, acceptedAt } = invitation.toObject();
-    return { email, invitedByUserId, expiresAt, acceptedAt };
+    const { email, invitedByUserId, expiresAt, acceptedAt, revokedAt, tokenVersion } = invitation.toObject();
+    return { email, invitedByUserId, expiresAt, acceptedAt, revokedAt, tokenVersion };
   }
 
   static toFindByTokenOutput(invitation: Invitation, organizationName: string): FindInvitationByTokenOutputDtoType {

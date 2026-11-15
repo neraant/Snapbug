@@ -20,9 +20,11 @@ const invitation = new Invitation({
   organizationId,
   email: "alice@example.com",
   tokenHash: hashToken(token),
+  tokenVersion: 1,
   invitedByUserId: "2a8c69a1-1ab1-45a8-8497-eae1e506d9d4",
   expiresAt: new Date("2099-10-03T09:00:00.000Z"),
   acceptedAt: null,
+  revokedAt: null,
   createdAt: new Date("2026-10-03T09:00:00.000Z"),
 });
 

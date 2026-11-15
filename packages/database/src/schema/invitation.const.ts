@@ -1,6 +1,6 @@
 import { organizationTable } from "@workspace/database/schema/organization.const";
 import { userTable } from "@workspace/database/schema/user.const";
-import { pgTable, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
+import { integer, pgTable, text, timestamp, unique, uuid } from "drizzle-orm/pg-core";
 
 export const invitationTable = pgTable(
   "invitations",
@@ -11,11 +11,13 @@ export const invitationTable = pgTable(
       .notNull(),
     email: text("email").notNull(),
     tokenHash: text("token_hash").notNull(),
+    tokenVersion: integer("token_version").notNull().default(1),
     invitedByUserId: uuid("invited_by_user_id")
       .references(() => userTable.id)
       .notNull(),
     expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" }).notNull(),
     acceptedAt: timestamp("accepted_at", { withTimezone: true, mode: "date" }),
+    revokedAt: timestamp("revoked_at", { withTimezone: true, mode: "date" }),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull(),
   },
   (table) => [

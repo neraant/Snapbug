@@ -7,6 +7,7 @@ import { Suspense } from "react";
 
 import { InvitePeopleDialog } from "@/client/modules/team/components/invite-people-dialog";
 import { Team } from "@/client/modules/team/components/team";
+import { TeamPendingInvitations } from "@/client/modules/team/components/team-pending-invitations";
 import { texts } from "@/client/modules/team/consts/texts.const";
 
 export default function Page() {
@@ -26,6 +27,7 @@ export default function Page() {
         </Suspense>
       }
     >
+      <TeamPendingInvitations />
       <Suspense fallback={<Team.Fallback />}>
         <Team />
       </Suspense>

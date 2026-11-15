@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 const envSchema = z.object({
+  AUTH_SECRET: z.string().min(1),
   RESEND_API_KEY: z.string().min(1),
   EMAIL_FROM: z.string().min(1),
   BLOB_READ_WRITE_TOKEN: z
@@ -13,6 +14,7 @@ const envSchema = z.object({
 });
 
 export const env = envSchema.parse({
+  AUTH_SECRET: process.env.AUTH_SECRET,
   RESEND_API_KEY: process.env.RESEND_API_KEY,
   EMAIL_FROM: process.env.EMAIL_FROM,
   BLOB_READ_WRITE_TOKEN: process.env.BLOB_READ_WRITE_TOKEN,

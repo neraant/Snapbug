@@ -42,10 +42,10 @@ Do not start tasks marked TBD: an implementer agent must not take them.
 - P-19 global search for tickets and projects, limited to the member's project access.
 - P-20 acceptance of the terms on registration.
 - P-21 project archive and restore, delete, default assignee, store IP, collect visitor email, color, and slug.
+- P-22 invitation resend, revoke, and copy link. Expiry after 7 days already rejects acceptance.
 
 ## Open
 
-- P-22 invitation resend, revoke, and copy link. Expiry after 7 days already rejects acceptance.
 - P-24 error responses that return the real status, including 400, 401, 403, 404, 500, and any other real code. The error screen always shows 500.
 - P-25 ticket comments sit at the bottom of the card, read like a Jira thread, and the author can edit or delete their own comment.
 - P-26 an MCP user token has a name. The list shows that name, when it was created, and revoke. The secret is shown once.

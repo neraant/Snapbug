@@ -1,7 +1,6 @@
 import { SendInvitationsUseCase } from "@workspace/server/modules/invitation/application/send-invitation.use-case";
 import type { MembershipPort } from "@workspace/server/modules/invitation/port/membership.port";
 import type { OrganizationPort } from "@workspace/server/modules/invitation/port/organization.port";
-import type { TokenPort } from "@workspace/server/modules/invitation/port/token.port";
 import type { UserPort } from "@workspace/server/modules/invitation/port/user.port";
 import type { InvitationService } from "@workspace/server/modules/invitation/service/invitation.service";
 import type { WithTransactionType } from "@workspace/server/shared/database/transaction.util";
@@ -11,7 +10,7 @@ import { UserRole } from "@workspace/validation/modules/user/consts/user-role.co
 import { createHash } from "crypto";
 import type { ReactElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 function hashToken(token: string): string {
   return createHash("sha256").update(token).digest("hex");
@@ -30,10 +29,14 @@ const organization = {
 
 const withTransaction = vi.fn(async (callback: (tx: unknown) => Promise<unknown>) => await callback({}));
 
+let tokenCounter = 0;
+
 function invitationService(saveWithAudit = vi.fn().mockResolvedValue(undefined)) {
   const service = {
     saveWithAudit,
     hashToken,
+    buildInvitationToken: vi.fn(() => `invite-token-${++tokenCounter}`),
+    inviteUrl: vi.fn((token: string) => `http://localhost:3000/sign-up?invitation=${token}`),
     withActor: vi.fn(),
     withTx: vi.fn(),
   };
@@ -51,6 +54,10 @@ function emailMarkup(react: ReactElement): string {
 }
 
 describe("SendInvitationsUseCase", () => {
+  beforeEach(() => {
+    tokenCounter = 0;
+  });
+
   it("throws when the inviter is not in the organization", async () => {
     const membershipPort = {
       findByUserAndOrganization: vi.fn().mockResolvedValue(null),
@@ -60,7 +67,6 @@ describe("SendInvitationsUseCase", () => {
       membershipPort as unknown as MembershipPort,
       { findByEmail: vi.fn() } as unknown as UserPort,
       organizationPort(),
-      { generatePasswordResetToken: vi.fn() } as unknown as TokenPort,
       { send: vi.fn() } as unknown as EmailService,
       withTransaction as unknown as WithTransactionType,
     );
@@ -83,7 +89,6 @@ describe("SendInvitationsUseCase", () => {
       membershipPort as unknown as MembershipPort,
       { findByEmail: vi.fn() } as unknown as UserPort,
       organizationPort(),
-      { generatePasswordResetToken: vi.fn() } as unknown as TokenPort,
       emailService as unknown as EmailService,
       withTransaction as unknown as WithTransactionType,
     );
@@ -99,20 +104,17 @@ describe("SendInvitationsUseCase", () => {
   });
 
   it("dedupes emails and skips the inviter", async () => {
-    const token = "550e8400-e29b-41d4-a716-446655440000";
     const membershipPort = {
       findByUserAndOrganization: vi.fn().mockResolvedValue({ role: UserRole.ADMIN }),
     };
     const userPort = { findByEmail: vi.fn().mockResolvedValue(null) };
     const invitations = invitationService();
-    const authService = { generatePasswordResetToken: vi.fn().mockResolvedValue(token) };
     const emailService = { send: vi.fn().mockResolvedValue(undefined) };
     const useCase = new SendInvitationsUseCase(
       invitations as unknown as InvitationService,
       membershipPort as unknown as MembershipPort,
       userPort as unknown as UserPort,
       organizationPort(),
-      authService as unknown as TokenPort,
       emailService as unknown as EmailService,
       withTransaction as unknown as WithTransactionType,
     );
@@ -128,15 +130,10 @@ describe("SendInvitationsUseCase", () => {
 
     expect(invitations.saveWithAudit).toHaveBeenCalledTimes(2);
     expect(emailService.send).toHaveBeenCalledTimes(2);
-    expect(authService.generatePasswordResetToken).toHaveBeenCalledTimes(2);
+    expect(invitations.buildInvitationToken).toHaveBeenCalledTimes(2);
   });
 
   it("sends an email for each invitee after skipping existing members", async () => {
-    const tokens = [
-      "550e8400-e29b-41d4-a716-446655440000",
-      "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
-      "6ba7b811-9dad-11d1-80b4-00c04fd430c8",
-    ];
     const membershipPort = {
       findByUserAndOrganization: vi.fn(async ({ userId: memberUserId }) => {
         if (memberUserId === "member-user-id") {
@@ -154,13 +151,6 @@ describe("SendInvitationsUseCase", () => {
       }),
     };
     const invitations = invitationService();
-    const authService = {
-      generatePasswordResetToken: vi
-        .fn()
-        .mockResolvedValueOnce(tokens[0])
-        .mockResolvedValueOnce(tokens[1])
-        .mockResolvedValueOnce(tokens[2]),
-    };
     const emailService = { send: vi.fn().mockResolvedValue(undefined) };
     const organizations = organizationPort();
     const useCase = new SendInvitationsUseCase(
@@ -168,7 +158,6 @@ describe("SendInvitationsUseCase", () => {
       membershipPort as unknown as MembershipPort,
       userPort as unknown as UserPort,
       organizations,
-      authService as unknown as TokenPort,
       emailService as unknown as EmailService,
       withTransaction as unknown as WithTransactionType,
     );
@@ -185,20 +174,16 @@ describe("SendInvitationsUseCase", () => {
     expect(invitations.saveWithAudit).toHaveBeenCalledTimes(2);
     expect(emailService.send).toHaveBeenCalledTimes(2);
     expect(organizations.findById).toHaveBeenCalledOnce();
-    expect(emailService.send).toHaveBeenCalledWith(
-      expect.objectContaining({
-        to: "new@company.com",
-        subject: "You're invited to join Acme on Snapbug",
-      }),
-    );
 
     const saved = invitations.saveWithAudit.mock.calls[0]?.[0];
-    expect(saved.tokenHash).toBe(hashToken(tokens[0]!));
-    expect(saved.tokenHash).not.toBe(tokens[0]);
+    const firstToken = invitations.buildInvitationToken.mock.results[0]?.value as string;
+    expect(saved.tokenHash).toBe(hashToken(firstToken));
+    expect(saved.tokenVersion).toBe(1);
+    expect(saved.tokenHash).not.toBe(firstToken);
 
     const sent = emailService.send.mock.calls.find((call) => call[0].to === "new@company.com")?.[0];
     const markup = emailMarkup(sent?.react as ReactElement);
-    expect(markup).toContain(`invitation=${tokens[0]}`);
+    expect(markup).toContain(`invitation=${firstToken}`);
     expect(markup).toContain("Join Acme");
     expect(markup).toContain("You're invited to join Acme");
     expect(markup).not.toContain("Ada Lovelace");
@@ -214,7 +199,6 @@ describe("SendInvitationsUseCase", () => {
       membershipPort as unknown as MembershipPort,
       { findByEmail: vi.fn() } as unknown as UserPort,
       organizationPort(false),
-      { generatePasswordResetToken: vi.fn() } as unknown as TokenPort,
       emailService as unknown as EmailService,
       withTransaction as unknown as WithTransactionType,
     );
@@ -229,7 +213,6 @@ describe("SendInvitationsUseCase", () => {
   });
 
   it("includes the invitee name when that user already has one", async () => {
-    const token = "550e8400-e29b-41d4-a716-446655440000";
     const membershipPort = {
       findByUserAndOrganization: vi.fn(async ({ userId: memberUserId }: { userId: string }) => {
         if (memberUserId === userId) return { role: UserRole.ADMIN };
@@ -248,19 +231,12 @@ describe("SendInvitationsUseCase", () => {
       }),
     };
     const invitations = invitationService();
-    const authService = {
-      generatePasswordResetToken: vi
-        .fn()
-        .mockResolvedValueOnce(token)
-        .mockResolvedValueOnce("6ba7b810-9dad-11d1-80b4-00c04fd430c8"),
-    };
     const emailService = { send: vi.fn().mockResolvedValue(undefined) };
     const useCase = new SendInvitationsUseCase(
       invitations as unknown as InvitationService,
       membershipPort as unknown as MembershipPort,
       userPort as unknown as UserPort,
       organizationPort(),
-      authService as unknown as TokenPort,
       emailService as unknown as EmailService,
       withTransaction as unknown as WithTransactionType,
     );

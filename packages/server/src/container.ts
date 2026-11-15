@@ -48,7 +48,11 @@ import { FindUserByEmailUseCase } from "@workspace/server/modules/identity/appli
 import { UpdateInterfaceLanguageUseCase } from "@workspace/server/modules/identity/application/update-interface-language.use-case";
 import { UserRepository } from "@workspace/server/modules/identity/repository/user.repository";
 import { AcceptInvitationUseCase } from "@workspace/server/modules/invitation/application/accept-invitation.use-case";
+import { CopyInvitationLinkUseCase } from "@workspace/server/modules/invitation/application/copy-invitation-link.use-case";
 import { FindInvitationByTokenUseCase } from "@workspace/server/modules/invitation/application/find-invitation-by-token.use-case";
+import { FindInvitationsUseCase } from "@workspace/server/modules/invitation/application/find-invitations.use-case";
+import { ResendInvitationUseCase } from "@workspace/server/modules/invitation/application/resend-invitation.use-case";
+import { RevokeInvitationUseCase } from "@workspace/server/modules/invitation/application/revoke-invitation.use-case";
 import { SendInvitationsUseCase } from "@workspace/server/modules/invitation/application/send-invitation.use-case";
 import { InvitationRepository } from "@workspace/server/modules/invitation/repository/invitation.repository";
 import { InvitationService } from "@workspace/server/modules/invitation/service/invitation.service";
@@ -266,10 +270,10 @@ const sendInvitations = new SendInvitationsUseCase(
   membershipAdapter,
   userAdapter,
   organizationAdapter,
-  authService,
   emailService,
   withTransaction,
 );
+const findInvitations = new FindInvitationsUseCase(invitationRepository, membershipAdapter);
 const findInvitationByToken = new FindInvitationByTokenUseCase(
   invitationService,
   invitationRepository,
@@ -281,6 +285,26 @@ const acceptInvitation = new AcceptInvitationUseCase(
   projectAdapter,
   withTransaction,
   invitationService,
+);
+const resendInvitation = new ResendInvitationUseCase(
+  invitationRepository,
+  invitationService,
+  membershipAdapter,
+  organizationAdapter,
+  userAdapter,
+  emailService,
+  withTransaction,
+);
+const revokeInvitation = new RevokeInvitationUseCase(
+  invitationRepository,
+  invitationService,
+  membershipAdapter,
+  withTransaction,
+);
+const copyInvitationLink = new CopyInvitationLinkUseCase(
+  invitationRepository,
+  invitationService,
+  membershipAdapter,
 );
 const findActivityLogs = new FindActivityLogsUseCase(membershipAdapter, userAdapter, auditLogRepository);
 
@@ -397,7 +421,15 @@ export const container = {
   },
   apiKey: { findProjectByKey, findProjectApiKey, rotateProjectApiKey },
   auth: { signUp, verifyCredentials, requestResetPassword, resetPassword },
-  invitation: { sendInvitations, findInvitationByToken, acceptInvitation },
+  invitation: {
+    sendInvitations,
+    findInvitations,
+    findInvitationByToken,
+    acceptInvitation,
+    resendInvitation,
+    revokeInvitation,
+    copyInvitationLink,
+  },
   bugReport: {
     createBugReport,
     findWidgetConfig,

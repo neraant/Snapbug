@@ -15,10 +15,15 @@ import { findScreenshotInputDtoSchema } from "@workspace/validation/modules/bug-
 import { findStatsInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-stats.schema";
 import { findWorkloadInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-workload.schema";
 import { acceptInvitationInputDtoSchema } from "@workspace/validation/modules/invitation/dto/accept-invitation.schema";
+import { copyInvitationLinkInputDtoSchema } from "@workspace/validation/modules/invitation/dto/copy-invitation-link.schema";
 import {
   findInvitationByTokenInputDtoSchema,
   findInvitationByTokenOutputDtoSchema,
 } from "@workspace/validation/modules/invitation/dto/find-invitation-by-token.schema";
+import { findInvitationsOutputDtoSchema } from "@workspace/validation/modules/invitation/dto/find-invitations.schema";
+import { invitationModelSchema } from "@workspace/validation/modules/invitation/dto/invitation.model";
+import { resendInvitationInputDtoSchema } from "@workspace/validation/modules/invitation/dto/resend-invitation.schema";
+import { revokeInvitationInputDtoSchema } from "@workspace/validation/modules/invitation/dto/revoke-invitation.schema";
 import { sendInvitationsInputDtoSchema } from "@workspace/validation/modules/invitation/dto/send-invitation.schema";
 import { findMembershipInputDtoSchema } from "@workspace/validation/modules/membership/dto/find-membership.schema";
 import { findMembershipByUserOutputDtoSchema } from "@workspace/validation/modules/membership/dto/find-membership-by-user.schema";
@@ -338,6 +343,43 @@ JSON_SCHEMA_REGISTRY.add(acceptInvitationInputDtoSchema, {
   title: "Accept invitation",
   description: "Join an organization with a valid invitation token",
   examples: [{ token: "550e8400-e29b-41d4-a716-446655440000" }],
+});
+
+JSON_SCHEMA_REGISTRY.add(findInvitationsOutputDtoSchema, {
+  title: "List pending invitations",
+  description: "Unaccepted invitations for the organization",
+});
+
+JSON_SCHEMA_REGISTRY.add(invitationModelSchema, {
+  title: "Invitation",
+  description: "Pending organization invitation",
+  examples: [
+    {
+      id: "1a8c69a1-1ab1-45a8-8497-eae1e506d9d4",
+      email: "teammate@example.com",
+      expiresAt: "2026-11-22T09:00:00.000Z",
+      createdAt: "2026-11-15T09:00:00.000Z",
+      revokedAt: null,
+    },
+  ],
+});
+
+JSON_SCHEMA_REGISTRY.add(resendInvitationInputDtoSchema, {
+  title: "Resend invitation",
+  description: "Issue a new invitation link",
+  examples: [{ invitationId: "1a8c69a1-1ab1-45a8-8497-eae1e506d9d4" }],
+});
+
+JSON_SCHEMA_REGISTRY.add(revokeInvitationInputDtoSchema, {
+  title: "Revoke invitation",
+  description: "Invalidate a pending invitation",
+  examples: [{ invitationId: "1a8c69a1-1ab1-45a8-8497-eae1e506d9d4" }],
+});
+
+JSON_SCHEMA_REGISTRY.add(copyInvitationLinkInputDtoSchema, {
+  title: "Copy invitation link",
+  description: "Return the current sign-up URL for an invitation",
+  examples: [{ invitationId: "1a8c69a1-1ab1-45a8-8497-eae1e506d9d4" }],
 });
 
 JSON_SCHEMA_REGISTRY.add(createBugReportInputDtoSchema, {

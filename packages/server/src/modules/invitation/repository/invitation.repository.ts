@@ -5,7 +5,7 @@ import type { Invitation } from "@workspace/server/modules/invitation/entity/inv
 import { InvitationMapper } from "@workspace/server/modules/invitation/entity/invitation.mapper";
 import { InternalServerError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
-import { eq } from "drizzle-orm";
+import { and, desc, eq, isNull } from "drizzle-orm";
 
 export class InvitationRepository {
   constructor(private readonly db: DbClient = defaultDb) {}
@@ -19,9 +19,19 @@ export class InvitationRepository {
     return row ? InvitationMapper.fromPersistence(row) : null;
   }
 
-  async findByToken(token: string): Promise<Invitation | null> {
-    const [row] = await this.db.select().from(invitationTable).where(eq(invitationTable.tokenHash, token));
+  async findByToken(tokenHash: string): Promise<Invitation | null> {
+    const [row] = await this.db.select().from(invitationTable).where(eq(invitationTable.tokenHash, tokenHash));
     return row ? InvitationMapper.fromPersistence(row) : null;
+  }
+
+  async findManyPendingByOrganizationId(organizationId: string): Promise<Invitation[]> {
+    const rows = await this.db
+      .select()
+      .from(invitationTable)
+      .where(and(eq(invitationTable.organizationId, organizationId), isNull(invitationTable.acceptedAt)))
+      .orderBy(desc(invitationTable.createdAt));
+
+    return rows.map((row) => InvitationMapper.fromPersistence(row));
   }
 
   async save(invitation: Invitation): Promise<void> {
@@ -35,9 +45,11 @@ export class InvitationRepository {
           target: [invitationTable.organizationId, invitationTable.email],
           set: {
             tokenHash: values.tokenHash,
+            tokenVersion: values.tokenVersion,
             expiresAt: values.expiresAt,
             invitedByUserId: values.invitedByUserId,
             acceptedAt: values.acceptedAt,
+            revokedAt: values.revokedAt,
           },
         });
     } catch (error) {
