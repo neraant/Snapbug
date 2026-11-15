@@ -12,8 +12,8 @@ export abstract class UserMapper {
   }
 
   static toDto(user: User): UserModelType {
-    const { id, name, email, onboardingCompletedAt } = user.toObject();
-    return { id, name, email, onboardingCompletedAt };
+    const { id, name, email, interfaceLanguage, onboardingCompletedAt } = user.toObject();
+    return { id, name, email, interfaceLanguage, onboardingCompletedAt };
   }
 
   static toFindUsersByIdsOutput(users: User[]): UserModelType[] {
@@ -21,7 +21,7 @@ export abstract class UserMapper {
   }
 
   static toCredentialsDto(user: User): UserModelType & { passwordHash: string } {
-    const { id, name, email, passwordHash, onboardingCompletedAt } = user.toObject();
-    return { id, name, email, passwordHash, onboardingCompletedAt };
+    const { id, name, email, passwordHash, interfaceLanguage, onboardingCompletedAt } = user.toObject();
+    return { id, name, email, passwordHash, interfaceLanguage, onboardingCompletedAt };
   }
 }

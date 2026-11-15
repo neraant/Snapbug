@@ -5,15 +5,21 @@ import { url } from "@/shared/build-url.util";
 import { ACTIVE_ORGANIZATION_COOKIE } from "@/shared/organization/active-organization-cookie.const";
 import { chooseActiveMembership } from "@/shared/organization/resolve-active-organization";
 import { hasCompletedOnboarding } from "@/shared/utils/has-completed-onboarding.util";
-import { isGuestAuthPath, isInvitationAuthPath, isOnboardingPath } from "@/shared/utils/onboarding-gate.util";
+import {
+  isGuestAuthPath,
+  isInvitationAuthPath,
+  isOnboardingPath,
+  isPublicVisitorPath,
+} from "@/shared/utils/onboarding-gate.util";
 import { parseInvitationToken } from "@/shared/utils/parse-invitation-token.util";
 
 export default auth(async (req) => {
   const pathname = req.nextUrl.pathname;
   const isGuestAuthPage = isGuestAuthPath(pathname);
+  const isPublicVisitorPage = isPublicVisitorPath(pathname);
   const isOnboardingPage = isOnboardingPath(pathname);
 
-  if (!req.auth && !isGuestAuthPage) {
+  if (!req.auth && !isGuestAuthPage && !isPublicVisitorPage) {
     return Response.redirect(new URL(url.signIn(), req.nextUrl));
   }
 

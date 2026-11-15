@@ -8,6 +8,11 @@ import {
   findUserByEmailInputDtoSchema,
   findUserByEmailOutputDtoSchema,
 } from "@workspace/validation/modules/user/dto/find-user-by-email.schema";
+import {
+  updateInterfaceLanguageInputDtoSchema,
+  updateInterfaceLanguageOutputDtoSchema,
+} from "@workspace/validation/modules/user/dto/update-interface-language.schema";
+import { userModelSchema } from "@workspace/validation/modules/user/dto/user.model";
 
 export const identityContract = {
   createUser: oc
@@ -24,4 +29,21 @@ export const identityContract = {
       summary: "Find user by email",
       spec: sessionAuthSpec,
     }),
+  updateInterfaceLanguage: oc
+    .input(updateInterfaceLanguageInputDtoSchema)
+    .output(updateInterfaceLanguageOutputDtoSchema)
+    .route({
+      method: "POST",
+      path: "/users/interface-language",
+      tags: ["identity"],
+      summary: "Update interface language",
+      spec: sessionAuthSpec,
+    }),
+  findCurrentUser: oc.output(userModelSchema).route({
+    method: "GET",
+    path: "/users/me",
+    tags: ["identity"],
+    summary: "Find current user",
+    spec: sessionAuthSpec,
+  }),
 };

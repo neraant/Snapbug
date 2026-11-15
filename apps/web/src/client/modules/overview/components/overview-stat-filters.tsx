@@ -7,10 +7,16 @@ import { texts } from "@/client/modules/overview/consts/texts.const";
 import type { OverviewStatFilters } from "@/client/modules/overview/types/overview-stat-filter.type";
 
 const periodLabelByDays = {
-  7: texts.filter.period.last7Days,
-  30: texts.filter.period.last30Days,
-  90: texts.filter.period.last90Days,
-} as const;
+  get 7() {
+    return texts.filter.period.last7Days;
+  },
+  get 30() {
+    return texts.filter.period.last30Days;
+  },
+  get 90() {
+    return texts.filter.period.last90Days;
+  },
+};
 
 type OverviewStatFilterToolbarContainerProps = {
   filters: OverviewStatFilters;

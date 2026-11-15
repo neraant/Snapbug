@@ -6,7 +6,6 @@ import { useForm } from "react-hook-form";
 import type { z } from "zod";
 
 import { useAddComment } from "@/client/modules/shared/queries/use-add-comment";
-import { useFindComments } from "@/client/modules/shared/queries/use-find-comments";
 import { texts } from "@/client/modules/ticket-detail/consts/texts.const";
 
 const commentFormSchema = addCommentInputDtoSchema.pick({ body: true });
@@ -18,7 +17,6 @@ type UseTicketDetailCommentInput = {
 };
 
 export function useTicketDetailComment({ bugReportId }: UseTicketDetailCommentInput) {
-  const { data: comments } = useFindComments({ bugReportId });
   const { mutateAsync: addComment, isPending } = useAddComment();
   const form = useForm<CommentFormSchemaType>({
     resolver: zodResolver(commentFormSchema),
@@ -27,9 +25,11 @@ export function useTicketDetailComment({ bugReportId }: UseTicketDetailCommentIn
 
   const onSubmit = form.handleSubmit(async (values) => {
     try {
-      await addComment({ bugReportId, body: values.body });
+      const pending = addComment({ bugReportId, body: values.body });
       form.reset();
+      await pending;
     } catch (error) {
+      form.setValue("body", values.body);
       toast.add({
         title: getAppErrorMessage(error, texts.comments.submitError),
         type: "error",
@@ -38,7 +38,6 @@ export function useTicketDetailComment({ bugReportId }: UseTicketDetailCommentIn
   });
 
   return {
-    comments,
     control: form.control,
     isPending: isPending || form.formState.isSubmitting,
     onSubmit,

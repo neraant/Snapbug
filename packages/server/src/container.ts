@@ -13,7 +13,7 @@ import { VerifyCredentialsUseCase } from "@workspace/server/modules/auth/applica
 import { ResetPasswordRepository } from "@workspace/server/modules/auth/repository/reset-password.repository";
 import { AuthService } from "@workspace/server/modules/auth/service/auth.service";
 import { BugReportAdapter } from "@workspace/server/modules/bug-report/adapter/bug-report.adapter";
-import { VercelBlobFileStorageAdapter } from "@workspace/server/modules/bug-report/adapter/vercel-blob-file-storage.adapter";
+import { createBugReportFileStorage } from "@workspace/server/modules/bug-report/adapter/create-bug-report-file-storage";
 import { CountOpenByAssigneeUseCase } from "@workspace/server/modules/bug-report/application/count-open-by-assignee.use-case";
 import { CountOpenByProjectUseCase } from "@workspace/server/modules/bug-report/application/count-open-by-project.use-case";
 import { CreateBugReportUseCase } from "@workspace/server/modules/bug-report/application/create-bug-report.use-case";
@@ -41,7 +41,9 @@ import { CommentRepository } from "@workspace/server/modules/comment/repository/
 import { CommentService } from "@workspace/server/modules/comment/service/comment.service";
 import { UserAdapter } from "@workspace/server/modules/identity/adapter/user.adapter";
 import { CreateUserUseCase } from "@workspace/server/modules/identity/application/create-user.use-case";
+import { FindUserUseCase } from "@workspace/server/modules/identity/application/find-user.use-case";
 import { FindUserByEmailUseCase } from "@workspace/server/modules/identity/application/find-user-by-email.use-case";
+import { UpdateInterfaceLanguageUseCase } from "@workspace/server/modules/identity/application/update-interface-language.use-case";
 import { UserRepository } from "@workspace/server/modules/identity/repository/user.repository";
 import { AcceptInvitationUseCase } from "@workspace/server/modules/invitation/application/accept-invitation.use-case";
 import { FindInvitationByTokenUseCase } from "@workspace/server/modules/invitation/application/find-invitation-by-token.use-case";
@@ -122,7 +124,7 @@ const apiKeyService = new ApiKeyService(apiKeyRepository, auditLogService);
 const widgetIngestOriginService = new WidgetIngestOriginService();
 const widgetIngestRateLimitService = new WidgetIngestRateLimitService();
 const widgetUserAgentService = new WidgetUserAgentService();
-const bugReportFileStorage = new VercelBlobFileStorageAdapter(env.BLOB_READ_WRITE_TOKEN);
+const bugReportFileStorage = createBugReportFileStorage(env.BLOB_READ_WRITE_TOKEN);
 
 const projectAccessService = new ProjectAccessService(projectAccessRepository, auditLogService);
 const membershipAdapter = new MembershipAdapter(
@@ -164,6 +166,8 @@ const replaceMembershipProjectAccess = new ReplaceMembershipProjectAccessUseCase
 
 const createUser = new CreateUserUseCase(userRepository);
 const findUserByEmail = new FindUserByEmailUseCase(userRepository);
+const findCurrentUser = new FindUserUseCase(userRepository);
+const updateInterfaceLanguage = new UpdateInterfaceLanguageUseCase(userRepository);
 
 const createProject = new CreateProjectUseCase(membershipAdapter, projectService, withTransaction);
 const findProjects = new FindProjectsUseCase(membershipAdapter, projectRepository);
@@ -336,7 +340,7 @@ export const container = {
     findMembershipProjectAccess,
     replaceMembershipProjectAccess,
   },
-  identity: { createUser, findUserByEmail },
+  identity: { createUser, findUserByEmail, findCurrentUser, updateInterfaceLanguage },
   project: { createProject, findProjects, updateProject, findProjectWidgetSetting, updateProjectWidgetSetting },
   organization: {
     findOnboarding,
