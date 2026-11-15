@@ -1,5 +1,6 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import { Column } from "@workspace/design-system/components/layout/column";
 import { Row } from "@workspace/design-system/components/layout/row";
 import { Avatar, AvatarFallback } from "@workspace/design-system/components/ui/avatar";
@@ -7,13 +8,7 @@ import { Badge } from "@workspace/design-system/components/ui/badge";
 import { Button } from "@workspace/design-system/components/ui/button";
 import { Code } from "@workspace/design-system/components/ui/code";
 import { Separator } from "@workspace/design-system/components/ui/separator";
-import {
-  Sheet,
-  SheetBody,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@workspace/design-system/components/ui/sheet";
+import { Sheet, SheetBody, SheetContent, SheetHeader, SheetTitle } from "@workspace/design-system/components/ui/sheet";
 import { Table } from "@workspace/design-system/components/ui/table";
 import { Typography } from "@workspace/design-system/components/ui/typography";
 import { useCopyText } from "@workspace/design-system/hooks/use-copy-text";
@@ -32,6 +27,7 @@ import {
   formatActivityObjectBadge,
   formatActivityRelativeWhen,
 } from "@/client/modules/activity-log/utils/format-activity-log.util";
+import { orpcQuery } from "@/client/modules/shared/orpc/query-utils";
 
 type ActivityLogDetailSheetProps = {
   entry: ActivityLogType | null;
@@ -53,11 +49,15 @@ export function ActivityLogDetailSheet({
   onNext,
 }: ActivityLogDetailSheetProps) {
   const { copied, copy } = useCopyText();
+  const { data: projects = [] } = useQuery(orpcQuery.project.findProjects.queryOptions());
 
   if (!entry) return null;
 
   const sentence = formatActivityEventSentence(entry);
-  const objectHref = resolveActivityObjectHref(entry);
+  const objectHref = resolveActivityObjectHref(
+    entry,
+    projects.map((project) => ({ id: project.id, slug: project.slug })),
+  );
   const actorName = formatActivityActorName(entry);
   const hasStructuredChanges = entry.changes.length > 0;
 

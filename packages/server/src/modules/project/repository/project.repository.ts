@@ -38,6 +38,16 @@ export class ProjectRepository {
     return project ? ProjectMapper.fromPersistence(mapRow(project)) : null;
   }
 
+  async findManyByIds(ids: string[]): Promise<Project[]> {
+    if (ids.length === 0) return [];
+
+    const projects = await this.db.query.projectTable.findMany({
+      where: { id: { in: ids } },
+    });
+
+    return projects.map((project) => ProjectMapper.fromPersistence(mapRow(project)));
+  }
+
   async findBySlugAndOrganizationId(slug: string, organizationId: string): Promise<Project | null> {
     const project = await this.db.query.projectTable.findFirst({
       where: { slug, organizationId },

@@ -42,4 +42,5 @@ test("an administrator reads the activity log after changing the organization", 
   await expect(detail.getByRole("cell", { name: "name", exact: true })).toBeVisible();
   await expect(detail.getByRole("cell", { name: "Acme", exact: true })).toBeVisible();
   await expect(detail.getByRole("cell", { name: "Acme Studio", exact: true })).toBeVisible();
+  await expect(detail.getByRole("link", { name: "Acme Studio" })).toHaveAttribute("href", "/settings");
 });

@@ -17,6 +17,8 @@ export const activityLogSchema = z.object({
   entityType: z.string(),
   entityId: z.uuid(),
   entityLabel: z.string(),
+  entityExists: z.boolean(),
+  entityShortId: z.string().nullable(),
   projectId: z.uuid().nullable(),
   action: z.string(),
   source: z.enum(activityLogSources),

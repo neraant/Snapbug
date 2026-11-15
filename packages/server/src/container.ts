@@ -6,6 +6,9 @@ import { FindProjectByKeyUseCase } from "@workspace/server/modules/api-key/appli
 import { RotateProjectApiKeyUseCase } from "@workspace/server/modules/api-key/application/rotate-project-api-key.use-case";
 import { ApiKeyRepository } from "@workspace/server/modules/api-key/repository/api-key.repository";
 import { ApiKeyService } from "@workspace/server/modules/api-key/service/api-key.service";
+import { ActivityLogBugReportAdapter } from "@workspace/server/modules/audit/adapter/activity-log-bug-report.adapter";
+import { ActivityLogMembershipAdapter } from "@workspace/server/modules/audit/adapter/activity-log-membership.adapter";
+import { ActivityLogProjectAdapter } from "@workspace/server/modules/audit/adapter/activity-log-project.adapter";
 import { FindActivityLogsUseCase } from "@workspace/server/modules/audit/application/find-activity-logs.use-case";
 import { RequestPasswordResetUseCase } from "@workspace/server/modules/auth/application/request-password-reset.use-case";
 import { ResetPasswordUseCase } from "@workspace/server/modules/auth/application/reset-password.use-case";
@@ -303,12 +306,17 @@ const revokeInvitation = new RevokeInvitationUseCase(
   membershipAdapter,
   withTransaction,
 );
-const copyInvitationLink = new CopyInvitationLinkUseCase(
-  invitationRepository,
-  invitationService,
-  membershipAdapter,
+const copyInvitationLink = new CopyInvitationLinkUseCase(invitationRepository, invitationService, membershipAdapter);
+const activityLogMembershipAdapter = new ActivityLogMembershipAdapter(membershipRepository);
+const activityLogProjectAdapter = new ActivityLogProjectAdapter(projectRepository);
+const activityLogBugReportAdapter = new ActivityLogBugReportAdapter(bugReportRepository);
+const findActivityLogs = new FindActivityLogsUseCase(
+  activityLogMembershipAdapter,
+  userAdapter,
+  activityLogProjectAdapter,
+  activityLogBugReportAdapter,
+  auditLogRepository,
 );
-const findActivityLogs = new FindActivityLogsUseCase(membershipAdapter, userAdapter, auditLogRepository);
 
 const findProjectByKey = new FindProjectByKeyUseCase(apiKeyRepository, projectAdapter);
 const findProjectApiKey = new FindProjectApiKeyUseCase(

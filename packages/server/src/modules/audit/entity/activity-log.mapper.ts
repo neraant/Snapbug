@@ -19,6 +19,8 @@ export abstract class ActivityLogMapper {
       entityType: row.entityType,
       entityId: row.entityId,
       entityLabel: ActivityLogMapper.entityLabel(row.entityType, row.entityId, row.changes),
+      entityExists: false,
+      entityShortId: null,
       projectId: row.projectId,
       action: row.action,
       source: row.source,
@@ -30,11 +32,7 @@ export abstract class ActivityLogMapper {
     };
   }
 
-  static entityLabel(
-    entityType: string,
-    entityId: string,
-    changes: AuditLog["changes"],
-  ): string {
+  static entityLabel(entityType: string, entityId: string, changes: AuditLog["changes"]): string {
     const readChangeValue = (field: string): string | null => {
       const change = changes[field];
       const candidate = change?.to ?? change?.from;

@@ -1,18 +1,25 @@
 import { ActivityLogMapper } from "@workspace/server/modules/audit/entity/activity-log.mapper";
+import type { BugReportPort } from "@workspace/server/modules/audit/port/bug-report.port";
 import type { MembershipPort } from "@workspace/server/modules/audit/port/membership.port";
+import type { ProjectPort } from "@workspace/server/modules/audit/port/project.port";
 import type { UserPort } from "@workspace/server/modules/audit/port/user.port";
 import { encodeActivityLogCursor } from "@workspace/server/shared/audit/activity-log-cursor.util";
 import type { AuditLogRepository } from "@workspace/server/shared/audit/audit-log.repository";
 import { ForbiddenError, NotFoundError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
+import type {
+  ActivityLogType,
+  FindActivityLogsOutputDtoType,
+} from "@workspace/validation/modules/audit/dto/find-activity-logs.schema";
 import type { FindActivityLogsInputDtoType } from "@workspace/validation/modules/audit/dto/find-activity-logs-input.schema";
-import type { FindActivityLogsOutputDtoType } from "@workspace/validation/modules/audit/dto/find-activity-logs.schema";
 import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
 
 export class FindActivityLogsUseCase {
   constructor(
     private readonly membershipPort: MembershipPort,
     private readonly userPort: UserPort,
+    private readonly projectPort: ProjectPort,
+    private readonly bugReportPort: BugReportPort,
     private readonly auditLogRepository: AuditLogRepository,
   ) {}
 
@@ -55,14 +62,67 @@ export class FindActivityLogsUseCase {
 
     const items = pageItems.map((auditLog) => {
       const row = auditLog.toObject();
-      return ActivityLogMapper.toDto(auditLog, this.actorFields(row.actorType, row.actorId, labelByUserId, nameByUserId));
+      return ActivityLogMapper.toDto(
+        auditLog,
+        this.actorFields(row.actorType, row.actorId, labelByUserId, nameByUserId),
+      );
     });
 
-    const last = pageItems.at(-1);
-    const nextCursor =
-      hasMore && last ? encodeActivityLogCursor(last.occurredAt, last.id) : null;
+    const enrichedItems = await this.enrichEntityLinks(organizationId, items);
 
-    return { items, nextCursor };
+    const last = pageItems.at(-1);
+    const nextCursor = hasMore && last ? encodeActivityLogCursor(last.occurredAt, last.id) : null;
+
+    return { items: enrichedItems, nextCursor };
+  }
+
+  private async enrichEntityLinks(organizationId: string, items: ActivityLogType[]): Promise<ActivityLogType[]> {
+    const bugReportIds = items.filter((item) => item.entityType === "bug-report").map((item) => item.entityId);
+    const projectIds = items.filter((item) => item.entityType === "project").map((item) => item.entityId);
+    const membershipIds = items.filter((item) => item.entityType === "membership").map((item) => item.entityId);
+
+    const [bugReports, projects, memberships] = await Promise.all([
+      this.bugReportPort.findManyByIds(bugReportIds),
+      this.projectPort.findManyByIds(projectIds),
+      this.membershipPort.findManyByIds(membershipIds),
+    ]);
+
+    const bugReportById = new Map(bugReports.map((bugReport) => [bugReport.id, bugReport]));
+    const projectById = new Map(projects.map((project) => [project.id, project]));
+    const membershipById = new Map(memberships.map((membership) => [membership.id, membership]));
+
+    return items.map((item) => {
+      switch (item.entityType) {
+        case "organization":
+          return {
+            ...item,
+            entityExists: item.entityId === organizationId,
+            entityShortId: null,
+          };
+        case "bug-report": {
+          const bugReport = bugReportById.get(item.entityId);
+          return {
+            ...item,
+            entityExists: bugReport != null,
+            entityShortId: bugReport?.shortId ?? null,
+          };
+        }
+        case "project":
+          return {
+            ...item,
+            entityExists: projectById.has(item.entityId),
+            entityShortId: null,
+          };
+        case "membership":
+          return {
+            ...item,
+            entityExists: membershipById.has(item.entityId),
+            entityShortId: null,
+          };
+        default:
+          return item;
+      }
+    });
   }
 
   private actorFields(
