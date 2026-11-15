@@ -20,6 +20,11 @@ const en = {
     save: "Save",
     cancel: "Cancel",
     delete: "Delete",
+    deleteDialog: {
+      title: "Delete comment?",
+      description: "This comment will be removed from the ticket. This cannot be undone.",
+      confirm: "Delete",
+    },
     updateError: "Could not update the comment.",
     deleteError: "Could not delete the comment.",
   },
@@ -103,6 +108,11 @@ const ru = {
     save: "Сохранить",
     cancel: "Отмена",
     delete: "Удалить",
+    deleteDialog: {
+      title: "Удалить комментарий?",
+      description: "Комментарий будет удалён из тикета. Это нельзя отменить.",
+      confirm: "Удалить",
+    },
     updateError: "Не удалось обновить комментарий.",
     deleteError: "Не удалось удалить комментарий.",
   },

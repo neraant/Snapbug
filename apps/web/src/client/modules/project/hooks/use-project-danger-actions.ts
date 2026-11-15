@@ -30,17 +30,10 @@ export function useProjectDangerActions({ project, onProjectChanged, onProjectDe
   }, [queryClient]);
 
   const onArchive = useCallback(async () => {
-    try {
-      await archiveProject({ projectId: project.id });
-      await invalidateProjectLists();
-      toast.add({ title: texts.settingsSheet.toast.archiveSuccess, type: "success" });
-      onProjectChanged();
-    } catch (error) {
-      toast.add({
-        title: getAppErrorMessage(error, texts.settingsSheet.toast.archiveError),
-        type: "error",
-      });
-    }
+    await archiveProject({ projectId: project.id });
+    await invalidateProjectLists();
+    toast.add({ title: texts.settingsSheet.toast.archiveSuccess, type: "success" });
+    onProjectChanged();
   }, [archiveProject, invalidateProjectLists, onProjectChanged, project.id]);
 
   const onRestore = useCallback(async () => {
@@ -58,17 +51,10 @@ export function useProjectDangerActions({ project, onProjectChanged, onProjectDe
   }, [invalidateProjectLists, onProjectChanged, project.id, restoreProject]);
 
   const onDelete = useCallback(async () => {
-    try {
-      await deleteProject({ projectId: project.id });
-      await invalidateProjectLists();
-      toast.add({ title: texts.settingsSheet.toast.deleteSuccess, type: "success" });
-      onProjectDeleted();
-    } catch (error) {
-      toast.add({
-        title: getAppErrorMessage(error, texts.settingsSheet.toast.deleteError),
-        type: "error",
-      });
-    }
+    await deleteProject({ projectId: project.id });
+    await invalidateProjectLists();
+    toast.add({ title: texts.settingsSheet.toast.deleteSuccess, type: "success" });
+    onProjectDeleted();
   }, [deleteProject, invalidateProjectLists, onProjectDeleted, project.id]);
 
   return {

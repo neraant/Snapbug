@@ -48,11 +48,11 @@ Do not start tasks marked TBD: an implementer agent must not take them.
 - P-26 an MCP user token has a name. The list shows that name, when it was created, and revoke. The secret is shown once.
 - P-28 the settings screen matches the rest of the app and the design system. Language copy appears once; English / Russian is a two-option switch that saves on change (no Save). Organization name and retention keep Save.
 - P-29 playground sample is a mock customer checkout; after submit the capture uses the ticket-card layout (description, screenshot, replay, diagnostics, environment sidebar). No comments or ticket properties. Submit still writes nothing.
+- P-30 Actions with real consequences ask for confirmation through one shared `ConfirmDialog`: revoke token, remove member, role change, revoke invitation, rotate key, archive, delete project (typed name), delete comment. Harmless actions do not ask. Brief with the expected UI/UX: `docs/tasks/P-30.md`. Read it first; shared rules are in `docs/tasks/README.md`.
 
 ## Open
 
 - P-24 error responses that return the real status, including 400, 401, 403, 404, 500, and any other real code. The error screen always shows 500.
-- P-30 Actions with real consequences ask for confirmation through one shared `ConfirmDialog`: revoke token, remove member, role change, revoke invitation, rotate key, archive, delete project (typed name), delete comment. Harmless actions do not ask. Brief with the expected UI/UX: `docs/tasks/P-30.md`. Read it first; shared rules are in `docs/tasks/README.md`.
 - P-31 The one-time secret dialog (new MCP token, rotated project key) is a polished shared dialog: warning, masked field with reveal and copy, usage snippet, Done. Brief with the expected UI/UX: `docs/tasks/P-31.md`. Read it first; shared rules are in `docs/tasks/README.md`.
 - P-32 The activity page loads on scroll (cursor pagination, no Load more), shows a minimal table (when, actor, event sentence, object type), and a click on a row opens a detail sidebar with summary and before/after changes, kept in the URL. Brief with the expected UI/UX: `docs/tasks/P-32.md`. Read it first; shared rules are in `docs/tasks/README.md`.
 - P-33 The Team page has two tabs, Members and Invitations. The pending-invitations table lives only on the Invitations tab. The tab is kept in the URL. Brief with the expected UI/UX: `docs/tasks/P-33.md`. Read it first; shared rules are in `docs/tasks/README.md`.

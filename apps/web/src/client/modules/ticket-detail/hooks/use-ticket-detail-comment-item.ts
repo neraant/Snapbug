@@ -51,14 +51,7 @@ export function useTicketDetailCommentItem({ commentId, body }: UseTicketDetailC
   });
 
   const onDelete = useCallback(async () => {
-    try {
-      await deleteComment({ id: commentId });
-    } catch (error) {
-      toast.add({
-        title: getAppErrorMessage(error, texts.comments.deleteError),
-        type: "error",
-      });
-    }
+    await deleteComment({ id: commentId });
   }, [commentId, deleteComment]);
 
   return {
