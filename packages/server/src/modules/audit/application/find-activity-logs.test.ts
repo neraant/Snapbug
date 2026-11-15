@@ -39,28 +39,41 @@ describe("FindActivityLogsUseCase", () => {
     const userPort = {
       findManyByIds: vi.fn().mockResolvedValue([{ id: userId, email: "admin@example.com", name: "Admin" }]),
     };
-    const auditLogRepository = { findManyByOrganizationId: vi.fn().mockResolvedValue([auditLog]) };
+    const auditLogRepository = { findPageByOrganizationId: vi.fn().mockResolvedValue([auditLog]) };
     const useCase = new FindActivityLogsUseCase(
       membershipPort as unknown as MembershipPort,
       userPort as unknown as UserPort,
       auditLogRepository as unknown as AuditLogRepository,
     );
 
-    const result = await useCase.execute(userId, organizationId);
+    const result = await useCase.execute(userId, organizationId, { limit: 50 });
 
-    expect(auditLogRepository.findManyByOrganizationId).toHaveBeenCalledWith(organizationId);
-    expect(result).toEqual([
+    expect(auditLogRepository.findPageByOrganizationId).toHaveBeenCalledWith({
+      organizationId,
+      limit: 50,
+      cursor: undefined,
+      search: undefined,
+      actorId: undefined,
+      entityType: undefined,
+      range: "all",
+    });
+    expect(result.items).toEqual([
       {
         id: auditLog.id,
         occurredAt: occurredAt.toISOString(),
+        actorId: userId,
+        actorName: "Admin",
         actorLabel: "admin@example.com",
         entityType: "organization",
         entityId: organizationId,
+        entityLabel: "Acme Studio",
+        projectId: null,
         action: "Update organization",
         source: "web",
         changes: [{ field: "name", from: "Acme", to: "Acme Studio" }],
       },
     ]);
+    expect(result.nextCursor).toBeNull();
   });
 
   it("names the member who changed an object through MCP", async () => {
@@ -81,17 +94,17 @@ describe("FindActivityLogsUseCase", () => {
     const userPort = {
       findManyByIds: vi.fn().mockResolvedValue([{ id: userId, email: "admin@example.com", name: "Admin" }]),
     };
-    const auditLogRepository = { findManyByOrganizationId: vi.fn().mockResolvedValue([mcpLog]) };
+    const auditLogRepository = { findPageByOrganizationId: vi.fn().mockResolvedValue([mcpLog]) };
     const useCase = new FindActivityLogsUseCase(
       membershipPort as unknown as MembershipPort,
       userPort as unknown as UserPort,
       auditLogRepository as unknown as AuditLogRepository,
     );
 
-    const result = await useCase.execute(userId, organizationId);
+    const result = await useCase.execute(userId, organizationId, {});
 
     expect(userPort.findManyByIds).toHaveBeenCalledWith([userId]);
-    expect(result[0]).toMatchObject({
+    expect(result.items[0]).toMatchObject({
       actorLabel: "admin@example.com",
       entityType: "bug-report",
       entityId: "5a8c69a1-1ab1-45a8-8497-eae1e506d9d1",
@@ -99,22 +112,45 @@ describe("FindActivityLogsUseCase", () => {
     });
   });
 
-  it("rejects a member without reading the log", async () => {
-    const membershipPort = {
-      findByUserAndOrganization: vi.fn().mockResolvedValue({ ...membership, role: UserRole.USER }),
+  it("returns a cursor when another page of activity exists", async () => {
+    const olderLog = new AuditLog({
+      ...auditLog.toObject(),
+      id: "7a8c69a1-1ab1-45a8-8497-eae1e506d9d1",
+      occurredAt: new Date("2026-11-12T12:00:00.000Z"),
+    });
+    const membershipPort = { findByUserAndOrganization: vi.fn().mockResolvedValue(membership) };
+    const userPort = {
+      findManyByIds: vi.fn().mockResolvedValue([{ id: userId, email: "admin@example.com", name: "Admin" }]),
     };
-    const userPort = { findManyByIds: vi.fn() };
-    const auditLogRepository = { findManyByOrganizationId: vi.fn() };
+    const auditLogRepository = { findPageByOrganizationId: vi.fn().mockResolvedValue([auditLog, olderLog]) };
     const useCase = new FindActivityLogsUseCase(
       membershipPort as unknown as MembershipPort,
       userPort as unknown as UserPort,
       auditLogRepository as unknown as AuditLogRepository,
     );
 
-    await expect(useCase.execute(userId, organizationId)).rejects.toMatchObject({
+    const result = await useCase.execute(userId, organizationId, { limit: 1 });
+
+    expect(result.items).toHaveLength(1);
+    expect(result.nextCursor).toBe(`${occurredAt.toISOString()}|${auditLog.id}`);
+  });
+
+  it("rejects a member without reading the log", async () => {
+    const membershipPort = {
+      findByUserAndOrganization: vi.fn().mockResolvedValue({ ...membership, role: UserRole.USER }),
+    };
+    const userPort = { findManyByIds: vi.fn() };
+    const auditLogRepository = { findPageByOrganizationId: vi.fn() };
+    const useCase = new FindActivityLogsUseCase(
+      membershipPort as unknown as MembershipPort,
+      userPort as unknown as UserPort,
+      auditLogRepository as unknown as AuditLogRepository,
+    );
+
+    await expect(useCase.execute(userId, organizationId, {})).rejects.toMatchObject({
       errorCode: ERROR_CODES.ADMIN_REQUIRED,
     });
 
-    expect(auditLogRepository.findManyByOrganizationId).not.toHaveBeenCalled();
+    expect(auditLogRepository.findPageByOrganizationId).not.toHaveBeenCalled();
   });
 });
