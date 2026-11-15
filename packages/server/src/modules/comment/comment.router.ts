@@ -15,4 +15,10 @@ export const commentRouter = os.router({
   findComments: authed.findComments.handler(
     async ({ input, context }) => await container.comment.findComments.execute(input, context.user.id),
   ),
+  updateComment: authed.updateComment.handler(
+    async ({ input, context }) => await container.comment.updateComment.execute(input, context.user.id, context.actor),
+  ),
+  deleteComment: authed.deleteComment.handler(
+    async ({ input, context }) => await container.comment.deleteComment.execute(input, context.user.id, context.actor),
+  ),
 });

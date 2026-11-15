@@ -30,7 +30,6 @@ export function TicketDetail({ shortId }: TicketDetailProps) {
         <Grid columns="responsive-3" gap="lg">
           <Column gap="lg" minWidth="0" width="full" className="min-w-0 lg:col-span-2">
             <TicketDetailIssueSection shortId={shortId} />
-            <TicketDetailCommentSection shortId={shortId} />
             {showActiveOrganizationData ? (
               <TicketDetailScreenshotSection shortId={shortId} />
             ) : (
@@ -42,6 +41,7 @@ export function TicketDetail({ shortId }: TicketDetailProps) {
               <Skeleton className="w-full" style={{ height: TICKET_DETAIL_REPLAY_PLAYER_SKELETON_HEIGHT }} />
             )}
             <TicketDetailDiagnosticsCard shortId={shortId} />
+            <TicketDetailCommentSection shortId={shortId} />
           </Column>
           <TicketDetailSidebar shortId={shortId} />
         </Grid>
