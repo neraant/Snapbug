@@ -21,10 +21,16 @@ test("an administrator resends a pending invitation", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Invite people" })).toBeVisible();
 
   const inviteEmail = `pending-${Date.now()}@example.com`;
-  await page.getByRole("button", { name: "Invite people" }).click();
-  await page.getByRole("textbox", { name: "Email addresses" }).fill(inviteEmail);
-  await page.getByRole("textbox", { name: "Email addresses" }).press("Enter");
-  await page.getByRole("button", { name: "Send invitations" }).click();
+  const inviteButton = page.getByRole("button", { name: "Invite people" });
+  await expect(async () => {
+    await inviteButton.click();
+    await expect(page.getByRole("dialog", { name: "Invite people" })).toBeVisible({ timeout: 2_000 });
+  }).toPass({ timeout: 30_000 });
+
+  const inviteDialog = page.getByRole("dialog", { name: "Invite people" });
+  await inviteDialog.getByRole("textbox", { name: "Email addresses" }).fill(inviteEmail);
+  await inviteDialog.getByRole("textbox", { name: "Email addresses" }).press("Enter");
+  await inviteDialog.getByRole("button", { name: "Send invitations" }).click();
   await expect(page.getByText("Invitations sent.")).toBeVisible();
 
   await expect(page.getByRole("heading", { name: "Pending invitations" })).toBeVisible();
