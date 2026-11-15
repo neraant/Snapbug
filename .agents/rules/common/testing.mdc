@@ -1,0 +1,12 @@
+---
+description: Where unit tests are allowed
+alwaysApply: true
+---
+
+# Testing scope
+
+- Unit tests (`.test.ts`) exist **only** for application use-cases: `packages/server/src/modules/{context}/application/{verb}.test.ts` next to `{verb}.use-case.ts`. See [tdd](../backend/tdd.mdc).
+- No unit tests for utils, hooks, components, constants, mappers, services, adapters, routers, schemas, or anything in `apps/web` and `packages/design-system`.
+- UI and wiring are proven by e2e smoke ([e2e](./e2e.mdc)) and by types/lint, not by unit tests.
+- Logic that deserves a test belongs in a use-case; if it does not, it does not get a test.
+- Do not add a test runner or test script to `apps/web`.
