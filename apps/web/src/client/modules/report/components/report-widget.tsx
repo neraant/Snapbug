@@ -1,5 +1,3 @@
-"use client";
-
 import { snapbug } from "@neraant/snapbug";
 import { useEffect } from "react";
 
