@@ -39,6 +39,7 @@ function applyEnvFileVars(filePath: string): void {
   }
 }
 
+applyEnvFileVars(path.join(repoRoot, ".env.local"));
 applyEnvFileVars(path.join(repoRoot, "apps/web/.env.local"));
 
 // The dev server may take the whole webServer timeout to boot. Workers load this
@@ -203,14 +204,12 @@ export default defineConfig({
     timeout: 120_000,
     env: {
       ...process.env,
+      SNAPBUG_E2E: "1",
       DATABASE_URL: process.env.DATABASE_URL ?? "postgres://postgres:postgres@localhost:5432/snapbug",
       AUTH_SECRET: process.env.AUTH_SECRET ?? "your-secret-auth-secret",
       NEXT_PUBLIC_APP_URL: baseURL,
       RESEND_API_KEY: process.env.RESEND_API_KEY ?? "your-resend-api-key-here",
       EMAIL_FROM: process.env.EMAIL_FROM ?? "noreply@snapbug.com",
-      ...(process.env.BLOB_READ_WRITE_TOKEN?.trim()
-        ? { BLOB_READ_WRITE_TOKEN: process.env.BLOB_READ_WRITE_TOKEN }
-        : {}),
       ...(process.env.SNAPBUG_TEST_API_KEY?.trim() ? { SNAPBUG_TEST_API_KEY: process.env.SNAPBUG_TEST_API_KEY } : {}),
     },
   },

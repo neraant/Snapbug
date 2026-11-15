@@ -29,8 +29,14 @@ test("a visitor report shows on the dashboard with its screenshot", async ({ pag
   await expect(page).toHaveURL(/\/overview/, { timeout: 30_000 });
 
   await page.goto(`/tickets?projectId=${projectId}`);
-  await page.getByText(title).click();
-  await expect(page.getByRole("heading", { name: title })).toBeVisible();
+  const card = page.getByRole("button", { name: new RegExp(title) });
+  await expect(card).toBeVisible({ timeout: 30_000 });
+  const shortId = ((await card.innerText()).match(/SNB-\d+/) ?? [])[0];
+  if (!shortId) {
+    throw new Error("The submitted ticket has no short id");
+  }
+  await page.goto(`/tickets/${shortId}?projectId=${projectId}`);
+  await expect(page.getByRole("heading", { name: title })).toBeVisible({ timeout: 30_000 });
   await expect(page.getByText(description)).toBeVisible();
   await expect(page.getByRole("heading", { name: "Screenshot" })).toBeVisible();
   await expect(page.getByRole("img", { name: "Bug report screenshot" })).toBeVisible();
