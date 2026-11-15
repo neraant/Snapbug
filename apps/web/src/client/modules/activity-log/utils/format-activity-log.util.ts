@@ -4,8 +4,12 @@ import { format, formatDistance, isToday, isYesterday } from "date-fns";
 import { texts } from "@/client/modules/activity-log/consts/texts.const";
 
 const activityExactFormat = new Intl.DateTimeFormat(undefined, {
-  dateStyle: "medium",
-  timeStyle: "short",
+  year: "numeric",
+  month: "short",
+  day: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+  timeZoneName: "short",
 });
 
 export function formatActivityRelativeWhen(occurredAt: string): string {

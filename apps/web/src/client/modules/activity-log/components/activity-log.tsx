@@ -22,11 +22,13 @@ function groupEntriesWithDayDividers(entries: ReturnType<typeof useActivityLog>[
     { kind: "divider"; key: string; label: string } | { kind: "entry"; key: string; entry: (typeof entries)[number] }
   > = [];
 
+  let previousDayLabel: string | null = null;
+
   for (const entry of entries) {
     const label = formatActivityDayLabel(entry.occurredAt);
-    const last = rows.at(-1);
-    if (!last || last.kind !== "divider" || last.label !== label) {
+    if (previousDayLabel !== label) {
       rows.push({ kind: "divider", key: `day-${label}-${entry.id}`, label });
+      previousDayLabel = label;
     }
     rows.push({ kind: "entry", key: entry.id, entry });
   }
