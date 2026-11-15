@@ -1,12 +1,17 @@
 import { ORPCError } from "@orpc/client";
 import {
+  attachRouteErrorHttpStatus,
+  formatRouteErrorHttpStatusPrefix,
+  getAppErrorHttpStatus,
+  readRouteErrorHttpStatusFromMessage,
+} from "@workspace/server/shared/error/app-error-http-status";
+import {
   BadRequestError,
   ForbiddenError,
   NotFoundError,
   UnauthorizedError,
 } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
-import { getAppErrorHttpStatus } from "@workspace/server/shared/error/app-error-http-status";
 import { describe, expect, it } from "vitest";
 
 describe("getAppErrorHttpStatus", () => {
@@ -20,5 +25,20 @@ describe("getAppErrorHttpStatus", () => {
     [new Error("boom"), 500],
   ])("returns the application HTTP status", (error, status) => {
     expect(getAppErrorHttpStatus(error)).toBe(status);
+  });
+
+  it("reads the status from a serialized route error message", () => {
+    const message = `${formatRouteErrorHttpStatusPrefix(404)} Project not found`;
+    expect(readRouteErrorHttpStatusFromMessage(message)).toBe(404);
+    expect(getAppErrorHttpStatus(new Error(message))).toBe(404);
+  });
+
+  it("stamps HTTP status for Next.js error boundaries", () => {
+    const source = new ORPCError("FORBIDDEN", { message: "Admin required" });
+    const routeError = attachRouteErrorHttpStatus(source);
+
+    expect(routeError.httpStatus).toBe(403);
+    expect(getAppErrorHttpStatus(routeError)).toBe(403);
+    expect(getAppErrorHttpStatus(new Error(routeError.message))).toBe(403);
   });
 });

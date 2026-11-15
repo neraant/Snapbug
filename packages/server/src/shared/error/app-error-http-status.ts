@@ -1,6 +1,48 @@
-import { fallbackORPCErrorStatus, ORPCError, toORPCError } from "@orpc/client";
-
+import type { ORPCError } from "@orpc/client";
+import { fallbackORPCErrorStatus, toORPCError } from "@orpc/client";
 import { AppError } from "@workspace/server/shared/error/app-errors";
+
+const ROUTE_ERROR_HTTP_STATUS_PATTERN = /^\[snapbug:http=(\d{3})\]\s?/;
+
+export type ErrorWithHttpStatus = Error & { httpStatus?: number; digest?: string };
+
+export function formatRouteErrorHttpStatusPrefix(status: number): string {
+  return `[snapbug:http=${status}]`;
+}
+
+export function readRouteErrorHttpStatusFromMessage(message: string): number | null {
+  const match = ROUTE_ERROR_HTTP_STATUS_PATTERN.exec(message);
+  if (!match) {
+    return null;
+  }
+  const status = Number(match[1]);
+  return status >= 400 && status <= 599 ? status : null;
+}
+
+export function stripRouteErrorHttpStatusFromMessage(message: string): string {
+  return message.replace(ROUTE_ERROR_HTTP_STATUS_PATTERN, "");
+}
+
+function hasStampedHttpStatus(error: Error): error is ErrorWithHttpStatus {
+  return typeof (error as ErrorWithHttpStatus).httpStatus === "number";
+}
+
+export function attachRouteErrorHttpStatus(error: unknown): ErrorWithHttpStatus {
+  if (error instanceof Error && hasStampedHttpStatus(error)) {
+    return error;
+  }
+
+  const status = getAppErrorHttpStatus(error);
+  const baseMessage = error instanceof Error ? error.message : String(error);
+  const routeError = new Error(
+    `${formatRouteErrorHttpStatusPrefix(status)} ${stripRouteErrorHttpStatusFromMessage(baseMessage)}`.trim(),
+  ) as ErrorWithHttpStatus;
+  routeError.httpStatus = status;
+  if (error instanceof Error) {
+    routeError.cause = error;
+  }
+  return routeError;
+}
 
 export function appErrorHttpStatus(code: AppError["code"]): number {
   switch (code) {
@@ -37,6 +79,21 @@ function readOrpcHttpStatus(error: unknown): number | null {
 }
 
 export function getAppErrorHttpStatus(error: unknown): number {
+  if (error instanceof Error) {
+    if (hasStampedHttpStatus(error) && error.httpStatus !== undefined) {
+      return error.httpStatus;
+    }
+
+    const fromMessage = readRouteErrorHttpStatusFromMessage(error.message);
+    if (fromMessage !== null) {
+      return fromMessage;
+    }
+
+    if (error.cause !== undefined) {
+      return getAppErrorHttpStatus(error.cause);
+    }
+  }
+
   if (error instanceof AppError) {
     return appErrorHttpStatus(error.code);
   }

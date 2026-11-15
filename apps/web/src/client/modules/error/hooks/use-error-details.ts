@@ -1,5 +1,8 @@
 import { useCopyText } from "@workspace/design-system/hooks/use-copy-text";
-import { getAppErrorHttpStatus } from "@workspace/server/error/app-error-http-status";
+import {
+  getAppErrorHttpStatus,
+  stripRouteErrorHttpStatusFromMessage,
+} from "@workspace/server/error/app-error-http-status";
 import { useState } from "react";
 
 import { texts } from "@/client/modules/error/consts/texts.const";
@@ -17,7 +20,7 @@ export function useErrorDetails({ error }: UseErrorDetailsParams) {
     return {
       errorId: error.digest,
       timestamp: new Date().toISOString(),
-      message: error.message,
+      message: stripRouteErrorHttpStatusFromMessage(error.message),
       status,
       screenCopy: resolveErrorScreenCopy(status),
     };

@@ -2,6 +2,7 @@ import { createORPCClient } from "@orpc/client";
 import { RPCLink } from "@orpc/client/fetch";
 import { createORPCReactQueryUtils } from "@orpc/react-query";
 import type { RouterClient } from "@orpc/server";
+import { attachRouteErrorHttpStatus } from "@workspace/server/error/app-error-http-status";
 import type { AppRouter } from "@workspace/server/router";
 
 function getRpcUrl(): string {
@@ -17,6 +18,15 @@ function getRpcUrl(): string {
 
 const link = new RPCLink({
   url: getRpcUrl(),
+  interceptors: [
+    async (options) => {
+      try {
+        return await options.next(options);
+      } catch (error) {
+        throw attachRouteErrorHttpStatus(error);
+      }
+    },
+  ],
   headers: async () => {
     if (typeof window !== "undefined") {
       return {};
