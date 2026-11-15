@@ -43,6 +43,7 @@ Do not start tasks marked TBD: an implementer agent must not take them.
 - P-20 acceptance of the terms on registration.
 
 ## Open
+
 - P-21 project archive and restore, delete, default assignee, store IP, collect visitor email, color, and slug.
 - P-22 invitation resend, revoke, and copy link. Expiry after 7 days already rejects acceptance.
 - P-23 require 2FA, one invite email domain, GDPR mode, and delete workspace. Administrator only.
