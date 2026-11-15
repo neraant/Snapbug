@@ -3,11 +3,17 @@ import { localize } from "@/client/modules/shared/locale/interface-language";
 const en = {
   sample: {
     title: "Sample checkout",
-    description: "A customer page. The widget on this page is the real Snapbug widget.",
+    lead: "Confirm your details and pay. Use the widget to report anything that looks wrong.",
+    stepLabel: "Delivery address",
+    stepValue: "14 Market Street, San Francisco",
+    totalLabel: "Order total",
+    totalValue: "$42.00",
     email: "Email",
     pay: "Pay",
   },
   capture: {
+    descriptionTitle: "Issue description",
+    emptyDescription: "No description provided.",
     screenshotTitle: "Screenshot",
     screenshotEmpty: "No screenshot attached.",
     screenshotAlt: "Bug report screenshot",
@@ -32,11 +38,17 @@ const en = {
 const ru = {
   sample: {
     title: "Пример оформления заказа",
-    description: "Страница клиента. Виджет на этой странице — настоящий виджет Snapbug.",
+    lead: "Подтвердите данные и оплатите. Сообщите через виджет, если что-то не так.",
+    stepLabel: "Адрес доставки",
+    stepValue: "14 Market Street, San Francisco",
+    totalLabel: "Сумма заказа",
+    totalValue: "$42.00",
     email: "Email",
     pay: "Оплатить",
   },
   capture: {
+    descriptionTitle: "Описание проблемы",
+    emptyDescription: "Описание не указано.",
     screenshotTitle: "Скриншот",
     screenshotEmpty: "Скриншот не приложен.",
     screenshotAlt: "Скриншот отчёта об ошибке",
