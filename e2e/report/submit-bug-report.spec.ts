@@ -22,11 +22,7 @@ test("a visitor report shows on the dashboard with its screenshot", async ({ pag
   await expect(page.getByRole("heading", { name: "Report Received!" })).toBeVisible({ timeout: 30_000 });
 
   await page.goto("/sign-in");
-  await page.waitForFunction(() => {
-    const form = document.querySelector("form");
-    if (!form) return false;
-    return Object.getOwnPropertyNames(form).some((name) => name.startsWith("__reactProps$"));
-  });
+  await expect(page.getByRole("textbox", { name: "Work Email" })).toBeVisible();
   await page.getByRole("textbox", { name: "Work Email" }).fill("admin@example.com");
   await page.getByRole("textbox", { name: "Password" }).fill("password");
   await page.getByRole("button", { name: "Log in" }).click();

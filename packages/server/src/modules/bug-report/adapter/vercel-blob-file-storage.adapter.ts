@@ -81,9 +81,10 @@ export class VercelBlobFileStorageAdapter implements FileStoragePort {
   }
 
   private requireToken(): string {
-    if (!this.token) {
+    const token = this.token?.trim() || process.env.BLOB_READ_WRITE_TOKEN?.trim();
+    if (!token) {
       throw new Error("BLOB_READ_WRITE_TOKEN is not set");
     }
-    return this.token;
+    return token;
   }
 }

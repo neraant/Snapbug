@@ -1,12 +1,46 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { mkdirSync, readFileSync, statSync, unlinkSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, statSync, unlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
 import { defineConfig, devices } from "@playwright/test";
 
 const here = __dirname;
+const repoRoot = path.join(here, "..");
+
+function readEnvFile(filePath: string): Record<string, string> {
+  if (!existsSync(filePath)) return {};
+
+  const vars: Record<string, string> = {};
+  for (const line of readFileSync(filePath, "utf8").split("\n")) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) continue;
+
+    const separator = trimmed.indexOf("=");
+    if (separator <= 0) continue;
+
+    const key = trimmed.slice(0, separator).trim();
+    let value = trimmed.slice(separator + 1).trim();
+    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+      value = value.slice(1, -1);
+    }
+    vars[key] = value;
+  }
+
+  return vars;
+}
+
+function applyEnvFileVars(filePath: string): void {
+  for (const [key, value] of Object.entries(readEnvFile(filePath))) {
+    if (!process.env[key]?.trim()) {
+      process.env[key] = value;
+    }
+  }
+}
+
+applyEnvFileVars(path.join(repoRoot, "apps/web/.env.local"));
+
 // The dev server may take the whole webServer timeout to boot. Workers load this
 // file again after that, and must keep the port the server already bound.
 const portCacheMs = 180_000;
@@ -174,6 +208,10 @@ export default defineConfig({
       NEXT_PUBLIC_APP_URL: baseURL,
       RESEND_API_KEY: process.env.RESEND_API_KEY ?? "your-resend-api-key-here",
       EMAIL_FROM: process.env.EMAIL_FROM ?? "noreply@snapbug.com",
+      ...(process.env.BLOB_READ_WRITE_TOKEN?.trim()
+        ? { BLOB_READ_WRITE_TOKEN: process.env.BLOB_READ_WRITE_TOKEN }
+        : {}),
+      ...(process.env.SNAPBUG_TEST_API_KEY?.trim() ? { SNAPBUG_TEST_API_KEY: process.env.SNAPBUG_TEST_API_KEY } : {}),
     },
   },
 });
