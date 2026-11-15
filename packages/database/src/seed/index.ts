@@ -21,7 +21,7 @@ async function main() {
   await seedApiKey(projects);
   const bugReports = await seedBugReport(projects, users);
   const blobToken = process.env.BLOB_READ_WRITE_TOKEN?.trim();
-  if (blobToken) {
+  if (blobToken && blobToken !== "your-blob-read-write-token-here") {
     await uploadSeedBugReportFiles(bugReports, { token: blobToken, put: loadSeedBlobPut() });
   }
 }

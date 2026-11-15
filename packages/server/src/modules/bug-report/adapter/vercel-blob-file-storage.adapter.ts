@@ -1,4 +1,4 @@
-import { del, get, put } from "@vercel/blob";
+import { del, get, head, put } from "@vercel/blob";
 import type {
   FileStoragePort,
   SaveBugReportReplayInput,
@@ -38,12 +38,13 @@ export class VercelBlobFileStorageAdapter implements FileStoragePort {
 
   async readBugReportScreenshot(key: string) {
     const token = this.requireToken();
-    const result = await get(key, { access: "private", token });
-    if (!result) {
+    const metadata = await head(key, { token });
+    const result = await get(metadata.url, { access: "private", token });
+    if (!result || result.statusCode !== 200) {
       throw new Error(`Screenshot not found: ${key}`);
     }
 
-    const contentType = result.blob.contentType ?? contentTypeForScreenshotKey(key);
+    const contentType = result.blob.contentType ?? metadata.contentType ?? contentTypeForScreenshotKey(key);
     const bytes = new Uint8Array(await new Response(result.stream).arrayBuffer());
     return { bytes, contentType };
   }
@@ -63,12 +64,13 @@ export class VercelBlobFileStorageAdapter implements FileStoragePort {
 
   async readBugReportReplay(key: string) {
     const token = this.requireToken();
-    const result = await get(key, { access: "private", token });
-    if (!result) {
+    const metadata = await head(key, { token });
+    const result = await get(metadata.url, { access: "private", token });
+    if (!result || result.statusCode !== 200) {
       throw new Error(`Replay not found: ${key}`);
     }
 
-    const contentType = result.blob.contentType ?? contentTypeForReplayKey(key);
+    const contentType = result.blob.contentType ?? metadata.contentType ?? contentTypeForReplayKey(key);
     const bytes = new Uint8Array(await new Response(result.stream).arrayBuffer());
     return { bytes, contentType };
   }
@@ -79,9 +81,10 @@ export class VercelBlobFileStorageAdapter implements FileStoragePort {
   }
 
   private requireToken(): string {
-    if (!this.token) {
+    const token = this.token?.trim() || process.env.BLOB_READ_WRITE_TOKEN?.trim();
+    if (!token) {
       throw new Error("BLOB_READ_WRITE_TOKEN is not set");
     }
-    return this.token;
+    return token;
   }
 }

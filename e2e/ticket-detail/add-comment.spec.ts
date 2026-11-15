@@ -42,6 +42,6 @@ test("a teammate adds an internal comment on the ticket", async ({ page }) => {
   await commentBox.fill(commentBody);
   await page.getByRole("button", { name: "Add comment" }).click();
 
-  await expect(page.getByText(commentBody)).toBeVisible();
+  await expect(page.getByRole("paragraph").filter({ hasText: commentBody })).toBeVisible({ timeout: 30_000 });
   await expect(page.getByText("Internal notes for the team. The report author does not see them.")).toBeVisible();
 });

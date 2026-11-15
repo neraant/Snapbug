@@ -70,17 +70,61 @@ describe("VercelBlobFileStorageAdapter", () => {
   });
 
   it("does not write to Blob when the token is missing", async () => {
+    const previousToken = process.env.BLOB_READ_WRITE_TOKEN;
+    delete process.env.BLOB_READ_WRITE_TOKEN;
     const adapter = new VercelBlobFileStorageAdapter(undefined);
 
-    await expect(
-      adapter.saveBugReportScreenshot({
-        reportId,
-        bytes: new Uint8Array([1]),
-        contentType: "image/png",
-      }),
-    ).rejects.toThrow("BLOB_READ_WRITE_TOKEN is not set");
+    try {
+      await expect(
+        adapter.saveBugReportScreenshot({
+          reportId,
+          bytes: new Uint8Array([1]),
+          contentType: "image/png",
+        }),
+      ).rejects.toThrow("BLOB_READ_WRITE_TOKEN is not set");
 
-    expect(put).not.toHaveBeenCalled();
+      expect(put).not.toHaveBeenCalled();
+    } finally {
+      if (previousToken === undefined) {
+        delete process.env.BLOB_READ_WRITE_TOKEN;
+      } else {
+        process.env.BLOB_READ_WRITE_TOKEN = previousToken;
+      }
+    }
+  });
+
+  it("reads the blob token from process.env when the constructor token is missing", async () => {
+    const previousToken = process.env.BLOB_READ_WRITE_TOKEN;
+    process.env.BLOB_READ_WRITE_TOKEN = token;
+    vi.mocked(put).mockResolvedValue({
+      url: "https://example.private.blob.vercel-storage.com/bug-reports/screenshot.png",
+      pathname: `bug-reports/${reportId}/screenshot.png`,
+      contentType: "image/png",
+      contentDisposition: "attachment",
+      downloadUrl: "https://example.private.blob.vercel-storage.com/bug-reports/screenshot.png?download=1",
+      etag: "etag",
+    });
+
+    const adapter = new VercelBlobFileStorageAdapter(undefined);
+    try {
+      await adapter.saveBugReportScreenshot({
+        reportId,
+        bytes: new Uint8Array([9]),
+        contentType: "image/png",
+      });
+
+      expect(put).toHaveBeenCalledWith(
+        `bug-reports/${reportId}/screenshot.png`,
+        expect.any(Buffer),
+        expect.objectContaining({ token }),
+      );
+    } finally {
+      if (previousToken === undefined) {
+        delete process.env.BLOB_READ_WRITE_TOKEN;
+      } else {
+        process.env.BLOB_READ_WRITE_TOKEN = previousToken;
+      }
+    }
   });
 
   it("deletes a screenshot by pathname", async () => {
