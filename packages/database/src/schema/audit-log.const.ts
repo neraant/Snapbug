@@ -20,7 +20,7 @@ export const auditLogTable = pgTable(
     organizationId: uuid("organization_id")
       .references(() => organizationTable.id)
       .notNull(),
-    projectId: uuid("project_id").references(() => projectTable.id),
+    projectId: uuid("project_id").references(() => projectTable.id, { onDelete: "set null" }),
     source: text("source", { enum: auditSources }).notNull(),
     occurredAt: timestamp("occurred_at", { withTimezone: true, mode: "date" }).notNull(),
     changes: jsonb("changes").$type<AuditLogChangesType>().notNull(),
