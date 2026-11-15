@@ -4,6 +4,9 @@ const en = {
   title: "Activity log",
   description: "Who changed an application object, when, and what changed.",
   empty: "No activity yet.",
+  change: {
+    empty: "empty",
+  },
   column: {
     who: "Who",
     when: "When",
@@ -31,6 +34,9 @@ const ru = {
   title: "Журнал действий",
   description: "Кто изменил объект, когда и что именно изменилось.",
   empty: "Пока нет записей.",
+  change: {
+    empty: "пусто",
+  },
   column: {
     who: "Кто",
     when: "Когда",
