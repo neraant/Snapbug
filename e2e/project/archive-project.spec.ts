@@ -18,10 +18,18 @@ test("an administrator archives a project from the projects page", async ({ page
   await expect(page).toHaveURL(/\/overview/, { timeout: 30_000 });
 
   await page.goto("/projects");
-  await expect(page.getByRole("heading", { name: "Projects" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "New project" })).toBeVisible();
 
-  const marketingCard = page.getByRole("heading", { name: "Acme Marketing" }).locator("..").locator("..");
-  await marketingCard.getByRole("button", { name: "Project actions" }).click();
+  const marketingActions = page
+    .locator('[data-slot="card"]')
+    .filter({ has: page.getByRole("heading", { name: "Acme Marketing" }) })
+    .getByRole("button", { name: "Project actions" });
+
+  await expect(async () => {
+    await marketingActions.click();
+    await expect(page.getByRole("menuitem", { name: "Archive" })).toBeVisible({ timeout: 3_000 });
+  }).toPass({ timeout: 15_000 });
+
   await page.getByRole("menuitem", { name: "Archive" }).click();
   await expect(page.getByRole("heading", { name: "Archive project?" })).toBeVisible();
   await page.getByRole("button", { name: "Archive", exact: true }).click();
