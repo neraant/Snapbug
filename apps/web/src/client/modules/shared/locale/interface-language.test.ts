@@ -1,7 +1,7 @@
 // @ts-expect-error vitest is resolved by the test runner, not the web package typecheck
 import { afterEach, describe, expect, it } from "vitest";
 
-import { localize, setInterfaceLanguage } from "./interface-language";
+import { localize, setInterfaceLanguage } from "@/client/modules/shared/locale/interface-language";
 
 const sample = localize({ title: "Tickets" }, { title: "Тикеты" });
 

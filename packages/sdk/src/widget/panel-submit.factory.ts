@@ -24,7 +24,9 @@ export function bindPanelSubmit(session: PanelSession) {
     hideDescriptionError();
     syncPanelSubmitState(session);
   });
-  session.email.input.addEventListener("input", hideEmailError);
+  if (session.options.collectVisitorEmail) {
+    session.email.input.addEventListener("input", hideEmailError);
+  }
   syncPanelSubmitState(session);
 
   session.form.addEventListener("submit", async (event) => {
@@ -50,10 +52,13 @@ export function bindPanelSubmit(session: PanelSession) {
       showPanelFieldError(session.description.editable, session.descriptionError, COPY.descriptionTooShort);
       valid = false;
     }
-    const email = session.email.input.value.trim();
-    if (email.length > 0 && !isValidReporterEmail(email)) {
-      showPanelFieldError(session.email.input, session.email.error, COPY.emailInvalid);
-      valid = false;
+    let email = "";
+    if (session.options.collectVisitorEmail) {
+      email = session.email.input.value.trim();
+      if (email.length > 0 && !isValidReporterEmail(email)) {
+        showPanelFieldError(session.email.input, session.email.error, COPY.emailInvalid);
+        valid = false;
+      }
     }
     if (!valid) return;
 

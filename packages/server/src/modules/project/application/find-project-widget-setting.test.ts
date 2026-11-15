@@ -1,4 +1,5 @@
 import { FindProjectWidgetSettingUseCase } from "@workspace/server/modules/project/application/find-project-widget-setting.use-case";
+import { projectTestFields } from "@workspace/server/modules/project/application/project-test.const";
 import { Project } from "@workspace/server/modules/project/entity/project.entity";
 import type { MembershipPort } from "@workspace/server/modules/project/port/membership.port";
 import type { ProjectRepository } from "@workspace/server/modules/project/repository/project.repository";
@@ -16,6 +17,7 @@ const project = new Project({
   organizationId,
   widgetSettings: null,
   createdAt: new Date("2026-10-03T09:00:00.000Z"),
+  ...projectTestFields,
 });
 
 describe("FindProjectWidgetSettingUseCase", () => {

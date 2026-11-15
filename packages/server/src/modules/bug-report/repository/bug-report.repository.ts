@@ -100,6 +100,14 @@ export class BugReportRepository {
       .sort((left, right) => this.compareBoardOrder(left, right));
   }
 
+  async deleteManyByProjectId(projectId: string): Promise<void> {
+    try {
+      await this.db.delete(bugReportTable).where(eq(bugReportTable.projectId, projectId));
+    } catch (error) {
+      throw new InternalServerError(ERROR_CODES.INTERNAL_SERVER_ERROR, undefined, { cause: error });
+    }
+  }
+
   async findManyByProjectIdsMatchingQuery(projectIds: string[], query: string, limit: number): Promise<BugReport[]> {
     if (projectIds.length === 0) {
       return [];
@@ -208,6 +216,7 @@ export class BugReportRepository {
             description: values.description,
             stepsToReproduce: values.stepsToReproduce,
             reporterEmail: values.reporterEmail,
+            reporterIp: values.reporterIp,
             url: values.url,
             userAgent: values.userAgent,
             browser: values.browser,

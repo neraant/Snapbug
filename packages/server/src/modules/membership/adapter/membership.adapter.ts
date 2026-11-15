@@ -1,4 +1,5 @@
 import type { DbClient } from "@workspace/database";
+import { CheckUserProjectAccessUseCase } from "@workspace/server/modules/membership/application/check-user-project-access.use-case";
 import { CreateMembershipUseCase } from "@workspace/server/modules/membership/application/create-membership.use-case";
 import { FilterProjectIdsUseCase } from "@workspace/server/modules/membership/application/filter-project-ids.use-case";
 import { FindMembershipUseCase } from "@workspace/server/modules/membership/application/find-membership.use-case";
@@ -30,6 +31,7 @@ export class MembershipAdapter implements OrganizationMembershipPort {
   private readonly filterProjectIdsUseCase: FilterProjectIdsUseCase;
   private readonly grantProjectToMembersUseCase: GrantProjectToMembersUseCase;
   private readonly grantMembershipProjectsUseCase: GrantMembershipProjectsUseCase;
+  private readonly checkUserProjectAccess: CheckUserProjectAccessUseCase;
 
   constructor(
     private readonly membershipRepository: MembershipRepository,
@@ -51,6 +53,7 @@ export class MembershipAdapter implements OrganizationMembershipPort {
       projectAccessRepository,
       projectAccessService,
     );
+    this.checkUserProjectAccess = new CheckUserProjectAccessUseCase(membershipRepository, projectAccessRepository);
   }
 
   withTx(tx: unknown): MembershipAdapter {
@@ -95,5 +98,9 @@ export class MembershipAdapter implements OrganizationMembershipPort {
 
   async grantProjects(membershipId: string, projectIds: string[], userId: string): Promise<void> {
     await this.grantMembershipProjectsUseCase.execute(membershipId, projectIds, userId);
+  }
+
+  async userHasProjectAccess(userId: string, projectId: string, organizationId: string): Promise<boolean> {
+    return await this.checkUserProjectAccess.execute(userId, projectId, organizationId);
   }
 }

@@ -7,8 +7,13 @@ export abstract class ProjectFactory {
     return new Project({
       id: randomUUID(),
       name: project.name,
+      slug: project.slug,
       color: project.color,
       organizationId: project.organizationId,
+      defaultAssigneeId: null,
+      storeVisitorIp: false,
+      collectVisitorEmail: true,
+      archivedAt: null,
       widgetSettings: null,
       createdAt: new Date(),
     });

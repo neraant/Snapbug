@@ -21,6 +21,7 @@ const bugReport = new BugReport({
   description: "Clicking Pay shows a blank page.",
   stepsToReproduce: null,
   reporterEmail: "sam@shopper.test",
+  reporterIp: null,
   url: "https://store.acme.test/checkout",
   userAgent: null,
   browser: null,

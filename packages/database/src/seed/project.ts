@@ -16,6 +16,7 @@ export async function seedProject(organizations: OrganizationRow[]): Promise<Pro
     {
       id: "4a8c69a1-1ab1-45a8-8497-eae1e506d9d1",
       name: "Acme Store",
+      slug: "acme-store",
       color: projectColorValues[0],
       organizationId: organization.id,
       createdAt: daysAgo(30),
@@ -23,6 +24,7 @@ export async function seedProject(organizations: OrganizationRow[]): Promise<Pro
     {
       id: "4a8c69a1-1ab1-45a8-8497-eae1e506d9d2",
       name: "Acme Marketing",
+      slug: "acme-marketing",
       color: projectColorValues[4],
       organizationId: organization.id,
       createdAt: daysAgo(21),

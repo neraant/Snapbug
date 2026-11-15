@@ -7,11 +7,17 @@ import {
 } from "@workspace/validation/modules/project/dto/find-project-widget-setting.schema";
 import { findProjectsOutputDtoSchema } from "@workspace/validation/modules/project/dto/find-projects.schema";
 import { projectModelSchema } from "@workspace/validation/modules/project/dto/project.model";
-import { updateProjectInputDtoSchema } from "@workspace/validation/modules/project/dto/update-project.schema";
+import {
+  archiveProjectInputDtoSchema,
+  deleteProjectInputDtoSchema,
+  restoreProjectInputDtoSchema,
+  updateProjectInputDtoSchema,
+} from "@workspace/validation/modules/project/dto/update-project.schema";
 import {
   updateProjectWidgetSettingInputDtoSchema,
   updateProjectWidgetSettingOutputDtoSchema,
 } from "@workspace/validation/modules/project/dto/update-project-widget-setting.schema";
+import { z } from "zod";
 
 export const projectContract = {
   createProject: oc
@@ -35,6 +41,36 @@ export const projectContract = {
       path: "/projects",
       tags: ["project"],
       summary: "Update project",
+      spec: sessionAuthSpec,
+    }),
+  archiveProject: oc
+    .input(archiveProjectInputDtoSchema)
+    .output(projectModelSchema)
+    .route({
+      method: "POST",
+      path: "/projects/archive",
+      tags: ["project"],
+      summary: "Archive project",
+      spec: sessionAuthSpec,
+    }),
+  restoreProject: oc
+    .input(restoreProjectInputDtoSchema)
+    .output(projectModelSchema)
+    .route({
+      method: "POST",
+      path: "/projects/restore",
+      tags: ["project"],
+      summary: "Restore project",
+      spec: sessionAuthSpec,
+    }),
+  deleteProject: oc
+    .input(deleteProjectInputDtoSchema)
+    .output(z.void())
+    .route({
+      method: "DELETE",
+      path: "/projects",
+      tags: ["project"],
+      summary: "Delete project",
       spec: sessionAuthSpec,
     }),
   findProjectWidgetSetting: oc

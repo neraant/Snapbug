@@ -1,5 +1,6 @@
 import { db } from "@workspace/database";
 import { ApiKeyAdapter } from "@workspace/server/modules/api-key/adapter/api-key.adapter";
+import { ProjectApiKeyAdapter } from "@workspace/server/modules/api-key/adapter/project-api-key.adapter";
 import { FindProjectApiKeyUseCase } from "@workspace/server/modules/api-key/application/find-project-api-key.use-case";
 import { FindProjectByKeyUseCase } from "@workspace/server/modules/api-key/application/find-project-by-key.use-case";
 import { RotateProjectApiKeyUseCase } from "@workspace/server/modules/api-key/application/rotate-project-api-key.use-case";
@@ -52,6 +53,7 @@ import { SendInvitationsUseCase } from "@workspace/server/modules/invitation/app
 import { InvitationRepository } from "@workspace/server/modules/invitation/repository/invitation.repository";
 import { InvitationService } from "@workspace/server/modules/invitation/service/invitation.service";
 import { MembershipAdapter } from "@workspace/server/modules/membership/adapter/membership.adapter";
+import { CheckUserProjectAccessUseCase } from "@workspace/server/modules/membership/application/check-user-project-access.use-case";
 import { FindMembershipUseCase } from "@workspace/server/modules/membership/application/find-membership.use-case";
 import { FindMembershipByUserUseCase } from "@workspace/server/modules/membership/application/find-membership-by-user.use-case";
 import { FindMembershipProjectAccessUseCase } from "@workspace/server/modules/membership/application/find-membership-project-access.use-case";
@@ -76,9 +78,15 @@ import { OrganizationRepository } from "@workspace/server/modules/organization/r
 import { OrganizationService } from "@workspace/server/modules/organization/service/organization.service";
 import { AuditProjectAdapter } from "@workspace/server/modules/project/adapter/audit-project.adapter";
 import { ProjectAdapter } from "@workspace/server/modules/project/adapter/project.adapter";
+import { ProjectAccessAdapter } from "@workspace/server/modules/project/adapter/project-access.adapter";
+import { ProjectBugReportAdapter } from "@workspace/server/modules/project/adapter/project-bug-report.adapter";
+import { ProjectUserAdapter } from "@workspace/server/modules/project/adapter/user.adapter";
+import { ArchiveProjectUseCase } from "@workspace/server/modules/project/application/archive-project.use-case";
 import { CreateProjectUseCase } from "@workspace/server/modules/project/application/create-project.use-case";
+import { DeleteProjectUseCase } from "@workspace/server/modules/project/application/delete-project.use-case";
 import { FindProjectWidgetSettingUseCase } from "@workspace/server/modules/project/application/find-project-widget-setting.use-case";
 import { FindProjectsUseCase } from "@workspace/server/modules/project/application/find-projects.use-case";
+import { RestoreProjectUseCase } from "@workspace/server/modules/project/application/restore-project.use-case";
 import { UpdateProjectUseCase } from "@workspace/server/modules/project/application/update-project.use-case";
 import { UpdateProjectWidgetSettingUseCase } from "@workspace/server/modules/project/application/update-project-widget-setting.use-case";
 import { ProjectRepository } from "@workspace/server/modules/project/repository/project.repository";
@@ -172,9 +180,33 @@ const findUserByEmail = new FindUserByEmailUseCase(userRepository);
 const findCurrentUser = new FindUserUseCase(userRepository);
 const updateInterfaceLanguage = new UpdateInterfaceLanguageUseCase(userRepository);
 
-const createProject = new CreateProjectUseCase(membershipAdapter, projectService, withTransaction);
+const projectBugReportAdapter = new ProjectBugReportAdapter(bugReportRepository, bugReportFileStorage);
+const projectApiKeyAdapter = new ProjectApiKeyAdapter(apiKeyRepository);
+
+const checkUserProjectAccess = new CheckUserProjectAccessUseCase(membershipRepository, projectAccessRepository);
+const projectAccessAdapter = new ProjectAccessAdapter(checkUserProjectAccess);
+const projectUserAdapter = new ProjectUserAdapter(userRepository);
+
+const createProject = new CreateProjectUseCase(membershipAdapter, projectRepository, projectService, withTransaction);
 const findProjects = new FindProjectsUseCase(membershipAdapter, projectRepository);
-const updateProject = new UpdateProjectUseCase(membershipAdapter, projectRepository, projectService, withTransaction);
+const updateProject = new UpdateProjectUseCase(
+  membershipAdapter,
+  projectRepository,
+  projectService,
+  projectAccessAdapter,
+  projectUserAdapter,
+  withTransaction,
+);
+const archiveProject = new ArchiveProjectUseCase(membershipAdapter, projectRepository, projectService, withTransaction);
+const restoreProject = new RestoreProjectUseCase(membershipAdapter, projectRepository, projectService, withTransaction);
+const deleteProject = new DeleteProjectUseCase(
+  membershipAdapter,
+  projectRepository,
+  projectBugReportAdapter,
+  projectApiKeyAdapter,
+  projectService,
+  withTransaction,
+);
 const findProjectWidgetSetting = new FindProjectWidgetSettingUseCase(membershipAdapter, projectRepository);
 const updateProjectWidgetSetting = new UpdateProjectWidgetSettingUseCase(
   membershipAdapter,
@@ -345,7 +377,16 @@ export const container = {
     replaceMembershipProjectAccess,
   },
   identity: { createUser, findUserByEmail, findCurrentUser, updateInterfaceLanguage },
-  project: { createProject, findProjects, updateProject, findProjectWidgetSetting, updateProjectWidgetSetting },
+  project: {
+    createProject,
+    findProjects,
+    updateProject,
+    archiveProject,
+    restoreProject,
+    deleteProject,
+    findProjectWidgetSetting,
+    updateProjectWidgetSetting,
+  },
   organization: {
     findOnboarding,
     findOrganizations,

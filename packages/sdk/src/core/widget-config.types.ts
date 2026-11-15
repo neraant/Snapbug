@@ -31,6 +31,7 @@ export type WidgetConfig = {
   mutedText?: ProjectWidgetSettingModelType["mutedText"];
   font?: ProjectWidgetSettingModelType["font"];
   privacy?: Partial<ProjectWidgetSettingModelType["privacy"]>;
+  collectVisitorEmail?: boolean;
   /** When set, submit stays in the page and never calls ingest. */
   preview?: (capture: WidgetPreviewCapture) => void;
 };
@@ -38,9 +39,13 @@ export type WidgetConfig = {
 export type ResolvedWidgetOptions = Pick<
   ProjectWidgetSettingModelType,
   "position" | "buttonLabel" | "theme" | "accent" | "privacy" | "background" | "text" | "mutedText" | "font"
->;
+> & {
+  collectVisitorEmail: boolean;
+};
 
 export type RemoteWidgetConfig = Pick<
   ProjectWidgetSettingModelType,
   "position" | "buttonLabel" | "theme" | "accent" | "privacy" | "background" | "text" | "mutedText" | "font"
->;
+> & {
+  collectVisitorEmail?: boolean;
+};

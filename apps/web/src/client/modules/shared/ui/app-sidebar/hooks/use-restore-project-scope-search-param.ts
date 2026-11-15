@@ -1,13 +1,17 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 import { overviewStatAllProjectsValue } from "@/client/modules/overview/consts/overview-stat-filter.const";
 import { projectScopeSearchParamKey } from "@/client/modules/shared/consts/project-scope-search-param.const";
 import { useProjectScopeSearchParam } from "@/client/modules/shared/hooks/use-project-scope-search-param";
-import { useFindProjects } from "@/client/modules/shared/queries/use-find-projects";
-import { parseProjectScopeSearchParam } from "@/client/modules/shared/utils/parse-project-scope-search-param.util";
+import { orpcQuery } from "@/client/modules/shared/orpc/query-utils";
+import {
+  parseProjectScopeSearchParam,
+  resolveProjectScopeToken,
+} from "@/client/modules/shared/utils/parse-project-scope-search-param.util";
 import {
   isStoredProjectScopeValid,
   readStoredProjectScope,
@@ -16,18 +20,21 @@ import {
 export function useRestoreProjectScopeSearchParam() {
   const searchParams = useSearchParams();
   const { setProjectId } = useProjectScopeSearchParam();
-  const { data: projects } = useFindProjects();
+  const { data: projects = [] } = useQuery(orpcQuery.project.findProjects.queryOptions());
   const restoredRef = useRef(false);
 
-  useEffect(() => {
-    const currentProjectId = parseProjectScopeSearchParam(searchParams.get(projectScopeSearchParamKey));
-    if (!currentProjectId) return;
+  const projectLookups = useMemo(() => projects.map((project) => ({ id: project.id, slug: project.slug })), [projects]);
+  const projectIds = useMemo(() => new Set(projects.map((project) => project.id)), [projects]);
 
-    const projectIds = new Set(projects.map((project) => project.id));
-    if (!projectIds.has(currentProjectId)) {
+  useEffect(() => {
+    const token = parseProjectScopeSearchParam(searchParams.get(projectScopeSearchParamKey));
+    if (!token) return;
+
+    const resolvedProjectId = resolveProjectScopeToken(token, projectLookups);
+    if (resolvedProjectId == null || !projectIds.has(resolvedProjectId)) {
       setProjectId(null);
     }
-  }, [projects, searchParams, setProjectId]);
+  }, [projectIds, projectLookups, searchParams, setProjectId]);
 
   useEffect(() => {
     if (restoredRef.current) {
@@ -45,7 +52,6 @@ export function useRestoreProjectScopeSearchParam() {
       return;
     }
 
-    const projectIds = new Set(projects.map((project) => project.id));
     if (!isStoredProjectScopeValid(storedValue, projectIds)) {
       restoredRef.current = true;
       return;
@@ -58,5 +64,5 @@ export function useRestoreProjectScopeSearchParam() {
     }
 
     setProjectId(storedValue);
-  }, [projects, searchParams, setProjectId]);
+  }, [projectIds, searchParams, setProjectId]);
 }

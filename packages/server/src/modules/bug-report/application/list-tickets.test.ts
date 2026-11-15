@@ -50,6 +50,7 @@ function createBugReport(id: string, reportProjectId: string) {
     description: "Clicking Pay shows a blank page.",
     stepsToReproduce: null,
     reporterEmail: null,
+    reporterIp: null,
     url: "https://store.acme.test/checkout",
     userAgent: null,
     browser: null,

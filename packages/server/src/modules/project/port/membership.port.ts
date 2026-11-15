@@ -9,4 +9,5 @@ export type MembershipPort = {
   findByUserAndOrganization: (input: FindMembershipInputDtoType) => Promise<FindMembershipOutputDtoType>;
   filterProjectIds: (membership: Pick<MembershipModelType, "id" | "role">, projectIds: string[]) => Promise<string[]>;
   grantProjectToMembers: (organizationId: string, projectId: string, userId: string) => Promise<void>;
+  userHasProjectAccess: (userId: string, projectId: string, organizationId: string) => Promise<boolean>;
 };

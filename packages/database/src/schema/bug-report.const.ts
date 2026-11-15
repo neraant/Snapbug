@@ -18,6 +18,7 @@ export const bugReportTable = pgTable("bug_reports", {
   description: text("description").notNull(),
   stepsToReproduce: text("steps_to_reproduce"),
   reporterEmail: text("reporter_email"),
+  reporterIp: text("reporter_ip"),
   url: text("url"),
   userAgent: text("user_agent"),
   browser: text("browser"),

@@ -1,6 +1,7 @@
 import { CreateProjectUseCase } from "@workspace/server/modules/project/application/create-project.use-case";
 import { ProjectMapper } from "@workspace/server/modules/project/entity/project.mapper";
 import type { MembershipPort } from "@workspace/server/modules/project/port/membership.port";
+import type { ProjectRepository } from "@workspace/server/modules/project/repository/project.repository";
 import type { ProjectService } from "@workspace/server/modules/project/service/project.service";
 import type { WithTransactionType } from "@workspace/server/shared/database/transaction.util";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
@@ -32,6 +33,9 @@ describe("CreateProjectUseCase", () => {
     };
     membershipPort.withTx.mockReturnValue(membershipPort);
     const saveWithAudit = vi.fn().mockResolvedValue(undefined);
+    const projectRepository = {
+      findSlugsByOrganizationId: vi.fn().mockResolvedValue(["acme-store"]),
+    };
     const projectService = {
       withTx: vi.fn().mockReturnValue({
         withActor: vi.fn().mockReturnValue({ saveWithAudit }),
@@ -40,6 +44,7 @@ describe("CreateProjectUseCase", () => {
     const withTransaction = vi.fn(async (callback) => await callback({}));
     const useCase = new CreateProjectUseCase(
       membershipPort as unknown as MembershipPort,
+      projectRepository as unknown as ProjectRepository,
       projectService as unknown as ProjectService,
       withTransaction as WithTransactionType,
     );
@@ -55,8 +60,10 @@ describe("CreateProjectUseCase", () => {
     const membershipPort = { findByUserAndOrganization: vi.fn().mockResolvedValue(null) };
     const projectService = { withTx: vi.fn() };
     const withTransaction = vi.fn();
+    const projectRepository = { findSlugsByOrganizationId: vi.fn() };
     const useCase = new CreateProjectUseCase(
       membershipPort as unknown as MembershipPort,
+      projectRepository as unknown as ProjectRepository,
       projectService as unknown as ProjectService,
       withTransaction as WithTransactionType,
     );

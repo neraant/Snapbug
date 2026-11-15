@@ -41,10 +41,9 @@ Do not start tasks marked TBD: an implementer agent must not take them.
 - P-17 Playground is a sample customer page with the real widget. Submit stays on the page and shows the captured screenshot, replay, environment, and logs. Nothing is written to the database or to Blob.
 - P-19 global search for tickets and projects, limited to the member's project access.
 - P-20 acceptance of the terms on registration.
+- P-21 project archive and restore, delete, default assignee, store IP, collect visitor email, color, and slug.
 
 ## Open
-
-- P-21 project archive and restore, delete, default assignee, store IP, collect visitor email, color, and slug.
 - P-22 invitation resend, revoke, and copy link. Expiry after 7 days already rejects acceptance.
 - P-23 require 2FA, one invite email domain, GDPR mode, and delete workspace. Administrator only.
 - P-24 error responses that return the real status, including 400, 401, 403, 404, 500, and any other real code. The error screen always shows 500.

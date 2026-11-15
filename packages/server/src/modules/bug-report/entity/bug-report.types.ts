@@ -13,6 +13,7 @@ export type BugReportPersistedType = {
   description: string;
   stepsToReproduce: string | null;
   reporterEmail: string | null;
+  reporterIp: string | null;
   url: string | null;
   userAgent: string | null;
   browser: string | null;
@@ -75,6 +76,8 @@ export type CreateBugReportType = {
   consoleLogs?: unknown[] | null;
   networkLogs?: unknown[] | null;
   reporterEmail?: string | null;
+  reporterIp?: string | null;
+  assignedTo?: string | null;
   customContext?: Record<string, unknown> | null;
 };
 

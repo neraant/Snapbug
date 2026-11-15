@@ -29,6 +29,14 @@ export class ApiKeyRepository {
     return row ? ApiKeyMapper.fromPersistence(row) : null;
   }
 
+  async deleteByProjectId(projectId: string): Promise<void> {
+    try {
+      await this.db.delete(apiKeyTable).where(eq(apiKeyTable.projectId, projectId));
+    } catch (error) {
+      throw new InternalServerError(ERROR_CODES.INTERNAL_SERVER_ERROR, undefined, { cause: error });
+    }
+  }
+
   async save(apiKey: ApiKey): Promise<void> {
     const values = ApiKeyMapper.toPersistence(apiKey);
 

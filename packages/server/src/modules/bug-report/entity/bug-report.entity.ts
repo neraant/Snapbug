@@ -37,6 +37,7 @@ export class BugReport {
   readonly description: BugReportPersistedType["description"];
   readonly stepsToReproduce: BugReportPersistedType["stepsToReproduce"];
   readonly reporterEmail: BugReportPersistedType["reporterEmail"];
+  readonly reporterIp: BugReportPersistedType["reporterIp"];
   readonly url: BugReportPersistedType["url"];
   readonly userAgent: BugReportPersistedType["userAgent"];
   readonly browser: BugReportPersistedType["browser"];
@@ -66,6 +67,7 @@ export class BugReport {
     this.description = bugReport.description;
     this.stepsToReproduce = bugReport.stepsToReproduce;
     this.reporterEmail = bugReport.reporterEmail;
+    this.reporterIp = bugReport.reporterIp;
     this.url = bugReport.url;
     this.userAgent = bugReport.userAgent;
     this.browser = bugReport.browser;
@@ -138,6 +140,7 @@ export class BugReport {
       description: this.description,
       stepsToReproduce: this.stepsToReproduce,
       reporterEmail: this.reporterEmail,
+      reporterIp: this.reporterIp,
       url: this.url,
       userAgent: this.userAgent,
       browser: this.browser,

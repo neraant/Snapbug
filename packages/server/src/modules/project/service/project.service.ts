@@ -37,4 +37,19 @@ export class ProjectService {
       newSnapshot: ProjectMapper.toAudit(project),
     });
   }
+
+  async deleteWithAudit(project: Project, action: string): Promise<void> {
+    await this.projectRepository.delete(project.id);
+
+    await this.auditLogService.save({
+      action,
+      entityType: PROJECT_ENTITY_TYPE,
+      entityId: project.id,
+      organizationId: project.organizationId,
+      projectId: null,
+      actor: this.actor,
+      oldSnapshot: ProjectMapper.toAudit(project),
+      newSnapshot: { name: null, slug: null, archivedAt: null },
+    });
+  }
 }

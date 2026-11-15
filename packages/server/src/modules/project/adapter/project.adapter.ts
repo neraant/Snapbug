@@ -32,7 +32,7 @@ export class ProjectAdapter implements OrganizationProjectPort, BugReportProject
     private readonly projectService: ProjectService,
     private readonly withTransaction: WithTransactionType,
   ) {
-    this.createProject = new CreateProjectUseCase(membershipPort, projectService, withTransaction);
+    this.createProject = new CreateProjectUseCase(membershipPort, projectRepository, projectService, withTransaction);
     this.findProjects = new FindProjectsUseCase(membershipPort, projectRepository);
     this.findProjectById = new FindProjectByIdUseCase(projectRepository);
   }

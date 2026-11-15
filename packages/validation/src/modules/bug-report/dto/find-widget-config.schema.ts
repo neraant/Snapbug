@@ -7,6 +7,8 @@ export const findWidgetConfigInputDtoSchema = z.object({
 
 export type FindWidgetConfigInputDtoType = z.infer<typeof findWidgetConfigInputDtoSchema>;
 
-export const findWidgetConfigOutputDtoSchema = projectWidgetSettingModelSchema.omit({ allowedDomains: true });
+export const findWidgetConfigOutputDtoSchema = projectWidgetSettingModelSchema.omit({ allowedDomains: true }).extend({
+  collectVisitorEmail: z.boolean(),
+});
 
 export type FindWidgetConfigOutputDtoType = z.infer<typeof findWidgetConfigOutputDtoSchema>;

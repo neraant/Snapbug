@@ -204,6 +204,7 @@ export async function ingestBugReportMultipart(request: Request, context: OrpcCo
       input,
       context.actor,
       context.requestOrigin,
+      context.ip || null,
       screenshot,
       replay,
     );

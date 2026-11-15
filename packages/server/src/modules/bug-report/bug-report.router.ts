@@ -13,7 +13,12 @@ const admin = authed.use(adminMiddleware);
 export const bugReportRouter = os.router({
   create: os.create.handler(
     async ({ input, context }) =>
-      await container.bugReport.createBugReport.execute(input, context.actor, context.requestOrigin),
+      await container.bugReport.createBugReport.execute(
+        input,
+        context.actor,
+        context.requestOrigin,
+        context.ip || null,
+      ),
   ),
   findWidgetConfig: os.findWidgetConfig.handler(
     async ({ input, context }) => await container.bugReport.findWidgetConfig.execute(input, context.requestOrigin),
