@@ -271,8 +271,13 @@ JSON_SCHEMA_REGISTRY.add(projectModelSchema, {
     {
       id: "4a8c69a1-1ab1-45a8-8497-eae1e506d9d1",
       name: "Store",
+      slug: "store",
       color: "#F97316",
       organizationId: "3a8c69a1-1ab1-45a8-8497-eae1e506d9d1",
+      defaultAssigneeId: null,
+      storeVisitorIp: false,
+      collectVisitorEmail: true,
+      archivedAt: null,
       createdAt: "2026-10-03T09:00:00.000Z",
     },
   ],

@@ -29,7 +29,25 @@ export function resolveWidgetOptions(config: WidgetConfig): ResolvedWidgetOption
       ? config.font
       : undefined;
 
-  return { position, buttonLabel, theme, accent, background, text, mutedText, font, privacy: resolvePrivacy(config) };
+  const collectVisitorEmail =
+    typeof config.collectVisitorEmail === "boolean" ? config.collectVisitorEmail : defaultsCollectVisitorEmail();
+
+  return {
+    position,
+    buttonLabel,
+    theme,
+    accent,
+    background,
+    text,
+    mutedText,
+    font,
+    privacy: resolvePrivacy(config),
+    collectVisitorEmail,
+  };
+}
+
+function defaultsCollectVisitorEmail(): boolean {
+  return true;
 }
 
 export async function fetchRemoteWidgetConfig(apiHost: string, apiKey: string): Promise<RemoteWidgetConfig | null> {
@@ -58,6 +76,7 @@ export function mergeWidgetConfig(init: WidgetConfig, remote: RemoteWidgetConfig
     mutedText: init.mutedText ?? remote.mutedText,
     font: init.font ?? remote.font,
     privacy: init.privacy ?? remote.privacy,
+    collectVisitorEmail: init.collectVisitorEmail ?? remote.collectVisitorEmail,
   };
 }
 

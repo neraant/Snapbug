@@ -20,6 +20,15 @@ export const projectRouter = os.router({
   updateProject: admin.updateProject.handler(
     async ({ input, context }) => await container.project.updateProject.execute(input, context.user.id),
   ),
+  archiveProject: admin.archiveProject.handler(
+    async ({ input, context }) => await container.project.archiveProject.execute(input, context.user.id),
+  ),
+  restoreProject: admin.restoreProject.handler(
+    async ({ input, context }) => await container.project.restoreProject.execute(input, context.user.id),
+  ),
+  deleteProject: admin.deleteProject.handler(
+    async ({ input, context }) => await container.project.deleteProject.execute(input, context.user.id),
+  ),
   findProjectWidgetSetting: authed.findProjectWidgetSetting.handler(
     async ({ input, context }) =>
       await container.project.findProjectWidgetSetting.execute(input, context.user.id, context.organizationId),

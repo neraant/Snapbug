@@ -1,4 +1,5 @@
 import { FindProjectByIdUseCase } from "@workspace/server/modules/project/application/find-project-by-id.use-case";
+import { projectTestFields } from "@workspace/server/modules/project/application/project-test.const";
 import { Project } from "@workspace/server/modules/project/entity/project.entity";
 import { ProjectMapper } from "@workspace/server/modules/project/entity/project.mapper";
 import type { ProjectRepository } from "@workspace/server/modules/project/repository/project.repository";
@@ -12,6 +13,7 @@ const project = new Project({
   organizationId: "1a8c69a1-1ab1-45a8-8497-eae1e506d9d4",
   widgetSettings: null,
   createdAt: new Date("2026-10-03T09:00:00.000Z"),
+  ...projectTestFields,
 });
 
 describe("FindProjectByIdUseCase", () => {

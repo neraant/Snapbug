@@ -104,9 +104,12 @@ export abstract class BugReportMapper {
     return { items };
   }
 
-  static toFindWidgetConfigOutput(settings: ProjectWidgetSettingModelType): FindWidgetConfigOutputDtoType {
+  static toFindWidgetConfigOutput(
+    settings: ProjectWidgetSettingModelType,
+    collectVisitorEmail: boolean,
+  ): FindWidgetConfigOutputDtoType {
     const { allowedDomains: _allowedDomains, ...publicConfig } = settings;
-    return publicConfig;
+    return { ...publicConfig, collectVisitorEmail };
   }
 
   static toFindOneOutput(

@@ -10,6 +10,19 @@ const organizationId = "3a8c69a1-1ab1-45a8-8497-eae1e506d9d1";
 
 const input = { apiKey: "ff_test_key" };
 
+const activeProjectModel = {
+  id: projectId,
+  name: "Store",
+  slug: "store",
+  color: "#F97316" as const,
+  organizationId,
+  defaultAssigneeId: null,
+  storeVisitorIp: false,
+  collectVisitorEmail: false,
+  archivedAt: null,
+  createdAt: "2026-10-03T09:00:00.000Z",
+};
+
 const widgetSettingBase = {
   position: "bottom-left" as const,
   buttonLabel: "Feedback",
@@ -42,16 +55,11 @@ function createUseCase(deps: {
 describe("FindWidgetConfigUseCase", () => {
   it("returns widget settings without allowedDomains for a valid api key", async () => {
     const apiKeyPort = {
-      findProjectByKey: vi.fn().mockResolvedValue({
-        id: projectId,
-        name: "Store",
-        organizationId,
-        createdAt: "2026-10-03T09:00:00.000Z",
-      }),
+      findProjectByKey: vi.fn().mockResolvedValue(activeProjectModel),
     };
     const projectPort = {
       findManyByOrganizationId: vi.fn(),
-      findById: vi.fn(),
+      findById: vi.fn().mockResolvedValue(activeProjectModel),
       findWidgetSetting: vi.fn().mockResolvedValue(widgetSettingBase),
     };
     const useCase = createUseCase({
@@ -71,22 +79,18 @@ describe("FindWidgetConfigUseCase", () => {
       mutedText: "#94A3B8",
       font: "monospace",
       privacy: widgetSettingBase.privacy,
+      collectVisitorEmail: false,
     });
     expect(result).not.toHaveProperty("allowedDomains");
   });
 
   it("throws when origin host does not match allowed domains", async () => {
     const apiKeyPort = {
-      findProjectByKey: vi.fn().mockResolvedValue({
-        id: projectId,
-        name: "Store",
-        organizationId,
-        createdAt: "2026-10-03T09:00:00.000Z",
-      }),
+      findProjectByKey: vi.fn().mockResolvedValue(activeProjectModel),
     };
     const projectPort = {
       findManyByOrganizationId: vi.fn(),
-      findById: vi.fn(),
+      findById: vi.fn().mockResolvedValue(activeProjectModel),
       findWidgetSetting: vi.fn().mockResolvedValue({
         ...widgetSettingBase,
         allowedDomains: ["app.example.com"],
@@ -106,7 +110,7 @@ describe("FindWidgetConfigUseCase", () => {
     const apiKeyPort = { findProjectByKey: vi.fn().mockResolvedValue(null) };
     const projectPort = {
       findManyByOrganizationId: vi.fn(),
-      findById: vi.fn(),
+      findById: vi.fn().mockResolvedValue(activeProjectModel),
       findWidgetSetting: vi.fn(),
     };
     const useCase = createUseCase({

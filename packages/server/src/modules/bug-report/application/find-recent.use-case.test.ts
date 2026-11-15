@@ -60,6 +60,7 @@ function createBugReport(index: number, status: BugReportStatus) {
     description: "Something broke.",
     stepsToReproduce: null,
     reporterEmail: null,
+    reporterIp: null,
     url: "https://store.acme.test/checkout",
     userAgent: null,
     browser: index % 2 === 0 ? "Chrome 129" : null,

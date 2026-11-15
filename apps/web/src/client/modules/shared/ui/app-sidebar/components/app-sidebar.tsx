@@ -1,5 +1,6 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import { Column } from "@workspace/design-system/components/layout/column";
 import { SidebarLayout } from "@workspace/design-system/components/layout/sidebar";
 import Link from "next/link";
@@ -10,6 +11,7 @@ import { ActiveOrganizationProvider } from "@/client/modules/shared/components/a
 import { texts as sharedTexts } from "@/client/modules/shared/consts/texts.const";
 import { useProjectScopeSearchParam } from "@/client/modules/shared/hooks/use-project-scope-search-param";
 import { useInterfaceLanguage } from "@/client/modules/shared/locale/use-interface-language";
+import { orpcQuery } from "@/client/modules/shared/orpc/query-utils";
 import { AppSidebarHeader } from "@/client/modules/shared/ui/app-sidebar/components/app-sidebar-header";
 import { AppSidebarOrganizationSwitcher } from "@/client/modules/shared/ui/app-sidebar/components/app-sidebar-organization-switcher";
 import { AppSidebarProjectScope } from "@/client/modules/shared/ui/app-sidebar/components/app-sidebar-project-scope";
@@ -41,14 +43,16 @@ export function AppSidebar({
   const pathname = usePathname();
   const language = useInterfaceLanguage();
   const { projectId } = useProjectScopeSearchParam();
+  const { data: projects = [] } = useQuery(orpcQuery.project.findProjects.queryOptions());
+  const projectLookups = useMemo(() => projects.map((project) => ({ id: project.id, slug: project.slug })), [projects]);
   const sidebarItems = useMemo(() => {
     const items = isAdmin ? [...appSidebarItems, ...appSidebarAdminItems] : appSidebarItems;
 
     return items.map((item) => ({
       ...item,
-      href: buildPathWithProjectScopeSearchParam(item.href, projectId),
+      href: buildPathWithProjectScopeSearchParam(item.href, projectId, projectLookups),
     }));
-  }, [isAdmin, language, projectId]);
+  }, [isAdmin, language, projectId, projectLookups]);
 
   return (
     <ActiveOrganizationProvider organizationId={activeOrganizationId}>

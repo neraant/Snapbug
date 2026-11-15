@@ -1,7 +1,9 @@
 import { ProjectFactory } from "@workspace/server/modules/project/entity/project.factory";
 import { ProjectMapper } from "@workspace/server/modules/project/entity/project.mapper";
 import type { MembershipPort } from "@workspace/server/modules/project/port/membership.port";
+import type { ProjectRepository } from "@workspace/server/modules/project/repository/project.repository";
 import type { ProjectService } from "@workspace/server/modules/project/service/project.service";
+import { ProjectSlugService } from "@workspace/server/modules/project/service/project-slug.service";
 import type { WithTransactionType } from "@workspace/server/shared/database/transaction.util";
 import { NotFoundError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
@@ -13,6 +15,7 @@ import type {
 export class CreateProjectUseCase {
   constructor(
     private readonly membershipPort: MembershipPort,
+    private readonly projectRepository: ProjectRepository,
     private readonly projectService: ProjectService,
     private readonly withTransaction: WithTransactionType,
   ) {}
@@ -24,10 +27,15 @@ export class CreateProjectUseCase {
     });
     if (!membership) throw new NotFoundError(ERROR_CODES.ORGANIZATION_NOT_FOUND);
 
+    const takenSlugs = await this.projectRepository.findSlugsByOrganizationId(input.organizationId);
+    const baseSlug = ProjectSlugService.baseSlugFromName(input.name);
+    const slug = ProjectSlugService.allocateSlug(baseSlug, new Set(takenSlugs));
+
     const project = ProjectFactory.create({
       name: input.name,
       color: input.color,
       organizationId: input.organizationId,
+      slug,
     });
     await this.withTransaction(async (tx) => {
       await this.projectService

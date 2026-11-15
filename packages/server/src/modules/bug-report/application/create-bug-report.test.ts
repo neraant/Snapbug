@@ -60,6 +60,19 @@ const fileStoragePortStub: FileStoragePort = {
   delete: vi.fn(),
 };
 
+const activeProjectModel = {
+  id: projectId,
+  name: "Store",
+  slug: "store",
+  color: "#F97316" as const,
+  organizationId,
+  defaultAssigneeId: null,
+  storeVisitorIp: false,
+  collectVisitorEmail: true,
+  archivedAt: null,
+  createdAt: "2026-10-03T09:00:00.000Z",
+};
+
 const widgetSettingBase = {
   position: "bottom-right" as const,
   buttonLabel: "Report a bug",
@@ -98,16 +111,11 @@ function createUseCase(deps: {
 describe("CreateBugReportUseCase", () => {
   it("creates a new bug report for an active api key", async () => {
     const apiKeyPort = {
-      findProjectByKey: vi.fn().mockResolvedValue({
-        id: projectId,
-        name: "Store",
-        organizationId,
-        createdAt: "2026-10-03T09:00:00.000Z",
-      }),
+      findProjectByKey: vi.fn().mockResolvedValue(activeProjectModel),
     };
     const projectPort = {
       findManyByOrganizationId: vi.fn(),
-      findById: vi.fn(),
+      findById: vi.fn().mockResolvedValue(activeProjectModel),
       findWidgetSetting: vi.fn().mockResolvedValue(widgetSettingBase),
     };
     const createWithAudit = vi.fn(async (createInput) =>
@@ -128,7 +136,7 @@ describe("CreateBugReportUseCase", () => {
       withTransaction: withTransaction as WithTransactionType,
     });
 
-    const result = await useCase.execute(input, actor, "https://app.example.com");
+    const result = await useCase.execute(input, actor, "https://app.example.com", null);
 
     expect(apiKeyPort.findProjectByKey).toHaveBeenCalledWith({ key: input.apiKey });
     expect(projectPort.findWidgetSetting).toHaveBeenCalledWith(projectId);
@@ -136,7 +144,7 @@ describe("CreateBugReportUseCase", () => {
     expect(bugReportService.withTx).toHaveBeenCalledOnce();
     expect(withActor).toHaveBeenCalledWith(actor);
     expect(createWithAudit).toHaveBeenCalledWith(
-      {
+      expect.objectContaining({
         organizationId,
         projectId,
         title: input.title,
@@ -153,7 +161,7 @@ describe("CreateBugReportUseCase", () => {
         reporterEmail: null,
         customContext: null,
         severity: BugReportSeverity.MEDIUM,
-      },
+      }),
       "Create bug report",
     );
     const created = createWithAudit.mock.results[0]?.value;
@@ -167,16 +175,11 @@ describe("CreateBugReportUseCase", () => {
 
   it("creates a report when allowed domains is empty regardless of origin", async () => {
     const apiKeyPort = {
-      findProjectByKey: vi.fn().mockResolvedValue({
-        id: projectId,
-        name: "Store",
-        organizationId,
-        createdAt: "2026-10-03T09:00:00.000Z",
-      }),
+      findProjectByKey: vi.fn().mockResolvedValue(activeProjectModel),
     };
     const projectPort = {
       findManyByOrganizationId: vi.fn(),
-      findById: vi.fn(),
+      findById: vi.fn().mockResolvedValue(activeProjectModel),
       findWidgetSetting: vi.fn().mockResolvedValue({ ...widgetSettingBase, allowedDomains: [] }),
     };
     const createWithAudit = vi.fn(async (createInput) =>
@@ -195,23 +198,18 @@ describe("CreateBugReportUseCase", () => {
       withTransaction: withTransaction as WithTransactionType,
     });
 
-    await useCase.execute(input, actor, null);
+    await useCase.execute(input, actor, null, null);
 
     expect(withTransaction).toHaveBeenCalledOnce();
   });
 
   it("creates a report when origin host matches allowed domains", async () => {
     const apiKeyPort = {
-      findProjectByKey: vi.fn().mockResolvedValue({
-        id: projectId,
-        name: "Store",
-        organizationId,
-        createdAt: "2026-10-03T09:00:00.000Z",
-      }),
+      findProjectByKey: vi.fn().mockResolvedValue(activeProjectModel),
     };
     const projectPort = {
       findManyByOrganizationId: vi.fn(),
-      findById: vi.fn(),
+      findById: vi.fn().mockResolvedValue(activeProjectModel),
       findWidgetSetting: vi.fn().mockResolvedValue({
         ...widgetSettingBase,
         allowedDomains: ["app.example.com"],
@@ -233,23 +231,18 @@ describe("CreateBugReportUseCase", () => {
       withTransaction: withTransaction as WithTransactionType,
     });
 
-    await useCase.execute(input, actor, "https://app.example.com/page");
+    await useCase.execute(input, actor, "https://app.example.com/page", null);
 
     expect(withTransaction).toHaveBeenCalledOnce();
   });
 
   it("throws when origin host does not match allowed domains", async () => {
     const apiKeyPort = {
-      findProjectByKey: vi.fn().mockResolvedValue({
-        id: projectId,
-        name: "Store",
-        organizationId,
-        createdAt: "2026-10-03T09:00:00.000Z",
-      }),
+      findProjectByKey: vi.fn().mockResolvedValue(activeProjectModel),
     };
     const projectPort = {
       findManyByOrganizationId: vi.fn(),
-      findById: vi.fn(),
+      findById: vi.fn().mockResolvedValue(activeProjectModel),
       findWidgetSetting: vi.fn().mockResolvedValue({
         ...widgetSettingBase,
         allowedDomains: ["app.example.com"],
@@ -264,7 +257,7 @@ describe("CreateBugReportUseCase", () => {
       withTransaction: withTransaction as WithTransactionType,
     });
 
-    await expect(useCase.execute(input, actor, "https://other.example.com")).rejects.toMatchObject({
+    await expect(useCase.execute(input, actor, "https://other.example.com", null)).rejects.toMatchObject({
       errorCode: ERROR_CODES.ORIGIN_NOT_ALLOWED,
     });
 
@@ -274,16 +267,11 @@ describe("CreateBugReportUseCase", () => {
 
   it("throws when allowed domains is set and origin header is missing", async () => {
     const apiKeyPort = {
-      findProjectByKey: vi.fn().mockResolvedValue({
-        id: projectId,
-        name: "Store",
-        organizationId,
-        createdAt: "2026-10-03T09:00:00.000Z",
-      }),
+      findProjectByKey: vi.fn().mockResolvedValue(activeProjectModel),
     };
     const projectPort = {
       findManyByOrganizationId: vi.fn(),
-      findById: vi.fn(),
+      findById: vi.fn().mockResolvedValue(activeProjectModel),
       findWidgetSetting: vi.fn().mockResolvedValue({
         ...widgetSettingBase,
         allowedDomains: ["app.example.com"],
@@ -298,7 +286,7 @@ describe("CreateBugReportUseCase", () => {
       withTransaction: withTransaction as WithTransactionType,
     });
 
-    await expect(useCase.execute(input, actor, null)).rejects.toMatchObject({
+    await expect(useCase.execute(input, actor, null, null)).rejects.toMatchObject({
       errorCode: ERROR_CODES.ORIGIN_NOT_ALLOWED,
     });
 
@@ -307,16 +295,11 @@ describe("CreateBugReportUseCase", () => {
 
   it("passes env metadata and parsed user agent into createWithAudit", async () => {
     const apiKeyPort = {
-      findProjectByKey: vi.fn().mockResolvedValue({
-        id: projectId,
-        name: "Store",
-        organizationId,
-        createdAt: "2026-10-03T09:00:00.000Z",
-      }),
+      findProjectByKey: vi.fn().mockResolvedValue(activeProjectModel),
     };
     const projectPort = {
       findManyByOrganizationId: vi.fn(),
-      findById: vi.fn(),
+      findById: vi.fn().mockResolvedValue(activeProjectModel),
       findWidgetSetting: vi.fn().mockResolvedValue(widgetSettingBase),
     };
     const createWithAudit = vi.fn(async (createInput) =>
@@ -355,6 +338,7 @@ describe("CreateBugReportUseCase", () => {
       },
       actor,
       "https://app.example.com",
+      null,
     );
 
     expect(createWithAudit).toHaveBeenCalledWith(
@@ -384,16 +368,11 @@ describe("CreateBugReportUseCase", () => {
     const reporterEmail = "user@example.com";
     const customContext = { route: "/billing", plan: "pro" };
     const apiKeyPort = {
-      findProjectByKey: vi.fn().mockResolvedValue({
-        id: projectId,
-        name: "Store",
-        organizationId,
-        createdAt: "2026-10-03T09:00:00.000Z",
-      }),
+      findProjectByKey: vi.fn().mockResolvedValue(activeProjectModel),
     };
     const projectPort = {
       findManyByOrganizationId: vi.fn(),
-      findById: vi.fn(),
+      findById: vi.fn().mockResolvedValue(activeProjectModel),
       findWidgetSetting: vi.fn().mockResolvedValue(widgetSettingBase),
     };
     const createWithAudit = vi.fn(async (createInput) =>
@@ -412,7 +391,12 @@ describe("CreateBugReportUseCase", () => {
       withTransaction: withTransaction as WithTransactionType,
     });
 
-    const result = await useCase.execute({ ...input, reporterEmail, customContext }, actor, "https://app.example.com");
+    const result = await useCase.execute(
+      { ...input, reporterEmail, customContext },
+      actor,
+      "https://app.example.com",
+      null,
+    );
 
     expect(createWithAudit).toHaveBeenCalledWith(
       {
@@ -442,16 +426,11 @@ describe("CreateBugReportUseCase", () => {
   it("persists reproduction steps from the create input", async () => {
     const stepsToReproduce = "1. Open checkout\n2. Click Pay";
     const apiKeyPort = {
-      findProjectByKey: vi.fn().mockResolvedValue({
-        id: projectId,
-        name: "Store",
-        organizationId,
-        createdAt: "2026-10-03T09:00:00.000Z",
-      }),
+      findProjectByKey: vi.fn().mockResolvedValue(activeProjectModel),
     };
     const projectPort = {
       findManyByOrganizationId: vi.fn(),
-      findById: vi.fn(),
+      findById: vi.fn().mockResolvedValue(activeProjectModel),
       findWidgetSetting: vi.fn().mockResolvedValue(widgetSettingBase),
     };
     const createWithAudit = vi.fn(async (createInput) =>
@@ -470,7 +449,7 @@ describe("CreateBugReportUseCase", () => {
       withTransaction: withTransaction as WithTransactionType,
     });
 
-    const result = await useCase.execute({ ...input, stepsToReproduce }, actor, "https://app.example.com");
+    const result = await useCase.execute({ ...input, stepsToReproduce }, actor, "https://app.example.com", null);
 
     expect(createWithAudit).toHaveBeenCalledWith(expect.objectContaining({ stepsToReproduce }), "Create bug report");
     expect(result.stepsToReproduce).toBe(stepsToReproduce);
@@ -481,16 +460,11 @@ describe("CreateBugReportUseCase", () => {
     const saveBugReportScreenshot = vi.fn().mockResolvedValue(screenshotKey);
     const deleteScreenshot = vi.fn();
     const apiKeyPort = {
-      findProjectByKey: vi.fn().mockResolvedValue({
-        id: projectId,
-        name: "Store",
-        organizationId,
-        createdAt: "2026-10-03T09:00:00.000Z",
-      }),
+      findProjectByKey: vi.fn().mockResolvedValue(activeProjectModel),
     };
     const projectPort = {
       findManyByOrganizationId: vi.fn(),
-      findById: vi.fn(),
+      findById: vi.fn().mockResolvedValue(activeProjectModel),
       findWidgetSetting: vi.fn().mockResolvedValue(widgetSettingBase),
     };
     const createWithAudit = vi.fn(async (createInput) =>
@@ -517,7 +491,7 @@ describe("CreateBugReportUseCase", () => {
     });
 
     const screenshot = { data: new Uint8Array([137, 80, 78, 71]), mimeType: "image/png" };
-    const result = await useCase.execute(input, actor, "https://app.example.com", screenshot);
+    const result = await useCase.execute(input, actor, "https://app.example.com", null, screenshot);
 
     expect(saveBugReportScreenshot).toHaveBeenCalledOnce();
     expect(saveBugReportScreenshot.mock.calls[0]?.[0]).toMatchObject({
@@ -542,7 +516,7 @@ describe("CreateBugReportUseCase", () => {
     const apiKeyPort = { findProjectByKey: vi.fn().mockResolvedValue(null) };
     const projectPort = {
       findManyByOrganizationId: vi.fn(),
-      findById: vi.fn(),
+      findById: vi.fn().mockResolvedValue(activeProjectModel),
       findWidgetSetting: vi.fn(),
     };
     const bugReportService = { withTx: vi.fn() };
@@ -554,7 +528,7 @@ describe("CreateBugReportUseCase", () => {
       withTransaction: withTransaction as WithTransactionType,
     });
 
-    await expect(useCase.execute(input, actor, null)).rejects.toMatchObject({
+    await expect(useCase.execute(input, actor, null, null)).rejects.toMatchObject({
       errorCode: ERROR_CODES.INVALID_API_KEY,
     });
 
@@ -565,16 +539,11 @@ describe("CreateBugReportUseCase", () => {
 
   it("maps reporter severity onto the bug report", async () => {
     const apiKeyPort = {
-      findProjectByKey: vi.fn().mockResolvedValue({
-        id: projectId,
-        name: "Store",
-        organizationId,
-        createdAt: "2026-10-03T09:00:00.000Z",
-      }),
+      findProjectByKey: vi.fn().mockResolvedValue(activeProjectModel),
     };
     const projectPort = {
       findManyByOrganizationId: vi.fn(),
-      findById: vi.fn(),
+      findById: vi.fn().mockResolvedValue(activeProjectModel),
       findWidgetSetting: vi.fn().mockResolvedValue(widgetSettingBase),
     };
     const createWithAudit = vi.fn(async (createInput) =>
@@ -593,7 +562,7 @@ describe("CreateBugReportUseCase", () => {
       withTransaction: withTransaction as WithTransactionType,
     });
 
-    const result = await useCase.execute({ ...input, severity: "critical" }, actor, "https://app.example.com");
+    const result = await useCase.execute({ ...input, severity: "critical" }, actor, "https://app.example.com", null);
 
     expect(createWithAudit).toHaveBeenCalledWith(
       expect.objectContaining({ severity: BugReportSeverity.CRITICAL }),
@@ -607,16 +576,11 @@ describe("CreateBugReportUseCase", () => {
     const saveBugReportReplay = vi.fn().mockResolvedValue(replayKey);
     const deleteStorage = vi.fn();
     const apiKeyPort = {
-      findProjectByKey: vi.fn().mockResolvedValue({
-        id: projectId,
-        name: "Store",
-        organizationId,
-        createdAt: "2026-10-03T09:00:00.000Z",
-      }),
+      findProjectByKey: vi.fn().mockResolvedValue(activeProjectModel),
     };
     const projectPort = {
       findManyByOrganizationId: vi.fn(),
-      findById: vi.fn(),
+      findById: vi.fn().mockResolvedValue(activeProjectModel),
       findWidgetSetting: vi.fn().mockResolvedValue(widgetSettingBase),
     };
     const createWithAudit = vi.fn(async (createInput) =>
@@ -643,7 +607,7 @@ describe("CreateBugReportUseCase", () => {
     });
 
     const replay = { data: new Uint8Array([31, 139]), mimeType: "application/gzip" };
-    const result = await useCase.execute(input, actor, "https://app.example.com", undefined, replay);
+    const result = await useCase.execute(input, actor, "https://app.example.com", null, undefined, replay);
 
     expect(saveBugReportReplay).toHaveBeenCalledOnce();
     expect(createWithAudit).toHaveBeenCalledWith(
@@ -661,7 +625,7 @@ describe("CreateBugReportUseCase", () => {
     const apiKeyPort = { findProjectByKey: vi.fn() };
     const projectPort = {
       findManyByOrganizationId: vi.fn(),
-      findById: vi.fn(),
+      findById: vi.fn().mockResolvedValue(activeProjectModel),
       findWidgetSetting: vi.fn(),
     };
     const bugReportService = { withTx: vi.fn() };
@@ -675,7 +639,7 @@ describe("CreateBugReportUseCase", () => {
 
     const replay = { data: new Uint8Array(3_000_001), mimeType: "application/gzip" };
 
-    await expect(useCase.execute(input, actor, null, undefined, replay)).rejects.toMatchObject({
+    await expect(useCase.execute(input, actor, null, null, undefined, replay)).rejects.toMatchObject({
       errorCode: ERROR_CODES.REPLAY_TOO_LARGE,
     });
 
@@ -687,16 +651,11 @@ describe("CreateBugReportUseCase", () => {
     const replayKey = "bug-reports/id/replay.json.gz";
     const deleteStorage = vi.fn().mockResolvedValue(undefined);
     const apiKeyPort = {
-      findProjectByKey: vi.fn().mockResolvedValue({
-        id: projectId,
-        name: "Store",
-        organizationId,
-        createdAt: "2026-10-03T09:00:00.000Z",
-      }),
+      findProjectByKey: vi.fn().mockResolvedValue(activeProjectModel),
     };
     const projectPort = {
       findManyByOrganizationId: vi.fn(),
-      findById: vi.fn(),
+      findById: vi.fn().mockResolvedValue(activeProjectModel),
       findWidgetSetting: vi.fn().mockResolvedValue(widgetSettingBase),
     };
     const bugReportService = {
@@ -724,7 +683,7 @@ describe("CreateBugReportUseCase", () => {
     const screenshot = { data: new Uint8Array([1]), mimeType: "image/png" };
     const replay = { data: new Uint8Array([2]), mimeType: "application/gzip" };
 
-    await expect(useCase.execute(input, actor, "https://app.example.com", screenshot, replay)).rejects.toThrow(
+    await expect(useCase.execute(input, actor, "https://app.example.com", null, screenshot, replay)).rejects.toThrow(
       "db failed",
     );
 
@@ -741,16 +700,11 @@ describe("CreateBugReportUseCase", () => {
       }),
     );
     const apiKeyPort = {
-      findProjectByKey: vi.fn().mockResolvedValue({
-        id: projectId,
-        name: "Store",
-        organizationId,
-        createdAt: "2026-10-03T09:00:00.000Z",
-      }),
+      findProjectByKey: vi.fn().mockResolvedValue(activeProjectModel),
     };
     const projectPort = {
       findManyByOrganizationId: vi.fn(),
-      findById: vi.fn(),
+      findById: vi.fn().mockResolvedValue(activeProjectModel),
       findWidgetSetting: vi.fn().mockResolvedValue(widgetSettingBase),
     };
     const bugReportService = {
@@ -772,10 +726,10 @@ describe("CreateBugReportUseCase", () => {
       },
     });
 
-    await useCase.execute(input, actor, "https://app.example.com");
+    await useCase.execute(input, actor, "https://app.example.com", null);
 
     await expect(
-      useCase.execute({ ...input, title: "Second report" }, actor, "https://app.example.com", {
+      useCase.execute({ ...input, title: "Second report" }, actor, "https://app.example.com", null, {
         data: new Uint8Array([1]),
         mimeType: "image/png",
       }),
@@ -785,8 +739,62 @@ describe("CreateBugReportUseCase", () => {
     expect(saveBugReportScreenshot).not.toHaveBeenCalled();
     expect(projectPort.findWidgetSetting).toHaveBeenCalledOnce();
 
-    await useCase.execute({ ...input, apiKey: "other_key" }, actor, "https://app.example.com");
+    await useCase.execute({ ...input, apiKey: "other_key" }, actor, "https://app.example.com", null);
 
     expect(createWithAudit).toHaveBeenCalledTimes(2);
+  });
+
+  it("rejects ingest when the project is archived", async () => {
+    const archivedProject = {
+      ...activeProjectModel,
+      archivedAt: "2026-11-01T12:00:00.000Z",
+    };
+    const apiKeyPort = { findProjectByKey: vi.fn().mockResolvedValue(archivedProject) };
+    const projectPort = {
+      findManyByOrganizationId: vi.fn(),
+      findById: vi.fn().mockResolvedValue(archivedProject),
+      findWidgetSetting: vi.fn(),
+    };
+    const useCase = createUseCase({
+      apiKeyPort: apiKeyPort as unknown as ApiKeyPort,
+      projectPort: projectPort as unknown as ProjectPort,
+      bugReportService: { withTx: vi.fn() } as unknown as BugReportService,
+      withTransaction: vi.fn() as WithTransactionType,
+    });
+
+    await expect(useCase.execute(input, actor, "https://app.example.com", null)).rejects.toMatchObject({
+      errorCode: ERROR_CODES.PROJECT_ARCHIVED,
+    });
+
+    expect(projectPort.findWidgetSetting).not.toHaveBeenCalled();
+  });
+
+  it("drops visitor email when collection is turned off", async () => {
+    const projectWithoutEmail = { ...activeProjectModel, collectVisitorEmail: false };
+    const createWithAudit = vi.fn(async (createInput) =>
+      bugReportFromCreateInput({ ...createInput, shortId: "SNB-10" }),
+    );
+    const apiKeyPort = { findProjectByKey: vi.fn().mockResolvedValue(projectWithoutEmail) };
+    const projectPort = {
+      findManyByOrganizationId: vi.fn(),
+      findById: vi.fn().mockResolvedValue(projectWithoutEmail),
+      findWidgetSetting: vi.fn().mockResolvedValue(widgetSettingBase),
+    };
+    const bugReportService = {
+      withTx: vi.fn().mockReturnValue({
+        withActor: vi.fn().mockReturnValue({ createWithAudit }),
+      }),
+    };
+    const withTransaction = vi.fn(async (callback) => await callback({}));
+    const useCase = createUseCase({
+      apiKeyPort: apiKeyPort as unknown as ApiKeyPort,
+      projectPort: projectPort as unknown as ProjectPort,
+      bugReportService: bugReportService as unknown as BugReportService,
+      withTransaction: withTransaction as WithTransactionType,
+    });
+
+    await useCase.execute({ ...input, reporterEmail: "visitor@example.com" }, actor, "https://app.example.com", null);
+
+    expect(createWithAudit).toHaveBeenCalledWith(expect.objectContaining({ reporterEmail: null }), "Create bug report");
   });
 });

@@ -18,13 +18,55 @@ export abstract class ProjectMapper {
   }
 
   static toAudit(project: Project): Record<string, unknown> {
-    const { name, color, organizationId, widgetSettings } = project.toObject();
-    return { name, color, organizationId, widgetSettings };
+    const {
+      name,
+      slug,
+      color,
+      organizationId,
+      defaultAssigneeId,
+      storeVisitorIp,
+      collectVisitorEmail,
+      archivedAt,
+      widgetSettings,
+    } = project.toObject();
+    return {
+      name,
+      slug,
+      color,
+      organizationId,
+      defaultAssigneeId,
+      storeVisitorIp,
+      collectVisitorEmail,
+      archivedAt: archivedAt?.toISOString() ?? null,
+      widgetSettings,
+    };
   }
 
   static toDto(project: Project): ProjectModelType {
-    const { id, name, color, organizationId, createdAt } = project.toObject();
-    return { id, name, color, organizationId, createdAt: createdAt.toISOString() };
+    const {
+      id,
+      name,
+      slug,
+      color,
+      organizationId,
+      defaultAssigneeId,
+      storeVisitorIp,
+      collectVisitorEmail,
+      archivedAt,
+      createdAt,
+    } = project.toObject();
+    return {
+      id,
+      name,
+      slug,
+      color,
+      organizationId,
+      defaultAssigneeId,
+      storeVisitorIp,
+      collectVisitorEmail,
+      archivedAt: archivedAt?.toISOString() ?? null,
+      createdAt: createdAt.toISOString(),
+    };
   }
 
   static toFindProjectsOutput(projects: Project[]): FindProjectsOutputDtoType {

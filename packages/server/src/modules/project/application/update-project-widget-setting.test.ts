@@ -1,3 +1,4 @@
+import { projectTestFields } from "@workspace/server/modules/project/application/project-test.const";
 import { UpdateProjectWidgetSettingUseCase } from "@workspace/server/modules/project/application/update-project-widget-setting.use-case";
 import { Project } from "@workspace/server/modules/project/entity/project.entity";
 import type { MembershipPort } from "@workspace/server/modules/project/port/membership.port";
@@ -19,6 +20,7 @@ const project = new Project({
   organizationId,
   widgetSettings: null,
   createdAt: new Date("2026-10-03T09:00:00.000Z"),
+  ...projectTestFields,
 });
 
 describe("UpdateProjectWidgetSettingUseCase", () => {

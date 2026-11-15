@@ -21,13 +21,16 @@ export class FindWidgetConfigUseCase {
     input: FindWidgetConfigInputDtoType,
     requestOrigin: string | null,
   ): Promise<FindWidgetConfigOutputDtoType> {
-    const project = await this.apiKeyPort.findProjectByKey({ key: input.apiKey });
+    const projectFromKey = await this.apiKeyPort.findProjectByKey({ key: input.apiKey });
+    if (!projectFromKey) throw new UnauthorizedError(ERROR_CODES.INVALID_API_KEY);
+
+    const project = await this.projectPort.findById(projectFromKey.id);
     if (!project) throw new UnauthorizedError(ERROR_CODES.INVALID_API_KEY);
 
     const widgetSetting = await this.projectPort.findWidgetSetting(project.id);
     const settings = widgetSetting ?? projectWidgetSettingModelDefaults;
     this.widgetIngestOriginService.assertAllowed(settings.allowedDomains, requestOrigin);
 
-    return BugReportMapper.toFindWidgetConfigOutput(settings);
+    return BugReportMapper.toFindWidgetConfigOutput(settings, project.collectVisitorEmail);
   }
 }

@@ -4,12 +4,29 @@ import type { ProjectColor } from "@workspace/validation/shared/project-color.sc
 export type ProjectPersistedType = {
   id: string;
   name: string;
+  slug: string;
   color: ProjectColor;
   organizationId: string;
+  defaultAssigneeId: string | null;
+  storeVisitorIp: boolean;
+  collectVisitorEmail: boolean;
+  archivedAt: Date | null;
   widgetSettings: ProjectWidgetSettingModelType | null;
   createdAt: Date;
 };
 
-export type CreateProjectType = Pick<ProjectPersistedType, "name" | "color" | "organizationId">;
+export type CreateProjectType = Pick<ProjectPersistedType, "name" | "color" | "organizationId" | "slug">;
 
-export type UpdateProjectType = Partial<Pick<ProjectPersistedType, "name" | "widgetSettings">>;
+export type UpdateProjectType = Partial<
+  Pick<
+    ProjectPersistedType,
+    | "name"
+    | "slug"
+    | "color"
+    | "defaultAssigneeId"
+    | "storeVisitorIp"
+    | "collectVisitorEmail"
+    | "archivedAt"
+    | "widgetSettings"
+  >
+>;

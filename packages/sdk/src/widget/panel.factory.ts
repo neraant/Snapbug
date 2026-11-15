@@ -31,15 +31,12 @@ function appendPanelContent(session: ReturnType<typeof createPanelElements>) {
   const stepsField = createField(COPY.stepsLabel, session.steps);
   const severityField = createSeverityField(session);
 
-  session.body.append(
-    titleField,
-    descriptionField,
-    stepsField,
-    severityField,
-    session.email.root,
-    session.screenshotBlock,
-    session.diagnostic.root,
-  );
+  const fields: HTMLElement[] = [titleField, descriptionField, stepsField, severityField];
+  if (session.options.collectVisitorEmail) {
+    fields.push(session.email.root);
+  }
+  fields.push(session.screenshotBlock, session.diagnostic.root);
+  session.body.append(...fields);
   session.form.append(session.header, session.body, session.actions);
   session.success.append(session.successHeading, session.successShortId, session.successMessage, session.done);
   session.error.append(session.errorHeading, session.errorMessage, session.tryAgain);

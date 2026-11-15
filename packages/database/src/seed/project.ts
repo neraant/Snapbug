@@ -2,7 +2,7 @@ import { db } from "@workspace/database";
 import { projectTable } from "@workspace/database/schema";
 import type { OrganizationRow } from "@workspace/database/seed/organization";
 import { projectColorValues } from "@workspace/validation/shared/project-color.schema";
-import { inArray, type InferInsertModel, type InferSelectModel } from "drizzle-orm";
+import { eq, inArray, type InferInsertModel, type InferSelectModel } from "drizzle-orm";
 
 type ProjectInsert = InferInsertModel<typeof projectTable>;
 export type ProjectRow = InferSelectModel<typeof projectTable>;
@@ -16,6 +16,7 @@ export async function seedProject(organizations: OrganizationRow[]): Promise<Pro
     {
       id: "4a8c69a1-1ab1-45a8-8497-eae1e506d9d1",
       name: "Acme Store",
+      slug: "acme-store",
       color: projectColorValues[0],
       organizationId: organization.id,
       createdAt: daysAgo(30),
@@ -23,6 +24,7 @@ export async function seedProject(organizations: OrganizationRow[]): Promise<Pro
     {
       id: "4a8c69a1-1ab1-45a8-8497-eae1e506d9d2",
       name: "Acme Marketing",
+      slug: "acme-marketing",
       color: projectColorValues[4],
       organizationId: organization.id,
       createdAt: daysAgo(21),
@@ -30,6 +32,21 @@ export async function seedProject(organizations: OrganizationRow[]): Promise<Pro
   ];
 
   await db.insert(projectTable).values(projectData).onConflictDoNothing({ target: projectTable.id });
+
+  for (const project of projectData) {
+    await db
+      .update(projectTable)
+      .set({
+        name: project.name,
+        slug: project.slug,
+        color: project.color,
+        archivedAt: null,
+        defaultAssigneeId: null,
+        storeVisitorIp: false,
+        collectVisitorEmail: true,
+      })
+      .where(eq(projectTable.id, project.id));
+  }
 
   return db
     .select()

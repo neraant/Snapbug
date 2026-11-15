@@ -52,6 +52,7 @@ export class CreateBugReportUseCase {
     input: CreateBugReportInputDtoType,
     actor: AuditActor | null,
     requestOrigin: string | null,
+    clientIp: string | null,
     screenshot?: CreateBugReportScreenshotInput,
     replay?: CreateBugReportReplayInput,
   ): Promise<CreateBugReportOutputDtoType> {
@@ -62,8 +63,15 @@ export class CreateBugReportUseCase {
       this.assertValidReplay(replay);
     }
 
-    const project = await this.apiKeyPort.findProjectByKey({ key: input.apiKey });
+    const projectFromKey = await this.apiKeyPort.findProjectByKey({ key: input.apiKey });
+    if (!projectFromKey) throw new UnauthorizedError(ERROR_CODES.INVALID_API_KEY);
+
+    const project = await this.projectPort.findById(projectFromKey.id);
     if (!project) throw new UnauthorizedError(ERROR_CODES.INVALID_API_KEY);
+
+    if (project.archivedAt !== null) {
+      throw new BadRequestError(ERROR_CODES.PROJECT_ARCHIVED);
+    }
 
     if (!this.widgetIngestRateLimitService.consume(input.apiKey)) {
       throw new RateLimitedError(ERROR_CODES.RATE_LIMITED);
@@ -75,6 +83,10 @@ export class CreateBugReportUseCase {
 
     const parsedUserAgent = this.widgetUserAgentService.parse(input.userAgent);
     const severity = CreateBugReportUseCase.mapReporterSeverity(input.severity);
+
+    const reporterEmail = project.collectVisitorEmail ? (input.reporterEmail ?? null) : null;
+    const reporterIp = project.storeVisitorIp ? clientIp : null;
+    const assignedTo = project.defaultAssigneeId ?? null;
 
     let screenshotKey: string | null = null;
     let replayKey: string | null = null;
@@ -124,7 +136,9 @@ export class CreateBugReportUseCase {
             severity,
             consoleLogs: input.consoleLogs ?? null,
             networkLogs: input.networkLogs ?? null,
-            reporterEmail: input.reporterEmail ?? null,
+            reporterEmail,
+            ...(reporterIp ? { reporterIp } : {}),
+            ...(assignedTo ? { assignedTo } : {}),
             customContext: input.customContext ?? null,
           },
           "Create bug report",
