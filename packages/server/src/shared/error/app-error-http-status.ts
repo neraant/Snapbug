@@ -3,6 +3,7 @@ import { fallbackORPCErrorStatus, toORPCError } from "@orpc/client";
 import { AppError } from "@workspace/server/shared/error/app-errors";
 
 const ROUTE_ERROR_HTTP_STATUS_PATTERN = /^\[snapbug:http=(\d{3})\]\s?/;
+const ROUTE_ERROR_HTTP_STATUS_SNIPPET = /snapbug:http=(\d{3})/;
 
 export type ErrorWithHttpStatus = Error & { httpStatus?: number; digest?: string };
 
@@ -10,13 +11,25 @@ export function formatRouteErrorHttpStatusPrefix(status: number): string {
   return `[snapbug:http=${status}]`;
 }
 
+function parseRouteErrorHttpStatus(value: string): number | null {
+  const status = Number(value);
+  return status >= 400 && status <= 599 ? status : null;
+}
+
 export function readRouteErrorHttpStatusFromMessage(message: string): number | null {
   const match = ROUTE_ERROR_HTTP_STATUS_PATTERN.exec(message);
   if (!match) {
     return null;
   }
-  const status = Number(match[1]);
-  return status >= 400 && status <= 599 ? status : null;
+  return parseRouteErrorHttpStatus(match[1] ?? "");
+}
+
+export function readRouteErrorHttpStatusFromDigest(digest: string): number | null {
+  const match = ROUTE_ERROR_HTTP_STATUS_SNIPPET.exec(digest);
+  if (!match) {
+    return null;
+  }
+  return parseRouteErrorHttpStatus(match[1] ?? "");
 }
 
 export function stripRouteErrorHttpStatusFromMessage(message: string): string {
@@ -87,6 +100,14 @@ export function getAppErrorHttpStatus(error: unknown): number {
     const fromMessage = readRouteErrorHttpStatusFromMessage(error.message);
     if (fromMessage !== null) {
       return fromMessage;
+    }
+
+    const digest = (error as ErrorWithHttpStatus).digest;
+    if (typeof digest === "string") {
+      const fromDigest = readRouteErrorHttpStatusFromDigest(digest);
+      if (fromDigest !== null) {
+        return fromDigest;
+      }
     }
 
     if (error.cause !== undefined) {

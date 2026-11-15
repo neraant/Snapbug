@@ -3,6 +3,7 @@ import {
   attachRouteErrorHttpStatus,
   formatRouteErrorHttpStatusPrefix,
   getAppErrorHttpStatus,
+  readRouteErrorHttpStatusFromDigest,
   readRouteErrorHttpStatusFromMessage,
 } from "@workspace/server/shared/error/app-error-http-status";
 import {
@@ -40,5 +41,13 @@ describe("getAppErrorHttpStatus", () => {
     expect(routeError.httpStatus).toBe(403);
     expect(getAppErrorHttpStatus(routeError)).toBe(403);
     expect(getAppErrorHttpStatus(new Error(routeError.message))).toBe(403);
+  });
+
+  it("reads HTTP status from a digest snippet when the message was redacted", () => {
+    const digest = "2417359201;snapbug:http=404";
+    expect(readRouteErrorHttpStatusFromDigest(digest)).toBe(404);
+    expect(
+      getAppErrorHttpStatus(Object.assign(new Error("An error occurred in the Server Components render."), { digest })),
+    ).toBe(404);
   });
 });

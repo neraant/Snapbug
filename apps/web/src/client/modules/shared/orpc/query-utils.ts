@@ -5,6 +5,8 @@ import type { RouterClient } from "@orpc/server";
 import { attachRouteErrorHttpStatus } from "@workspace/server/error/app-error-http-status";
 import type { AppRouter } from "@workspace/server/router";
 
+import { stampRouteOrpcQueryUtils } from "@/client/modules/shared/orpc/stamp-route-error-http-status";
+
 function getRpcUrl(): string {
   if (typeof window !== "undefined") {
     return new URL("/api/rpc", window.location.origin).href;
@@ -41,4 +43,4 @@ const link = new RPCLink({
 
 const orpcClient: RouterClient<AppRouter> = createORPCClient(link);
 
-export const orpcQuery = createORPCReactQueryUtils(orpcClient);
+export const orpcQuery = stampRouteOrpcQueryUtils(createORPCReactQueryUtils(orpcClient));
