@@ -13,6 +13,7 @@ const user = new User({
   name: "Alex",
   email: "alex@company.com",
   passwordHash: "hashed-secret",
+  interfaceLanguage: "en",
   passwordChangedAt: null,
   onboardingCompletedAt: null,
   createdAt: persistedAt,

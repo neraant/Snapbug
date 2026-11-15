@@ -17,7 +17,7 @@ export abstract class ResetPasswordMapper {
   }
 
   static toVerifyCredentialsOutput(credentials: UserModelType & { passwordHash: string }): UserModelType {
-    const { id, email, name, onboardingCompletedAt } = credentials;
-    return { id, email, name, onboardingCompletedAt };
+    const { id, email, name, interfaceLanguage, onboardingCompletedAt } = credentials;
+    return { id, email, name, interfaceLanguage, onboardingCompletedAt };
   }
 }

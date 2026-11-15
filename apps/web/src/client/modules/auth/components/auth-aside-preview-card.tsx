@@ -8,11 +8,11 @@ import type { ComponentProps } from "react";
 
 import { texts } from "@/client/modules/auth/consts/texts.const";
 
-const preview = texts.auth.aside.preview;
-
 type AuthAsidePreviewCardProps = ComponentProps<"div">;
 
 export function AuthAsidePreviewCard({ className, ...props }: AuthAsidePreviewCardProps) {
+  const preview = texts.auth.aside.preview;
+
   return (
     <div className={cn("w-full -rotate-2", className)} {...props}>
       <Card width="lg">

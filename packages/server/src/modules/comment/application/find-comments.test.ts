@@ -35,6 +35,7 @@ const teammate = {
   id: userId,
   name: "Alex Admin",
   email: "admin@example.com",
+  interfaceLanguage: "en" as const,
   onboardingCompletedAt: null,
 };
 
@@ -42,6 +43,7 @@ const reporter = {
   id: userId,
   name: "Sam Shopper",
   email: "sam@shopper.test",
+  interfaceLanguage: "en" as const,
   onboardingCompletedAt: null,
 };
 

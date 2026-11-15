@@ -1,4 +1,6 @@
-export const texts = {
+import { localize } from "@/client/modules/shared/locale/interface-language";
+
+const en = {
   auth: {
     copyright: (year: string) => `© ${year} Snapbug Inc.`,
     aside: {
@@ -236,3 +238,243 @@ export const texts = {
     },
   },
 } as const;
+
+const ru = {
+  auth: {
+    copyright: (year: string) => `© ${year} Snapbug Inc.`,
+    aside: {
+      preview: {
+        title: "Кнопка оплаты ничего не делает в Safari 17.4",
+        severity: "Критическая",
+        error: "Uncaught TypeError: window.__queue",
+        statusCode: "500",
+        assigneeInitials: "AR",
+        assigneeLabel: "Назначено Алексу",
+        replayStatus: "● Запись готова",
+      },
+      cards: [
+        {
+          title: "Знаете ли вы?",
+          description: "Нажмите на стектрейс, чтобы сразу перейти к строке в исходнике.",
+        },
+        {
+          title: "Совет",
+          description: "Запись сессии сохраняет клики и сетевые вызовы — воспроизведение без догадок.",
+        },
+        {
+          title: "Знаете ли вы?",
+          description: "Метки важности помогают сначала разобрать самые шумные отчёты.",
+        },
+        {
+          title: "Быстрый шаг",
+          description: "Назначайте новые баги сразу, чтобы они не залеживались во входящих.",
+        },
+        {
+          title: "Знаете ли вы?",
+          description: "Метаданные браузера и OS объясняют баги, которые есть только в одном сегменте.",
+        },
+        {
+          title: "Совет",
+          description: "Фильтр по пути URL приглушает шум маркетинговых страниц.",
+        },
+        {
+          title: "Знаете ли вы?",
+          description: "Ошибки консоли в отчёте часто рано показывают первопричину.",
+        },
+        {
+          title: "Быстрый шаг",
+          description: "Объединяйте дубликаты, чтобы все видели одни и те же обновления статуса.",
+        },
+        {
+          title: "Совет",
+          description: "Запись показывает DOM в момент падения — конец «у меня работает».",
+        },
+        {
+          title: "Знаете ли вы?",
+          description: "Сбои сети на таймлайне объясняют многие баги оплаты и входа.",
+        },
+        {
+          title: "Быстрый шаг",
+          description: "Короткая заметка о воспроизведении при закрытии бага пригодится вам потом.",
+        },
+        {
+          title: "Знаете ли вы?",
+          description: "Оставляйте «Критическая» для блокеров пользователей, чтобы оповещения не теряли смысл.",
+        },
+        {
+          title: "Совет",
+          description: "Ищите по тексту ошибки, чтобы поймать все варианты регрессии.",
+        },
+        {
+          title: "Знаете ли вы?",
+          description: "Неназначенные баги зависают — выбирайте владельца раньше.",
+        },
+        {
+          title: "Быстрый шаг",
+          description: "Помечайте релизы при выкладке, чтобы всплески совпадали с деплоями.",
+        },
+        {
+          title: "Совет",
+          description: "Сравнивайте записи, когда staging работает, а production — нет.",
+        },
+        {
+          title: "Знаете ли вы?",
+          description: "Загруженные source maps расшифровывают минифицированные стектрейсы.",
+        },
+        {
+          title: "Быстрый шаг",
+          description: "Откладывайте известный шум, а не удаляйте его — история сохранится.",
+        },
+        {
+          title: "Совет",
+          description: "Ровный поток ошибок после деплоя обычно значит чистый релиз.",
+        },
+        {
+          title: "Знаете ли вы?",
+          description: "Живые сессии показывают причуды Mobile Safari, которые эмуляторы пропускают.",
+        },
+        {
+          title: "Быстрый шаг",
+          description: "Ссылка на PR с исправлением даёт ревьюерам контекст прямо в баге.",
+        },
+        {
+          title: "Совет",
+          description: "Фильтр по окружению отделяет шум staging от инцидентов production.",
+        },
+        {
+          title: "Знаете ли вы?",
+          description: "Первые отчёты пользователей часто содержат шаги, которые QA не пробовал.",
+        },
+        {
+          title: "Быстрый шаг",
+          description: "После хотфикса закройте дубликаты пачкой, чтобы очистить очередь.",
+        },
+        {
+          title: "Совет",
+          description: "Промотайте таймлайн к клику прямо перед исключением.",
+        },
+        {
+          title: "Знаете ли вы?",
+          description: "Ошибки сторонних скриптов забивают входящие, пока их не отфильтровать.",
+        },
+        {
+          title: "Быстрый шаг",
+          description: "Закрепите повторяющиеся инциденты, чтобы команда не пинговала статус.",
+        },
+        {
+          title: "Совет",
+          description: "Группировка по отпечатку — одна проблема, а не сотни событий.",
+        },
+        {
+          title: "Знаете ли вы?",
+          description: "Медленные API в записи объясняют, почему «кнопка казалась сломанной».",
+        },
+        {
+          title: "Быстрый шаг",
+          description: "Сначала важность, потом исполнитель — порядок разбора экономит минуты.",
+        },
+      ],
+      badge: {
+        liveIngestion: "Живой приём багов",
+        developerFirst: "Сначала для разработчиков",
+      },
+    },
+  },
+  field: {
+    email: {
+      label: "Email",
+      placeholder: "Email",
+    },
+    workEmail: {
+      label: "Рабочий email",
+      placeholder: "you@company.com",
+    },
+    name: {
+      label: "Полное имя",
+      placeholder: "Sarah Jenkins",
+    },
+    signUpWorkEmail: {
+      label: "Рабочий email",
+      placeholder: "sarah@acme.com",
+    },
+    password: {
+      label: "Пароль",
+      placeholder: "Пароль",
+    },
+  },
+  signIn: {
+    title: "С возвращением",
+    description: "Поймаем немного багов.",
+    submit: "Войти",
+    forgotPassword: "Забыли пароль?",
+    footerPrompt: "Впервые в Snapbug?",
+    footerLink: "Создать аккаунт",
+    toast: {
+      invalidCredentials: "Неверный email или пароль",
+      success: "Вход выполнен",
+    },
+  },
+  signUp: {
+    title: "Создайте аккаунт Snapbug",
+    description: "Начать можно бесплатно. Займёт около минуты.",
+    submit: "Создать аккаунт",
+    footerPrompt: "Уже есть аккаунт?",
+    footerLink: "Войти",
+    toast: {
+      success: "Регистрация прошла успешно",
+      signInAfterSignUpFailed: "Аккаунт создан, но войти не удалось. Войдите с email и паролем.",
+      genericError: "Что-то пошло не так",
+    },
+  },
+  requestPasswordReset: {
+    title: "Сброс пароля",
+    description: "Укажите email аккаунта — отправим ссылку для восстановления.",
+    submit: "Отправить ссылку",
+    footerPrompt: "Вспомнили пароль?",
+    footerLink: "Войти",
+    emailPlaceholder: "alex@company.com",
+    toast: {
+      success: "Ссылка для восстановления отправлена",
+      genericError: "Что-то пошло не так",
+    },
+  },
+  resetPassword: {
+    title: "Новый пароль",
+    description: "Не короче 8 символов.",
+    submit: "Обновить пароль и войти",
+    newPassword: {
+      label: "Новый пароль",
+      placeholder: "••••••••••••",
+    },
+    confirmPassword: {
+      label: "Подтвердите новый пароль",
+      placeholder: "••••••••••••",
+    },
+    invalidLink: "Ссылка для сброса недействительна или устарела.",
+    requestNewLink: "Запросить новую ссылку",
+    toast: {
+      success: "Пароль обновлён",
+      signInFailed: "Пароль обновлён, но войти не удалось. Войдите с новым паролем.",
+      genericError: "Что-то пошло не так",
+    },
+    validation: {
+      confirmMismatch: "Пароли не совпадают",
+    },
+  },
+  signOut: {
+    label: "Выйти",
+  },
+  invitation: {
+    fieldHint: (organizationName: string) => `Вас пригласили в ${organizationName}`,
+    lookupError: "Ссылка приглашения недействительна или устарела. Зарегистрироваться всё равно можно с любым email.",
+    joiningTitle: "Входим в команду",
+    joiningDescription: "Принимаем приглашение…",
+    acceptFailedTitle: "Приглашение не принято",
+    continueToApp: "Перейти в Snapbug",
+    toast: {
+      acceptError: "Не удалось принять приглашение. Попробуйте ещё раз по ссылке из письма.",
+    },
+  },
+} as const;
+
+export const texts: typeof en = localize(en, ru as never);

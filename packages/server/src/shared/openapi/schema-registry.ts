@@ -42,6 +42,7 @@ import {
   createUserWithPasswordHashInputDtoSchema,
 } from "@workspace/validation/modules/user/dto/create-user.schema";
 import { findUserByEmailInputDtoSchema } from "@workspace/validation/modules/user/dto/find-user-by-email.schema";
+import { updateInterfaceLanguageInputDtoSchema } from "@workspace/validation/modules/user/dto/update-interface-language.schema";
 import { userModelSchema } from "@workspace/validation/modules/user/dto/user.model";
 
 JSON_SCHEMA_REGISTRY.add(userModelSchema, {
@@ -52,6 +53,7 @@ JSON_SCHEMA_REGISTRY.add(userModelSchema, {
       id: "0a8c69a1-1ab1-45a8-8497-eae1e506d9d4",
       name: "Jane Doe",
       email: "user@example.com",
+      interfaceLanguage: "en",
       onboardingCompletedAt: null,
     },
   ],
@@ -167,6 +169,12 @@ JSON_SCHEMA_REGISTRY.add(findUserByEmailInputDtoSchema, {
   title: "Find user by email",
   description: "Public profile for an email",
   examples: [{ email: "user@example.com" }],
+});
+
+JSON_SCHEMA_REGISTRY.add(updateInterfaceLanguageInputDtoSchema, {
+  title: "Update interface language",
+  description: "Store the signed-in user's interface language",
+  examples: [{ interfaceLanguage: "ru" }],
 });
 
 JSON_SCHEMA_REGISTRY.add(membershipModelSchema, {
