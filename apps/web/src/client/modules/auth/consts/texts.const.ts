@@ -404,6 +404,9 @@ const ru = {
       label: "Пароль",
       placeholder: "Пароль",
     },
+    acceptedTerms: {
+      label: "Я принимаю Условия использования",
+    },
   },
   signIn: {
     title: "С возвращением",
