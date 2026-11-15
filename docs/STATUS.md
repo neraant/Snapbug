@@ -51,7 +51,8 @@ Do not start tasks marked TBD: an implementer agent must not take them.
 - P-25 ticket comments sit at the bottom of the card, read like a Jira thread, and the author can edit or delete their own comment.
 - P-26 an MCP user token has a name. The list shows that name, when it was created, and revoke. The secret is shown once.
 - P-27 the activity log table matches the rest of the app and the design system.
-- P-28 the settings screen matches the rest of the app and the design system.
+- P-28 the settings screen matches the rest of the app and the design system. Language copy appears once; English / Russian is a two-option switch that saves on change (no Save). Organization name and retention keep Save.
+- P-29 playground sample is a mock customer checkout; after submit the capture uses the ticket-card layout (description, screenshot, replay, diagnostics, environment sidebar). No comments or ticket properties. Submit still writes nothing.
 
 ## TBD
 
