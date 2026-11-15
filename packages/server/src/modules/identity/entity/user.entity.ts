@@ -8,6 +8,7 @@ export class User {
   readonly interfaceLanguage: UserPersistedType["interfaceLanguage"];
   readonly passwordChangedAt: UserPersistedType["passwordChangedAt"];
   readonly onboardingCompletedAt: UserPersistedType["onboardingCompletedAt"];
+  readonly termsAcceptedAt: UserPersistedType["termsAcceptedAt"];
   readonly createdAt: UserPersistedType["createdAt"];
   readonly updatedAt: UserPersistedType["updatedAt"];
 
@@ -19,6 +20,7 @@ export class User {
     this.interfaceLanguage = user.interfaceLanguage;
     this.passwordChangedAt = user.passwordChangedAt;
     this.onboardingCompletedAt = user.onboardingCompletedAt;
+    this.termsAcceptedAt = user.termsAcceptedAt;
     this.createdAt = user.createdAt;
     this.updatedAt = user.updatedAt;
   }
@@ -46,6 +48,7 @@ export class User {
       interfaceLanguage: this.interfaceLanguage,
       passwordChangedAt: this.passwordChangedAt,
       onboardingCompletedAt: this.onboardingCompletedAt,
+      termsAcceptedAt: this.termsAcceptedAt,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
     };

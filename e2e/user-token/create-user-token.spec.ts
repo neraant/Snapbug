@@ -12,6 +12,7 @@ test("a member can create a personal MCP token and see the secret once", async (
   await page.getByRole("textbox", { name: "Full Name" }).fill("MCP Member");
   await page.getByRole("textbox", { name: "Work Email" }).fill(email);
   await page.getByRole("textbox", { name: "Password" }).fill("password1");
+  await page.getByRole("checkbox", { name: "I accept the Terms of Service" }).check();
   await page.getByRole("button", { name: "Create account" }).click();
   await page.getByRole("button", { name: "Skip onboarding" }).click();
 

@@ -162,6 +162,9 @@ const en = {
       label: "Password",
       placeholder: "Password",
     },
+    acceptedTerms: {
+      label: "I accept the Terms of Service",
+    },
   },
   signIn: {
     title: "Welcome back",
@@ -400,6 +403,9 @@ const ru = {
     password: {
       label: "Пароль",
       placeholder: "Пароль",
+    },
+    acceptedTerms: {
+      label: "Я принимаю Условия использования",
     },
   },
   signIn: {

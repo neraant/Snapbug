@@ -1,3 +1,4 @@
+import { CheckboxField } from "@workspace/design-system/components/forms/checkbox-field";
 import { PasswordField } from "@workspace/design-system/components/forms/password-field";
 import { TextField } from "@workspace/design-system/components/forms/text-field";
 import { Column } from "@workspace/design-system/components/layout/column";
@@ -92,6 +93,7 @@ function SignUpFormFields({ invitationToken, defaultEmail = "", organizationName
           placeholder={texts.field.password.placeholder}
           autoComplete="new-password"
         />
+        <CheckboxField control={control} name="acceptedTerms" label={texts.field.acceptedTerms.label} />
         <SubmitButton loading={formState.isSubmitting} size="lg" className="w-full">
           {texts.signUp.submit}
         </SubmitButton>

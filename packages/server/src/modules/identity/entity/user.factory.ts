@@ -12,6 +12,7 @@ export abstract class UserFactory {
       interfaceLanguage: "en",
       passwordChangedAt: null,
       onboardingCompletedAt: null,
+      termsAcceptedAt: user.termsAcceptedAt ?? null,
       createdAt: new Date(),
       updatedAt: new Date(),
     });

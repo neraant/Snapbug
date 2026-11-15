@@ -1,10 +1,12 @@
 import { userModelSchema } from "@workspace/validation/modules/user/dto/user.model";
+import { acceptedTermsSchema } from "@workspace/validation/shared/accepted-terms.schema";
 import z from "zod";
 
 export const createUserInputDtoSchema = z.object({
   email: z.email(),
   name: z.string().min(1),
   password: z.string().min(8),
+  acceptedTerms: acceptedTermsSchema,
 });
 export type CreateUserInputDtoType = z.infer<typeof createUserInputDtoSchema>;
 
@@ -15,5 +17,6 @@ export const createUserWithPasswordHashInputDtoSchema = z.object({
   email: z.email(),
   name: z.string().min(1),
   passwordHash: z.string().min(1),
+  termsAcceptedAt: z.coerce.date().optional(),
 });
 export type CreateUserWithPasswordHashDtoType = z.infer<typeof createUserWithPasswordHashInputDtoSchema>;

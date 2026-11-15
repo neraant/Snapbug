@@ -11,6 +11,7 @@ export const userTable = pgTable(
     interfaceLanguage: text("interface_language").$type<InterfaceLanguage>().notNull().default("en"),
     passwordChangedAt: timestamp("password_changed_at", { withTimezone: true, mode: "date" }),
     onboardingCompletedAt: timestamp("onboarding_completed_at", { withTimezone: true, mode: "date" }),
+    termsAcceptedAt: timestamp("terms_accepted_at", { withTimezone: true, mode: "date" }),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull(),
   },

@@ -7,6 +7,7 @@ const input = {
   email: "alex@company.com",
   name: "Alex",
   passwordHash: "hashed-secret",
+  termsAcceptedAt: new Date("2026-11-15T12:00:00.000Z"),
 };
 
 describe("CreateUserUseCase", () => {
@@ -21,6 +22,7 @@ describe("CreateUserUseCase", () => {
     expect(result).toEqual(UserMapper.toDto(saved));
     expect(saved.email).toBe(input.email);
     expect(saved.name).toBe(input.name);
+    expect(saved.termsAcceptedAt).toEqual(input.termsAcceptedAt);
     expect(result).not.toHaveProperty("passwordHash");
   });
 });

@@ -12,6 +12,7 @@ export class CreateUserUseCase {
       email: input.email,
       name: input.name,
       passwordHash: input.passwordHash,
+      termsAcceptedAt: input.termsAcceptedAt ?? null,
     });
     await this.userRepository.save(user);
     return UserMapper.toDto(user);
