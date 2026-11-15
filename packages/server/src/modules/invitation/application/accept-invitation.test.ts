@@ -25,9 +25,11 @@ const pendingInvitation = new Invitation({
   organizationId,
   email: "invitee@company.com",
   tokenHash: hashToken(token),
+  tokenVersion: 1,
   invitedByUserId: "9a8c69a1-1ab1-45a8-8497-eae1e506d9d4",
   expiresAt: new Date(Date.now() + 60_000),
   acceptedAt: null,
+  revokedAt: null,
   createdAt: persistedAt,
 });
 

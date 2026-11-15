@@ -54,6 +54,24 @@ const en = {
     saveError: "Could not update project access. Try again.",
   },
   empty: "No team members match your search.",
+  pending: {
+    title: "Pending invitations",
+    column: {
+      email: "Email",
+      expires: "Expires",
+      actions: "Actions",
+    },
+    menu: (email: string) => `Invitation actions for ${email}`,
+    resend: "Resend",
+    copyLink: "Copy link",
+    revoke: "Revoke",
+    resendSuccess: "Invitation resent.",
+    resendError: "Could not resend the invitation. Try again.",
+    copySuccess: "Invitation link copied.",
+    copyError: "Could not copy the invitation link. Try again.",
+    revokeSuccess: "Invitation revoked.",
+    revokeError: "Could not revoke the invitation. Try again.",
+  },
 } as const;
 
 const ru = {
@@ -108,6 +126,24 @@ const ru = {
     saveError: "Не удалось обновить доступ к проектам. Попробуйте ещё раз.",
   },
   empty: "Нет участников по этому запросу.",
+  pending: {
+    title: "Ожидающие приглашения",
+    column: {
+      email: "Email",
+      expires: "Истекает",
+      actions: "Действия",
+    },
+    menu: (email: string) => `Действия для ${email}`,
+    resend: "Отправить снова",
+    copyLink: "Копировать ссылку",
+    revoke: "Отозвать",
+    resendSuccess: "Приглашение отправлено снова.",
+    resendError: "Не удалось отправить приглашение снова. Попробуйте ещё раз.",
+    copySuccess: "Ссылка приглашения скопирована.",
+    copyError: "Не удалось скопировать ссылку. Попробуйте ещё раз.",
+    revokeSuccess: "Приглашение отозвано.",
+    revokeError: "Не удалось отозвать приглашение. Попробуйте ещё раз.",
+  },
 } as const;
 
 export const texts: typeof en = localize(en, ru as never);

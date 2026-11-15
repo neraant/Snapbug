@@ -4,7 +4,8 @@ import { InvitationMapper } from "@workspace/server/modules/invitation/entity/in
 import type { InvitationRepository } from "@workspace/server/modules/invitation/repository/invitation.repository";
 import type { AuditLogService } from "@workspace/server/shared/audit/audit-log.service";
 import type { AuditActor } from "@workspace/server/shared/audit/audit-log.types";
-import { createHash } from "crypto";
+import { env } from "@workspace/server/shared/env/env.schema";
+import { createHash, createHmac } from "crypto";
 
 const INVITATION_ENTITY_TYPE = "invitation";
 
@@ -23,8 +24,17 @@ export class InvitationService {
     return new InvitationService(this.invitationRepository, this.auditLogService, actor);
   }
 
+  buildInvitationToken(invitationId: string, tokenVersion: number): string {
+    return createHmac("sha256", env.AUTH_SECRET).update(`${invitationId}:${tokenVersion}`).digest("hex");
+  }
+
   hashToken(token: string): string {
     return createHash("sha256").update(token).digest("hex");
+  }
+
+  inviteUrl(token: string): string {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+    return `${appUrl}/sign-up?invitation=${token}`;
   }
 
   async saveWithAudit(invitation: Invitation, action: string): Promise<void> {

@@ -31,6 +31,7 @@ const ERROR_MESSAGES: Record<ErrorCode, string> = {
   [ERROR_CODES.RATE_LIMITED]: "You have exceeded the rate limit. Please try again later",
   [ERROR_CODES.INVALID_RESET_PASSWORD_TOKEN]: "This reset link is invalid or has expired",
   [ERROR_CODES.INVALID_INVITATION_TOKEN]: "This invitation link is invalid or has expired",
+  [ERROR_CODES.INVITATION_NOT_FOUND]: "Invitation not found",
   [ERROR_CODES.INVITATION_EMAIL_MISMATCH]: "Sign in with the email address that received the invitation",
   [ERROR_CODES.SCREENSHOT_TOO_LARGE]: "Screenshot is too large",
   [ERROR_CODES.INVALID_SCREENSHOT]: "Screenshot must be PNG or JPEG",

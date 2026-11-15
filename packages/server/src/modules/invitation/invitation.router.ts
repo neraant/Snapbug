@@ -15,11 +15,27 @@ export const invitationRouter = os.router({
     async ({ input, context }) =>
       await container.invitation.sendInvitations.execute(input, context.user.id, context.user.email),
   ),
+  findInvitations: admin.findInvitations.handler(
+    async ({ context }) =>
+      await container.invitation.findInvitations.execute(context.user.id, context.organizationId),
+  ),
   findInvitationByToken: os.findInvitationByToken.handler(
     async ({ input }) => await container.invitation.findInvitationByToken.execute(input),
   ),
   acceptInvitation: authed.acceptInvitation.handler(
     async ({ input, context }) =>
       await container.invitation.acceptInvitation.execute(input, context.user.id, context.user.email),
+  ),
+  resendInvitation: admin.resendInvitation.handler(
+    async ({ input, context }) =>
+      await container.invitation.resendInvitation.execute(input, context.user.id, context.organizationId),
+  ),
+  revokeInvitation: admin.revokeInvitation.handler(
+    async ({ input, context }) =>
+      await container.invitation.revokeInvitation.execute(input, context.user.id, context.organizationId),
+  ),
+  copyInvitationLink: admin.copyInvitationLink.handler(
+    async ({ input, context }) =>
+      await container.invitation.copyInvitationLink.execute(input, context.user.id, context.organizationId),
   ),
 });

@@ -2,7 +2,6 @@ import { InvitationEmailTemplate } from "@workspace/server/modules/invitation/em
 import { InvitationFactory } from "@workspace/server/modules/invitation/entity/invitation.factory";
 import type { MembershipPort } from "@workspace/server/modules/invitation/port/membership.port";
 import type { OrganizationPort } from "@workspace/server/modules/invitation/port/organization.port";
-import type { TokenPort } from "@workspace/server/modules/invitation/port/token.port";
 import type { UserPort } from "@workspace/server/modules/invitation/port/user.port";
 import type { InvitationService } from "@workspace/server/modules/invitation/service/invitation.service";
 import type { WithTransactionType } from "@workspace/server/shared/database/transaction.util";
@@ -14,8 +13,10 @@ import type {
   SendInvitationsOutputDtoType,
 } from "@workspace/validation/modules/invitation/dto/send-invitation.schema";
 import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
+import { randomUUID } from "crypto";
 
-const TOKEN_TTL_MS = 1000 * 60 * 60 * 24 * 7; // 7 days
+const TOKEN_TTL_MS = 1000 * 60 * 60 * 24 * 7;
+const INITIAL_TOKEN_VERSION = 1;
 
 export class SendInvitationsUseCase {
   constructor(
@@ -23,7 +24,6 @@ export class SendInvitationsUseCase {
     private readonly membershipPort: MembershipPort,
     private readonly userPort: UserPort,
     private readonly organizationPort: OrganizationPort,
-    private readonly tokenPort: TokenPort,
     private readonly emailService: EmailService,
     private readonly withTransaction: WithTransactionType,
   ) {}
@@ -66,11 +66,14 @@ export class SendInvitationsUseCase {
 
       const recipientName = this.recipientName(existingUser);
 
-      const token = await this.tokenPort.generatePasswordResetToken();
+      const invitationId = randomUUID();
+      const token = this.invitationService.buildInvitationToken(invitationId, INITIAL_TOKEN_VERSION);
       const invitation = InvitationFactory.create({
+        id: invitationId,
         organizationId: input.organizationId,
         email,
         tokenHash: this.invitationService.hashToken(token),
+        tokenVersion: INITIAL_TOKEN_VERSION,
         invitedByUserId: userId,
         expiresAt: new Date(Date.now() + TOKEN_TTL_MS),
       });
@@ -82,14 +85,11 @@ export class SendInvitationsUseCase {
           .saveWithAudit(invitation, "Send invitation");
       });
 
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-      const inviteUrl = `${appUrl}/sign-up?invitation=${token}`;
-
       await this.emailService.send({
         to: email,
         subject: `You're invited to join ${organization.name} on Snapbug`,
         react: InvitationEmailTemplate({
-          inviteUrl,
+          inviteUrl: this.invitationService.inviteUrl(token),
           organizationName: organization.name,
           recipientName,
         }),
