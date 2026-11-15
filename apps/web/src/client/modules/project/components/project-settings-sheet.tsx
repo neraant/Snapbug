@@ -6,15 +6,7 @@ import { Column } from "@workspace/design-system/components/layout/column";
 import { Row } from "@workspace/design-system/components/layout/row";
 import { Badge } from "@workspace/design-system/components/ui/badge";
 import { Button } from "@workspace/design-system/components/ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@workspace/design-system/components/ui/dialog";
+import { ConfirmDialog } from "@workspace/design-system/components/ui/confirm-dialog";
 import { FieldGroup } from "@workspace/design-system/components/ui/field";
 import { Separator } from "@workspace/design-system/components/ui/separator";
 import {
@@ -27,14 +19,16 @@ import {
   SheetTitle,
 } from "@workspace/design-system/components/ui/sheet";
 import { Typography } from "@workspace/design-system/components/ui/typography";
+import { getAppErrorMessage } from "@workspace/server/error/get-app-error-message";
 import { projectColorValues } from "@workspace/validation/shared/project-color.schema";
 import { ArchiveIcon, RotateCcwIcon, Trash2Icon } from "lucide-react";
-import { Suspense, useState } from "react";
+import { Suspense } from "react";
 
 import { texts } from "@/client/modules/project/consts/texts.const";
 import { useProjectDangerActions } from "@/client/modules/project/hooks/use-project-danger-actions";
 import { useProjectSettingsForm } from "@/client/modules/project/hooks/use-project-settings-form";
 import type { ProjectListItem } from "@/client/modules/project/types/project-list-item.type";
+import { useConfirmDialog } from "@/client/modules/shared/hooks/use-confirm-dialog";
 
 type ProjectSettingsSheetProps = {
   project: ProjectListItem;
@@ -44,17 +38,47 @@ type ProjectSettingsSheetProps = {
 
 export function ProjectSettingsSheet({ project, open, onOpenChange }: ProjectSettingsSheetProps) {
   const closeSheet = () => onOpenChange(false);
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const { confirm, bind } = useConfirmDialog();
   const { control, onSubmit, loading, memberOptions } = useProjectSettingsForm({ project, onSaved: closeSheet });
-  const { onArchive, onRestore, onDelete, isArchiving, isRestoring, isDeleting, isArchived } = useProjectDangerActions({
+  const { onArchive, onRestore, onDelete, isRestoring, isArchived } = useProjectDangerActions({
     project,
     onProjectChanged: closeSheet,
     onProjectDeleted: closeSheet,
   });
 
-  const handleDelete = async () => {
-    await onDelete();
-    setDeleteConfirmOpen(false);
+  const openArchiveConfirm = () => {
+    confirm({
+      title: texts.settingsSheet.archiveDialog.title(project.name),
+      description: texts.settingsSheet.archiveDialog.description(project.name),
+      confirmLabel: texts.settingsSheet.archiveDialog.confirm,
+      variant: "default",
+      errorFallback: texts.settingsSheet.toast.archiveError,
+      onConfirm: async () => {
+        try {
+          await onArchive();
+        } catch (error) {
+          throw new Error(getAppErrorMessage(error, texts.settingsSheet.toast.archiveError));
+        }
+      },
+    });
+  };
+
+  const openDeleteConfirm = () => {
+    confirm({
+      title: texts.settingsSheet.deleteDialog.title(project.name),
+      description: texts.settingsSheet.deleteDialog.description(),
+      confirmLabel: texts.settingsSheet.deleteDialog.confirm,
+      variant: "destructive",
+      confirmText: project.name,
+      errorFallback: texts.settingsSheet.toast.deleteError,
+      onConfirm: async () => {
+        try {
+          await onDelete();
+        } catch (error) {
+          throw new Error(getAppErrorMessage(error, texts.settingsSheet.toast.deleteError));
+        }
+      },
+    });
   };
 
   return (
@@ -130,12 +154,12 @@ export function ProjectSettingsSheet({ project, open, onOpenChange }: ProjectSet
                       {texts.settingsSheet.danger.restore}
                     </Button>
                   ) : (
-                    <Button type="button" variant="outline" disabled={isArchiving} onClick={() => onArchive()}>
+                    <Button type="button" variant="outline" onClick={openArchiveConfirm}>
                       <ArchiveIcon />
                       {texts.settingsSheet.danger.archive}
                     </Button>
                   )}
-                  <Button type="button" variant="destructive" onClick={() => setDeleteConfirmOpen(true)}>
+                  <Button type="button" variant="destructive" onClick={openDeleteConfirm}>
                     <Trash2Icon />
                     {texts.settingsSheet.danger.delete}
                   </Button>
@@ -155,22 +179,7 @@ export function ProjectSettingsSheet({ project, open, onOpenChange }: ProjectSet
           </Column>
         </SheetContent>
       </Sheet>
-      <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{texts.settingsSheet.deleteDialog.title}</DialogTitle>
-            <DialogDescription>{texts.settingsSheet.deleteDialog.description(project.name)}</DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <DialogClose render={<Button type="button" variant="outline" />}>
-              {texts.settingsSheet.deleteDialog.cancel}
-            </DialogClose>
-            <Button type="button" variant="destructive" disabled={isDeleting} onClick={handleDelete}>
-              {texts.settingsSheet.deleteDialog.confirm}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ConfirmDialog {...bind()} />
     </>
   );
 }

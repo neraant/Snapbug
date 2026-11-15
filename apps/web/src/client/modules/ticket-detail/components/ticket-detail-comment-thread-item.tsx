@@ -2,10 +2,13 @@ import { TextareaField } from "@workspace/design-system/components/forms/textare
 import { Column } from "@workspace/design-system/components/layout/column";
 import { Row } from "@workspace/design-system/components/layout/row";
 import { Button } from "@workspace/design-system/components/ui/button";
+import { ConfirmDialog } from "@workspace/design-system/components/ui/confirm-dialog";
 import { SubmitButton } from "@workspace/design-system/components/ui/submit-button";
 import { Typography } from "@workspace/design-system/components/ui/typography";
+import { getAppErrorMessage } from "@workspace/server/error/get-app-error-message";
 import type { CommentModelType } from "@workspace/validation/modules/comment/dto/comment.model";
 
+import { useConfirmDialog } from "@/client/modules/shared/hooks/use-confirm-dialog";
 import { texts } from "@/client/modules/ticket-detail/consts/texts.const";
 import { useTicketDetailCommentItem } from "@/client/modules/ticket-detail/hooks/use-ticket-detail-comment-item";
 import { formatTicketDetailExactTimestamp } from "@/client/modules/ticket-detail/utils/format-ticket-detail-timestamp.util";
@@ -16,10 +19,30 @@ type TicketDetailCommentThreadItemProps = {
 };
 
 export function TicketDetailCommentThreadItem({ comment, canManage }: TicketDetailCommentThreadItemProps) {
-  const { control, isEditing, isUpdating, isDeleting, onEdit, onCancel, onSave, onDelete } = useTicketDetailCommentItem({
-    commentId: comment.id,
-    body: comment.body,
-  });
+  const { control, isEditing, isUpdating, isDeleting, onEdit, onCancel, onSave, onDelete } = useTicketDetailCommentItem(
+    {
+      commentId: comment.id,
+      body: comment.body,
+    },
+  );
+  const { confirm, bind } = useConfirmDialog();
+
+  const openDeleteConfirm = () => {
+    confirm({
+      title: texts.comments.deleteDialog.title,
+      description: texts.comments.deleteDialog.description,
+      confirmLabel: texts.comments.deleteDialog.confirm,
+      variant: "destructive",
+      errorFallback: texts.comments.deleteError,
+      onConfirm: async () => {
+        try {
+          await onDelete();
+        } catch (error) {
+          throw new Error(getAppErrorMessage(error, texts.comments.deleteError));
+        }
+      },
+    });
+  };
 
   return (
     <Column gap="xs" width="full" minWidth="0">
@@ -42,9 +65,7 @@ export function TicketDetailCommentThreadItem({ comment, canManage }: TicketDeta
                 size="sm"
                 className="h-auto px-1"
                 disabled={isDeleting}
-                onClick={() => {
-                  onDelete().catch(() => undefined);
-                }}
+                onClick={openDeleteConfirm}
               >
                 {texts.comments.delete}
               </Button>
@@ -67,6 +88,7 @@ export function TicketDetailCommentThreadItem({ comment, canManage }: TicketDeta
       ) : (
         <Typography variant="text-sm">{comment.body}</Typography>
       )}
+      <ConfirmDialog {...bind()} />
     </Column>
   );
 }

@@ -33,6 +33,11 @@ const en = {
   },
   revoke: {
     action: "Revoke",
+    dialog: {
+      title: (name: string) => `Revoke token "${name}"?`,
+      description: "Anyone using this token loses access immediately. This cannot be undone.",
+      confirm: "Revoke",
+    },
     success: "Token revoked",
     error: "Could not revoke the token. Try again.",
   },
@@ -72,6 +77,11 @@ const ru = {
   },
   revoke: {
     action: "Отозвать",
+    dialog: {
+      title: (name: string) => `Отозвать токен «${name}»?`,
+      description: "Все, кто использует этот токен, сразу потеряют доступ. Это нельзя отменить.",
+      confirm: "Отозвать",
+    },
     success: "Токен отозван",
     error: "Не удалось отозвать токен. Попробуйте ещё раз.",
   },

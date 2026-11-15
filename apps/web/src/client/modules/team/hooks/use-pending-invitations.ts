@@ -1,6 +1,5 @@
 import { toast } from "@workspace/design-system/components/ui/toast";
 import { useCopyText } from "@workspace/design-system/hooks/use-copy-text";
-import { getAppErrorMessage } from "@workspace/server/error/get-app-error-message";
 
 import { useCopyInvitationLink } from "@/client/modules/shared/queries/use-copy-invitation-link";
 import { useFindInvitations } from "@/client/modules/shared/queries/use-find-invitations";
@@ -20,25 +19,17 @@ export function usePendingInvitations() {
       .then(() => {
         toast.add({ title: texts.pending.resendSuccess, type: "success" });
       })
-      .catch((error: unknown) => {
+      .catch(() => {
         toast.add({
-          title: getAppErrorMessage(error, texts.pending.resendError),
+          title: texts.pending.resendError,
           type: "error",
         });
       });
   };
 
-  const revoke = (invitationId: string) => {
-    revokeInvitation({ invitationId })
-      .then(() => {
-        toast.add({ title: texts.pending.revokeSuccess, type: "success" });
-      })
-      .catch((error: unknown) => {
-        toast.add({
-          title: getAppErrorMessage(error, texts.pending.revokeError),
-          type: "error",
-        });
-      });
+  const revoke = async (invitationId: string) => {
+    await revokeInvitation({ invitationId });
+    toast.add({ title: texts.pending.revokeSuccess, type: "success" });
   };
 
   const copyLink = (invitationId: string) => {
@@ -47,9 +38,9 @@ export function usePendingInvitations() {
         await copy(result.inviteUrl);
         toast.add({ title: texts.pending.copySuccess, type: "success" });
       })
-      .catch((error: unknown) => {
+      .catch(() => {
         toast.add({
-          title: getAppErrorMessage(error, texts.pending.copyError),
+          title: texts.pending.copyError,
           type: "error",
         });
       });
