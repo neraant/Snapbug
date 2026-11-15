@@ -16,7 +16,7 @@ const en = {
   },
   playground: {
     title: "Playground",
-    description: "Preview the Snapbug widget.",
+    description: "A sample customer page. Submit stays here and shows the capture.",
   },
 } as const;
 
@@ -36,7 +36,7 @@ const ru = {
   },
   playground: {
     title: "Песочница",
-    description: "Предпросмотр виджета Snapbug.",
+    description: "Пример страницы клиента. Отправка остаётся на этой странице и показывает захват.",
   },
 } as const;
 

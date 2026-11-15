@@ -19,8 +19,25 @@ export async function submitReport(input: SubmitReportInput) {
     throw { message: COPY.screenshotTooLarge };
   }
 
-  const replay = diagnostics.replay ? await buildReplayBlob(snapshotReplayEvents()) : null;
   const payload = buildReportPayload(apiKey, input);
+  const preview = widgetState.preview;
+  if (preview) {
+    preview({
+      title: payload.title,
+      description: payload.description,
+      url: payload.url,
+      userAgent: payload.userAgent,
+      viewportWidth: payload.viewportWidth,
+      viewportHeight: payload.viewportHeight,
+      consoleLogs: payload.consoleLogs,
+      networkLogs: payload.networkLogs,
+      screenshotUrl: screenshot ? URL.createObjectURL(screenshot) : null,
+      replayEvents: diagnostics.replay ? snapshotReplayEvents() : [],
+    });
+    return null;
+  }
+
+  const replay = diagnostics.replay ? await buildReplayBlob(snapshotReplayEvents()) : null;
   const response = await postReport(host, payload, screenshot, replay?.blob ?? null);
   if (!response.ok) {
     const failure = await readSubmitReportFailure(response);

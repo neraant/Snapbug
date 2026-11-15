@@ -1,4 +1,4 @@
-.ticket-detail-replay-player {
+.rrweb-replay-player {
   width: 100%;
   min-width: 0;
   overflow: hidden;
@@ -7,7 +7,7 @@
   background: var(--card);
 }
 
-.ticket-detail-replay-player .rr-player {
+.rrweb-replay-player .rr-player {
   float: none;
   width: 100% !important;
   max-width: 100%;
@@ -16,52 +16,52 @@
   background: var(--card);
 }
 
-.ticket-detail-replay-player .rr-controller {
+.rrweb-replay-player .rr-controller {
   background: var(--card);
   border-top: 1px solid var(--border);
   border-radius: 0;
   color: var(--foreground);
 }
 
-.ticket-detail-replay-player .rr-timeline__time {
+.rrweb-replay-player .rr-timeline__time {
   color: var(--muted-foreground);
   font-family: var(--font-mono);
   font-size: 0.75rem;
 }
 
-.ticket-detail-replay-player .rr-progress {
+.rrweb-replay-player .rr-progress {
   background: var(--muted);
   border-color: var(--card);
 }
 
-.ticket-detail-replay-player .rr-progress__step {
+.rrweb-replay-player .rr-progress__step {
   background: color-mix(in oklch, var(--primary) 25%, transparent);
 }
 
-.ticket-detail-replay-player .rr-progress__handler {
+.rrweb-replay-player .rr-progress__handler {
   background: var(--primary);
 }
 
-.ticket-detail-replay-player .rr-controller__btns button:active {
+.rrweb-replay-player .rr-controller__btns button:active {
   background: var(--accent);
 }
 
-.ticket-detail-replay-player .rr-controller__btns button.active {
+.rrweb-replay-player .rr-controller__btns button.active {
   background: var(--primary);
   color: var(--primary-foreground);
 }
 
-.ticket-detail-replay-player .rr-controller__btns .switch:has(#skip) {
+.rrweb-replay-player .rr-controller__btns .switch:has(#skip) {
   display: none;
 }
 
-.ticket-detail-replay-player-shell {
+.rrweb-replay-player-shell {
   position: relative;
   width: 100%;
   min-width: 0;
 }
 
-.ticket-detail-replay-player-shell__play-overlay {
+.rrweb-replay-player-shell__play-overlay {
   position: absolute;
   top: 0;
   right: 0;
@@ -76,15 +76,15 @@
   background: color-mix(in oklch, var(--foreground) 12%, transparent);
   color: var(--primary-foreground);
   border-radius: var(--radius-md) var(--radius-md) 0 0;
-  height: var(--ticket-detail-replay-viewport-height, 320px);
+  height: var(--rrweb-replay-viewport-height, 320px);
 }
 
-.ticket-detail-replay-player-shell__play-overlay:focus-visible {
+.rrweb-replay-player-shell__play-overlay:focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
 }
 
-.ticket-detail-replay-player-shell__play-icon {
+.rrweb-replay-player-shell__play-icon {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -95,7 +95,7 @@
   box-shadow: var(--shadow-md);
 }
 
-.ticket-detail-replay-player-shell__play-icon svg {
+.rrweb-replay-player-shell__play-icon svg {
   width: 1.75rem;
   height: 1.75rem;
   margin-left: 0.15rem;
