@@ -25,7 +25,7 @@ export default function Page() {
         </Suspense>
       ) : null}
       <Suspense fallback={<InterfaceLanguageForm.Fallback />}>
-        <InterfaceLanguageForm />
+        <InterfaceLanguageForm showHeader={isAdmin} />
       </Suspense>
     </PageContainer>
   );

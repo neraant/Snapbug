@@ -13,10 +13,6 @@ export function OrganizationSettingsForm() {
 
   return (
     <Card>
-      <Card.Header>
-        <Card.Title>{texts.title}</Card.Title>
-        <Card.Description>{texts.description}</Card.Description>
-      </Card.Header>
       <Card.Content>
         <Column as="form" width="full" gap="lg" onSubmit={onSubmit}>
           <FieldGroup>
