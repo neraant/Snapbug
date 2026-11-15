@@ -1,6 +1,9 @@
 import { expect, test } from "@playwright/test";
 
+import { seedDatabase } from "../shared/seed/seed-database";
+
 test("a member can create a personal MCP token and see the secret once", async ({ page }) => {
+  await seedDatabase();
   const email = `mcp-${Date.now()}@example.com`;
   const tokenName = "E2E MCP token";
 
