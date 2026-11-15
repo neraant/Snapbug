@@ -14,6 +14,7 @@ import { ResetPasswordRepository } from "@workspace/server/modules/auth/reposito
 import { AuthService } from "@workspace/server/modules/auth/service/auth.service";
 import { BugReportAdapter } from "@workspace/server/modules/bug-report/adapter/bug-report.adapter";
 import { createBugReportFileStorage } from "@workspace/server/modules/bug-report/adapter/create-bug-report-file-storage";
+import { SearchBugReportAdapter } from "@workspace/server/modules/bug-report/adapter/search-bug-report.adapter";
 import { CountOpenByAssigneeUseCase } from "@workspace/server/modules/bug-report/application/count-open-by-assignee.use-case";
 import { CountOpenByProjectUseCase } from "@workspace/server/modules/bug-report/application/count-open-by-project.use-case";
 import { CreateBugReportUseCase } from "@workspace/server/modules/bug-report/application/create-bug-report.use-case";
@@ -82,6 +83,7 @@ import { UpdateProjectUseCase } from "@workspace/server/modules/project/applicat
 import { UpdateProjectWidgetSettingUseCase } from "@workspace/server/modules/project/application/update-project-widget-setting.use-case";
 import { ProjectRepository } from "@workspace/server/modules/project/repository/project.repository";
 import { ProjectService } from "@workspace/server/modules/project/service/project.service";
+import { SearchUseCase } from "@workspace/server/modules/search/application/search.use-case";
 import { CreateUserTokenUseCase } from "@workspace/server/modules/user-token/application/create-user-token.use-case";
 import { FindUserByTokenUseCase } from "@workspace/server/modules/user-token/application/find-user-by-token.use-case";
 import { FindUserTokensUseCase } from "@workspace/server/modules/user-token/application/find-user-tokens.use-case";
@@ -138,6 +140,7 @@ const projectAdapter = new ProjectAdapter(projectRepository, membershipAdapter, 
 const organizationAdapter = new OrganizationAdapter(organizationRepository);
 const apiKeyAdapter = new ApiKeyAdapter(apiKeyRepository, projectAdapter);
 const bugReportAdapter = new BugReportAdapter(bugReportRepository);
+const searchBugReportAdapter = new SearchBugReportAdapter(bugReportRepository);
 
 const findMembership = new FindMembershipUseCase(membershipRepository);
 const findMembershipByUser = new FindMembershipByUserUseCase(membershipRepository);
@@ -326,6 +329,7 @@ const findComments = new FindCommentsUseCase(
   userAdapter,
   commentRepository,
 );
+const search = new SearchUseCase(membershipAdapter, projectAdapter, searchBugReportAdapter);
 
 export const container = {
   audit: { findActivityLogs },
@@ -379,5 +383,8 @@ export const container = {
   comment: {
     addComment,
     findComments,
+  },
+  search: {
+    search,
   },
 };

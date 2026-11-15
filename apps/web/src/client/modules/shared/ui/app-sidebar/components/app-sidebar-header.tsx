@@ -4,12 +4,16 @@ import { Breadcrumb } from "@workspace/design-system/components/ui/breadcrumb";
 import { SidebarTrigger, useSidebar } from "@workspace/design-system/components/ui/sidebar";
 import { cn } from "@workspace/design-system/lib/utils";
 import Link from "next/link";
-import { Fragment } from "react";
+import { Fragment, type ReactNode } from "react";
 
 import { texts } from "@/client/modules/shared/consts/texts.const";
 import { useBreadcrumb } from "@/client/modules/shared/hooks/use-breadcrumb";
 
-export function AppSidebarHeader() {
+type AppSidebarHeaderProps = {
+  toolbarStart?: ReactNode;
+};
+
+export function AppSidebarHeader({ toolbarStart }: AppSidebarHeaderProps) {
   const { isMobile, state } = useSidebar();
   const isCompactHeader = !isMobile && state === "collapsed";
   const crumbs = useBreadcrumb();
@@ -45,7 +49,10 @@ export function AppSidebarHeader() {
           </Breadcrumb.List>
         </Breadcrumb>
       </Row>
-      <PageContainer.HeaderToolbar notificationLabel={texts.header.notifications} />
+      <Row align="center" gap="sm" wrap={false}>
+        {toolbarStart}
+        <PageContainer.HeaderToolbar notificationLabel={texts.header.notifications} />
+      </Row>
     </Row>
   );
 }
