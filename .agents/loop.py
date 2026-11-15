@@ -80,7 +80,7 @@ TYPE_BADGES = {
     "security": "B60205",
     "test": "FBCA04",
 }
-TBD = {"P-08", "P-18"}
+TBD = {"P-08", "P-18", "P-23"}
 FORBIDDEN_REFS = {"master", "staging", "production"}
 PROTECTED_EXACT = {"docs/SPEC.md"}
 PROTECTED_PREFIXES = (".github/", ".cursor/", ".agents/", "docs/decisions/")

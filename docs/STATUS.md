@@ -46,7 +46,6 @@ Do not start tasks marked TBD: an implementer agent must not take them.
 ## Open
 
 - P-22 invitation resend, revoke, and copy link. Expiry after 7 days already rejects acceptance.
-- P-23 require 2FA, one invite email domain, GDPR mode, and delete workspace. Administrator only.
 - P-24 error responses that return the real status, including 400, 401, 403, 404, 500, and any other real code. The error screen always shows 500.
 - P-25 ticket comments sit at the bottom of the card, read like a Jira thread, and the author can edit or delete their own comment.
 - P-26 an MCP user token has a name. The list shows that name, when it was created, and revoke. The secret is shown once.
@@ -60,6 +59,7 @@ Do not start tasks marked TBD: an implementer agent must not take them.
 
 - P-08 TBD. Cleanup by the organization retention period, including the screenshot and the replay. Not in the current implementation scope. An implementer must not start this task.
 - P-18 TBD. A Jira connection is in the product. The detailed behavior is not specified. An implementer must not start this task.
+- P-23 TBD. Require 2FA, one invite email domain, GDPR mode, and delete workspace. Parked; an implementer must not start this task.
 
 Retired id; do not reuse: P-05.
 

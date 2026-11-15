@@ -47,7 +47,7 @@ one or two sentences, the actual reason
 short bullets of the real diff, or "No file changes."
 
 ## Spec
-one line: which product rules the diff touches, or "Product rules not touched." Mention TBD tasks P-08 and P-18 only if the diff starts them.
+one line: which product rules the diff touches, or "Product rules not touched." Mention TBD tasks P-08, P-18, and P-23 only if the diff starts them.
 
 ## Human
 "No." if the bot may approve, or "Yes. Protected path: <paths>." if a person must approve.
