@@ -3,15 +3,7 @@ import { Avatar, AvatarFallback } from "@workspace/design-system/components/ui/a
 import { Badge } from "@workspace/design-system/components/ui/badge";
 import { Button } from "@workspace/design-system/components/ui/button";
 import { Card } from "@workspace/design-system/components/ui/card";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@workspace/design-system/components/ui/dialog";
+import { ConfirmDialog } from "@workspace/design-system/components/ui/confirm-dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +12,7 @@ import {
 } from "@workspace/design-system/components/ui/dropdown-menu";
 import { Separator } from "@workspace/design-system/components/ui/separator";
 import { Typography } from "@workspace/design-system/components/ui/typography";
+import { getAppErrorMessage } from "@workspace/server/error/get-app-error-message";
 import { ArchiveIcon, EllipsisVerticalIcon, SettingsIcon } from "lucide-react";
 import { Suspense, useState } from "react";
 
@@ -30,6 +23,7 @@ import { useProjectDangerActions } from "@/client/modules/project/hooks/use-proj
 import type { ProjectListItem } from "@/client/modules/project/types/project-list-item.type";
 import { formatProjectCreatedDate } from "@/client/modules/project/utils/format-project-created-date.util";
 import { getProjectInitials } from "@/client/modules/project/utils/get-project-initials.util";
+import { useConfirmDialog } from "@/client/modules/shared/hooks/use-confirm-dialog";
 
 type ProjectCardProps = {
   project: ProjectListItem;
@@ -38,18 +32,29 @@ type ProjectCardProps = {
 export function ProjectCard({ project }: ProjectCardProps) {
   const createdLabel = formatProjectCreatedDate(project.createdAt);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [archiveConfirmOpen, setArchiveConfirmOpen] = useState(false);
   const isArchived = project.archivedAt != null;
-
-  const { onArchive, isArchiving } = useProjectDangerActions({
+  const { confirm, bind } = useConfirmDialog();
+  const { onArchive } = useProjectDangerActions({
     project,
-    onProjectChanged: () => setArchiveConfirmOpen(false),
+    onProjectChanged: () => undefined,
     onProjectDeleted: () => undefined,
   });
 
-  const handleArchive = async () => {
-    await onArchive();
-    setArchiveConfirmOpen(false);
+  const openArchiveConfirm = () => {
+    confirm({
+      title: texts.card.archiveDialog.title(project.name),
+      description: texts.card.archiveDialog.description(project.name),
+      confirmLabel: texts.card.archiveDialog.confirm,
+      variant: "default",
+      errorFallback: texts.settingsSheet.toast.archiveError,
+      onConfirm: async () => {
+        try {
+          await onArchive();
+        } catch (error) {
+          throw new Error(getAppErrorMessage(error, texts.settingsSheet.toast.archiveError));
+        }
+      },
+    });
   };
 
   return (
@@ -76,7 +81,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
                   {texts.card.settings}
                 </DropdownMenuItem>
                 {!isArchived ? (
-                  <DropdownMenuItem onClick={() => setArchiveConfirmOpen(true)}>
+                  <DropdownMenuItem onClick={openArchiveConfirm}>
                     <ArchiveIcon />
                     {texts.card.archive}
                   </DropdownMenuItem>
@@ -103,22 +108,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
           <ProjectSettingsSheet project={project} open={settingsOpen} onOpenChange={setSettingsOpen} />
         </Suspense>
       ) : null}
-      <Dialog open={archiveConfirmOpen} onOpenChange={setArchiveConfirmOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{texts.card.archiveDialog.title}</DialogTitle>
-            <DialogDescription>{texts.card.archiveDialog.description(project.name)}</DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <DialogClose render={<Button type="button" variant="outline" />}>
-              {texts.card.archiveDialog.cancel}
-            </DialogClose>
-            <Button type="button" disabled={isArchiving} onClick={handleArchive}>
-              {texts.card.archiveDialog.confirm}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ConfirmDialog {...bind()} />
     </>
   );
 }

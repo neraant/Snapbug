@@ -1,5 +1,4 @@
 import { toast } from "@workspace/design-system/components/ui/toast";
-import { getAppErrorMessage } from "@workspace/server/error/get-app-error-message";
 import type { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
 import { useMemo, useState } from "react";
 
@@ -24,22 +23,13 @@ export function useTeam() {
   const filteredMembers = useMemo(() => filterTeamMembers(members, filters.search), [filters.search, members]);
   const openCountByUserId = useMemo(() => toOpenCountByUserId(counts), [counts]);
 
-  const updateRole = (membershipId: string, role: UserRole) => {
-    updateMembershipRole({ membershipId, role }).catch((error: unknown) => {
-      toast.add({
-        title: getAppErrorMessage(error, texts.role.updateError),
-        type: "error",
-      });
-    });
+  const updateRole = async (membershipId: string, role: UserRole) => {
+    await updateMembershipRole({ membershipId, role });
   };
 
-  const remove = (membershipId: string) => {
-    removeMembership({ membershipId }).catch((error: unknown) => {
-      toast.add({
-        title: getAppErrorMessage(error, texts.action.removeError),
-        type: "error",
-      });
-    });
+  const remove = async (membershipId: string) => {
+    await removeMembership({ membershipId });
+    toast.add({ title: texts.action.removeSuccess, type: "success" });
   };
 
   return {

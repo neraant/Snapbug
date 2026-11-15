@@ -35,12 +35,27 @@ const en = {
       [UserRole.ADMIN]: "Admin",
       [UserRole.USER]: "Member",
     },
+    confirmDialog: {
+      title: (name: string, role: UserRole) =>
+        role === UserRole.ADMIN ? `Make ${name} an admin?` : `Make ${name} a member?`,
+      description: (_name: string, role: UserRole) =>
+        role === UserRole.ADMIN
+          ? "They will be able to manage team settings, invitations, and all projects."
+          : "They will lose admin access to organization settings and all projects.",
+      confirm: "Change role",
+    },
     updateError: "Could not update the member role. Try again.",
   },
   action: {
     menu: (name: string) => `Actions for ${name}`,
     editProjectAccess: "Edit project access",
     remove: "Remove",
+    removeDialog: {
+      title: (name: string) => `Remove ${name}?`,
+      description: "They lose access to this organization immediately. This cannot be undone.",
+      confirm: "Remove",
+    },
+    removeSuccess: "Member removed.",
     removeError: "Could not remove the member. Try again.",
   },
   projectAccess: {
@@ -65,6 +80,11 @@ const en = {
     resend: "Resend",
     copyLink: "Copy link",
     revoke: "Revoke",
+    revokeDialog: {
+      title: (email: string) => `Revoke invitation for ${email}?`,
+      description: "The invite link stops working. You can send a new invitation later.",
+      confirm: "Revoke",
+    },
     resendSuccess: "Invitation resent.",
     resendError: "Could not resend the invitation. Try again.",
     copySuccess: "Invitation link copied.",
@@ -107,12 +127,27 @@ const ru = {
       [UserRole.ADMIN]: "Администратор",
       [UserRole.USER]: "Участник",
     },
+    confirmDialog: {
+      title: (name: string, role: UserRole) =>
+        role === UserRole.ADMIN ? `Назначить ${name} администратором?` : `Назначить ${name} участником?`,
+      description: (_name: string, role: UserRole) =>
+        role === UserRole.ADMIN
+          ? "Сможет управлять настройками команды, приглашениями и всеми проектами."
+          : "Потеряет административный доступ к настройкам организации и всем проектам.",
+      confirm: "Изменить роль",
+    },
     updateError: "Не удалось изменить роль. Попробуйте ещё раз.",
   },
   action: {
     menu: (name: string) => `Действия: ${name}`,
     editProjectAccess: "Доступ к проектам",
     remove: "Удалить",
+    removeDialog: {
+      title: (name: string) => `Удалить ${name}?`,
+      description: "Участник сразу потеряет доступ к организации. Это нельзя отменить.",
+      confirm: "Удалить",
+    },
+    removeSuccess: "Участник удалён.",
     removeError: "Не удалось удалить участника. Попробуйте ещё раз.",
   },
   projectAccess: {
@@ -137,6 +172,11 @@ const ru = {
     resend: "Отправить снова",
     copyLink: "Копировать ссылку",
     revoke: "Отозвать",
+    revokeDialog: {
+      title: (email: string) => `Отозвать приглашение для ${email}?`,
+      description: "Ссылка перестанет работать. Позже можно отправить новое приглашение.",
+      confirm: "Отозвать",
+    },
     resendSuccess: "Приглашение отправлено снова.",
     resendError: "Не удалось отправить приглашение снова. Попробуйте ещё раз.",
     copySuccess: "Ссылка приглашения скопирована.",

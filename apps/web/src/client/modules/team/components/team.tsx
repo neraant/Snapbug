@@ -2,6 +2,7 @@ import { Column } from "@workspace/design-system/components/layout/column";
 import { Row } from "@workspace/design-system/components/layout/row";
 import { Avatar, AvatarFallback } from "@workspace/design-system/components/ui/avatar";
 import { Button } from "@workspace/design-system/components/ui/button";
+import { ConfirmDialog } from "@workspace/design-system/components/ui/confirm-dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,10 +19,12 @@ import {
 import { Skeleton } from "@workspace/design-system/components/ui/skeleton";
 import { Table } from "@workspace/design-system/components/ui/table";
 import { Typography } from "@workspace/design-system/components/ui/typography";
+import { getAppErrorMessage } from "@workspace/server/error/get-app-error-message";
 import type { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
 import { userRoles } from "@workspace/validation/modules/user/consts/user-role.const";
 import { EllipsisVerticalIcon, FolderIcon, Trash2Icon } from "lucide-react";
 
+import { useConfirmDialog } from "@/client/modules/shared/hooks/use-confirm-dialog";
 import { EditProjectAccessDialog } from "@/client/modules/team/components/edit-project-access-dialog";
 import { TeamFiltersBar } from "@/client/modules/team/components/team-filters";
 import { texts } from "@/client/modules/team/consts/texts.const";
@@ -42,6 +45,41 @@ export function Team() {
     openProjectAccess,
     closeProjectAccess,
   } = useTeam();
+  const { confirm, bind } = useConfirmDialog();
+
+  const openRoleConfirm = (membershipId: string, displayName: string, role: UserRole) => {
+    confirm({
+      title: texts.role.confirmDialog.title(displayName, role),
+      description: texts.role.confirmDialog.description(displayName, role),
+      confirmLabel: texts.role.confirmDialog.confirm,
+      variant: "default",
+      errorFallback: texts.role.updateError,
+      onConfirm: async () => {
+        try {
+          await updateRole(membershipId, role);
+        } catch (error) {
+          throw new Error(getAppErrorMessage(error, texts.role.updateError));
+        }
+      },
+    });
+  };
+
+  const openRemoveConfirm = (membershipId: string, displayName: string) => {
+    confirm({
+      title: texts.action.removeDialog.title(displayName),
+      description: texts.action.removeDialog.description,
+      confirmLabel: texts.action.removeDialog.confirm,
+      variant: "destructive",
+      errorFallback: texts.action.removeError,
+      onConfirm: async () => {
+        try {
+          await remove(membershipId);
+        } catch (error) {
+          throw new Error(getAppErrorMessage(error, texts.action.removeError));
+        }
+      },
+    });
+  };
 
   return (
     <Column gap="lg" width="full">
@@ -81,7 +119,8 @@ export function Team() {
                   <Select
                     value={member.role}
                     onValueChange={(role) => {
-                      if (role) updateRole(member.id, role as UserRole);
+                      if (!role || role === member.role) return;
+                      openRoleConfirm(member.id, displayName, role as UserRole);
                     }}
                     disabled={isCurrentUser || isMutating}
                   >
@@ -120,7 +159,10 @@ export function Team() {
                           <FolderIcon />
                           {texts.action.editProjectAccess}
                         </DropdownMenuItem>
-                        <DropdownMenuItem variant="destructive" onClick={() => remove(member.id)}>
+                        <DropdownMenuItem
+                          variant="destructive"
+                          onClick={() => openRemoveConfirm(member.id, displayName)}
+                        >
                           <Trash2Icon />
                           {texts.action.remove}
                         </DropdownMenuItem>
@@ -148,6 +190,7 @@ export function Team() {
           if (!open) closeProjectAccess();
         }}
       />
+      <ConfirmDialog {...bind()} />
     </Column>
   );
 }

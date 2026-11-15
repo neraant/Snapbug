@@ -18,6 +18,14 @@ const en = {
     title: "Playground",
     description: "A sample customer page. Submit stays here and shows the capture.",
   },
+  confirm: {
+    cancel: "Cancel",
+    error: "Something went wrong. Try again.",
+    typeToConfirm: {
+      prefix: "Type",
+      suffix: "to confirm",
+    },
+  },
 } as const;
 
 const ru = {
@@ -37,6 +45,14 @@ const ru = {
   playground: {
     title: "Песочница",
     description: "Пример страницы клиента. Отправка остаётся на этой странице и показывает захват.",
+  },
+  confirm: {
+    cancel: "Отмена",
+    error: "Что-то пошло не так. Попробуйте ещё раз.",
+    typeToConfirm: {
+      prefix: "Введите",
+      suffix: "для подтверждения",
+    },
   },
 } as const;
 

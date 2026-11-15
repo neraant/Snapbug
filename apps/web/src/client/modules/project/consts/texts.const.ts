@@ -24,9 +24,9 @@ const en = {
     archive: "Archive",
     archivedBadge: "Archived",
     archiveDialog: {
-      title: "Archive project?",
-      description: (name: string) => `${name} will stop accepting new bug reports. Existing tickets stay available.`,
-      cancel: "Cancel",
+      title: (name: string) => `Archive "${name}"?`,
+      description: (name: string) =>
+        `${name} will stop accepting new bug reports. You can restore it later from project settings.`,
       confirm: "Archive",
     },
     member: (name: string) => name,
@@ -74,11 +74,15 @@ const en = {
       delete: "Delete project",
     },
     deleteDialog: {
-      title: "Delete project?",
-      description: (name: string) =>
-        `${name} and all of its tickets will be permanently deleted. This cannot be undone.`,
-      cancel: "Cancel",
+      title: (name: string) => `Delete "${name}"?`,
+      description: () => "This project and all of its tickets will be permanently deleted. This cannot be undone.",
       confirm: "Delete",
+    },
+    archiveDialog: {
+      title: (name: string) => `Archive "${name}"?`,
+      description: (name: string) =>
+        `${name} will stop accepting new bug reports. You can restore it later from project settings.`,
+      confirm: "Archive",
     },
     toast: {
       saveSuccess: "Project settings saved.",
@@ -144,10 +148,9 @@ const ru = {
     archive: "В архив",
     archivedBadge: "В архиве",
     archiveDialog: {
-      title: "Отправить проект в архив?",
+      title: (name: string) => `Отправить «${name}» в архив?`,
       description: (name: string) =>
-        `Проект «${name}» перестанет принимать новые отчёты. Существующие тикеты останутся доступны.`,
-      cancel: "Отмена",
+        `Проект «${name}» перестанет принимать новые отчёты. Его можно восстановить в настройках проекта.`,
       confirm: "В архив",
     },
     member: (name: string) => name,
@@ -195,10 +198,15 @@ const ru = {
       delete: "Удалить проект",
     },
     deleteDialog: {
-      title: "Удалить проект?",
-      description: (name: string) => `Проект «${name}» и все его тикеты будут удалены без возможности восстановления.`,
-      cancel: "Отмена",
+      title: (name: string) => `Удалить «${name}»?`,
+      description: () => "Проект и все его тикеты будут удалены без возможности восстановления.",
       confirm: "Удалить",
+    },
+    archiveDialog: {
+      title: (name: string) => `Отправить «${name}» в архив?`,
+      description: (name: string) =>
+        `Проект «${name}» перестанет принимать новые отчёты. Его можно восстановить в настройках проекта.`,
+      confirm: "В архив",
     },
     toast: {
       saveSuccess: "Настройки проекта сохранены.",
