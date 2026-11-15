@@ -41,6 +41,7 @@ export const routePattern = {
   forgotPassword: "/forgot-password",
   resetPassword: "/reset-password",
   onboarding: "/onboarding",
+  report: "/report",
 
   overview: "/overview",
   playground: "/playground",
@@ -61,6 +62,7 @@ export const url = {
   forgotPassword: () => routePattern.forgotPassword,
   resetPassword: () => routePattern.resetPassword,
   onboarding: () => routePattern.onboarding,
+  report: () => routePattern.report,
 
   overview: () => routePattern.overview,
   playground: () => routePattern.playground,
