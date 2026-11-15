@@ -9,6 +9,7 @@ export const userTokenTable = pgTable(
       .references(() => userTable.id)
       .notNull(),
     tokenHash: text("token_hash").notNull(),
+    name: text("name").notNull(),
     prefix: text("prefix").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull(),
     revokedAt: timestamp("revoked_at", { withTimezone: true, mode: "date" }),

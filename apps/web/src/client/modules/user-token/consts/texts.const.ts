@@ -7,6 +7,14 @@ const en = {
   create: {
     action: "Create token",
     error: "Could not create the token. Try again.",
+    dialog: {
+      title: "Create token",
+      description: "Give this token a name so you can tell it apart later.",
+      nameLabel: "Name",
+      namePlaceholder: "Local dev",
+      cancel: "Cancel",
+      submit: "Create",
+    },
   },
   secret: {
     title: "Copy this token",
@@ -15,7 +23,7 @@ const en = {
     copied: "Copied",
   },
   column: {
-    token: "Token",
+    token: "Name",
     created: "Created",
     status: "Status",
   },
@@ -38,6 +46,14 @@ const ru = {
   create: {
     action: "Создать токен",
     error: "Не удалось создать токен. Попробуйте ещё раз.",
+    dialog: {
+      title: "Создать токен",
+      description: "Задайте название, чтобы потом отличать этот токен от других.",
+      nameLabel: "Название",
+      namePlaceholder: "Локальная разработка",
+      cancel: "Отмена",
+      submit: "Создать",
+    },
   },
   secret: {
     title: "Скопируйте токен",
@@ -46,7 +62,7 @@ const ru = {
     copied: "Скопировано",
   },
   column: {
-    token: "Токен",
+    token: "Название",
     created: "Создан",
     status: "Статус",
   },

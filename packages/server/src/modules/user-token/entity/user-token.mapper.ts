@@ -13,9 +13,10 @@ export abstract class UserTokenMapper {
   }
 
   static toDto(userToken: UserToken): UserTokenModelType {
-    const { id, prefix, createdAt, revokedAt } = userToken.toObject();
+    const { id, name, prefix, createdAt, revokedAt } = userToken.toObject();
     return {
       id,
+      name,
       prefix,
       createdAt: createdAt.toISOString(),
       revokedAt: revokedAt?.toISOString() ?? null,
@@ -23,7 +24,7 @@ export abstract class UserTokenMapper {
   }
 
   static toCreatedDto(userToken: UserToken, secret: string): CreateUserTokenOutputDtoType {
-    const { id, prefix, createdAt } = UserTokenMapper.toDto(userToken);
-    return { id, prefix, createdAt, secret };
+    const { id, name, createdAt } = UserTokenMapper.toDto(userToken);
+    return { id, name, createdAt, secret };
   }
 }

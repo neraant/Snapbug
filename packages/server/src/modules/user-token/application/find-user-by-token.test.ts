@@ -23,6 +23,7 @@ const userToken = new UserToken({
   id: "8a8c69a1-1ab1-45a8-8497-eae1e506d9d1",
   userId,
   tokenHash: createHash("sha256").update(secret).digest("hex"),
+  name: "Cursor MCP",
   prefix: "snb_ut_live_abc1",
   createdAt,
   revokedAt: null,
