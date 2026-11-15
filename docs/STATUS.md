@@ -31,6 +31,7 @@ Do not start tasks marked TBD: an implementer agent must not take them.
 - P-04 comments, and the `add_comment` tool. No replay tool.
 - P-06 organization settings on a screen: name and the one retention period.
 - P-07 the activity log for every application-object change: who, when, which object, and what changed.
+- P-27 the activity log table matches the rest of the app and the design system.
 - P-10 screenshot and replay files in the seed, stored in Blob.
 - P-11 an ingest rate limit.
 - P-12 a hashed invitation token.
@@ -49,7 +50,6 @@ Do not start tasks marked TBD: an implementer agent must not take them.
 ## Open
 
 - P-24 error responses that return the real status, including 400, 401, 403, 404, 500, and any other real code. The error screen always shows 500.
-- P-27 the activity log table matches the rest of the app and the design system.
 - P-28 the settings screen matches the rest of the app and the design system. Language copy appears once; English / Russian is a two-option switch that saves on change (no Save). Organization name and retention keep Save.
 - P-29 playground sample is a mock customer checkout; after submit the capture uses the ticket-card layout (description, screenshot, replay, diagnostics, environment sidebar). No comments or ticket properties. Submit still writes nothing.
 
