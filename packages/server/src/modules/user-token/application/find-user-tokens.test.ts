@@ -10,6 +10,7 @@ const userToken = new UserToken({
   id: "8a8c69a1-1ab1-45a8-8497-eae1e506d9d1",
   userId,
   tokenHash: "hashed-secret",
+  name: "Cursor MCP",
   prefix: "snb_ut_live_ab12",
   createdAt,
   revokedAt: null,
@@ -26,6 +27,7 @@ describe("FindUserTokensUseCase", () => {
     expect(result).toEqual([
       {
         id: userToken.id,
+        name: userToken.name,
         prefix: userToken.prefix,
         createdAt: createdAt.toISOString(),
         revokedAt: null,

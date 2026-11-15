@@ -29,9 +29,7 @@ export function UserTokenList() {
           return (
             <Table.Row key={token.id}>
               <Table.Cell>
-                <Typography variant="text-sm" font="mono">
-                  {token.prefix}
-                </Typography>
+                <Typography variant="text-sm">{token.name}</Typography>
               </Table.Cell>
               <Table.Cell>
                 <Typography variant="text-sm">{formatUserTokenCreatedAt(token.createdAt)}</Typography>

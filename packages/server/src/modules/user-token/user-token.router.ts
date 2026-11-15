@@ -9,7 +9,9 @@ const os = implement(userTokenContract).$context<OrpcContext>().use(mapAppErrorM
 const authed = os.use(authedMiddleware);
 
 export const userTokenRouter = os.router({
-  create: authed.create.handler(async ({ context }) => await container.userToken.create.execute(context.user.id)),
+  create: authed.create.handler(
+    async ({ input, context }) => await container.userToken.create.execute(input, context.user.id),
+  ),
   findMany: authed.findMany.handler(async ({ context }) => await container.userToken.findMany.execute(context.user.id)),
   revoke: authed.revoke.handler(
     async ({ input, context }) => await container.userToken.revoke.execute(input, context.user.id),

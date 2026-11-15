@@ -13,6 +13,7 @@ function createUserToken(ownerId: string, revokedAt: Date | null = null) {
     id: "8a8c69a1-1ab1-45a8-8497-eae1e506d9d1",
     userId: ownerId,
     tokenHash: "hashed-secret",
+    name: "Cursor MCP",
     prefix: "snb_ut_live_ab12",
     createdAt,
     revokedAt,

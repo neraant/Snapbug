@@ -1,6 +1,9 @@
 import { oc } from "@orpc/contract";
 import { sessionAuthSpec } from "@workspace/server/shared/openapi/session-auth.const";
-import { createUserTokenOutputDtoSchema } from "@workspace/validation/modules/user-token/dto/create-user-token.schema";
+import {
+  createUserTokenInputDtoSchema,
+  createUserTokenOutputDtoSchema,
+} from "@workspace/validation/modules/user-token/dto/create-user-token.schema";
 import {
   findUserByTokenInputDtoSchema,
   findUserByTokenOutputDtoSchema,
@@ -12,13 +15,16 @@ import {
 } from "@workspace/validation/modules/user-token/dto/revoke-user-token.schema";
 
 export const userTokenContract = {
-  create: oc.output(createUserTokenOutputDtoSchema).route({
-    method: "POST",
-    path: "/user-tokens",
-    tags: ["user-token"],
-    summary: "Create a personal MCP token",
-    spec: sessionAuthSpec,
-  }),
+  create: oc
+    .input(createUserTokenInputDtoSchema)
+    .output(createUserTokenOutputDtoSchema)
+    .route({
+      method: "POST",
+      path: "/user-tokens",
+      tags: ["user-token"],
+      summary: "Create a personal MCP token",
+      spec: sessionAuthSpec,
+    }),
   findMany: oc.output(findUserTokensOutputDtoSchema).route({
     method: "GET",
     path: "/user-tokens",
