@@ -18,7 +18,7 @@ test("an administrator resends a pending invitation", async ({ page }) => {
   await expect(page).toHaveURL(/\/overview/, { timeout: 30_000 });
 
   await page.goto("/team");
-  await expect(page.getByRole("heading", { name: "Team" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Invite people" })).toBeVisible();
 
   const inviteEmail = `pending-${Date.now()}@example.com`;
   await page.getByRole("button", { name: "Invite people" }).click();
