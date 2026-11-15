@@ -1,47 +1,44 @@
-import { RadioGroupField } from "@workspace/design-system/components/forms/radio-group-field";
-import { Column } from "@workspace/design-system/components/layout/column";
-import { Button } from "@workspace/design-system/components/ui/button";
 import { Card } from "@workspace/design-system/components/ui/card";
-import { FieldGroup } from "@workspace/design-system/components/ui/field";
+import { SegmentedControl } from "@workspace/design-system/components/ui/segmented-control";
 import { Skeleton } from "@workspace/design-system/components/ui/skeleton";
 
 import { texts } from "@/client/modules/user/consts/texts.const";
 import { useInterfaceLanguageForm } from "@/client/modules/user/hooks/use-interface-language-form";
 
-export function InterfaceLanguageForm() {
-  const { control, onSubmit, saving } = useInterfaceLanguageForm();
+type InterfaceLanguageFormProps = {
+  showHeader?: boolean;
+};
+
+export function InterfaceLanguageForm({ showHeader = false }: InterfaceLanguageFormProps) {
+  const { value, onValueChange, saving } = useInterfaceLanguageForm();
+
+  const items = [
+    { value: "en", label: texts.options.en, disabled: saving },
+    { value: "ru", label: texts.options.ru, disabled: saving },
+  ];
 
   return (
     <Card>
-      <Card.Header>
-        <Card.Title>{texts.title}</Card.Title>
-        <Card.Description>{texts.description}</Card.Description>
-      </Card.Header>
+      {showHeader ? (
+        <Card.Header>
+          <Card.Title>{texts.title}</Card.Title>
+          <Card.Description>{texts.description}</Card.Description>
+        </Card.Header>
+      ) : null}
       <Card.Content>
-        <Column as="form" width="full" gap="lg" onSubmit={onSubmit}>
-          <FieldGroup>
-            <RadioGroupField
-              control={control}
-              name="interfaceLanguage"
-              label={texts.title}
-              description={texts.description}
-              options={[
-                { value: "en", label: texts.options.en },
-                { value: "ru", label: texts.options.ru },
-              ]}
-            />
-          </FieldGroup>
-          <Button type="submit" disabled={saving}>
-            {texts.save}
-          </Button>
-        </Column>
+        <SegmentedControl
+          value={value}
+          onValueChange={onValueChange}
+          items={items}
+          aria-label={texts.title}
+        />
       </Card.Content>
     </Card>
   );
 }
 
 function InterfaceLanguageFormFallback() {
-  return <Skeleton className="h-48 w-full" />;
+  return <Skeleton className="h-24 w-full max-w-xs" />;
 }
 
 InterfaceLanguageForm.Fallback = InterfaceLanguageFormFallback;

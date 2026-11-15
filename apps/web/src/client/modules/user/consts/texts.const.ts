@@ -7,7 +7,6 @@ const en = {
     en: "English",
     ru: "Русский",
   },
-  save: "Save language",
   toast: {
     success: "Interface language saved",
     error: "Could not save the interface language. Try again.",
@@ -21,7 +20,6 @@ const ru = {
     en: "English",
     ru: "Русский",
   },
-  save: "Сохранить язык",
   toast: {
     success: "Язык интерфейса сохранён",
     error: "Не удалось сохранить язык интерфейса. Попробуйте ещё раз.",
