@@ -33,13 +33,13 @@ export function ErrorScreen({ error, reset }: ErrorScreenProps) {
         <Mascot mood="confused" size="lg" />
         <Column align="center" gap="sm">
           <Typography variant="heading-lg" color="primary" align="center" font="heading">
-            {texts.code}
+            {details.screenCopy.code}
           </Typography>
           <Typography variant="heading-xs" align="center" weight="bold">
-            {texts.title}
+            {details.screenCopy.title}
           </Typography>
           <Typography variant="text-sm" color="muted" align="center">
-            {texts.description}
+            {details.screenCopy.description}
           </Typography>
         </Column>
         <Row justify="center" gap="sm">

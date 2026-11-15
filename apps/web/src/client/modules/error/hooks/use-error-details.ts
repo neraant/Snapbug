@@ -1,7 +1,9 @@
 import { useCopyText } from "@workspace/design-system/hooks/use-copy-text";
+import { getAppErrorHttpStatus } from "@workspace/server/error/app-error-http-status";
 import { useState } from "react";
 
 import { texts } from "@/client/modules/error/consts/texts.const";
+import { resolveErrorScreenCopy } from "@/client/modules/error/utils/resolve-error-screen-copy.util";
 
 type UseErrorDetailsParams = {
   error: Error & { digest?: string };
@@ -9,11 +11,17 @@ type UseErrorDetailsParams = {
 
 export function useErrorDetails({ error }: UseErrorDetailsParams) {
   const { copied, copy } = useCopyText();
-  const [details] = useState(() => ({
-    errorId: error.digest,
-    timestamp: new Date().toISOString(),
-    message: error.message,
-  }));
+  const [details] = useState(() => {
+    const status = getAppErrorHttpStatus(error);
+
+    return {
+      errorId: error.digest,
+      timestamp: new Date().toISOString(),
+      message: error.message,
+      status,
+      screenCopy: resolveErrorScreenCopy(status),
+    };
+  });
 
   function copyDetails() {
     const payload = [

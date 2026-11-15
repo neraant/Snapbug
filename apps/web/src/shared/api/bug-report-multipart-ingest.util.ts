@@ -2,6 +2,7 @@ import { container } from "@workspace/server/container";
 import type { CreateBugReportScreenshotInput } from "@workspace/server/modules/bug-report/application/create-bug-report.use-case";
 import type { CreateBugReportReplayInput } from "@workspace/server/modules/bug-report/application/create-bug-report.use-case";
 import { AppError } from "@workspace/server/shared/error/app-errors";
+import { appErrorHttpStatus } from "@workspace/server/shared/error/app-error-http-status";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import type { OrpcContext } from "@workspace/server/shared/orpc/context.const";
 import {
@@ -28,30 +29,11 @@ import {
 } from "@workspace/validation/modules/bug-report/dto/create-bug-report.schema";
 import { z } from "zod";
 
-function appErrorStatus(code: AppError["code"]): number {
-  switch (code) {
-    case "BAD_REQUEST":
-      return 400;
-    case "UNAUTHORIZED":
-      return 401;
-    case "FORBIDDEN":
-      return 403;
-    case "NOT_FOUND":
-      return 404;
-    case "CONFLICT":
-      return 409;
-    case "TOO_MANY_REQUESTS":
-      return 429;
-    default:
-      return 500;
-  }
-}
-
 function errorResponse(error: unknown): Response {
   if (error instanceof AppError) {
     return Response.json(
       { message: error.message, data: { errorCode: error.errorCode } },
-      { status: appErrorStatus(error.code) },
+      { status: appErrorHttpStatus(error.code) },
     );
   }
 
