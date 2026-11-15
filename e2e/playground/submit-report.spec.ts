@@ -28,10 +28,13 @@ test("playground submit stays on the page and shows the capture", async ({ page 
   await page.getByRole("textbox", { name: "What happened?" }).fill("The pay button did nothing at all");
   await page.getByRole("button", { name: "Send report" }).click();
 
-  await expect(page.getByRole("heading", { name: "Screenshot" })).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByRole("heading", { name: "Pay does nothing" })).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByRole("heading", { name: "Issue description" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Screenshot" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Session replay" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Client environment" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Technical diagnostics" })).toBeVisible();
+  await expect(page.getByText("The pay button did nothing at all")).toBeVisible();
   await expect(page.getByText("Page URL")).toBeVisible();
   expect(ingestPosts).toEqual([]);
   await expect(page).toHaveURL(/\/playground/);
