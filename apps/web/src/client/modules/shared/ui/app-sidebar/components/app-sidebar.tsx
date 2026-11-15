@@ -4,9 +4,8 @@ import { Column } from "@workspace/design-system/components/layout/column";
 import { SidebarLayout } from "@workspace/design-system/components/layout/sidebar";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { type PropsWithChildren, Suspense, useMemo } from "react";
+import { type PropsWithChildren, type ReactNode, Suspense, useMemo } from "react";
 
-import { GlobalSearch } from "@/client/modules/global-search/components/global-search";
 import { ActiveOrganizationProvider } from "@/client/modules/shared/components/active-organization-provider";
 import { texts as sharedTexts } from "@/client/modules/shared/consts/texts.const";
 import { useProjectScopeSearchParam } from "@/client/modules/shared/hooks/use-project-scope-search-param";
@@ -22,6 +21,7 @@ import { texts as siteTexts } from "@/shared/consts/texts.const";
 type AppSidebarProps = PropsWithChildren<{
   defaultSidebarOpen?: boolean;
   activeOrganizationId?: string | null;
+  headerToolbarStart?: ReactNode;
   isAdmin?: boolean;
   user?: {
     name?: string | null;
@@ -33,6 +33,7 @@ type AppSidebarProps = PropsWithChildren<{
 export function AppSidebar({
   activeOrganizationId = null,
   defaultSidebarOpen,
+  headerToolbarStart,
   isAdmin,
   user,
   children,
@@ -73,7 +74,7 @@ export function AppSidebar({
         }
       >
         <Column gap="none" className="flex h-svh min-h-0 flex-col overflow-hidden">
-          <AppSidebarHeader toolbarStart={<GlobalSearch />} />
+          <AppSidebarHeader toolbarStart={headerToolbarStart} />
           {children}
         </Column>
       </SidebarLayout>

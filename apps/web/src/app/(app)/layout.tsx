@@ -7,6 +7,7 @@ import { cookies } from "next/headers";
 import type { PropsWithChildren } from "react";
 
 import { auth } from "@/auth";
+import { GlobalSearch } from "@/client/modules/global-search/components/global-search";
 import {
   bindInterfaceLanguageStore,
   enterInterfaceLanguage,
@@ -36,6 +37,7 @@ export default async function Layout({ children }: PropsWithChildren) {
         isAdmin={activeOrganization?.role === UserRole.ADMIN}
         activeOrganizationId={activeOrganization?.organizationId ?? null}
         defaultSidebarOpen={defaultSidebarOpen}
+        headerToolbarStart={<GlobalSearch />}
       >
         {children}
       </AppSidebar>
