@@ -2,7 +2,7 @@ import { db } from "@workspace/database";
 import { projectTable } from "@workspace/database/schema";
 import type { OrganizationRow } from "@workspace/database/seed/organization";
 import { projectColorValues } from "@workspace/validation/shared/project-color.schema";
-import { inArray, type InferInsertModel, type InferSelectModel } from "drizzle-orm";
+import { eq, inArray, type InferInsertModel, type InferSelectModel } from "drizzle-orm";
 
 type ProjectInsert = InferInsertModel<typeof projectTable>;
 export type ProjectRow = InferSelectModel<typeof projectTable>;
@@ -32,6 +32,21 @@ export async function seedProject(organizations: OrganizationRow[]): Promise<Pro
   ];
 
   await db.insert(projectTable).values(projectData).onConflictDoNothing({ target: projectTable.id });
+
+  for (const project of projectData) {
+    await db
+      .update(projectTable)
+      .set({
+        name: project.name,
+        slug: project.slug,
+        color: project.color,
+        archivedAt: null,
+        defaultAssigneeId: null,
+        storeVisitorIp: false,
+        collectVisitorEmail: true,
+      })
+      .where(eq(projectTable.id, project.id));
+  }
 
   return db
     .select()
