@@ -33,6 +33,8 @@ export const ERROR_CODES = {
   INVALID_REPLAY: "invalid-replay",
   USER_TOKEN_NOT_FOUND: "user-token-not-found",
   PROJECT_KEY_NOT_ACCEPTED: "project-key-not-accepted",
+  COMMENT_NOT_FOUND: "comment-not-found",
+  CANNOT_MANAGE_COMMENT: "cannot-manage-comment",
 } as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES];

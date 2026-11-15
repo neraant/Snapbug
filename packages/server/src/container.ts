@@ -38,7 +38,9 @@ import { WidgetIngestOriginService } from "@workspace/server/modules/bug-report/
 import { WidgetIngestRateLimitService } from "@workspace/server/modules/bug-report/service/widget-ingest-rate-limit.service";
 import { WidgetUserAgentService } from "@workspace/server/modules/bug-report/service/widget-user-agent.service";
 import { AddCommentUseCase } from "@workspace/server/modules/comment/application/add-comment.use-case";
+import { DeleteCommentUseCase } from "@workspace/server/modules/comment/application/delete-comment.use-case";
 import { FindCommentsUseCase } from "@workspace/server/modules/comment/application/find-comments.use-case";
+import { UpdateCommentUseCase } from "@workspace/server/modules/comment/application/update-comment.use-case";
 import { CommentRepository } from "@workspace/server/modules/comment/repository/comment.repository";
 import { CommentService } from "@workspace/server/modules/comment/service/comment.service";
 import { UserAdapter } from "@workspace/server/modules/identity/adapter/user.adapter";
@@ -385,6 +387,24 @@ const findComments = new FindCommentsUseCase(
   userAdapter,
   commentRepository,
 );
+const updateComment = new UpdateCommentUseCase(
+  bugReportAdapter,
+  projectAdapter,
+  membershipAdapter,
+  userAdapter,
+  commentRepository,
+  commentService,
+  withTransaction,
+);
+const deleteComment = new DeleteCommentUseCase(
+  bugReportAdapter,
+  projectAdapter,
+  membershipAdapter,
+  userAdapter,
+  commentRepository,
+  commentService,
+  withTransaction,
+);
 const search = new SearchUseCase(membershipAdapter, projectAdapter, searchBugReportAdapter);
 
 export const container = {
@@ -456,6 +476,8 @@ export const container = {
   comment: {
     addComment,
     findComments,
+    updateComment,
+    deleteComment,
   },
   search: {
     search,

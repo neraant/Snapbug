@@ -28,8 +28,24 @@ export class CommentRepository {
   }
 
   async save(comment: Comment): Promise<void> {
+    const values = CommentMapper.toPersistence(comment);
+
     try {
-      await this.db.insert(commentTable).values(CommentMapper.toPersistence(comment));
+      await this.db
+        .insert(commentTable)
+        .values(values)
+        .onConflictDoUpdate({
+          target: commentTable.id,
+          set: { body: values.body },
+        });
+    } catch (error) {
+      throw new InternalServerError(ERROR_CODES.INTERNAL_SERVER_ERROR, undefined, { cause: error });
+    }
+  }
+
+  async deleteById(id: string): Promise<void> {
+    try {
+      await this.db.delete(commentTable).where(eq(commentTable.id, id));
     } catch (error) {
       throw new InternalServerError(ERROR_CODES.INTERNAL_SERVER_ERROR, undefined, { cause: error });
     }

@@ -6,9 +6,17 @@ import {
   addCommentOutputDtoSchema,
 } from "@workspace/validation/modules/comment/dto/add-comment.schema";
 import {
+  deleteCommentInputDtoSchema,
+  deleteCommentOutputDtoSchema,
+} from "@workspace/validation/modules/comment/dto/delete-comment.schema";
+import {
   findCommentsInputDtoSchema,
   findCommentsOutputDtoSchema,
 } from "@workspace/validation/modules/comment/dto/find-comments.schema";
+import {
+  updateCommentInputDtoSchema,
+  updateCommentOutputDtoSchema,
+} from "@workspace/validation/modules/comment/dto/update-comment.schema";
 
 const comment = oc.$meta<OrpcMetaType>({});
 
@@ -32,6 +40,26 @@ export const commentContract = {
       path: "/comments",
       tags: ["comment"],
       summary: "List comments",
+      spec: sessionAuthSpec,
+    }),
+  updateComment: comment
+    .input(updateCommentInputDtoSchema)
+    .output(updateCommentOutputDtoSchema)
+    .route({
+      method: "PATCH",
+      path: "/comments",
+      tags: ["comment"],
+      summary: "Update comment",
+      spec: sessionAuthSpec,
+    }),
+  deleteComment: comment
+    .input(deleteCommentInputDtoSchema)
+    .output(deleteCommentOutputDtoSchema)
+    .route({
+      method: "DELETE",
+      path: "/comments",
+      tags: ["comment"],
+      summary: "Delete comment",
       spec: sessionAuthSpec,
     }),
 };

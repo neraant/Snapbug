@@ -36,4 +36,18 @@ export class CommentService {
       newSnapshot: CommentMapper.toAudit(comment),
     });
   }
+
+  async deleteWithAudit(comment: Comment, projectId: string, action: string): Promise<void> {
+    await this.commentRepository.deleteById(comment.id);
+
+    await this.auditLogService.save({
+      action,
+      entityType: COMMENT_ENTITY_TYPE,
+      entityId: comment.id,
+      projectId,
+      actor: this.actor,
+      oldSnapshot: CommentMapper.toAudit(comment),
+      newSnapshot: { bugReportId: null, authorUserId: null, body: null },
+    });
+  }
 }

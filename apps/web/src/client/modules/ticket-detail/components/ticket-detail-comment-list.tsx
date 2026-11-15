@@ -2,6 +2,7 @@ import { TextareaField } from "@workspace/design-system/components/forms/textare
 import { Column } from "@workspace/design-system/components/layout/column";
 import { Row } from "@workspace/design-system/components/layout/row";
 import { Panel } from "@workspace/design-system/components/ui/panel";
+import { Separator } from "@workspace/design-system/components/ui/separator";
 import { SubmitButton } from "@workspace/design-system/components/ui/submit-button";
 import { MessageSquareIcon } from "lucide-react";
 import { Suspense } from "react";
@@ -25,6 +26,7 @@ export function TicketDetailCommentList({ bugReportId }: TicketDetailCommentList
           <Suspense fallback={<TicketDetailCommentThread.Fallback />}>
             <TicketDetailCommentThread bugReportId={bugReportId} />
           </Suspense>
+          <Separator />
           <Column as="form" gap="md" width="full" onSubmit={onSubmit}>
             <TextareaField control={control} name="body" label={texts.comments.fieldLabel} />
             <Row justify="end">

@@ -24,4 +24,15 @@ export class Comment {
       createdAt: this.createdAt,
     };
   }
+
+  updateBody(body: string): Comment {
+    if (body === this.body) {
+      return this;
+    }
+
+    return new Comment({
+      ...this.toObject(),
+      body,
+    });
+  }
 }
