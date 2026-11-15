@@ -1,5 +1,6 @@
 import type { DbClient } from "@workspace/database";
 import type { AuditMembershipLinkType, MembershipPort } from "@workspace/server/modules/audit/port/membership.port";
+import { FindManyMembershipsForActivityLogUseCase } from "@workspace/server/modules/membership/application/find-many-for-activity-log.use-case";
 import { FindMembershipUseCase } from "@workspace/server/modules/membership/application/find-membership.use-case";
 import type { MembershipRepository } from "@workspace/server/modules/membership/repository/membership.repository";
 import type {
@@ -9,9 +10,11 @@ import type {
 
 export class ActivityLogMembershipAdapter implements MembershipPort {
   private readonly findMembership: FindMembershipUseCase;
+  private readonly findManyForActivityLog: FindManyMembershipsForActivityLogUseCase;
 
   constructor(private readonly membershipRepository: MembershipRepository) {
     this.findMembership = new FindMembershipUseCase(membershipRepository);
+    this.findManyForActivityLog = new FindManyMembershipsForActivityLogUseCase(membershipRepository);
   }
 
   withTx(tx: unknown): ActivityLogMembershipAdapter {
@@ -23,7 +26,6 @@ export class ActivityLogMembershipAdapter implements MembershipPort {
   }
 
   async findManyByIds(ids: string[]): Promise<AuditMembershipLinkType[]> {
-    const memberships = await this.membershipRepository.findManyByIds(ids);
-    return memberships.map((membership) => ({ id: membership.id }));
+    return await this.findManyForActivityLog.execute(ids);
   }
 }
