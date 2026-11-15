@@ -17,7 +17,7 @@ import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import { BugReportSeverity } from "@workspace/validation/modules/bug-report/consts/bug-report-severity.const";
 import { formatBugReportShortId } from "@workspace/validation/modules/bug-report/consts/bug-report-short-id.const";
 import { BugReportStatus } from "@workspace/validation/modules/bug-report/consts/bug-report-status.const";
-import { and, count, eq, gte, inArray, isNotNull, lt, sql } from "drizzle-orm";
+import { and, count, desc, eq, gte, ilike, inArray, isNotNull, lt, or, sql } from "drizzle-orm";
 
 const openStatuses = [BugReportStatus.NEW, BugReportStatus.IN_PROGRESS] as const;
 const criticalHighSeverities = [BugReportSeverity.HIGH, BugReportSeverity.CRITICAL] as const;
@@ -98,6 +98,32 @@ export class BugReportRepository {
     return bugReports
       .map((bugReport) => BugReportMapper.fromPersistence(bugReport))
       .sort((left, right) => this.compareBoardOrder(left, right));
+  }
+
+  async findManyByProjectIdsMatchingQuery(projectIds: string[], query: string, limit: number): Promise<BugReport[]> {
+    if (projectIds.length === 0) {
+      return [];
+    }
+
+    const pattern = `%${query}%`;
+    const rows = await this.db
+      .select()
+      .from(bugReportTable)
+      .where(
+        and(
+          inArray(bugReportTable.projectId, projectIds),
+          or(
+            ilike(bugReportTable.title, pattern),
+            ilike(bugReportTable.shortId, pattern),
+            ilike(bugReportTable.url, pattern),
+            ilike(bugReportTable.description, pattern),
+          ),
+        ),
+      )
+      .orderBy(desc(bugReportTable.updatedAt))
+      .limit(limit);
+
+    return rows.map((bugReport) => BugReportMapper.fromPersistence(bugReport));
   }
 
   async findManyByProjectIdAndStatus(projectId: string, status: BugReportStatus): Promise<BugReport[]> {

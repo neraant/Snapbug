@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { type PropsWithChildren, Suspense, useMemo } from "react";
 
+import { GlobalSearch } from "@/client/modules/global-search/components/global-search";
 import { ActiveOrganizationProvider } from "@/client/modules/shared/components/active-organization-provider";
 import { texts as sharedTexts } from "@/client/modules/shared/consts/texts.const";
 import { useProjectScopeSearchParam } from "@/client/modules/shared/hooks/use-project-scope-search-param";
@@ -72,7 +73,7 @@ export function AppSidebar({
         }
       >
         <Column gap="none" className="flex h-svh min-h-0 flex-col overflow-hidden">
-          <AppSidebarHeader />
+          <AppSidebarHeader toolbarStart={<GlobalSearch />} />
           {children}
         </Column>
       </SidebarLayout>

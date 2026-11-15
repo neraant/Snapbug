@@ -8,6 +8,7 @@ import { invitationRouter } from "@workspace/server/modules/invitation/invitatio
 import { membershipRouter } from "@workspace/server/modules/membership/membership.router";
 import { organizationRouter } from "@workspace/server/modules/organization/organization.router";
 import { projectRouter } from "@workspace/server/modules/project/project.router";
+import { searchRouter } from "@workspace/server/modules/search/search.router";
 import { userTokenRouter } from "@workspace/server/modules/user-token/user-token.router";
 
 export const router = {
@@ -21,6 +22,7 @@ export const router = {
   membership: membershipRouter,
   organization: organizationRouter,
   project: projectRouter,
+  search: searchRouter,
   userToken: userTokenRouter,
 };
 export type AppRouter = typeof router;
