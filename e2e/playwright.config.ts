@@ -204,7 +204,6 @@ export default defineConfig({
     timeout: 120_000,
     env: {
       ...process.env,
-      SNAPBUG_E2E: "1",
       DATABASE_URL: process.env.DATABASE_URL ?? "postgres://postgres:postgres@localhost:5432/snapbug",
       AUTH_SECRET: process.env.AUTH_SECRET ?? "your-secret-auth-secret",
       NEXT_PUBLIC_APP_URL: baseURL,

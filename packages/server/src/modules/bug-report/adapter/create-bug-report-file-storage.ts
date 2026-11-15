@@ -1,4 +1,3 @@
-import { InMemoryBugReportFileStorageAdapter } from "@workspace/server/modules/bug-report/adapter/in-memory-bug-report-file-storage.adapter";
 import { VercelBlobFileStorageAdapter } from "@workspace/server/modules/bug-report/adapter/vercel-blob-file-storage.adapter";
 import type { FileStoragePort } from "@workspace/server/modules/bug-report/port/file-storage.port";
 
@@ -12,13 +11,5 @@ function resolvedBlobToken(tokenFromEnvFile: string | undefined): string | undef
 
 export function createBugReportFileStorage(tokenFromEnvFile: string | undefined): FileStoragePort {
   const token = resolvedBlobToken(tokenFromEnvFile);
-  if (token) {
-    return new VercelBlobFileStorageAdapter(token);
-  }
-
-  if (process.env.SNAPBUG_E2E === "1") {
-    return new InMemoryBugReportFileStorageAdapter();
-  }
-
-  return new VercelBlobFileStorageAdapter(undefined);
+  return new VercelBlobFileStorageAdapter(token);
 }
