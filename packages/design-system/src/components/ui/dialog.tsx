@@ -18,7 +18,11 @@ function DialogClose(props: DialogPrimitive.Close.Props) {
   return <DialogPrimitive.Close data-slot="dialog-close" {...props} />;
 }
 
-function DialogContent({ className, children, ...props }: DialogPrimitive.Popup.Props) {
+type DialogContentProps = DialogPrimitive.Popup.Props & {
+  showClose?: boolean;
+};
+
+function DialogContent({ className, children, showClose = true, ...props }: DialogContentProps) {
   return (
     <DialogPrimitive.Portal>
       <DialogPrimitive.Backdrop
@@ -34,10 +38,12 @@ function DialogContent({ className, children, ...props }: DialogPrimitive.Popup.
         {...props}
       >
         {children}
-        <DialogPrimitive.Close render={<Button variant="ghost" size="icon-sm" className="absolute top-3 right-3" />}>
-          <XIcon />
-          <span className="sr-only">Close</span>
-        </DialogPrimitive.Close>
+        {showClose ? (
+          <DialogPrimitive.Close render={<Button variant="ghost" size="icon-sm" className="absolute top-3 right-3" />}>
+            <XIcon />
+            <span className="sr-only">Close</span>
+          </DialogPrimitive.Close>
+        ) : null}
       </DialogPrimitive.Popup>
     </DialogPrimitive.Portal>
   );

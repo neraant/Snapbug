@@ -14,6 +14,7 @@ type CreateUserTokenFormSchemaType = z.infer<typeof createUserTokenInputDtoSchem
 export function useCreateUserTokenDialog() {
   const [open, setOpen] = useState(false);
   const [secret, setSecret] = useState<string | null>(null);
+  const [createdTokenName, setCreatedTokenName] = useState<string | null>(null);
   const { mutateAsync: createUserToken, isPending } = useCreateUserToken();
   const { control, handleSubmit, formState, reset } = useForm<CreateUserTokenFormSchemaType>({
     resolver: zodResolver(createUserTokenInputDtoSchema),
@@ -23,12 +24,14 @@ export function useCreateUserTokenDialog() {
   const onOpenCreate = () => {
     setOpen(true);
     setSecret(null);
+    setCreatedTokenName(null);
     reset();
   };
 
   const onSubmit = handleSubmit(async (values) => {
     try {
       const created = await createUserToken({ name: values.name });
+      setCreatedTokenName(values.name.trim() || null);
       setSecret(created.secret);
       reset();
     } catch (error) {
@@ -43,6 +46,7 @@ export function useCreateUserTokenDialog() {
     setOpen(nextOpen);
     if (!nextOpen) {
       setSecret(null);
+      setCreatedTokenName(null);
       reset();
     }
   };
@@ -52,6 +56,7 @@ export function useCreateUserTokenDialog() {
     onSubmit,
     open,
     secret,
+    createdTokenName,
     isPending: formState.isSubmitting || isPending,
     onOpenChange,
     onOpenCreate,
