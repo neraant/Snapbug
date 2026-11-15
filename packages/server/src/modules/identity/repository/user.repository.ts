@@ -47,6 +47,7 @@ export class UserRepository {
           interfaceLanguage: values.interfaceLanguage,
           passwordChangedAt: values.passwordChangedAt,
           onboardingCompletedAt: values.onboardingCompletedAt,
+          termsAcceptedAt: values.termsAcceptedAt,
           createdAt: values.createdAt,
           updatedAt: values.updatedAt,
         })
@@ -59,6 +60,7 @@ export class UserRepository {
             interfaceLanguage: values.interfaceLanguage,
             passwordChangedAt: values.passwordChangedAt,
             onboardingCompletedAt: values.onboardingCompletedAt,
+            termsAcceptedAt: values.termsAcceptedAt,
             updatedAt: values.updatedAt,
           },
         });

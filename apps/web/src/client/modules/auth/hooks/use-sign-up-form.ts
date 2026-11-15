@@ -29,12 +29,17 @@ export function useSignUpForm({ invitationToken, defaultEmail = "" }: UseSignUpF
   }, []);
   const form = useForm<SignUpSchemaType>({
     resolver: zodResolver(signUpSchema),
-    defaultValues: { email: defaultEmail, name: "", password: "" },
+    defaultValues: { email: defaultEmail, name: "", password: "", acceptedTerms: false },
   });
 
   const onSubmit = async (values: SignUpSchemaType) => {
     try {
-      await signUp(values);
+      await signUp({
+        email: values.email,
+        name: values.name,
+        password: values.password,
+        acceptedTerms: true,
+      });
     } catch (error) {
       toast.add({
         title: getAppErrorMessage(error, texts.signUp.toast.genericError),

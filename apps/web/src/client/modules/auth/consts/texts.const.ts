@@ -162,6 +162,9 @@ const en = {
       label: "Password",
       placeholder: "Password",
     },
+    acceptedTerms: {
+      label: "I accept the Terms of Service",
+    },
   },
   signIn: {
     title: "Welcome back",

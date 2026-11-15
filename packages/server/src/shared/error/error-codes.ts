@@ -1,5 +1,6 @@
 export const ERROR_CODES = {
   EMAIL_ALREADY_TAKEN: "email-already-taken",
+  TERMS_NOT_ACCEPTED: "terms-not-accepted",
   RATE_LIMITED: "rate-limited",
   USER_NOT_FOUND: "user-not-found",
   UNAUTHORIZED: "unauthorized",

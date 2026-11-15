@@ -8,16 +8,23 @@ export type UserPersistedType = {
   interfaceLanguage: InterfaceLanguage;
   passwordChangedAt: Date | null;
   onboardingCompletedAt: Date | null;
+  termsAcceptedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 };
 
-export type CreateUserType = Partial<Pick<UserPersistedType, "name">> &
+export type CreateUserType = Partial<Pick<UserPersistedType, "name" | "termsAcceptedAt">> &
   Pick<UserPersistedType, "email" | "passwordHash">;
 
 export type UpdateUserType = Partial<
   Pick<
     UserPersistedType,
-    "name" | "email" | "passwordHash" | "interfaceLanguage" | "passwordChangedAt" | "onboardingCompletedAt"
+    | "name"
+    | "email"
+    | "passwordHash"
+    | "interfaceLanguage"
+    | "passwordChangedAt"
+    | "onboardingCompletedAt"
+    | "termsAcceptedAt"
   >
 >;

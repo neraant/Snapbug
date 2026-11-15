@@ -6,6 +6,7 @@ const KNOWN_ERROR_CODES = new Set<string>(Object.values(ERROR_CODES));
 
 const ERROR_MESSAGES: Record<ErrorCode, string> = {
   [ERROR_CODES.EMAIL_ALREADY_TAKEN]: "This email is already taken",
+  [ERROR_CODES.TERMS_NOT_ACCEPTED]: "You must accept the Terms of Service to create an account",
   [ERROR_CODES.USER_NOT_FOUND]: "User not found",
   [ERROR_CODES.UNAUTHORIZED]: "You need to sign in to continue",
   [ERROR_CODES.ADMIN_REQUIRED]: "Administrator access is required",

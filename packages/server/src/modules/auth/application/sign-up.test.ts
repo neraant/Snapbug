@@ -8,6 +8,7 @@ const input = {
   email: "ada@example.com",
   name: "Ada",
   password: "password1",
+  acceptedTerms: true as const,
 };
 
 const publicUser = {
@@ -33,9 +34,27 @@ describe("SignUpUseCase", () => {
       email: input.email,
       name: input.name,
       passwordHash: "hashed",
+      termsAcceptedAt: expect.any(Date),
     });
     expect(result).toEqual(publicUser);
     expect(result).not.toHaveProperty("password");
+  });
+
+  it("throws when the terms are not accepted", async () => {
+    const authService = { hashPassword: vi.fn() };
+    const userPort = {
+      findByEmail: vi.fn(),
+      create: vi.fn(),
+    };
+    const useCase = new SignUpUseCase(authService as unknown as AuthService, userPort as unknown as UserPort);
+
+    await expect(useCase.execute({ ...input, acceptedTerms: false as unknown as true })).rejects.toMatchObject({
+      errorCode: ERROR_CODES.TERMS_NOT_ACCEPTED,
+    });
+
+    expect(userPort.findByEmail).not.toHaveBeenCalled();
+    expect(authService.hashPassword).not.toHaveBeenCalled();
+    expect(userPort.create).not.toHaveBeenCalled();
   });
 
   it("throws when email is taken", async () => {

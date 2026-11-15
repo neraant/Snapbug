@@ -62,7 +62,7 @@ JSON_SCHEMA_REGISTRY.add(userModelSchema, {
 JSON_SCHEMA_REGISTRY.add(createUserInputDtoSchema, {
   title: "Sign up",
   description: "Create an account",
-  examples: [{ email: "user@example.com", name: "Jane Doe", password: "password1" }],
+  examples: [{ email: "user@example.com", name: "Jane Doe", password: "password1", acceptedTerms: true }],
 });
 
 JSON_SCHEMA_REGISTRY.add(bugReportModelSchema, {

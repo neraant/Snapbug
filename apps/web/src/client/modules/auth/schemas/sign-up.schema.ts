@@ -7,5 +7,8 @@ export const signUpSchema = z.object({
   email: z.email(validationText.required(texts.field.signUpWorkEmail.label)),
   name: z.string().min(1, validationText.required(texts.field.name.label)),
   password: z.string().min(8, validationText.minLength(texts.field.password.label, 8)),
+  acceptedTerms: z.boolean().refine((value) => value, {
+    message: validationText.required(texts.field.acceptedTerms.label),
+  }),
 });
 export type SignUpSchemaType = z.infer<typeof signUpSchema>;

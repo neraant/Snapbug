@@ -16,6 +16,7 @@ const user = new User({
   interfaceLanguage: "en",
   passwordChangedAt: null,
   onboardingCompletedAt: null,
+  termsAcceptedAt: null,
   createdAt: persistedAt,
   updatedAt: persistedAt,
 });
