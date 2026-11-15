@@ -6,7 +6,6 @@ import { texts } from "@/client/modules/activity-log/consts/texts.const";
 const activityExactFormat = new Intl.DateTimeFormat(undefined, {
   dateStyle: "medium",
   timeStyle: "short",
-  timeZoneName: "short",
 });
 
 export function formatActivityRelativeWhen(occurredAt: string): string {

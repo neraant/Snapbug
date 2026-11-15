@@ -18,14 +18,15 @@ import { useActivityLogDetail } from "@/client/modules/activity-log/hooks/use-ac
 import { formatActivityDayLabel } from "@/client/modules/activity-log/utils/format-activity-log.util";
 
 function groupEntriesWithDayDividers(entries: ReturnType<typeof useActivityLog>["entries"]) {
-  const rows: Array<{ kind: "divider"; key: string; label: string } | { kind: "entry"; key: string; entry: (typeof entries)[number] }> =
-    [];
+  const rows: Array<
+    { kind: "divider"; key: string; label: string } | { kind: "entry"; key: string; entry: (typeof entries)[number] }
+  > = [];
 
   for (const entry of entries) {
     const label = formatActivityDayLabel(entry.occurredAt);
     const last = rows.at(-1);
     if (!last || last.kind !== "divider" || last.label !== label) {
-      rows.push({ kind: "divider", key: `day-${label}`, label });
+      rows.push({ kind: "divider", key: `day-${label}-${entry.id}`, label });
     }
     rows.push({ kind: "entry", key: entry.id, entry });
   }
