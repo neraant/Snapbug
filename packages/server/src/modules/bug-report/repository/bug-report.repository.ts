@@ -58,6 +58,16 @@ export class BugReportRepository {
     return row ? BugReportMapper.fromPersistence(row) : null;
   }
 
+  async findManyByIds(ids: string[]): Promise<BugReport[]> {
+    if (ids.length === 0) return [];
+
+    const rows = await this.db.query.bugReportTable.findMany({
+      where: { id: { in: ids } },
+    });
+
+    return rows.map((row) => BugReportMapper.fromPersistence(row));
+  }
+
   async findManyByShortId(shortId: string): Promise<Array<{ bugReport: BugReport; organizationId: string }>> {
     const rows = await this.db.query.bugReportTable.findMany({
       where: { shortId },

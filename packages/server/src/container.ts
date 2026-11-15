@@ -13,6 +13,7 @@ import { SignUpUseCase } from "@workspace/server/modules/auth/application/sign-u
 import { VerifyCredentialsUseCase } from "@workspace/server/modules/auth/application/verify-credentials.use-case";
 import { ResetPasswordRepository } from "@workspace/server/modules/auth/repository/reset-password.repository";
 import { AuthService } from "@workspace/server/modules/auth/service/auth.service";
+import { ActivityLogBugReportAdapter } from "@workspace/server/modules/bug-report/adapter/activity-log-bug-report.adapter";
 import { BugReportAdapter } from "@workspace/server/modules/bug-report/adapter/bug-report.adapter";
 import { createBugReportFileStorage } from "@workspace/server/modules/bug-report/adapter/create-bug-report-file-storage";
 import { SearchBugReportAdapter } from "@workspace/server/modules/bug-report/adapter/search-bug-report.adapter";
@@ -58,6 +59,7 @@ import { RevokeInvitationUseCase } from "@workspace/server/modules/invitation/ap
 import { SendInvitationsUseCase } from "@workspace/server/modules/invitation/application/send-invitation.use-case";
 import { InvitationRepository } from "@workspace/server/modules/invitation/repository/invitation.repository";
 import { InvitationService } from "@workspace/server/modules/invitation/service/invitation.service";
+import { ActivityLogMembershipAdapter } from "@workspace/server/modules/membership/adapter/activity-log-membership.adapter";
 import { MembershipAdapter } from "@workspace/server/modules/membership/adapter/membership.adapter";
 import { CheckUserProjectAccessUseCase } from "@workspace/server/modules/membership/application/check-user-project-access.use-case";
 import { FindMembershipUseCase } from "@workspace/server/modules/membership/application/find-membership.use-case";
@@ -82,6 +84,7 @@ import { UpdateOnboardingOrganizationUseCase } from "@workspace/server/modules/o
 import { UpdateOrganizationUseCase } from "@workspace/server/modules/organization/application/update-organization.use-case";
 import { OrganizationRepository } from "@workspace/server/modules/organization/repository/organization.repository";
 import { OrganizationService } from "@workspace/server/modules/organization/service/organization.service";
+import { ActivityLogProjectAdapter } from "@workspace/server/modules/project/adapter/activity-log-project.adapter";
 import { AuditProjectAdapter } from "@workspace/server/modules/project/adapter/audit-project.adapter";
 import { ProjectAdapter } from "@workspace/server/modules/project/adapter/project.adapter";
 import { ProjectAccessAdapter } from "@workspace/server/modules/project/adapter/project-access.adapter";
@@ -303,12 +306,17 @@ const revokeInvitation = new RevokeInvitationUseCase(
   membershipAdapter,
   withTransaction,
 );
-const copyInvitationLink = new CopyInvitationLinkUseCase(
-  invitationRepository,
-  invitationService,
-  membershipAdapter,
+const copyInvitationLink = new CopyInvitationLinkUseCase(invitationRepository, invitationService, membershipAdapter);
+const activityLogMembershipAdapter = new ActivityLogMembershipAdapter(membershipRepository);
+const activityLogProjectAdapter = new ActivityLogProjectAdapter(projectRepository);
+const activityLogBugReportAdapter = new ActivityLogBugReportAdapter(bugReportRepository);
+const findActivityLogs = new FindActivityLogsUseCase(
+  activityLogMembershipAdapter,
+  userAdapter,
+  activityLogProjectAdapter,
+  activityLogBugReportAdapter,
+  auditLogRepository,
 );
-const findActivityLogs = new FindActivityLogsUseCase(membershipAdapter, userAdapter, auditLogRepository);
 
 const findProjectByKey = new FindProjectByKeyUseCase(apiKeyRepository, projectAdapter);
 const findProjectApiKey = new FindProjectApiKeyUseCase(

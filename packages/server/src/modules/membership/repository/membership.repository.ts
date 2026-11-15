@@ -21,6 +21,16 @@ export class MembershipRepository {
     return membership ? MembershipMapper.fromPersistence(membership) : null;
   }
 
+  async findManyByIds(ids: string[]): Promise<Membership[]> {
+    if (ids.length === 0) return [];
+
+    const memberships = await this.db.query.membershipTable.findMany({
+      where: { id: { in: ids } },
+    });
+
+    return memberships.map((membership) => MembershipMapper.fromPersistence(membership));
+  }
+
   async findByUserAndOrganization(userId: string, organizationId: string): Promise<Membership | null> {
     const membership = await this.db.query.membershipTable.findFirst({
       where: { userId, organizationId },

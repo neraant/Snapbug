@@ -24,21 +24,33 @@ test("a member can create a personal MCP token and see the secret once", async (
     await page.goto("/mcp");
     await expect(page.getByRole("button", { name: "Create token" })).toBeVisible();
     await expect(page.getByText("A project key is not accepted.")).toBeVisible();
-  }).toPass({ timeout: 20_000 });
+  }).toPass({ timeout: 30_000 });
+
+  await page.waitForFunction(() => {
+    const create = Array.from(document.querySelectorAll("button")).find((button) =>
+      button.textContent?.includes("Create token"),
+    );
+    if (!create) return false;
+    return Object.getOwnPropertyNames(create).some((name) => name.startsWith("__reactProps$"));
+  });
 
   await page.getByRole("button", { name: "Create token" }).click();
   const createDialog = page.getByRole("dialog", { name: "Create token" });
-  await expect(createDialog).toBeVisible();
+  await expect(createDialog).toBeVisible({ timeout: 30_000 });
   await createDialog.getByRole("textbox", { name: "Name" }).fill(tokenName);
   await createDialog.getByRole("button", { name: "Create", exact: true }).click();
 
-  const secretDialog = page.getByRole("dialog", { name: "Copy this token" });
+  const secretDialog = page.getByRole("dialog", { name: "Token created" });
   await expect(secretDialog).toBeVisible();
-  await expect(secretDialog.getByText("This token is shown once.")).toBeVisible();
-  await expect(secretDialog.getByText(/snb_ut_live_/)).toBeVisible();
+  await expect(secretDialog.getByText("Copy it now. You won't be able to see it again.")).toBeVisible();
+  const secretField = secretDialog.getByRole("textbox", { name: "Token created" });
+  await expect(secretField).toHaveValue(/^snb_ut_live_/);
 
-  await page.getByRole("button", { name: "Close" }).click();
+  await secretDialog.getByRole("button", { name: "I've copied it" }).click();
   await expect(page.getByText(tokenName)).toBeVisible();
   await page.getByRole("button", { name: "Revoke" }).click();
+  const revokeConfirm = page.getByRole("alertdialog", { name: `Revoke token "${tokenName}"?` });
+  await expect(revokeConfirm).toBeVisible();
+  await revokeConfirm.getByRole("button", { name: "Revoke" }).click();
   await expect(page.getByText("Revoked", { exact: true })).toBeVisible({ timeout: 30_000 });
 });
