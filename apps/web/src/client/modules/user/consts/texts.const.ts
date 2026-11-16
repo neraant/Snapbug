@@ -1,27 +1,27 @@
 import { localize } from "@/client/modules/shared/locale/interface-language";
 
 const en = {
-  title: "Interface language",
-  description: "English and Russian. The dashboard uses the language you choose.",
+  sectionTitle: "Interface language",
+  sectionDescription: "English and Russian. The dashboard uses the language you choose.",
   options: {
     en: "English",
     ru: "Русский",
   },
+  saved: "Saved",
   toast: {
-    success: "Interface language saved",
     error: "Could not save the interface language. Try again.",
   },
 } as const;
 
 const ru = {
-  title: "Язык интерфейса",
-  description: "English и русский. Дашборд использует выбранный язык.",
+  sectionTitle: "Язык интерфейса",
+  sectionDescription: "English и русский. Дашборд использует выбранный язык.",
   options: {
     en: "English",
     ru: "Русский",
   },
+  saved: "Сохранено",
   toast: {
-    success: "Язык интерфейса сохранён",
     error: "Не удалось сохранить язык интерфейса. Попробуйте ещё раз.",
   },
 } as const;

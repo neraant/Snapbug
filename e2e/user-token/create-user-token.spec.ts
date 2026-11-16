@@ -19,12 +19,11 @@ test("a member can create a personal MCP token and see the secret once", async (
   await page.getByRole("checkbox", { name: "I accept the Terms of Service" }).check();
   await page.getByRole("button", { name: "Create account" }).click();
   await page.getByRole("button", { name: "Skip onboarding" }).click();
+  await expect(page).toHaveURL(/\/overview/, { timeout: 30_000 });
 
-  await expect(async () => {
-    await page.goto("/mcp");
-    await expect(page.getByRole("button", { name: "Create token" })).toBeVisible();
-    await expect(page.getByText("A project key is not accepted.")).toBeVisible();
-  }).toPass({ timeout: 30_000 });
+  await page.goto("/settings?tab=tokens");
+  await expect(page.getByRole("tab", { name: "Access tokens" })).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByRole("button", { name: "Create token" })).toBeVisible({ timeout: 30_000 });
 
   await page.waitForFunction(() => {
     const create = Array.from(document.querySelectorAll("button")).find((button) =>
@@ -37,20 +36,21 @@ test("a member can create a personal MCP token and see the secret once", async (
   await page.getByRole("button", { name: "Create token" }).click();
   const createDialog = page.getByRole("dialog", { name: "Create token" });
   await expect(createDialog).toBeVisible({ timeout: 30_000 });
-  await createDialog.getByRole("textbox", { name: "Name" }).fill(tokenName);
+  await createDialog.getByRole("textbox", { name: "Local dev" }).fill(tokenName);
   await createDialog.getByRole("button", { name: "Create", exact: true }).click();
 
   const secretDialog = page.getByRole("dialog", { name: "Token created" });
-  await expect(secretDialog).toBeVisible();
+  await expect(secretDialog).toBeVisible({ timeout: 30_000 });
   await expect(secretDialog.getByText("Copy it now. You won't be able to see it again.")).toBeVisible();
   const secretField = secretDialog.getByRole("textbox", { name: "Token created" });
   await expect(secretField).toHaveValue(/^snb_ut_live_/);
 
   await secretDialog.getByRole("button", { name: "I've copied it" }).click();
   await expect(page.getByText(tokenName)).toBeVisible();
-  await page.getByRole("button", { name: "Revoke" }).click();
+  await page.getByRole("button", { name: "Token actions" }).click();
+  await page.getByRole("menuitem", { name: "Revoke" }).click();
   const revokeConfirm = page.getByRole("alertdialog", { name: `Revoke token "${tokenName}"?` });
   await expect(revokeConfirm).toBeVisible();
   await revokeConfirm.getByRole("button", { name: "Revoke" }).click();
-  await expect(page.getByText("Revoked", { exact: true })).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByText("No tokens yet.")).toBeVisible({ timeout: 30_000 });
 });

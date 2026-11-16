@@ -19,6 +19,12 @@ test("a member switches the interface language to Russian", async ({ page }) => 
 
   await page.getByRole("link", { name: "Settings" }).click();
   await expect(page).toHaveURL(/\/settings/);
+  await expect(page.getByRole("tab", { name: "Profile" })).toBeVisible();
+  await page.waitForFunction(() => {
+    const control = document.querySelector("[aria-label='Interface language']");
+    if (!control) return false;
+    return Object.getOwnPropertyNames(control).some((name) => name.startsWith("__reactProps$"));
+  });
   await expect(page.getByRole("heading", { name: "Interface language" })).toBeVisible();
   await expect(page.getByRole("button", { name: "English" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Русский" })).toBeVisible();

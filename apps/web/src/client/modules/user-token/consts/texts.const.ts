@@ -2,7 +2,9 @@ import { localize } from "@/client/modules/shared/locale/interface-language";
 
 const en = {
   title: "MCP",
-  description:
+  description: "Personal access tokens are managed in Settings under Access tokens.",
+  manageInSettings: "Open settings",
+  redirectDescription:
     "Connect a normal MCP client with a personal token. Send it as a Bearer token to /api/mcp. A project key is not accepted.",
   create: {
     action: "Create token",
@@ -25,12 +27,9 @@ const en = {
   column: {
     token: "Name",
     created: "Created",
-    status: "Status",
+    actions: "Actions",
   },
-  status: {
-    active: "Active",
-    revoked: "Revoked",
-  },
+  actionsMenuLabel: "Token actions",
   revoke: {
     action: "Revoke",
     dialog: {
@@ -46,7 +45,9 @@ const en = {
 
 const ru = {
   title: "MCP",
-  description:
+  description: "Личные токены доступа настраиваются в разделе «Настройки» → «Токены доступа».",
+  manageInSettings: "Открыть настройки",
+  redirectDescription:
     "Подключите обычный MCP-клиент личным токеном. Передавайте его как Bearer-токен на /api/mcp. Ключ проекта не подойдёт.",
   create: {
     action: "Создать токен",
@@ -69,12 +70,9 @@ const ru = {
   column: {
     token: "Название",
     created: "Создан",
-    status: "Статус",
+    actions: "Действия",
   },
-  status: {
-    active: "Активен",
-    revoked: "Отозван",
-  },
+  actionsMenuLabel: "Действия с токеном",
   revoke: {
     action: "Отозвать",
     dialog: {

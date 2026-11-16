@@ -1,14 +1,21 @@
 import { Column } from "@workspace/design-system/components/layout/column";
-import { Badge } from "@workspace/design-system/components/ui/badge";
 import { Button } from "@workspace/design-system/components/ui/button";
 import { ConfirmDialog } from "@workspace/design-system/components/ui/confirm-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@workspace/design-system/components/ui/dropdown-menu";
 import { Skeleton } from "@workspace/design-system/components/ui/skeleton";
 import { Table } from "@workspace/design-system/components/ui/table";
 import { toast } from "@workspace/design-system/components/ui/toast";
 import { Typography } from "@workspace/design-system/components/ui/typography";
 import { getAppErrorMessage } from "@workspace/server/error/get-app-error-message";
+import { EllipsisVerticalIcon } from "lucide-react";
 
 import { useConfirmDialog } from "@/client/modules/shared/hooks/use-confirm-dialog";
+import { CreateUserTokenDialog } from "@/client/modules/user-token/components/create-user-token-dialog";
 import { texts } from "@/client/modules/user-token/consts/texts.const";
 import { useUserTokenList } from "@/client/modules/user-token/hooks/use-user-token-list";
 import { formatUserTokenCreatedAt } from "@/client/modules/user-token/utils/format-user-token-created-at.util";
@@ -35,61 +42,68 @@ export function UserTokenList() {
     });
   };
 
+  const activeTokens = tokens.filter((token) => token.revokedAt === null);
+
   return (
     <>
-      <Table>
-        <Table.Header>
-          <Table.Row>
-            <Table.Head>{texts.column.token}</Table.Head>
-            <Table.Head>{texts.column.created}</Table.Head>
-            <Table.Head>{texts.column.status}</Table.Head>
-            <Table.Head />
-          </Table.Row>
-        </Table.Header>
-        <Table.Body>
-          {tokens.map((token) => {
-            const revoked = token.revokedAt !== null;
-
-            return (
-              <Table.Row key={token.id}>
-                <Table.Cell>
-                  <Typography variant="text-sm">{token.name}</Typography>
-                </Table.Cell>
-                <Table.Cell>
-                  <Typography variant="text-sm">{formatUserTokenCreatedAt(token.createdAt)}</Typography>
-                </Table.Cell>
-                <Table.Cell>
-                  <Badge variant={revoked ? "outline" : "success"}>
-                    {revoked ? texts.status.revoked : texts.status.active}
-                  </Badge>
-                </Table.Cell>
-                <Table.Cell>
-                  {revoked ? null : (
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="sm"
-                      disabled={isPending}
-                      onClick={() => openRevokeConfirm(token.id, token.name)}
-                    >
-                      {texts.revoke.action}
-                    </Button>
-                  )}
-                </Table.Cell>
+      <Column
+        align={activeTokens.length === 0 ? "center" : "stretch"}
+        gap="md"
+        padding={activeTokens.length === 0 ? "lg" : undefined}
+        width="full"
+      >
+        {activeTokens.length === 0 ? (
+          <Typography variant="text-sm" color="muted">
+            {texts.empty}
+          </Typography>
+        ) : null}
+        <CreateUserTokenDialog />
+        {activeTokens.length > 0 ? (
+          <Table>
+            <Table.Header>
+              <Table.Row>
+                <Table.Head>{texts.column.token}</Table.Head>
+                <Table.Head>{texts.column.created}</Table.Head>
+                <Table.Head>{texts.column.actions}</Table.Head>
               </Table.Row>
-            );
-          })}
-          {tokens.length === 0 ? (
-            <Table.Row>
-              <Table.Cell colSpan={4}>
-                <Typography variant="text-sm" color="muted" align="center">
-                  {texts.empty}
-                </Typography>
-              </Table.Cell>
-            </Table.Row>
-          ) : null}
-        </Table.Body>
-      </Table>
+            </Table.Header>
+            <Table.Body>
+              {activeTokens.map((token) => (
+                <Table.Row key={token.id}>
+                  <Table.Cell>
+                    <Typography variant="text-sm">{token.name}</Typography>
+                  </Table.Cell>
+                  <Table.Cell>
+                    <Typography variant="text-sm">{formatUserTokenCreatedAt(token.createdAt)}</Typography>
+                  </Table.Cell>
+                  <Table.Cell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger
+                        render={
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-sm"
+                            disabled={isPending}
+                            aria-label={texts.actionsMenuLabel}
+                          />
+                        }
+                      >
+                        <EllipsisVerticalIcon />
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem variant="destructive" onClick={() => openRevokeConfirm(token.id, token.name)}>
+                          {texts.revoke.action}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </Table.Cell>
+                </Table.Row>
+              ))}
+            </Table.Body>
+          </Table>
+        ) : null}
+      </Column>
       <ConfirmDialog {...bind()} />
     </>
   );
@@ -98,7 +112,7 @@ export function UserTokenList() {
 function UserTokenListFallback() {
   return (
     <Column gap="sm" width="full">
-      <Skeleton className="h-10 w-full" />
+      <Skeleton className="h-10 w-32" />
       <Skeleton className="h-48 w-full" />
     </Column>
   );

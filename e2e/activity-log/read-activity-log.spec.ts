@@ -18,6 +18,8 @@ test("an administrator reads the activity log after changing the organization", 
   await expect(page).toHaveURL(/\/overview/, { timeout: 30_000 });
 
   await page.goto("/settings");
+  await page.getByRole("tab", { name: "Organization" }).click();
+  await expect(page).toHaveURL(/tab=organization/);
   await page.waitForFunction(() => {
     const form = document.querySelector("form");
     if (!form) return false;
@@ -25,7 +27,7 @@ test("an administrator reads the activity log after changing the organization", 
   });
   await page.getByRole("textbox", { name: "Name" }).fill("Acme Studio");
   await page.getByRole("button", { name: "Save", exact: true }).click();
-  await expect(page.getByText("Organization settings saved")).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByText("Saved")).toBeVisible({ timeout: 30_000 });
 
   await page.getByRole("link", { name: "Activity" }).click();
   await expect(page.getByRole("heading", { name: "Activity log" })).toBeVisible();
