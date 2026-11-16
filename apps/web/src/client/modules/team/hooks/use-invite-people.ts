@@ -120,9 +120,12 @@ export function useInvitePeople() {
     event.preventDefault();
 
     const normalizedEmails = [...new Set(emails.map((email) => normalizeInviteEmail(email)).filter(Boolean))];
+    const projectIds = role === UserRole.ADMIN ? projects.map((project) => project.id) : selectedProjectIds;
     const result = sendInvitationsInputDtoSchema.safeParse({
       organizationId: currentMembership?.organizationId,
       emails: normalizedEmails,
+      role,
+      projectIds,
     });
 
     if (!result.success) {

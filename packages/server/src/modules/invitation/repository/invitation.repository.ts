@@ -56,6 +56,8 @@ export class InvitationRepository {
             tokenVersion: values.tokenVersion,
             expiresAt: values.expiresAt,
             invitedByUserId: values.invitedByUserId,
+            role: values.role,
+            projectIds: values.projectIds,
             acceptedAt: values.acceptedAt,
             revokedAt: values.revokedAt,
           },

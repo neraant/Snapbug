@@ -86,6 +86,7 @@ export class ResendInvitationUseCase {
         inviteUrl: this.invitationService.inviteUrl(token),
         organizationName: organization.name,
         inviterName,
+        role: invitation.role,
         recipientName,
       }),
     });

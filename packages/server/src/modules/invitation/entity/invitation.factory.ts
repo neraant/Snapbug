@@ -10,6 +10,8 @@ export abstract class InvitationFactory {
       tokenHash: invitation.tokenHash,
       tokenVersion: invitation.tokenVersion,
       invitedByUserId: invitation.invitedByUserId,
+      role: invitation.role,
+      projectIds: invitation.projectIds,
       expiresAt: invitation.expiresAt,
       acceptedAt: null,
       revokedAt: null,

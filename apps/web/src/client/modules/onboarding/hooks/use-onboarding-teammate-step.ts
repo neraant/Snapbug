@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "@workspace/design-system/components/ui/toast";
 import { getAppErrorMessage } from "@workspace/server/error/get-app-error-message";
+import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
 import { useFieldArray, useForm } from "react-hook-form";
 
 import { texts } from "@/client/modules/onboarding/consts/texts.const";
@@ -10,12 +11,14 @@ import {
 } from "@/client/modules/onboarding/schemas/onboarding-teammate.schema";
 import { collectTeammateEmails } from "@/client/modules/onboarding/utils/collect-teammate-email.util";
 import { useCompleteOnboarding } from "@/client/modules/shared/queries/use-complete-onboarding";
+import { useFindProjects } from "@/client/modules/shared/queries/use-find-projects";
 import { useSendInvitations } from "@/client/modules/shared/queries/use-send-invitations";
 type UseOnboardingTeammateStepInput = {
   organizationId: string;
 };
 
 export function useOnboardingTeammateStep({ organizationId }: UseOnboardingTeammateStepInput) {
+  const { data: projects } = useFindProjects();
   const { mutateAsync: sendInvitations, isPending: isSending } = useSendInvitations();
   const { mutateAsync: completeOnboarding, isPending: isCompleting } = useCompleteOnboarding();
   const form = useForm<OnboardingTeammateSchemaType>({
@@ -34,7 +37,12 @@ export function useOnboardingTeammateStep({ organizationId }: UseOnboardingTeamm
 
     if (emails.length > 0) {
       try {
-        await sendInvitations({ organizationId, emails });
+        await sendInvitations({
+          organizationId,
+          emails,
+          role: UserRole.USER,
+          projectIds: projects.map((project) => project.id),
+        });
       } catch (error) {
         toast.add({
           title: getAppErrorMessage(error, texts.teammate.toast.sendError),

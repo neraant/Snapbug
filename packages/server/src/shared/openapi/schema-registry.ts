@@ -323,6 +323,8 @@ JSON_SCHEMA_REGISTRY.add(sendInvitationsInputDtoSchema, {
     {
       organizationId: "2a8c69a1-1ab1-45a8-8497-eae1e506d9d1",
       emails: ["teammate@example.com"],
+      role: UserRole.USER,
+      projectIds: ["4a8c69a1-1ab1-45a8-8497-eae1e506d9d3"],
     },
   ],
 });

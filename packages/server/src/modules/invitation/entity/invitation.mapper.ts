@@ -2,8 +2,6 @@ import { Invitation } from "@workspace/server/modules/invitation/entity/invitati
 import type { InvitationPersistedType } from "@workspace/server/modules/invitation/entity/invitation.types";
 import type { FindInvitationByTokenOutputDtoType } from "@workspace/validation/modules/invitation/dto/find-invitation-by-token.schema";
 import type { InvitationModelType } from "@workspace/validation/modules/invitation/dto/invitation.model";
-import type { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
-
 export abstract class InvitationMapper {
   static fromPersistence(row: InvitationPersistedType): Invitation {
     return new Invitation(row);
@@ -25,8 +23,9 @@ export abstract class InvitationMapper {
   }
 
   static toAudit(invitation: Invitation): Record<string, unknown> {
-    const { email, invitedByUserId, expiresAt, acceptedAt, revokedAt, tokenVersion } = invitation.toObject();
-    return { email, invitedByUserId, expiresAt, acceptedAt, revokedAt, tokenVersion };
+    const { email, invitedByUserId, role, projectIds, expiresAt, acceptedAt, revokedAt, tokenVersion } =
+      invitation.toObject();
+    return { email, invitedByUserId, role, projectIds, expiresAt, acceptedAt, revokedAt, tokenVersion };
   }
 
   static toFindByTokenOutput(
@@ -34,19 +33,18 @@ export abstract class InvitationMapper {
     context: {
       organizationName: string;
       inviterName: string;
-      role: UserRole;
       accountExists: boolean;
       alreadyMember: boolean;
     },
   ): Extract<FindInvitationByTokenOutputDtoType, { status: "pending" }> {
-    const { email, organizationId, expiresAt } = invitation.toObject();
+    const { email, organizationId, expiresAt, role } = invitation.toObject();
     return {
       status: "pending",
       email,
       organizationId,
       organizationName: context.organizationName,
       inviterName: context.inviterName,
-      role: context.role,
+      role,
       expiresAt: expiresAt.toISOString(),
       accountExists: context.accountExists,
       alreadyMember: context.alreadyMember,

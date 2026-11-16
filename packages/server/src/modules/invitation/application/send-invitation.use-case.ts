@@ -2,12 +2,13 @@ import { InvitationEmailTemplate } from "@workspace/server/modules/invitation/em
 import { InvitationFactory } from "@workspace/server/modules/invitation/entity/invitation.factory";
 import type { MembershipPort } from "@workspace/server/modules/invitation/port/membership.port";
 import type { OrganizationPort } from "@workspace/server/modules/invitation/port/organization.port";
+import type { ProjectPort } from "@workspace/server/modules/invitation/port/project.port";
 import type { UserPort } from "@workspace/server/modules/invitation/port/user.port";
 import type { InvitationRepository } from "@workspace/server/modules/invitation/repository/invitation.repository";
 import type { InvitationService } from "@workspace/server/modules/invitation/service/invitation.service";
 import type { WithTransactionType } from "@workspace/server/shared/database/transaction.util";
 import type { EmailService } from "@workspace/server/shared/email/service/email.service";
-import { ForbiddenError, NotFoundError } from "@workspace/server/shared/error/app-errors";
+import { BadRequestError, ForbiddenError, NotFoundError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import type {
   SendInvitationsInputDtoType,
@@ -26,6 +27,7 @@ export class SendInvitationsUseCase {
     private readonly membershipPort: MembershipPort,
     private readonly userPort: UserPort,
     private readonly organizationPort: OrganizationPort,
+    private readonly projectPort: ProjectPort,
     private readonly emailService: EmailService,
     private readonly withTransaction: WithTransactionType,
   ) {}
@@ -54,6 +56,7 @@ export class SendInvitationsUseCase {
     const inviter = await this.userPort.findById(userId);
     const inviterName = inviter.name?.trim() ? inviter.name.trim() : inviter.email;
 
+    const storedProjectIds = await this.resolveStoredProjectIds(input.organizationId, input.role, input.projectIds);
     const normalizedInviterEmail = inviterEmail.toLowerCase();
     const emails = this.normalizeEmails(input.emails);
     let sent = 0;
@@ -89,12 +92,14 @@ export class SendInvitationsUseCase {
       if (existingInvitation?.isPending()) {
         const tokenVersion = existingInvitation.tokenVersion + 1;
         const token = this.invitationService.buildInvitationToken(existingInvitation.id, tokenVersion);
-        const rotatedInvitation = existingInvitation.withRotatedToken({
-          tokenHash: this.invitationService.hashToken(token),
-          tokenVersion,
-          expiresAt: new Date(Date.now() + TOKEN_TTL_MS),
-          invitedByUserId: userId,
-        });
+        const rotatedInvitation = existingInvitation
+          .withInviteAccess({ role: input.role, projectIds: storedProjectIds })
+          .withRotatedToken({
+            tokenHash: this.invitationService.hashToken(token),
+            tokenVersion,
+            expiresAt: new Date(Date.now() + TOKEN_TTL_MS),
+            invitedByUserId: userId,
+          });
 
         await this.withTransaction(async (tx) => {
           await this.invitationService
@@ -110,6 +115,7 @@ export class SendInvitationsUseCase {
             inviteUrl: this.invitationService.inviteUrl(token),
             organizationName: organization.name,
             inviterName,
+            role: input.role,
             recipientName,
           }),
         });
@@ -126,6 +132,8 @@ export class SendInvitationsUseCase {
         tokenHash: this.invitationService.hashToken(token),
         tokenVersion: INITIAL_TOKEN_VERSION,
         invitedByUserId: userId,
+        role: input.role,
+        projectIds: storedProjectIds,
         expiresAt: new Date(Date.now() + TOKEN_TTL_MS),
       });
 
@@ -143,6 +151,7 @@ export class SendInvitationsUseCase {
           inviteUrl: this.invitationService.inviteUrl(token),
           organizationName: organization.name,
           inviterName,
+          role: input.role,
           recipientName,
         }),
       });
@@ -150,6 +159,26 @@ export class SendInvitationsUseCase {
     }
 
     return { sent, skipped, skippedAlreadyMember, resent };
+  }
+
+  private async resolveStoredProjectIds(
+    organizationId: string,
+    role: SendInvitationsInputDtoType["role"],
+    requestedProjectIds: string[],
+  ): Promise<string[]> {
+    const projects = await this.projectPort.findManyByOrganizationId({ organizationId });
+    const organizationProjectIds = new Set(projects.map((project) => project.id));
+
+    if (role === UserRole.ADMIN) {
+      return projects.map((project) => project.id);
+    }
+
+    const uniqueProjectIds = [...new Set(requestedProjectIds)];
+    if (uniqueProjectIds.some((projectId) => !organizationProjectIds.has(projectId))) {
+      throw new BadRequestError(ERROR_CODES.PROJECT_NOT_FOUND);
+    }
+
+    return uniqueProjectIds;
   }
 
   private recipientName(user: { name: string | null } | null): string | undefined {

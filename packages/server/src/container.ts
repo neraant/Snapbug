@@ -276,6 +276,7 @@ const sendInvitations = new SendInvitationsUseCase(
   membershipAdapter,
   userAdapter,
   organizationAdapter,
+  projectAdapter,
   emailService,
   withTransaction,
 );

@@ -28,6 +28,8 @@ const pendingInvitation = new Invitation({
   tokenHash: hashToken(token),
   tokenVersion: 1,
   invitedByUserId: "9a8c69a1-1ab1-45a8-8497-eae1e506d9d4",
+  role: UserRole.USER,
+  projectIds: [projectId],
   expiresAt: new Date(Date.now() + 60_000),
   acceptedAt: null,
   revokedAt: null,
@@ -172,7 +174,7 @@ describe("AcceptInvitationUseCase", () => {
     expect(userPort.markOnboardingComplete).toHaveBeenCalledWith(userId);
     expect(invitationRepository.findByToken).toHaveBeenCalledWith(hashToken(token));
     expect(withTransactionFn).toHaveBeenCalledOnce();
-    expect(membershipPort.createInvited).toHaveBeenCalledWith(organizationId, userId);
+    expect(membershipPort.createInvited).toHaveBeenCalledWith(organizationId, userId, UserRole.USER);
     expect(membershipPort.grantProjects).toHaveBeenCalledWith(
       "1a8c69a1-1ab1-45a8-8497-eae1e506d9d1",
       [projectId],
@@ -199,6 +201,6 @@ describe("AcceptInvitationUseCase", () => {
     const result = await useCase.execute({ token }, userId, "invitee@company.com");
 
     expect(result.organizationId).toBe(organizationId);
-    expect(membershipPort.createInvited).toHaveBeenCalledWith(organizationId, userId);
+    expect(membershipPort.createInvited).toHaveBeenCalledWith(organizationId, userId, UserRole.USER);
   });
 });

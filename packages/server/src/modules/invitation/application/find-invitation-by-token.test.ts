@@ -29,6 +29,8 @@ function pendingInvitation(overrides: Partial<ConstructorParameters<typeof Invit
     tokenHash: hashToken(token),
     tokenVersion: 1,
     invitedByUserId: inviterUserId,
+    role: UserRole.ADMIN,
+    projectIds: [],
     expiresAt: new Date("2099-10-03T09:00:00.000Z"),
     acceptedAt: null,
     revokedAt: null,
@@ -94,7 +96,7 @@ describe("FindInvitationByTokenUseCase", () => {
       email: "alice@example.com",
       organizationName: "Acme",
       inviterName: "Morgan",
-      role: UserRole.USER,
+      role: UserRole.ADMIN,
       accountExists: false,
       alreadyMember: false,
     });

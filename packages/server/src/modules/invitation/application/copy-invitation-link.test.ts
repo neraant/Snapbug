@@ -21,6 +21,8 @@ function versionedInvitation(): Invitation {
     tokenHash: createHash("sha256").update(token).digest("hex"),
     tokenVersion: 1,
     invitedByUserId: userId,
+    role: UserRole.USER,
+    projectIds: [],
     expiresAt: new Date("2099-11-22T09:00:00.000Z"),
     acceptedAt: null,
     revokedAt: null,

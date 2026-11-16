@@ -57,13 +57,11 @@ export class AcceptInvitationUseCase {
       const membershipPort = this.membershipPort.withTx(tx);
       const projectPort = this.projectPort.withTx(tx);
       const invitationService = this.invitationService.withTx(tx).withActor({ type: "user", id: userId });
-      const createdMembership = await membershipPort.createInvited(invitation.organizationId, userId);
+      const createdMembership = await membershipPort.createInvited(invitation.organizationId, userId, invitation.role);
       const projects = await projectPort.findManyByOrganizationId({ organizationId: invitation.organizationId });
-      await membershipPort.grantProjects(
-        createdMembership.id,
-        projects.map((project) => project.id),
-        userId,
-      );
+      const projectIdsToGrant =
+        invitation.projectIds.length > 0 ? invitation.projectIds : projects.map((project) => project.id);
+      await membershipPort.grantProjects(createdMembership.id, projectIdsToGrant, userId);
       await invitationService.saveWithAudit(acceptedInvitation, "Accept invitation");
       return createdMembership;
     });

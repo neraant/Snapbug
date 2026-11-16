@@ -10,8 +10,6 @@ import type {
   FindInvitationByTokenOutputDtoType,
   InvitationLookupStatusType,
 } from "@workspace/validation/modules/invitation/dto/find-invitation-by-token.schema";
-import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
-
 type SessionContext = {
   userId: string;
   userEmail: string;
@@ -69,7 +67,6 @@ export class FindInvitationByTokenUseCase {
     return InvitationMapper.toFindByTokenOutput(invitation, {
       organizationName: organization.name,
       inviterName,
-      role: UserRole.USER,
       accountExists,
       alreadyMember,
     });
