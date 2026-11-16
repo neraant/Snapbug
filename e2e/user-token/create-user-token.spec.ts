@@ -21,8 +21,8 @@ test("a member can create a personal MCP token and see the secret once", async (
   await page.getByRole("button", { name: "Skip onboarding" }).click();
   await expect(page).toHaveURL(/\/overview/, { timeout: 30_000 });
 
-  await page.goto("/settings?tab=tokens");
-  await expect(page.getByRole("tab", { name: "Access tokens" })).toBeVisible({ timeout: 30_000 });
+  await page.goto("/mcp?tab=tokens");
+  await expect(page.getByRole("tab", { name: "Tokens" })).toBeVisible({ timeout: 30_000 });
   await expect(page.getByRole("button", { name: "Create token" })).toBeVisible({ timeout: 30_000 });
 
   await page.waitForFunction(() => {
@@ -36,7 +36,7 @@ test("a member can create a personal MCP token and see the secret once", async (
   await page.getByRole("button", { name: "Create token" }).click();
   const createDialog = page.getByRole("dialog", { name: "Create token" });
   await expect(createDialog).toBeVisible({ timeout: 30_000 });
-  await createDialog.getByRole("textbox", { name: "Local dev" }).fill(tokenName);
+  await createDialog.getByRole("textbox", { name: "Name" }).fill(tokenName);
   await createDialog.getByRole("button", { name: "Create", exact: true }).click();
 
   const secretDialog = page.getByRole("dialog", { name: "Token created" });
