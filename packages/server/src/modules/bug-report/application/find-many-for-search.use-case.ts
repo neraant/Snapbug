@@ -17,6 +17,8 @@ export class FindManyForSearchUseCase {
         shortId: row.shortId,
         title: row.title,
         projectId: row.projectId,
+        status: row.status,
+        severity: row.severity,
       };
     });
   }

@@ -43,6 +43,7 @@ export class SearchUseCase {
       .map((project) => ({
         id: project.id,
         name: project.name,
+        slug: project.slug,
         color: project.color,
       }));
 
@@ -59,6 +60,8 @@ export class SearchUseCase {
       title: bugReport.title,
       projectId: bugReport.projectId,
       projectName: projectNameById.get(bugReport.projectId) ?? "",
+      status: bugReport.status,
+      severity: bugReport.severity,
     }));
 
     return { projects: matchedProjects, tickets };
