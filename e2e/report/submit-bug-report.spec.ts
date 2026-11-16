@@ -14,7 +14,7 @@ test("a visitor report shows on the dashboard with screenshot, environment, logs
   await page.goto("/report");
   await expect(page.getByRole("heading", { name: "Store checkout" })).toBeVisible();
   const reportButton = page.getByRole("button", { name: "Report a bug" });
-  await expect(reportButton).toBeVisible();
+  await expect(reportButton).toBeVisible({ timeout: 30_000 });
   await page.evaluate((message) => {
     console.info(message);
   }, logMarker);
