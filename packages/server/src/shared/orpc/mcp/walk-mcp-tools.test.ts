@@ -1,62 +1,12 @@
-import { oc } from "@orpc/contract";
-import { implement, os } from "@orpc/server";
+import { implement } from "@orpc/server";
 import { bugReportContract } from "@workspace/server/modules/bug-report/bug-report.contract";
 import { commentContract } from "@workspace/server/modules/comment/comment.contract";
-import { listMcpTools, type OrpcMetaType } from "@workspace/server/shared/orpc/mcp/walk-mcp-tools";
+import { MCP_TOOL_CATALOG_BY_NAME } from "@workspace/server/shared/orpc/mcp/mcp-tool-catalog.const";
+import { listMcpTools } from "@workspace/server/shared/orpc/mcp/walk-mcp-tools";
 import { describe, expect, it } from "vitest";
 
-const builder = os.$meta<OrpcMetaType>({});
-
-const marked = builder
-  .meta({ mcp: true })
-  .route({ summary: "Find nested" })
-  .handler(() => ({ ok: true }));
-
-const unmarked = builder.route({ summary: "Hidden" }).handler(() => ({ ok: true }));
-
 describe("listMcpTools", () => {
-  it("includes nested mcp procedures with path-joined names", () => {
-    const router = {
-      portfolios: {
-        capitalCalls: {
-          findSummary: marked,
-        },
-      },
-    };
-
-    const tools = listMcpTools(router);
-
-    expect(tools).toHaveLength(1);
-    expect(tools[0]?.name).toBe("portfolios_capitalCalls_findSummary");
-    expect(tools[0]?.description).toBe("Find nested");
-    expect(tools[0]?.procedure).toBe(marked);
-  });
-
-  it("skips unmarked procedures", () => {
-    const router = {
-      hidden: unmarked,
-      shown: marked,
-    };
-
-    expect(listMcpTools(router).map((tool) => tool.name)).toEqual(["shown"]);
-  });
-
-  it("returns an empty list for an empty router", () => {
-    expect(listMcpTools({})).toEqual([]);
-  });
-
-  it("uses the public name add_comment and marks the write", () => {
-    const named = builder
-      .meta({ mcp: true, name: "add_comment", readOnlyHint: false })
-      .route({ summary: "Add comment" })
-      .handler(() => ({ ok: true }));
-
-    expect(listMcpTools({ comment: { addComment: named } })).toEqual([
-      expect.objectContaining({ name: "add_comment", description: "Add comment", readOnlyHint: false }),
-    ]);
-  });
-
-  it("registers add_comment and does not register a replay tool", () => {
+  it("returns only catalog tools with catalog descriptions", () => {
     const comment = implement(commentContract);
     const bugReport = implement(bugReportContract);
     const tools = listMcpTools({
@@ -65,46 +15,32 @@ describe("listMcpTools", () => {
         findComments: comment.findComments.handler(() => []),
       },
       bugReport: {
-        create: bugReport.create.handler(() => ({}) as never),
+        findOne: bugReport.findOne.handler(() => ({}) as never),
         findReplay: bugReport.findReplay.handler(() => new Blob()),
       },
     });
     const names = tools.map((tool) => tool.name);
 
     expect(names).toContain("add_comment");
+    expect(names).toContain("get_ticket");
+    expect(names).not.toContain("findReplay");
+    expect(tools.find((tool) => tool.name === "add_comment")?.description).toBe(
+      MCP_TOOL_CATALOG_BY_NAME.add_comment.description,
+    );
     expect(tools.find((tool) => tool.name === "add_comment")?.readOnlyHint).toBe(false);
-    expect(names.some((name) => name.toLowerCase().includes("replay"))).toBe(false);
-    expect(names).not.toContain("comment_findComments");
   });
 
-  it("keeps contract meta after implement", () => {
-    const contract = oc.$meta<OrpcMetaType>({});
-    const bugReportContract = {
-      create: contract.meta({ mcp: true }).route({ summary: "Create bug report" }),
-      findMany: contract.route({ summary: "List bug reports" }),
-    };
-    const procedures = implement(bugReportContract);
+  it("skips mcp procedures that are not in the catalog", () => {
+    const comment = implement(commentContract);
     const router = {
-      bugReport: procedures.router({
-        create: procedures.create.handler(() => ({ ok: true })),
-        findMany: procedures.findMany.handler(() => ({ ok: true })),
-      }),
+      comment: {
+        addComment: comment.addComment.handler(() => ({}) as never),
+      },
+      bugReport: {
+        create: implement(bugReportContract).create.handler(() => ({}) as never),
+      },
     };
 
-    expect(listMcpTools(router).map((tool) => tool.name)).toEqual(["bugReport_create"]);
-    expect(listMcpTools(router)[0]?.description).toBe("Create bug report");
-  });
-
-  it("uses an explicit tool name when meta provides one", () => {
-    const named = builder
-      .meta({ mcp: true, name: "list_tickets", readOnlyHint: false })
-      .route({ summary: "List tickets" })
-      .handler(() => ({ ok: true }));
-
-    const tools = listMcpTools({ bugReport: { listTickets: named } });
-
-    expect(tools).toEqual([
-      expect.objectContaining({ name: "list_tickets", description: "List tickets", readOnlyHint: false }),
-    ]);
+    expect(listMcpTools(router).map((tool) => tool.name)).toEqual(["add_comment"]);
   });
 });

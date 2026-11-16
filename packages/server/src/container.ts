@@ -30,6 +30,9 @@ import { FindScreenshotUseCase } from "@workspace/server/modules/bug-report/appl
 import { FindStatsUseCase } from "@workspace/server/modules/bug-report/application/find-stats.use-case";
 import { FindWidgetConfigUseCase } from "@workspace/server/modules/bug-report/application/find-widget-config.use-case";
 import { FindWorkloadUseCase } from "@workspace/server/modules/bug-report/application/find-workload.use-case";
+import { GetOverviewStatsUseCase } from "@workspace/server/modules/bug-report/application/get-overview-stats.use-case";
+import { GetTicketEnvironmentUseCase } from "@workspace/server/modules/bug-report/application/get-ticket-environment.use-case";
+import { ListTicketLogsUseCase } from "@workspace/server/modules/bug-report/application/list-ticket-logs.use-case";
 import { ListTicketsUseCase } from "@workspace/server/modules/bug-report/application/list-tickets.use-case";
 import { UpdateBugReportUseCase } from "@workspace/server/modules/bug-report/application/update-bug-report.use-case";
 import { BugReportRepository } from "@workspace/server/modules/bug-report/repository/bug-report.repository";
@@ -68,6 +71,7 @@ import { FindMembershipProjectAccessUseCase } from "@workspace/server/modules/me
 import { FindMembershipsByUserUseCase } from "@workspace/server/modules/membership/application/find-memberships-by-user.use-case";
 import { FindProjectMembersUseCase } from "@workspace/server/modules/membership/application/find-project-members.use-case";
 import { FindTeamMembersUseCase } from "@workspace/server/modules/membership/application/find-team-members.use-case";
+import { ListMembersUseCase } from "@workspace/server/modules/membership/application/list-members.use-case";
 import { RemoveMembershipUseCase } from "@workspace/server/modules/membership/application/remove-membership.use-case";
 import { ReplaceMembershipProjectAccessUseCase } from "@workspace/server/modules/membership/application/replace-membership-project-access.use-case";
 import { UpdateMembershipRoleUseCase } from "@workspace/server/modules/membership/application/update-membership-role.use-case";
@@ -95,6 +99,8 @@ import { CreateProjectUseCase } from "@workspace/server/modules/project/applicat
 import { DeleteProjectUseCase } from "@workspace/server/modules/project/application/delete-project.use-case";
 import { FindProjectWidgetSettingUseCase } from "@workspace/server/modules/project/application/find-project-widget-setting.use-case";
 import { FindProjectsUseCase } from "@workspace/server/modules/project/application/find-projects.use-case";
+import { GetProjectUseCase } from "@workspace/server/modules/project/application/get-project.use-case";
+import { ListProjectsUseCase } from "@workspace/server/modules/project/application/list-projects.use-case";
 import { RestoreProjectUseCase } from "@workspace/server/modules/project/application/restore-project.use-case";
 import { UpdateProjectUseCase } from "@workspace/server/modules/project/application/update-project.use-case";
 import { UpdateProjectWidgetSettingUseCase } from "@workspace/server/modules/project/application/update-project-widget-setting.use-case";
@@ -379,6 +385,12 @@ const updateBugReport = new UpdateBugReportUseCase(
   withTransaction,
 );
 const listTickets = new ListTicketsUseCase(membershipAdapter, projectAdapter, bugReportRepository);
+const listTicketLogs = new ListTicketLogsUseCase(membershipAdapter, bugReportRepository);
+const getTicketEnvironment = new GetTicketEnvironmentUseCase(membershipAdapter, bugReportRepository);
+const getOverviewStats = new GetOverviewStatsUseCase(membershipAdapter, projectAdapter, bugReportRepository);
+const listProjects = new ListProjectsUseCase(membershipAdapter, projectRepository);
+const getProject = new GetProjectUseCase(membershipAdapter, projectRepository);
+const listMembers = new ListMembersUseCase(membershipRepository, userAdapter);
 const userTokenRepository = new UserTokenRepository();
 const userTokenService = new UserTokenService();
 const createUserToken = new CreateUserTokenUseCase(userTokenService, userTokenRepository);
@@ -432,6 +444,7 @@ export const container = {
     removeMembership,
     findMembershipProjectAccess,
     replaceMembershipProjectAccess,
+    listMembers,
   },
   identity: { createUser, findUserByEmail, findCurrentUser, updateInterfaceLanguage },
   project: {
@@ -443,6 +456,8 @@ export const container = {
     deleteProject,
     findProjectWidgetSetting,
     updateProjectWidgetSetting,
+    listProjects,
+    getProject,
   },
   organization: {
     findOnboarding,
@@ -479,6 +494,9 @@ export const container = {
     countOpenByAssignee,
     updateBugReport,
     listTickets,
+    listTicketLogs,
+    getTicketEnvironment,
+    getOverviewStats,
   },
   userToken: {
     create: createUserToken,

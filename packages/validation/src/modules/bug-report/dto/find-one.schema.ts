@@ -9,7 +9,7 @@ const findOneAssigneeSchema = userModelSchema.pick({
 });
 
 export const findOneInputDtoSchema = z.object({
-  shortId: z.string().min(1),
+  shortId: z.string().min(1).describe("Ticket short id, for example SNB-12."),
 });
 
 export type FindOneInputDtoType = z.infer<typeof findOneInputDtoSchema>;

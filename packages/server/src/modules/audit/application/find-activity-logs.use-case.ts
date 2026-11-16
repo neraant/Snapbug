@@ -36,7 +36,7 @@ export class FindActivityLogsUseCase {
       throw new ForbiddenError(ERROR_CODES.ADMIN_REQUIRED, "Administrator access is required");
     }
 
-    const limit = input.limit ?? 50;
+    const limit = input.limit ?? 20;
     const auditLogs = await this.auditLogRepository.findPageByOrganizationId({
       organizationId,
       limit,

@@ -1,7 +1,10 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { type AnyProcedure, createProcedureClient } from "@orpc/server";
-import { listMcpTools } from "@workspace/server/shared/orpc/mcp/walk-mcp-tools";
+import {
+  filterMcpToolsForContext,
+  listMcpTools,
+} from "@workspace/server/shared/orpc/mcp/walk-mcp-tools";
 
 export type McpHandlerType = {
   handle(request: Request, options: { context: object }): Promise<{ response: Response }>;
@@ -15,9 +18,18 @@ export function createMcpHandler(router: unknown): McpHandlerType {
       }
 
       const server = new McpServer({ name: "Snapbug MCP", version: "1.0.0" });
+      const tools = filterMcpToolsForContext(listMcpTools(router), context as { user?: { role?: string } | null });
 
-      for (const tool of listMcpTools(router)) {
-        registerMcpTool(server, tool.name, tool.description, tool.readOnlyHint, tool.procedure, context);
+      for (const tool of tools) {
+        registerMcpTool(
+          server,
+          tool.name,
+          tool.description,
+          tool.readOnlyHint,
+          tool.destructiveHint,
+          tool.procedure,
+          context,
+        );
       }
 
       const transport = new WebStandardStreamableHTTPServerTransport({
@@ -33,8 +45,9 @@ export function createMcpHandler(router: unknown): McpHandlerType {
 function registerMcpTool(
   server: McpServer,
   name: string,
-  description: string | undefined,
+  description: string,
   readOnlyHint: boolean,
+  destructiveHint: boolean,
   procedure: AnyProcedure,
   context: object,
 ): void {
@@ -45,7 +58,7 @@ function registerMcpTool(
     {
       description,
       ...(inputSchema ? { inputSchema: inputSchema as never } : {}),
-      annotations: { readOnlyHint },
+      annotations: { readOnlyHint, destructiveHint },
     },
     async (args) => {
       try {

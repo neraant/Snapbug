@@ -1,5 +1,6 @@
 import { oc } from "@orpc/contract";
 import { sessionAuthSpec } from "@workspace/server/shared/openapi/session-auth.const";
+import type { OrpcMetaType } from "@workspace/server/shared/orpc/mcp/walk-mcp-tools";
 import {
   findMembershipInputDtoSchema,
   findMembershipOutputDtoSchema,
@@ -23,9 +24,15 @@ import {
   replaceMembershipProjectAccessOutputDtoSchema,
 } from "@workspace/validation/modules/membership/dto/replace-membership-project-access.schema";
 import {
+  listMembersInputDtoSchema,
+  listMembersOutputDtoSchema,
+} from "@workspace/validation/modules/membership/dto/list-members.schema";
+import {
   updateMembershipRoleInputDtoSchema,
   updateMembershipRoleOutputDtoSchema,
 } from "@workspace/validation/modules/membership/dto/update-membership-role.schema";
+
+const membership = oc.$meta<OrpcMetaType>({});
 
 export const membershipContract = {
   findMembership: oc
@@ -52,6 +59,17 @@ export const membershipContract = {
     summary: "List team members",
     spec: sessionAuthSpec,
   }),
+  listMembers: membership
+    .meta({ mcp: true, name: "list_members", readOnlyHint: true })
+    .input(listMembersInputDtoSchema)
+    .output(listMembersOutputDtoSchema)
+    .route({
+      method: "GET",
+      path: "/mcp/members",
+      tags: ["membership"],
+      summary: "List members for MCP",
+      spec: sessionAuthSpec,
+    }),
   findProjectMembers: oc
     .input(findProjectMembersInputDtoSchema)
     .output(findProjectMembersOutputDtoSchema)

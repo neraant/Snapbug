@@ -9,8 +9,14 @@ import { adminMiddleware } from "@workspace/server/shared/orpc/require-role.midd
 const os = implement(auditContract).$context<OrpcContext>().use(mapAppErrorMiddleware);
 const admin = os.use(authedMiddleware).use(adminMiddleware);
 
+const authed = os.use(authedMiddleware);
+
 export const auditRouter = os.router({
   findActivityLogs: admin.findActivityLogs.handler(
+    async ({ context, input }) =>
+      await container.audit.findActivityLogs.execute(context.user.id, context.organizationId, input ?? {}),
+  ),
+  listActivity: authed.listActivity.handler(
     async ({ context, input }) =>
       await container.audit.findActivityLogs.execute(context.user.id, context.organizationId, input ?? {}),
   ),

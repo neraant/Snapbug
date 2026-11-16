@@ -91,11 +91,12 @@ describe("ListTicketsUseCase", () => {
     const result = await useCase.execute({}, userId);
 
     expect(bugReportRepository.findManyByProjectIds).toHaveBeenCalledWith([projectId]);
-    expect(result).toHaveLength(1);
-    expect(result[0]?.title).toBe("Pay button throws");
-    expect(result[0]?.hasReplay).toBe(true);
-    expect(result[0]).not.toHaveProperty("replay");
-    expect(result[0]).not.toHaveProperty("replayKey");
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0]?.title).toBe("Pay button throws");
+    expect(result.items[0]?.hasReplay).toBe(true);
+    expect(result.items[0]).not.toHaveProperty("replay");
+    expect(result.items[0]).not.toHaveProperty("replayKey");
+    expect(result.nextCursor).toBeNull();
   });
 
   it("does not list a project the member cannot access", async () => {
@@ -116,5 +117,42 @@ describe("ListTicketsUseCase", () => {
     });
 
     expect(bugReportRepository.findManyByProjectIds).not.toHaveBeenCalled();
+  });
+
+  it("paginates by board order and createdAt when ties share board order", async () => {
+    const older = createBugReport("6a8c69a1-1ab1-45a8-8497-eae1e506d901", projectId);
+    const newer = new BugReport({
+      ...older.toObject(),
+      id: "6a8c69a1-1ab1-45a8-8497-eae1e506d902",
+      title: "Newer ticket",
+      createdAt: new Date("2026-10-04T09:00:00.000Z"),
+      updatedAt: new Date("2026-10-04T09:00:00.000Z"),
+    });
+    const membershipPort = {
+      findManyByUser: vi.fn().mockResolvedValue([membership]),
+      filterProjectIds: vi.fn().mockResolvedValue([projectId]),
+    };
+    const projectPort = {
+      findManyByOrganizationId: vi.fn().mockResolvedValue([project]),
+      findById: vi.fn(),
+    };
+    const bugReportRepository = { findManyByProjectIds: vi.fn().mockResolvedValue([older, newer]) };
+    const useCase = new ListTicketsUseCase(
+      membershipPort as unknown as MembershipPort,
+      projectPort as unknown as ProjectPort,
+      bugReportRepository as unknown as BugReportRepository,
+    );
+
+    const firstPage = await useCase.execute({ limit: 1 }, userId);
+
+    expect(firstPage.items).toHaveLength(1);
+    expect(firstPage.items[0]?.title).toBe("Newer ticket");
+    expect(firstPage.nextCursor).not.toBeNull();
+
+    const secondPage = await useCase.execute({ limit: 1, cursor: firstPage.nextCursor ?? undefined }, userId);
+
+    expect(secondPage.items).toHaveLength(1);
+    expect(secondPage.items[0]?.title).toBe("Pay button throws");
+    expect(secondPage.nextCursor).toBeNull();
   });
 });

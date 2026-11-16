@@ -43,9 +43,26 @@ import {
   findWorkloadOutputDtoSchema,
 } from "@workspace/validation/modules/bug-report/dto/find-workload.schema";
 import {
+  getOverviewStatsInputDtoSchema,
+  getOverviewStatsOutputDtoSchema,
+} from "@workspace/validation/modules/bug-report/dto/get-overview-stats.schema";
+import {
+  getTicketEnvironmentInputDtoSchema,
+  getTicketEnvironmentOutputDtoSchema,
+} from "@workspace/validation/modules/bug-report/dto/get-ticket-environment.schema";
+import {
+  listTicketLogsInputDtoSchema,
+  listTicketLogsOutputDtoSchema,
+} from "@workspace/validation/modules/bug-report/dto/list-ticket-logs.schema";
+import {
+  listTicketsInputDtoSchema,
+  listTicketsOutputDtoSchema,
+} from "@workspace/validation/modules/bug-report/dto/list-tickets.schema";
+import {
   updateBugReportInputDtoSchema,
   updateBugReportOutputDtoSchema,
 } from "@workspace/validation/modules/bug-report/dto/update-bug-report.schema";
+import { updateTicketMcpInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/update-ticket-mcp.schema";
 
 const bugReport = oc.$meta<OrpcMetaType>({});
 
@@ -74,7 +91,7 @@ export const bugReportContract = {
       spec: sessionAuthSpec,
     }),
   findOne: bugReport
-    .meta({ mcp: true, name: "get_ticket" })
+    .meta({ mcp: true, name: "get_ticket", readOnlyHint: true })
     .input(findOneInputDtoSchema)
     .output(findOneOutputDtoSchema)
     .route({
@@ -85,7 +102,7 @@ export const bugReportContract = {
       spec: sessionAuthSpec,
     }),
   findScreenshot: bugReport
-    .meta({ mcp: true, name: "get_screenshot" })
+    .meta({ mcp: true, name: "get_screenshot", readOnlyHint: true })
     .input(findScreenshotInputDtoSchema)
     .output(oz.blob())
     .route({
@@ -106,7 +123,6 @@ export const bugReportContract = {
       spec: sessionAuthSpec,
     }),
   update: bugReport
-    .meta({ mcp: true, name: "update_ticket", readOnlyHint: false })
     .input(updateBugReportInputDtoSchema)
     .output(updateBugReportOutputDtoSchema)
     .route({
@@ -116,15 +132,59 @@ export const bugReportContract = {
       summary: "Update a ticket",
       spec: sessionAuthSpec,
     }),
+  updateTicketMcp: bugReport
+    .meta({ mcp: true, name: "update_ticket", readOnlyHint: false, destructiveHint: false })
+    .input(updateTicketMcpInputDtoSchema)
+    .output(updateBugReportOutputDtoSchema)
+    .route({
+      method: "PATCH",
+      path: "/mcp/tickets",
+      tags: ["bug-report"],
+      summary: "Update a ticket via MCP",
+      spec: sessionAuthSpec,
+    }),
   listTickets: bugReport
-    .meta({ mcp: true, name: "list_tickets" })
-    .input(findBugReportsInputDtoSchema)
-    .output(findBugReportsOutputDtoSchema)
+    .meta({ mcp: true, name: "list_tickets", readOnlyHint: true })
+    .input(listTicketsInputDtoSchema)
+    .output(listTicketsOutputDtoSchema)
     .route({
       method: "GET",
       path: "/mcp/tickets",
       tags: ["bug-report"],
       summary: "List tickets",
+      spec: sessionAuthSpec,
+    }),
+  listTicketLogs: bugReport
+    .meta({ mcp: true, name: "list_ticket_logs", readOnlyHint: true })
+    .input(listTicketLogsInputDtoSchema)
+    .output(listTicketLogsOutputDtoSchema)
+    .route({
+      method: "GET",
+      path: "/mcp/ticket-logs",
+      tags: ["bug-report"],
+      summary: "List ticket logs",
+      spec: sessionAuthSpec,
+    }),
+  getTicketEnvironment: bugReport
+    .meta({ mcp: true, name: "get_ticket_environment", readOnlyHint: true })
+    .input(getTicketEnvironmentInputDtoSchema)
+    .output(getTicketEnvironmentOutputDtoSchema)
+    .route({
+      method: "GET",
+      path: "/mcp/ticket-environment",
+      tags: ["bug-report"],
+      summary: "Get ticket environment",
+      spec: sessionAuthSpec,
+    }),
+  getOverviewStats: bugReport
+    .meta({ mcp: true, name: "get_overview_stats", readOnlyHint: true })
+    .input(getOverviewStatsInputDtoSchema)
+    .output(getOverviewStatsOutputDtoSchema)
+    .route({
+      method: "GET",
+      path: "/mcp/overview-stats",
+      tags: ["bug-report"],
+      summary: "Get overview stats",
       spec: sessionAuthSpec,
     }),
   findStats: bugReport
