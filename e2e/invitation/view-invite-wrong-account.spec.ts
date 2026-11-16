@@ -35,6 +35,7 @@ test("a signed-in member opening someone else's invite sees the wrong-account sc
   await page.getByRole("button", { name: `Invitation actions for ${inviteEmail}` }).click();
   await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
   await page.getByRole("menuitem", { name: "Copy link" }).click();
+  await expect(page.getByText("Invitation link copied.")).toBeVisible({ timeout: 15_000 });
 
   const inviteUrl = await page.evaluate(async () => await navigator.clipboard.readText());
 
