@@ -1,4 +1,6 @@
 import { Column } from "@workspace/design-system/components/layout/column";
+import { Row } from "@workspace/design-system/components/layout/row";
+import { Badge } from "@workspace/design-system/components/ui/badge";
 import { Button } from "@workspace/design-system/components/ui/button";
 import { ConfirmDialog } from "@workspace/design-system/components/ui/confirm-dialog";
 import {
@@ -14,16 +16,19 @@ import { getAppErrorMessage } from "@workspace/server/error/get-app-error-messag
 import { CopyIcon, EllipsisVerticalIcon, RefreshCwIcon, XIcon } from "lucide-react";
 
 import { useConfirmDialog } from "@/client/modules/shared/hooks/use-confirm-dialog";
+import { InvitePeopleDialog } from "@/client/modules/team/components/invite-people-dialog";
 import { texts } from "@/client/modules/team/consts/texts.const";
 import { usePendingInvitations } from "@/client/modules/team/hooks/use-pending-invitations";
+import { isInvitationExpired, isInvitationPending } from "@/client/modules/team/utils/count-pending-invitations.util";
+
+function formatInvitationDate(value: string): string {
+  return new Date(value).toLocaleDateString();
+}
 
 export function PendingInvitations() {
   const { invitations, resend, revoke, copyLink, isMutating } = usePendingInvitations();
   const { confirm, bind } = useConfirmDialog();
-  const now = Date.now();
-  const activeInvitations = invitations.filter(
-    (invitation) => invitation.revokedAt === null && new Date(invitation.expiresAt).getTime() > now,
-  );
+  const openInvitations = invitations.filter((invitation) => invitation.revokedAt === null);
 
   const openRevokeConfirm = (invitationId: string, email: string) => {
     confirm({
@@ -42,67 +47,108 @@ export function PendingInvitations() {
     });
   };
 
-  if (activeInvitations.length === 0) {
-    return null;
+  if (openInvitations.length === 0) {
+    return (
+      <Column align="center" gap="md" padding="lg" width="full">
+        <Typography variant="text-sm" color="muted">
+          {texts.pending.empty}
+        </Typography>
+        <InvitePeopleDialog />
+      </Column>
+    );
   }
 
   return (
     <Column gap="sm" width="full">
-      <Typography variant="heading-xs">{texts.pending.title}</Typography>
       <Table>
         <Table.Header>
           <Table.Row>
             <Table.Head>{texts.pending.column.email}</Table.Head>
+            <Table.Head>{texts.pending.column.sent}</Table.Head>
             <Table.Head>{texts.pending.column.expires}</Table.Head>
+            <Table.Head>{texts.pending.column.status}</Table.Head>
             <Table.Head>{texts.pending.column.actions}</Table.Head>
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {activeInvitations.map((invitation) => (
-            <Table.Row key={invitation.id}>
-              <Table.Cell>
-                <Typography variant="text-sm">{invitation.email}</Typography>
-              </Table.Cell>
-              <Table.Cell>
-                <Typography variant="text-sm" color="muted">
-                  {new Date(invitation.expiresAt).toLocaleDateString()}
-                </Typography>
-              </Table.Cell>
-              <Table.Cell>
-                <DropdownMenu>
-                  <DropdownMenuTrigger
-                    render={
+          {openInvitations.map((invitation) => {
+            const expired = isInvitationExpired(invitation);
+            const pending = isInvitationPending(invitation);
+
+            return (
+              <Table.Row key={invitation.id}>
+                <Table.Cell>
+                  <Typography variant="text-sm">{invitation.email}</Typography>
+                </Table.Cell>
+                <Table.Cell>
+                  <Typography variant="text-sm" color="muted">
+                    {formatInvitationDate(invitation.createdAt)}
+                  </Typography>
+                </Table.Cell>
+                <Table.Cell>
+                  <Typography variant="text-sm" color="muted">
+                    {formatInvitationDate(invitation.expiresAt)}
+                  </Typography>
+                </Table.Cell>
+                <Table.Cell>
+                  {expired ? (
+                    <Badge variant="warning">{texts.pending.status.expired}</Badge>
+                  ) : pending ? (
+                    <Badge variant="secondary">{texts.pending.status.pending}</Badge>
+                  ) : null}
+                </Table.Cell>
+                <Table.Cell>
+                  <Row gap="xs" justify="end" wrap={false}>
+                    {expired ? (
                       <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        aria-label={texts.pending.menu(invitation.email)}
+                        type="button"
+                        variant="outline"
+                        size="sm"
                         disabled={isMutating}
-                      />
-                    }
-                  >
-                    <EllipsisVerticalIcon />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => resend(invitation.id)}>
-                      <RefreshCwIcon />
-                      {texts.pending.resend}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => copyLink(invitation.id)}>
-                      <CopyIcon />
-                      {texts.pending.copyLink}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      variant="destructive"
-                      onClick={() => openRevokeConfirm(invitation.id, invitation.email)}
-                    >
-                      <XIcon />
-                      {texts.pending.revoke}
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </Table.Cell>
-            </Table.Row>
-          ))}
+                        onClick={() => resend(invitation.id)}
+                      >
+                        <RefreshCwIcon />
+                        {texts.pending.resend}
+                      </Button>
+                    ) : null}
+                    <DropdownMenu>
+                      <DropdownMenuTrigger
+                        render={
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
+                            aria-label={texts.pending.menu(invitation.email)}
+                            disabled={isMutating}
+                          />
+                        }
+                      >
+                        <EllipsisVerticalIcon />
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        {!expired ? (
+                          <DropdownMenuItem onClick={() => resend(invitation.id)}>
+                            <RefreshCwIcon />
+                            {texts.pending.resend}
+                          </DropdownMenuItem>
+                        ) : null}
+                        <DropdownMenuItem onClick={() => copyLink(invitation.id)}>
+                          <CopyIcon />
+                          {texts.pending.copyLink}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          variant="destructive"
+                          onClick={() => openRevokeConfirm(invitation.id, invitation.email)}
+                        >
+                          <XIcon />
+                          {texts.pending.revoke}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </Row>
+                </Table.Cell>
+              </Table.Row>
+            );
+          })}
         </Table.Body>
       </Table>
       <ConfirmDialog {...bind()} />
@@ -111,5 +157,5 @@ export function PendingInvitations() {
 }
 
 PendingInvitations.Fallback = function PendingInvitationsFallback() {
-  return <Skeleton className="h-24 w-full" />;
+  return <Skeleton className="h-72 w-full" />;
 };

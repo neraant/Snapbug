@@ -6,14 +6,14 @@ import { UserPlusIcon } from "lucide-react";
 import { Suspense } from "react";
 
 import { InvitePeopleDialog } from "@/client/modules/team/components/invite-people-dialog";
-import { Team } from "@/client/modules/team/components/team";
-import { TeamPendingInvitations } from "@/client/modules/team/components/team-pending-invitations";
+import { TeamTabs } from "@/client/modules/team/components/team-tabs";
 import { texts } from "@/client/modules/team/consts/texts.const";
 
 export default function Page() {
   return (
     <PageContainer
       title={texts.title}
+      description={texts.description}
       actions={
         <Suspense
           fallback={
@@ -27,9 +27,8 @@ export default function Page() {
         </Suspense>
       }
     >
-      <TeamPendingInvitations />
-      <Suspense fallback={<Team.Fallback />}>
-        <Team />
+      <Suspense fallback={<TeamTabs.Fallback />}>
+        <TeamTabs />
       </Suspense>
     </PageContainer>
   );

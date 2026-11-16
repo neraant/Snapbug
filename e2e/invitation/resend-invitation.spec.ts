@@ -32,8 +32,10 @@ test("an administrator resends a pending invitation", async ({ page }) => {
   await inviteDialog.getByRole("textbox", { name: "Email addresses" }).press("Enter");
   await inviteDialog.getByRole("button", { name: "Send invitations" }).click();
   await expect(page.getByText("Invitations sent.")).toBeVisible();
+  await expect(page.getByRole("button", { name: "View" })).toBeVisible();
+  await page.getByRole("button", { name: "View" }).click();
 
-  await expect(page.getByRole("heading", { name: "Pending invitations" })).toBeVisible();
+  await expect(page).toHaveURL(/tab=invitations/);
   await expect(page.getByText(inviteEmail)).toBeVisible();
 
   await page.getByRole("button", { name: `Invitation actions for ${inviteEmail}` }).click();
