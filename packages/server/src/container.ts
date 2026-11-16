@@ -62,6 +62,7 @@ import { RevokeInvitationUseCase } from "@workspace/server/modules/invitation/ap
 import { SendInvitationsUseCase } from "@workspace/server/modules/invitation/application/send-invitation.use-case";
 import { InvitationRepository } from "@workspace/server/modules/invitation/repository/invitation.repository";
 import { InvitationService } from "@workspace/server/modules/invitation/service/invitation.service";
+import { ListToolsUseCase } from "@workspace/server/modules/mcp/application/list-tools.use-case";
 import { ActivityLogMembershipAdapter } from "@workspace/server/modules/membership/adapter/activity-log-membership.adapter";
 import { MembershipAdapter } from "@workspace/server/modules/membership/adapter/membership.adapter";
 import { CheckUserProjectAccessUseCase } from "@workspace/server/modules/membership/application/check-user-project-access.use-case";
@@ -106,7 +107,6 @@ import { UpdateProjectUseCase } from "@workspace/server/modules/project/applicat
 import { UpdateProjectWidgetSettingUseCase } from "@workspace/server/modules/project/application/update-project-widget-setting.use-case";
 import { ProjectRepository } from "@workspace/server/modules/project/repository/project.repository";
 import { ProjectService } from "@workspace/server/modules/project/service/project.service";
-import { ListToolsUseCase } from "@workspace/server/modules/mcp/application/list-tools.use-case";
 import { SearchUseCase } from "@workspace/server/modules/search/application/search.use-case";
 import { CreateUserTokenUseCase } from "@workspace/server/modules/user-token/application/create-user-token.use-case";
 import { FindUserByTokenUseCase } from "@workspace/server/modules/user-token/application/find-user-by-token.use-case";
@@ -393,7 +393,7 @@ const getTicketEnvironment = new GetTicketEnvironmentUseCase(membershipAdapter, 
 const getOverviewStats = new GetOverviewStatsUseCase(membershipAdapter, projectAdapter, bugReportRepository);
 const listProjects = new ListProjectsUseCase(membershipAdapter, projectRepository);
 const getProject = new GetProjectUseCase(membershipAdapter, projectRepository);
-const listMembers = new ListMembersUseCase(membershipRepository, userAdapter);
+const listMembers = new ListMembersUseCase(membershipRepository, projectAccessRepository, userAdapter);
 const userTokenRepository = new UserTokenRepository();
 const userTokenService = new UserTokenService();
 const createUserToken = new CreateUserTokenUseCase(

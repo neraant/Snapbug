@@ -27,7 +27,12 @@ export const membershipRouter = os.router({
   ),
   listMembers: authed.listMembers.handler(
     async ({ input, context }) =>
-      await container.membership.listMembers.execute(input, context.user.id, context.organizationId),
+      await container.membership.listMembers.execute(
+        input,
+        context.user.id,
+        context.organizationId,
+        context.mcp?.projectIds,
+      ),
   ),
   findProjectMembers: authed.findProjectMembers.handler(
     async ({ input, context }) =>

@@ -18,6 +18,11 @@ export const auditRouter = os.router({
   ),
   listActivity: authed.listActivity.handler(
     async ({ context, input }) =>
-      await container.audit.findActivityLogs.execute(context.user.id, context.organizationId, input ?? {}),
+      await container.audit.findActivityLogs.execute(
+        context.user.id,
+        context.organizationId,
+        input ?? {},
+        context.mcp?.projectIds,
+      ),
   ),
 });

@@ -5,6 +5,7 @@ import { seedDatabase } from "../shared/seed/seed-database";
 test("create dialog shows fewer tools for a read-only token", async ({ page }) => {
   await seedDatabase();
   const email = `mcp-read-${Date.now()}@example.com`;
+  const tokenName = "Read-only E2E token";
 
   await page.goto("/sign-up");
   await page.waitForFunction(() => {
@@ -36,6 +37,15 @@ test("create dialog shows fewer tools for a read-only token", async ({ page }) =
 
   const summary = createDialog.getByText(/This token can use \d+ of 14 tools/);
   await expect(summary).toHaveText("This token can use 11 of 14 tools");
-  await createDialog.getByRole("button", { name: "Full access" }).click();
-  await expect(summary).toHaveText("This token can use 13 of 14 tools");
+  await expect(createDialog.getByText("update_ticket")).not.toBeVisible();
+  await expect(createDialog.getByText("add_comment")).not.toBeVisible();
+
+  await createDialog.getByRole("textbox", { name: "Name" }).fill(tokenName);
+  await createDialog.getByRole("button", { name: "Create", exact: true }).click();
+
+  const secretDialog = page.getByRole("dialog", { name: "Token created" });
+  await expect(secretDialog).toBeVisible({ timeout: 30_000 });
+  await secretDialog.getByRole("button", { name: "I've copied it" }).click();
+  await expect(page.getByText(tokenName)).toBeVisible();
+  await expect(page.getByText("Read only")).toBeVisible();
 });
