@@ -18,7 +18,7 @@ test("an administrator saves the organization name and retention period", async 
   await expect(page).toHaveURL(/\/overview/, { timeout: 30_000 });
 
   await page.goto("/settings");
-  await expect(page.getByRole("heading", { name: "Settings" })).toBeVisible();
+  await expect(page.getByRole("tablist", { name: "Settings sections" })).toBeVisible();
   await page.getByRole("tab", { name: "Organization" }).click();
   await expect(page).toHaveURL(/tab=organization/);
   await page.waitForFunction(() => {
