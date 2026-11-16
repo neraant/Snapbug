@@ -11,6 +11,7 @@ const admin = os.use(authedMiddleware).use(adminMiddleware);
 
 export const auditRouter = os.router({
   findActivityLogs: admin.findActivityLogs.handler(
-    async ({ context }) => await container.audit.findActivityLogs.execute(context.user.id, context.organizationId),
+    async ({ context, input }) =>
+      await container.audit.findActivityLogs.execute(context.user.id, context.organizationId, input ?? {}),
   ),
 });

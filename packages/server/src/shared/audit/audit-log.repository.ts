@@ -8,9 +8,27 @@ import { InternalServerError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import { BugReportSeverity } from "@workspace/validation/modules/bug-report/consts/bug-report-severity.const";
 import { BugReportStatus } from "@workspace/validation/modules/bug-report/consts/bug-report-status.const";
-import { and, asc, desc, eq, inArray, lte } from "drizzle-orm";
+import { decodeActivityLogCursor } from "@workspace/server/shared/audit/activity-log-cursor.util";
+import type { FindActivityLogsPageInput } from "@workspace/server/shared/audit/activity-log-page.types";
+import { and, asc, desc, eq, gte, ilike, inArray, lt, lte, or, sql } from "drizzle-orm";
 
 const BUG_REPORT_ENTITY_TYPE = "bug-report";
+
+function rangeToSince(range: FindActivityLogsPageInput["range"]): Date | null {
+  if (!range || range === "all") return null;
+
+  const since = new Date();
+  if (range === "24h") {
+    since.setHours(since.getHours() - 24);
+    return since;
+  }
+  if (range === "7d") {
+    since.setDate(since.getDate() - 7);
+    return since;
+  }
+  since.setDate(since.getDate() - 30);
+  return since;
+}
 const openStatuses = new Set<string>([BugReportStatus.NEW, BugReportStatus.IN_PROGRESS]);
 const criticalHighSeverities = new Set<string>([BugReportSeverity.HIGH, BugReportSeverity.CRITICAL]);
 
@@ -32,6 +50,54 @@ export class AuditLogRepository {
       .from(auditLogTable)
       .where(eq(auditLogTable.organizationId, organizationId))
       .orderBy(desc(auditLogTable.occurredAt), desc(auditLogTable.id));
+
+    return rows.map((row) => AuditLogMapper.fromPersistence(row));
+  }
+
+  async findPageByOrganizationId(input: FindActivityLogsPageInput): Promise<AuditLog[]> {
+    const conditions = [eq(auditLogTable.organizationId, input.organizationId)];
+
+    if (input.actorId) {
+      conditions.push(eq(auditLogTable.actorId, input.actorId));
+    }
+
+    if (input.entityType) {
+      conditions.push(eq(auditLogTable.entityType, input.entityType));
+    }
+
+    const since = rangeToSince(input.range);
+    if (since) {
+      conditions.push(gte(auditLogTable.occurredAt, since));
+    }
+
+    const search = input.search?.trim();
+    if (search) {
+      const pattern = `%${search}%`;
+      conditions.push(
+        or(
+          ilike(auditLogTable.action, pattern),
+          sql`${auditLogTable.changes}::text ilike ${pattern}`,
+          sql`${auditLogTable.entityId}::text ilike ${pattern}`,
+        )!,
+      );
+    }
+
+    const cursor = input.cursor ? decodeActivityLogCursor(input.cursor) : null;
+    if (cursor) {
+      conditions.push(
+        or(
+          lt(auditLogTable.occurredAt, cursor.occurredAt),
+          and(eq(auditLogTable.occurredAt, cursor.occurredAt), lt(auditLogTable.id, cursor.id)),
+        )!,
+      );
+    }
+
+    const rows = await this.db
+      .select()
+      .from(auditLogTable)
+      .where(and(...conditions))
+      .orderBy(desc(auditLogTable.occurredAt), desc(auditLogTable.id))
+      .limit(input.limit + 1);
 
     return rows.map((row) => AuditLogMapper.fromPersistence(row));
   }
