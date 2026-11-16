@@ -66,4 +66,29 @@ describe("CreateUserTokenUseCase", () => {
     const saved = userTokenRepository.save.mock.calls[0]?.[0];
     expect(saved.projectIds).toEqual([projectId]);
   });
+
+  it("allows members to create a full access preset without activity scope", async () => {
+    const userTokenRepository = { save: vi.fn().mockResolvedValue(undefined) };
+    const membershipPort = {
+      findManyByUser: vi.fn().mockResolvedValue([membership]),
+      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
+    };
+    const projectPort = {
+      findManyByOrganizationId: vi.fn().mockResolvedValue([]),
+    };
+    const useCase = new CreateUserTokenUseCase(
+      new UserTokenService(),
+      userTokenRepository as unknown as UserTokenRepository,
+      membershipPort,
+      projectPort,
+    );
+
+    await useCase.execute({ name: "Full", preset: "fullAccess" }, userId);
+
+    const saved = userTokenRepository.save.mock.calls[0]?.[0];
+    expect(saved.scopePreset).toBe("fullAccess");
+    expect(saved.scopes).not.toContain("activity:read");
+    expect(saved.scopes).toContain("tickets:write");
+    expect(saved.scopes).toContain("comments:write");
+  });
 });

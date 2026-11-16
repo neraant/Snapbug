@@ -3,7 +3,12 @@ import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/
 import { type AnyProcedure, createProcedureClient } from "@orpc/server";
 import { EvaluateMcpToolAccessUseCase } from "@workspace/server/modules/user-token/application/evaluate-mcp-tool-access.use-case";
 import type { OrpcContext } from "@workspace/server/shared/orpc/context.const";
-import { filterMcpToolsForContext, listMcpTools } from "@workspace/server/shared/orpc/mcp/walk-mcp-tools";
+import { installScopedMcpToolsListHandler } from "@workspace/server/shared/orpc/mcp/mcp-tool-list-handler.util";
+import {
+  filterMcpToolsForRole,
+  filterMcpToolsForTokenList,
+  listMcpTools,
+} from "@workspace/server/shared/orpc/mcp/walk-mcp-tools";
 
 export type McpHandlerType = {
   handle(request: Request, options: { context: object }): Promise<{ response: Response }>;
@@ -20,9 +25,11 @@ export function createMcpHandler(router: unknown): McpHandlerType {
 
       const orpcContext = context as OrpcContext;
       const server = new McpServer({ name: "Snapbug MCP", version: "1.0.0" });
-      const tools = filterMcpToolsForContext(listMcpTools(router), orpcContext);
+      const allTools = listMcpTools(router);
+      const registeredTools = filterMcpToolsForRole(allTools, orpcContext);
+      const listableTools = filterMcpToolsForTokenList(allTools, orpcContext);
 
-      for (const tool of tools) {
+      for (const tool of registeredTools) {
         registerMcpTool(
           server,
           tool.name,
@@ -33,6 +40,8 @@ export function createMcpHandler(router: unknown): McpHandlerType {
           orpcContext,
         );
       }
+
+      installScopedMcpToolsListHandler(server, new Set(listableTools.map((tool) => tool.name)));
 
       const transport = new WebStandardStreamableHTTPServerTransport({
         sessionIdGenerator: undefined,

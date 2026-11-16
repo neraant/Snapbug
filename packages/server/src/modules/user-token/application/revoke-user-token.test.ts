@@ -17,7 +17,7 @@ function createUserToken(ownerId: string, revokedAt: Date | null = null) {
     name: "Cursor MCP",
     prefix: "snb_ut_live_ab12",
     scopes: [...LEGACY_USER_TOKEN_SCOPES],
-    scopePreset: "fullAccess",
+    scopePreset: "custom",
     projectIds: null,
     createdAt,
     revokedAt,

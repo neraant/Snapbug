@@ -9,15 +9,16 @@ import type { AuditActor } from "@workspace/server/shared/audit/audit-log.types"
 import type { WithTransactionType } from "@workspace/server/shared/database/transaction.util";
 import { NotFoundError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
+import { assertMcpProjectAllowed } from "@workspace/server/shared/orpc/mcp/mcp-project-scope.util";
 import type { BugReportModelType } from "@workspace/validation/modules/bug-report/dto/bug-report.model";
-import type {
-  AddCommentInputDtoType,
-  AddCommentOutputDtoType,
-} from "@workspace/validation/modules/comment/dto/add-comment.schema";
 import {
   CommentAuthorSource,
   type CommentAuthorSourceType,
 } from "@workspace/validation/modules/comment/consts/comment-author-source.const";
+import type {
+  AddCommentInputDtoType,
+  AddCommentOutputDtoType,
+} from "@workspace/validation/modules/comment/dto/add-comment.schema";
 import type { UserModelType } from "@workspace/validation/modules/user/dto/user.model";
 
 export class AddCommentUseCase {
@@ -30,8 +31,13 @@ export class AddCommentUseCase {
     private readonly withTransaction: WithTransactionType,
   ) {}
 
-  async execute(input: AddCommentInputDtoType, userId: string, actor: AuditActor): Promise<AddCommentOutputDtoType> {
-    const ticket = await this.loadTicket(input.bugReportId, userId);
+  async execute(
+    input: AddCommentInputDtoType,
+    userId: string,
+    actor: AuditActor,
+    mcpProjectIds?: string[] | null,
+  ): Promise<AddCommentOutputDtoType> {
+    const ticket = await this.loadTicket(input.bugReportId, userId, mcpProjectIds);
 
     if (isReportAuthor(ticket.caller.email, ticket.bugReport.reporterEmail)) {
       throw new NotFoundError(ERROR_CODES.BUG_REPORT_NOT_FOUND);
@@ -51,7 +57,11 @@ export class AddCommentUseCase {
     return CommentMapper.toDto(comment, ticket.caller);
   }
 
-  private async loadTicket(bugReportId: string, userId: string): Promise<AccessibleTicket> {
+  private async loadTicket(
+    bugReportId: string,
+    userId: string,
+    mcpProjectIds?: string[] | null,
+  ): Promise<AccessibleTicket> {
     const bugReport = await this.bugReportPort.findById(bugReportId);
     if (!bugReport) throw new NotFoundError(ERROR_CODES.BUG_REPORT_NOT_FOUND);
 
@@ -66,6 +76,8 @@ export class AddCommentUseCase {
 
     const allowedProjectIds = await this.membershipPort.filterProjectIds(membership, [bugReport.projectId]);
     if (allowedProjectIds.length === 0) throw new NotFoundError(ERROR_CODES.BUG_REPORT_NOT_FOUND);
+
+    assertMcpProjectAllowed(bugReport.projectId, mcpProjectIds);
 
     const caller = (await this.userPort.findManyByIds([userId]))[0];
     if (!caller) throw new NotFoundError(ERROR_CODES.USER_NOT_FOUND);

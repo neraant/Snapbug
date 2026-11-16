@@ -55,7 +55,7 @@ export const bugReportRouter = os.router({
   ),
   updateTicketMcp: authed.updateTicketMcp.handler(
     async ({ input, context }) =>
-      await container.bugReport.updateBugReport.execute(input, context.user.id, context.actor),
+      await container.bugReport.updateBugReport.execute(input, context.user.id, context.actor, context.mcp?.projectIds),
   ),
   listTickets: authed.listTickets.handler(
     async ({ input, context }) =>

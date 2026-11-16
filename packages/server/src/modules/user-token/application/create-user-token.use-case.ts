@@ -6,17 +6,17 @@ import type { UserTokenRepository } from "@workspace/server/modules/user-token/r
 import type { UserTokenService } from "@workspace/server/modules/user-token/service/user-token.service";
 import { BadRequestError, ForbiddenError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
-import type {
-  CreateUserTokenInputDtoType,
-  CreateUserTokenOutputDtoType,
-} from "@workspace/validation/modules/user-token/dto/create-user-token.schema";
+import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
 import {
   expandMcpScopes,
   type McpToolScopeType,
   presetScopes,
   type UserTokenScopePresetType,
 } from "@workspace/validation/modules/user-token/consts/mcp-scope.const";
-import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
+import type {
+  CreateUserTokenInputDtoType,
+  CreateUserTokenOutputDtoType,
+} from "@workspace/validation/modules/user-token/dto/create-user-token.schema";
 
 export class CreateUserTokenUseCase {
   constructor(
@@ -69,10 +69,13 @@ export class CreateUserTokenUseCase {
       throw new BadRequestError(ERROR_CODES.USER_TOKEN_NOT_FOUND, "Choose at least one permission");
     }
 
-    const scopes = expandMcpScopes(requested);
-    if (scopes.includes("activity:read") && userRole !== UserRole.ADMIN) {
+    if (preset === "custom" && requested.includes("activity:read") && userRole !== UserRole.ADMIN) {
       throw new ForbiddenError(ERROR_CODES.ADMIN_REQUIRED, "Activity access requires an administrator");
     }
+
+    const scopes = expandMcpScopes(requested).filter(
+      (scope) => userRole === UserRole.ADMIN || scope !== "activity:read",
+    );
 
     return { scopes, scopePreset: preset };
   }
@@ -103,7 +106,10 @@ export class CreateUserTokenUseCase {
 
     const uniqueRequested = [...new Set(projectIds)];
     if (uniqueRequested.some((projectId) => !allowedProjectIds.has(projectId))) {
-      throw new ForbiddenError(ERROR_CODES.CANNOT_RESTRICT_ADMIN, "You can only limit tokens to projects you can access");
+      throw new ForbiddenError(
+        ERROR_CODES.CANNOT_RESTRICT_ADMIN,
+        "You can only limit tokens to projects you can access",
+      );
     }
 
     return uniqueRequested;

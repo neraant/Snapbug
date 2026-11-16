@@ -10,10 +10,12 @@ const authed = os.use(authedMiddleware);
 
 export const commentRouter = os.router({
   addComment: authed.addComment.handler(
-    async ({ input, context }) => await container.comment.addComment.execute(input, context.user.id, context.actor),
+    async ({ input, context }) =>
+      await container.comment.addComment.execute(input, context.user.id, context.actor, context.mcp?.projectIds),
   ),
   findComments: authed.findComments.handler(
-    async ({ input, context }) => await container.comment.findComments.execute(input, context.user.id),
+    async ({ input, context }) =>
+      await container.comment.findComments.execute(input, context.user.id, context.mcp?.projectIds),
   ),
   updateComment: authed.updateComment.handler(
     async ({ input, context }) => await container.comment.updateComment.execute(input, context.user.id, context.actor),
