@@ -1,6 +1,7 @@
 import { SendInvitationsUseCase } from "@workspace/server/modules/invitation/application/send-invitation.use-case";
 import type { MembershipPort } from "@workspace/server/modules/invitation/port/membership.port";
 import type { OrganizationPort } from "@workspace/server/modules/invitation/port/organization.port";
+import type { ProjectPort } from "@workspace/server/modules/invitation/port/project.port";
 import type { UserPort } from "@workspace/server/modules/invitation/port/user.port";
 import type { InvitationService } from "@workspace/server/modules/invitation/service/invitation.service";
 import type { WithTransactionType } from "@workspace/server/shared/database/transaction.util";
@@ -20,11 +21,19 @@ const userId = "0a8c69a1-1ab1-45a8-8497-eae1e506d9d4";
 const organizationId = "2a8c69a1-1ab1-45a8-8497-eae1e506d9d1";
 const inviterEmail = "inviter@company.com";
 
+const projectId = "4a8c69a1-1ab1-45a8-8497-eae1e506d9d3";
+
 const organization = {
   id: organizationId,
   name: "Acme",
   reports_retention_days: 30,
   createdAt: "2026-10-03T09:00:00.000Z",
+};
+
+const memberInviteInput = {
+  organizationId,
+  role: UserRole.USER,
+  projectIds: [projectId],
 };
 
 const withTransaction = vi.fn(async (callback: (tx: unknown) => Promise<unknown>) => await callback({}));
@@ -35,8 +44,8 @@ function invitationService(saveWithAudit = vi.fn().mockResolvedValue(undefined))
   const service = {
     saveWithAudit,
     hashToken,
-    buildInvitationToken: vi.fn(() => `invite-token-${++tokenCounter}`),
-    inviteUrl: vi.fn((token: string) => `http://localhost:3000/sign-up?invitation=${token}`),
+    buildInvitationToken: vi.fn(() => `c${String(++tokenCounter).padStart(63, "0")}`),
+    inviteUrl: vi.fn((token: string) => `http://localhost:3000/invite/${token}`),
     withActor: vi.fn(),
     withTx: vi.fn(),
   };
@@ -45,8 +54,36 @@ function invitationService(saveWithAudit = vi.fn().mockResolvedValue(undefined))
   return service;
 }
 
+function invitationRepositoryMock() {
+  return { findByOrganizationAndEmail: vi.fn().mockResolvedValue(null) };
+}
+
+function userPortMock(overrides: Record<string, unknown> = {}) {
+  return {
+    findByEmail: vi.fn().mockResolvedValue(null),
+    findById: vi.fn().mockResolvedValue({ id: userId, email: inviterEmail, name: "Inviter" }),
+    ...overrides,
+  };
+}
+
 function organizationPort(found = true): OrganizationPort {
   return { findById: vi.fn().mockResolvedValue(found ? organization : null) };
+}
+
+function projectPortMock(): ProjectPort {
+  return {
+    findManyByOrganizationId: vi.fn().mockResolvedValue([
+      {
+        id: projectId,
+        name: "Store",
+        slug: "store",
+        color: "#F97316",
+        organizationId,
+        createdAt: "2026-10-03T09:00:00.000Z",
+      },
+    ]),
+    withTx: vi.fn(),
+  };
 }
 
 function emailMarkup(react: ReactElement): string {
@@ -64,15 +101,17 @@ describe("SendInvitationsUseCase", () => {
     };
     const useCase = new SendInvitationsUseCase(
       invitationService() as unknown as InvitationService,
+      invitationRepositoryMock() as never,
       membershipPort as unknown as MembershipPort,
-      { findByEmail: vi.fn() } as unknown as UserPort,
+      userPortMock() as unknown as UserPort,
       organizationPort(),
+      projectPortMock(),
       { send: vi.fn() } as unknown as EmailService,
       withTransaction as unknown as WithTransactionType,
     );
 
     await expect(
-      useCase.execute({ organizationId, emails: ["peer@company.com"] }, userId, inviterEmail),
+      useCase.execute({ ...memberInviteInput, emails: ["peer@company.com"] }, userId, inviterEmail),
     ).rejects.toMatchObject({
       errorCode: ERROR_CODES.ORGANIZATION_NOT_FOUND,
     });
@@ -86,15 +125,17 @@ describe("SendInvitationsUseCase", () => {
     const emailService = { send: vi.fn() };
     const useCase = new SendInvitationsUseCase(
       invitations as unknown as InvitationService,
+      invitationRepositoryMock() as never,
       membershipPort as unknown as MembershipPort,
-      { findByEmail: vi.fn() } as unknown as UserPort,
+      userPortMock() as unknown as UserPort,
       organizationPort(),
+      projectPortMock(),
       emailService as unknown as EmailService,
       withTransaction as unknown as WithTransactionType,
     );
 
     await expect(
-      useCase.execute({ organizationId, emails: ["peer@company.com"] }, userId, inviterEmail),
+      useCase.execute({ ...memberInviteInput, emails: ["peer@company.com"] }, userId, inviterEmail),
     ).rejects.toMatchObject({
       errorCode: ERROR_CODES.ADMIN_REQUIRED,
     });
@@ -107,21 +148,23 @@ describe("SendInvitationsUseCase", () => {
     const membershipPort = {
       findByUserAndOrganization: vi.fn().mockResolvedValue({ role: UserRole.ADMIN }),
     };
-    const userPort = { findByEmail: vi.fn().mockResolvedValue(null) };
+    const userPort = userPortMock();
     const invitations = invitationService();
     const emailService = { send: vi.fn().mockResolvedValue(undefined) };
     const useCase = new SendInvitationsUseCase(
       invitations as unknown as InvitationService,
+      invitationRepositoryMock() as never,
       membershipPort as unknown as MembershipPort,
       userPort as unknown as UserPort,
       organizationPort(),
+      projectPortMock(),
       emailService as unknown as EmailService,
       withTransaction as unknown as WithTransactionType,
     );
 
     await useCase.execute(
       {
-        organizationId,
+        ...memberInviteInput,
         emails: ["peer@company.com", "PEER@company.com", inviterEmail, "other@company.com"],
       },
       userId,
@@ -142,35 +185,38 @@ describe("SendInvitationsUseCase", () => {
         return { role: UserRole.ADMIN };
       }),
     };
-    const userPort = {
+    const userPort = userPortMock({
       findByEmail: vi.fn(async (email: string) => {
         if (email === "member@company.com") {
           return { id: "member-user-id", email, name: "Member" };
         }
         return null;
       }),
-    };
+    });
     const invitations = invitationService();
     const emailService = { send: vi.fn().mockResolvedValue(undefined) };
     const organizations = organizationPort();
     const useCase = new SendInvitationsUseCase(
       invitations as unknown as InvitationService,
+      invitationRepositoryMock() as never,
       membershipPort as unknown as MembershipPort,
       userPort as unknown as UserPort,
       organizations,
+      projectPortMock(),
       emailService as unknown as EmailService,
       withTransaction as unknown as WithTransactionType,
     );
 
-    await useCase.execute(
+    const summary = await useCase.execute(
       {
-        organizationId,
+        ...memberInviteInput,
         emails: ["new@company.com", "member@company.com", "another@company.com"],
       },
       userId,
       inviterEmail,
     );
 
+    expect(summary).toEqual({ sent: 2, skipped: 1, skippedAlreadyMember: 1, resent: 0 });
     expect(invitations.saveWithAudit).toHaveBeenCalledTimes(2);
     expect(emailService.send).toHaveBeenCalledTimes(2);
     expect(organizations.findById).toHaveBeenCalledOnce();
@@ -183,10 +229,12 @@ describe("SendInvitationsUseCase", () => {
 
     const sent = emailService.send.mock.calls.find((call) => call[0].to === "new@company.com")?.[0];
     const markup = emailMarkup(sent?.react as ReactElement);
-    expect(markup).toContain(`invitation=${firstToken}`);
+    expect(markup).toContain(`/invite/${firstToken}`);
     expect(markup).toContain("Join Acme");
-    expect(markup).toContain("You're invited to join Acme");
+    expect(markup).toContain("Inviter invited you to join Acme as a member");
     expect(markup).not.toContain("Ada Lovelace");
+    expect(saved.role).toBe(UserRole.USER);
+    expect(saved.projectIds).toEqual([projectId]);
   });
 
   it("does not send email when the organization does not exist", async () => {
@@ -196,15 +244,17 @@ describe("SendInvitationsUseCase", () => {
     const emailService = { send: vi.fn() };
     const useCase = new SendInvitationsUseCase(
       invitationService() as unknown as InvitationService,
+      invitationRepositoryMock() as never,
       membershipPort as unknown as MembershipPort,
-      { findByEmail: vi.fn() } as unknown as UserPort,
+      userPortMock() as unknown as UserPort,
       organizationPort(false),
+      projectPortMock(),
       emailService as unknown as EmailService,
       withTransaction as unknown as WithTransactionType,
     );
 
     await expect(
-      useCase.execute({ organizationId, emails: ["peer@company.com"] }, userId, inviterEmail),
+      useCase.execute({ ...memberInviteInput, emails: ["peer@company.com"] }, userId, inviterEmail),
     ).rejects.toMatchObject({
       errorCode: ERROR_CODES.ORGANIZATION_NOT_FOUND,
     });
@@ -219,7 +269,7 @@ describe("SendInvitationsUseCase", () => {
         return null;
       }),
     };
-    const userPort = {
+    const userPort = userPortMock({
       findByEmail: vi.fn(async (email: string) => {
         if (email === "ada@company.com") {
           return { id: "ada-user-id", email, name: "Ada Lovelace" };
@@ -229,25 +279,94 @@ describe("SendInvitationsUseCase", () => {
         }
         return null;
       }),
+    });
+    const invitations = invitationService();
+    const emailService = { send: vi.fn().mockResolvedValue(undefined) };
+    const useCase = new SendInvitationsUseCase(
+      invitations as unknown as InvitationService,
+      invitationRepositoryMock() as never,
+      membershipPort as unknown as MembershipPort,
+      userPort as unknown as UserPort,
+      organizationPort(),
+      projectPortMock(),
+      emailService as unknown as EmailService,
+      withTransaction as unknown as WithTransactionType,
+    );
+
+    await useCase.execute(
+      { ...memberInviteInput, emails: ["ada@company.com", "blank@company.com"] },
+      userId,
+      inviterEmail,
+    );
+
+    const named = emailService.send.mock.calls.find((call) => call[0].to === "ada@company.com")?.[0];
+    const unnamed = emailService.send.mock.calls.find((call) => call[0].to === "blank@company.com")?.[0];
+
+    expect(emailMarkup(named.react)).toContain("Ada Lovelace, Inviter invited you to join Acme as a member");
+    expect(emailMarkup(unnamed.react)).toContain("Inviter invited you to join Acme as a member");
+    expect(emailMarkup(unnamed.react)).not.toContain("Ada Lovelace");
+  });
+
+  it("stores an empty project list when a member invite clears every project", async () => {
+    const membershipPort = {
+      findByUserAndOrganization: vi.fn().mockResolvedValue({ role: UserRole.ADMIN }),
     };
     const invitations = invitationService();
     const emailService = { send: vi.fn().mockResolvedValue(undefined) };
     const useCase = new SendInvitationsUseCase(
       invitations as unknown as InvitationService,
+      invitationRepositoryMock() as never,
       membershipPort as unknown as MembershipPort,
-      userPort as unknown as UserPort,
+      userPortMock() as unknown as UserPort,
       organizationPort(),
+      projectPortMock(),
       emailService as unknown as EmailService,
       withTransaction as unknown as WithTransactionType,
     );
 
-    await useCase.execute({ organizationId, emails: ["ada@company.com", "blank@company.com"] }, userId, inviterEmail);
+    await useCase.execute(
+      { organizationId, role: UserRole.USER, projectIds: [], emails: ["no-projects@company.com"] },
+      userId,
+      inviterEmail,
+    );
 
-    const named = emailService.send.mock.calls.find((call) => call[0].to === "ada@company.com")?.[0];
-    const unnamed = emailService.send.mock.calls.find((call) => call[0].to === "blank@company.com")?.[0];
+    const saved = invitations.saveWithAudit.mock.calls[0]?.[0];
+    expect(saved.projectIds).toEqual([]);
+  });
 
-    expect(emailMarkup(named.react)).toContain("Ada Lovelace, you're invited to join Acme");
-    expect(emailMarkup(unnamed.react)).toContain("You're invited to join Acme");
-    expect(emailMarkup(unnamed.react)).not.toContain("Ada Lovelace");
+  it("stores administrator role and all organization projects on an admin invite", async () => {
+    const membershipPort = {
+      findByUserAndOrganization: vi.fn().mockResolvedValue({ role: UserRole.ADMIN }),
+    };
+    const invitations = invitationService();
+    const emailService = { send: vi.fn().mockResolvedValue(undefined) };
+    const useCase = new SendInvitationsUseCase(
+      invitations as unknown as InvitationService,
+      invitationRepositoryMock() as never,
+      membershipPort as unknown as MembershipPort,
+      userPortMock() as unknown as UserPort,
+      organizationPort(),
+      projectPortMock(),
+      emailService as unknown as EmailService,
+      withTransaction as unknown as WithTransactionType,
+    );
+
+    await useCase.execute(
+      {
+        organizationId,
+        role: UserRole.ADMIN,
+        projectIds: [projectId],
+        emails: ["admin-invite@company.com"],
+      },
+      userId,
+      inviterEmail,
+    );
+
+    const saved = invitations.saveWithAudit.mock.calls[0]?.[0];
+    expect(saved.role).toBe(UserRole.ADMIN);
+    expect(saved.projectIds).toEqual([projectId]);
+
+    const sent = emailService.send.mock.calls[0]?.[0];
+    expect(emailMarkup(sent.react as ReactElement)).toContain("as an administrator");
   });
 });

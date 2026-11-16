@@ -19,9 +19,12 @@ export const invitationRouter = os.router({
     async ({ context }) =>
       await container.invitation.findInvitations.execute(context.user.id, context.organizationId),
   ),
-  findInvitationByToken: os.findInvitationByToken.handler(
-    async ({ input }) => await container.invitation.findInvitationByToken.execute(input),
-  ),
+  findInvitationByToken: os.findInvitationByToken.handler(async ({ input, context }) => {
+    const session = context.user
+      ? { userId: context.user.id, userEmail: context.user.email }
+      : null;
+    return await container.invitation.findInvitationByToken.execute(input, session);
+  }),
   acceptInvitation: authed.acceptInvitation.handler(
     async ({ input, context }) =>
       await container.invitation.acceptInvitation.execute(input, context.user.id, context.user.email),

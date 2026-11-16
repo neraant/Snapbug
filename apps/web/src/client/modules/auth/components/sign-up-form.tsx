@@ -39,6 +39,10 @@ type SignUpFormWithInvitationProps = {
 function SignUpFormWithInvitation({ invitationToken }: SignUpFormWithInvitationProps) {
   const { data: invitation } = useFindInvitationByToken(invitationToken);
 
+  if (invitation.status !== "pending") {
+    return <SignUpFormFields invitationToken={invitationToken} />;
+  }
+
   return (
     <SignUpFormFields
       invitationToken={invitationToken}

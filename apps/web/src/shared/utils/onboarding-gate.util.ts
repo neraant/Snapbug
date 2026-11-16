@@ -5,7 +5,8 @@ export function isGuestAuthPath(pathname: string): boolean {
     pathname.startsWith(url.signIn()) ||
     pathname.startsWith(url.signUp()) ||
     pathname.startsWith(url.forgotPassword()) ||
-    pathname.startsWith(url.resetPassword())
+    pathname.startsWith(url.resetPassword()) ||
+    pathname.startsWith("/invite/")
   );
 }
 
@@ -14,7 +15,11 @@ export function isPublicVisitorPath(pathname: string): boolean {
 }
 
 export function isInvitationAuthPath(pathname: string): boolean {
-  return pathname.startsWith(url.signIn()) || pathname.startsWith(url.signUp());
+  return (
+    pathname.startsWith(url.signIn()) ||
+    pathname.startsWith(url.signUp()) ||
+    pathname.startsWith("/invite/")
+  );
 }
 
 export function isOnboardingPath(pathname: string): boolean {

@@ -7,6 +7,14 @@ import { cn } from "@workspace/design-system/lib/utils";
 import { XIcon } from "lucide-react";
 import { type ComponentProps, type KeyboardEvent, useState } from "react";
 
+type TagAnnotation = {
+  label: string;
+  action?: {
+    label: string;
+    onAction: () => void;
+  };
+};
+
 type TagsInputProps = Omit<ComponentProps<"div">, "onChange" | "value"> & {
   id?: string;
   value: string[];
@@ -15,6 +23,7 @@ type TagsInputProps = Omit<ComponentProps<"div">, "onChange" | "value"> & {
   "aria-invalid"?: boolean;
   disabled?: boolean;
   removeTagLabel?: (tag: string) => string;
+  tagAnnotation?: (tag: string) => TagAnnotation | undefined;
 };
 
 function TagsInput({
@@ -24,6 +33,7 @@ function TagsInput({
   placeholder,
   className,
   removeTagLabel = (tag) => `Remove ${tag}`,
+  tagAnnotation,
   disabled = false,
   "aria-invalid": ariaInvalid,
   ...props
@@ -72,23 +82,43 @@ function TagsInput({
       )}
       {...props}
     >
-      {value.map((tag) => (
-        <Badge key={tag} variant="secondary" className={disabled ? undefined : "gap-0.5 pr-0.5"}>
-          {tag}
-          {disabled ? null : (
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-xs"
-              className="size-5 text-muted-foreground hover:text-foreground"
-              aria-label={removeTagLabel(tag)}
-              onClick={() => removeTag(tag)}
-            >
-              <XIcon aria-hidden />
-            </Button>
-          )}
-        </Badge>
-      ))}
+      {value.map((tag) => {
+        const annotation = tagAnnotation?.(tag);
+
+        return (
+          <Badge key={tag} variant="secondary" className={disabled ? undefined : "gap-1 pr-0.5"}>
+            {tag}
+            {annotation ? (
+              <Row as="span" gap="xs" wrap={false} className="text-xs">
+                <span className="text-muted-foreground">{annotation.label}</span>
+                {annotation.action ? (
+                  <Button
+                    type="button"
+                    variant="link"
+                    size="xs"
+                    className="h-auto px-0 py-0"
+                    onClick={annotation.action.onAction}
+                  >
+                    {annotation.action.label}
+                  </Button>
+                ) : null}
+              </Row>
+            ) : null}
+            {disabled ? null : (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-xs"
+                className="size-5 text-muted-foreground hover:text-foreground"
+                aria-label={removeTagLabel(tag)}
+                onClick={() => removeTag(tag)}
+              >
+                <XIcon aria-hidden />
+              </Button>
+            )}
+          </Badge>
+        );
+      })}
       <Row as="span" minWidth="0" width="full" className="min-w-[8rem] flex-1">
         <input
           id={id}

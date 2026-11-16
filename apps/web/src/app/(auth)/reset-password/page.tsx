@@ -10,10 +10,12 @@ import { z } from "zod";
 import { ResetPasswordForm } from "@/client/modules/auth/components/reset-password-form";
 import { texts } from "@/client/modules/auth/consts/texts.const";
 import { url } from "@/shared/build-url.util";
+import { readInvitationSearchParam } from "@/shared/utils/parse-invitation-token.util";
 
 export default function Page() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token") ?? undefined;
+  const invitationToken = readInvitationSearchParam(searchParams.get("invitation") ?? undefined);
   const isValidToken = z.uuid().safeParse(token).success;
 
   return (
@@ -25,7 +27,7 @@ export default function Page() {
         </Typography>
       </Column>
       {isValidToken && token ? (
-        <ResetPasswordForm token={token} />
+        <ResetPasswordForm token={token} invitationToken={invitationToken} />
       ) : (
         <Column width="full" gap="sm">
           <Typography variant="text-sm" color="muted">

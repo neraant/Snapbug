@@ -272,9 +272,11 @@ const resetPassword = new ResetPasswordUseCase(resetPasswordRepository, userAdap
 
 const sendInvitations = new SendInvitationsUseCase(
   invitationService,
+  invitationRepository,
   membershipAdapter,
   userAdapter,
   organizationAdapter,
+  projectAdapter,
   emailService,
   withTransaction,
 );
@@ -283,6 +285,8 @@ const findInvitationByToken = new FindInvitationByTokenUseCase(
   invitationService,
   invitationRepository,
   organizationAdapter,
+  userAdapter,
+  membershipAdapter,
 );
 const acceptInvitation = new AcceptInvitationUseCase(
   invitationRepository,
@@ -290,6 +294,7 @@ const acceptInvitation = new AcceptInvitationUseCase(
   projectAdapter,
   withTransaction,
   invitationService,
+  userAdapter,
 );
 const resendInvitation = new ResendInvitationUseCase(
   invitationRepository,

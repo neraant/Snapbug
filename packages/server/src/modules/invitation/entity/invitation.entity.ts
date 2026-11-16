@@ -1,4 +1,5 @@
 import type { InvitationPersistedType } from "@workspace/server/modules/invitation/entity/invitation.types";
+import type { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
 
 export class Invitation {
   readonly id: InvitationPersistedType["id"];
@@ -7,6 +8,8 @@ export class Invitation {
   readonly tokenHash: InvitationPersistedType["tokenHash"];
   readonly tokenVersion: InvitationPersistedType["tokenVersion"];
   readonly invitedByUserId: InvitationPersistedType["invitedByUserId"];
+  readonly role: InvitationPersistedType["role"];
+  readonly projectIds: InvitationPersistedType["projectIds"];
   readonly expiresAt: InvitationPersistedType["expiresAt"];
   readonly acceptedAt: InvitationPersistedType["acceptedAt"];
   readonly revokedAt: InvitationPersistedType["revokedAt"];
@@ -19,6 +22,8 @@ export class Invitation {
     this.tokenHash = invitation.tokenHash;
     this.tokenVersion = invitation.tokenVersion;
     this.invitedByUserId = invitation.invitedByUserId;
+    this.role = invitation.role;
+    this.projectIds = invitation.projectIds;
     this.expiresAt = invitation.expiresAt;
     this.acceptedAt = invitation.acceptedAt;
     this.revokedAt = invitation.revokedAt;
@@ -26,9 +31,7 @@ export class Invitation {
   }
 
   isPending(at: Date = new Date()): boolean {
-    return (
-      this.acceptedAt === null && this.revokedAt === null && this.expiresAt.getTime() > at.getTime()
-    );
+    return this.acceptedAt === null && this.revokedAt === null && this.expiresAt.getTime() > at.getTime();
   }
 
   accept(at: Date = new Date()): Invitation {
@@ -61,6 +64,14 @@ export class Invitation {
     });
   }
 
+  withInviteAccess(input: { role: UserRole; projectIds: string[] }): Invitation {
+    return new Invitation({
+      ...this.toObject(),
+      role: input.role,
+      projectIds: input.projectIds,
+    });
+  }
+
   toObject(): InvitationPersistedType {
     return {
       id: this.id,
@@ -69,6 +80,8 @@ export class Invitation {
       tokenHash: this.tokenHash,
       tokenVersion: this.tokenVersion,
       invitedByUserId: this.invitedByUserId,
+      role: this.role,
+      projectIds: this.projectIds,
       expiresAt: this.expiresAt,
       acceptedAt: this.acceptedAt,
       revokedAt: this.revokedAt,

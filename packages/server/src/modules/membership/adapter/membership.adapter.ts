@@ -21,7 +21,7 @@ import type {
   FindMembershipOutputDtoType,
 } from "@workspace/validation/modules/membership/dto/find-membership.schema";
 import type { MembershipModelType } from "@workspace/validation/modules/membership/dto/membership.model";
-import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
+import type { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
 
 export class MembershipAdapter implements OrganizationMembershipPort {
   private readonly findMembership: FindMembershipUseCase;
@@ -81,8 +81,8 @@ export class MembershipAdapter implements OrganizationMembershipPort {
     return await this.createMembership.execute(input, userId);
   }
 
-  async createInvited(organizationId: string, userId: string): Promise<MembershipModelType> {
-    return await this.createMembership.execute({ organizationId }, userId, UserRole.USER);
+  async createInvited(organizationId: string, userId: string, role: UserRole): Promise<MembershipModelType> {
+    return await this.createMembership.execute({ organizationId }, userId, role);
   }
 
   async filterProjectIds(

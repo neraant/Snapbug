@@ -46,7 +46,10 @@ export class RequestPasswordResetUseCase {
     });
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-    const resetUrl = `${appUrl}/reset-password?token=${token}`;
+    const resetPath = input.invitation
+      ? `/reset-password?${new URLSearchParams({ token, invitation: input.invitation }).toString()}`
+      : `/reset-password?${new URLSearchParams({ token }).toString()}`;
+    const resetUrl = `${appUrl}${resetPath}`;
 
     await this.emailService.send({
       to: user.email,
