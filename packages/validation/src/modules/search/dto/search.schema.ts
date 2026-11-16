@@ -1,4 +1,7 @@
+import { BugReportSeverity } from "@workspace/validation/modules/bug-report/consts/bug-report-severity.const";
+import { BugReportStatus } from "@workspace/validation/modules/bug-report/consts/bug-report-status.const";
 import { projectColorSchema } from "@workspace/validation/shared/project-color.schema";
+import { projectSlugSchema } from "@workspace/validation/shared/project-slug.schema";
 import { z } from "zod";
 
 export const searchInputDtoSchema = z.object({
@@ -9,6 +12,7 @@ export type SearchInputDtoType = z.infer<typeof searchInputDtoSchema>;
 const searchProjectResultSchema = z.object({
   id: z.uuid(),
   name: z.string(),
+  slug: projectSlugSchema,
   color: projectColorSchema,
 });
 
@@ -18,6 +22,8 @@ const searchTicketResultSchema = z.object({
   title: z.string(),
   projectId: z.uuid(),
   projectName: z.string(),
+  status: z.enum(BugReportStatus),
+  severity: z.enum(BugReportSeverity),
 });
 
 export const searchOutputDtoSchema = z.object({

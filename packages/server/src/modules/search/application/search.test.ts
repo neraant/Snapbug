@@ -2,6 +2,8 @@ import { SearchUseCase } from "@workspace/server/modules/search/application/sear
 import type { BugReportPort } from "@workspace/server/modules/search/port/bug-report.port";
 import type { MembershipPort } from "@workspace/server/modules/search/port/membership.port";
 import type { ProjectPort } from "@workspace/server/modules/search/port/project.port";
+import { BugReportSeverity } from "@workspace/validation/modules/bug-report/consts/bug-report-severity.const";
+import { BugReportStatus } from "@workspace/validation/modules/bug-report/consts/bug-report-status.const";
 import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
 import { describe, expect, it, vi } from "vitest";
 
@@ -22,17 +24,21 @@ const membership = {
 const project = {
   id: projectId,
   name: "Acme Store",
-  color: "blue" as const,
+  slug: "acme-store",
+  color: "#3B82F6" as const,
   organizationId,
   createdAt: "2026-10-03T09:00:00.000Z",
+  archivedAt: null,
 };
 
 const hiddenProject = {
   id: hiddenProjectId,
   name: "Acme Marketing",
-  color: "green" as const,
+  slug: "acme-marketing",
+  color: "#10B981" as const,
   organizationId,
   createdAt: "2026-10-03T09:00:00.000Z",
+  archivedAt: null,
 };
 
 describe("SearchUseCase", () => {
@@ -51,6 +57,8 @@ describe("SearchUseCase", () => {
           shortId: "SNB-1",
           title: "Pay button throws",
           projectId,
+          status: BugReportStatus.NEW,
+          severity: BugReportSeverity.HIGH,
         },
       ]),
     };
@@ -71,6 +79,8 @@ describe("SearchUseCase", () => {
         title: "Pay button throws",
         projectId,
         projectName: "Acme Store",
+        status: BugReportStatus.NEW,
+        severity: BugReportSeverity.HIGH,
       },
     ]);
     expect(result.projects.some((item) => item.id === hiddenProjectId)).toBe(false);
