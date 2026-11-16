@@ -178,7 +178,7 @@ describe("SendInvitationsUseCase", () => {
       withTransaction as unknown as WithTransactionType,
     );
 
-    await useCase.execute(
+    const summary = await useCase.execute(
       {
         organizationId,
         emails: ["new@company.com", "member@company.com", "another@company.com"],
@@ -187,6 +187,7 @@ describe("SendInvitationsUseCase", () => {
       inviterEmail,
     );
 
+    expect(summary).toEqual({ sent: 2, skipped: 1, skippedAlreadyMember: 1, resent: 0 });
     expect(invitations.saveWithAudit).toHaveBeenCalledTimes(2);
     expect(emailService.send).toHaveBeenCalledTimes(2);
     expect(organizations.findById).toHaveBeenCalledOnce();

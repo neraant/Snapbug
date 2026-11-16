@@ -126,6 +126,20 @@ describe("FindInvitationByTokenUseCase", () => {
     });
   });
 
+  it("flags alreadyMember when the invite email differs only by case", async () => {
+    const { useCase } = createUseCase({
+      invitation: pendingInvitation({ email: "Alice@example.com" }),
+      membership: { id: "membership-id" },
+    });
+
+    const result = await useCase.execute({ token }, { userId: sessionUserId, userEmail: "alice@example.com" });
+
+    expect(result).toMatchObject({
+      status: "pending",
+      alreadyMember: true,
+    });
+  });
+
   it("does not flag alreadyMember when the signed-in email differs from the invitation", async () => {
     const { useCase, membershipPort } = createUseCase({
       membership: { id: "membership-id" },

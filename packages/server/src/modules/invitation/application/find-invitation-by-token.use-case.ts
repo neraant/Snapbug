@@ -58,7 +58,7 @@ export class FindInvitationByTokenUseCase {
     const inviteeUser = await this.userPort.findByEmail(invitation.email);
     const accountExists = inviteeUser !== null;
     let alreadyMember = false;
-    if (session && session.userEmail.toLowerCase() === invitation.email) {
+    if (session && session.userEmail.toLowerCase() === invitation.email.toLowerCase()) {
       const membership = await this.membershipPort.findByUserAndOrganization({
         userId: session.userId,
         organizationId: invitation.organizationId,

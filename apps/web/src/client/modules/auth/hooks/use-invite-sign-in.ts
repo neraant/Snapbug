@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "@workspace/design-system/components/ui/toast";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { texts } from "@/client/modules/auth/consts/texts.const";
@@ -19,6 +20,11 @@ type UseInviteSignInInput = {
 export function useInviteSignIn({ token, email, organizationName }: UseInviteSignInInput) {
   const router = useRouter();
   const { mutateAsync: acceptInvitation } = useAcceptInvitation();
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
 
   const form = useForm<SignInSchemaType>({
     resolver: zodResolver(signInSchema),
@@ -49,6 +55,7 @@ export function useInviteSignIn({ token, email, organizationName }: UseInviteSig
 
   return {
     ...form,
+    hydrated,
     onSubmit: form.handleSubmit(onSubmit),
   };
 }

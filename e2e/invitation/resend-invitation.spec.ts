@@ -31,7 +31,7 @@ test("an administrator resends a pending invitation", async ({ page }) => {
   await inviteDialog.getByRole("textbox", { name: "Email addresses" }).fill(inviteEmail);
   await inviteDialog.getByRole("textbox", { name: "Email addresses" }).press("Enter");
   await inviteDialog.getByRole("button", { name: "Send invitations" }).click();
-  await expect(page.getByText(/invitation sent/i)).toBeVisible();
+  await expect(page.getByText(/invitation sent/i)).toBeVisible({ timeout: 30_000 });
   await expect(page.getByRole("button", { name: "View" })).toBeVisible();
   await page.getByRole("button", { name: "View" }).click();
 

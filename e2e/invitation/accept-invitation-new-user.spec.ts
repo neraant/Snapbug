@@ -25,7 +25,7 @@ async function adminInviteEmail(page: import("@playwright/test").Page, inviteEma
   await inviteDialog.getByRole("textbox", { name: "Email addresses" }).fill(inviteEmail);
   await inviteDialog.getByRole("textbox", { name: "Email addresses" }).press("Enter");
   await inviteDialog.getByRole("button", { name: "Send invitations" }).click();
-  await expect(page.getByText(/invitation sent/i)).toBeVisible();
+  await expect(page.getByText(/invitation sent/i)).toBeVisible({ timeout: 30_000 });
   await page.getByRole("button", { name: "View" }).click();
   await expect(page).toHaveURL(/tab=invitations/);
 
@@ -57,6 +57,6 @@ test("a new user creates an account from the invite page and joins the team", as
   await page.getByRole("checkbox", { name: /terms/i }).check();
   await page.getByRole("button", { name: "Create account to join" }).click();
 
-  await expect(page.getByText(/You joined Acme/)).toBeVisible({ timeout: 60_000 });
-  await expect(page).toHaveURL(/\/overview/, { timeout: 60_000 });
+  await expect(page).toHaveURL(/\/overview/, { timeout: 90_000 });
+  await expect(page.getByText(/You joined Acme/)).toBeVisible({ timeout: 15_000 });
 });

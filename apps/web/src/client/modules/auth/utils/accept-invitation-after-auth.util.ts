@@ -5,7 +5,7 @@ import { getSession } from "next-auth/react";
 import { texts } from "@/client/modules/auth/consts/texts.const";
 import { selectActiveOrganization } from "@/shared/organization/select-active-organization";
 
-const SESSION_WAIT_MS = 5_000;
+const SESSION_WAIT_MS = 15_000;
 
 async function waitForAuthenticatedSession(): Promise<void> {
   const deadline = Date.now() + SESSION_WAIT_MS;
@@ -14,7 +14,7 @@ async function waitForAuthenticatedSession(): Promise<void> {
     if (session?.user?.id) {
       return;
     }
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    await new Promise((resolve) => setTimeout(resolve, 100));
   }
 }
 

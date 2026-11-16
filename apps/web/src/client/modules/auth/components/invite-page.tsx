@@ -252,11 +252,15 @@ function InviteSignInForm({
   token: string;
   invitation: Extract<FindInvitationByTokenOutputDtoType, { status: "pending" }>;
 }) {
-  const { control, onSubmit, formState } = useInviteSignIn({
+  const { control, onSubmit, formState, hydrated } = useInviteSignIn({
     token,
     email: invitation.email,
     organizationName: invitation.organizationName,
   });
+
+  if (!hydrated) {
+    return <InvitePageFallback />;
+  }
 
   return (
     <Column as="form" gap="md" width="full" onSubmit={onSubmit}>

@@ -22,7 +22,7 @@ const en = {
     submit: "Send invitations",
     validationError: "Add between 1 and 10 valid email addresses.",
     success: "Invitations sent.",
-    successSummary: (summary: { sent: number; skipped: number; resent: number }) => {
+    successSummary: (summary: { sent: number; skipped: number; skippedAlreadyMember: number; resent: number }) => {
       const parts: string[] = [];
       if (summary.sent > 0) {
         parts.push(`${summary.sent} invitation${summary.sent === 1 ? "" : "s"} sent`);
@@ -31,7 +31,11 @@ const en = {
         parts.push(`${summary.resent} resent`);
       }
       if (summary.skipped > 0) {
-        parts.push(`${summary.skipped} skipped`);
+        const skippedLabel =
+          summary.skippedAlreadyMember > 0 && summary.skippedAlreadyMember === summary.skipped
+            ? `${summary.skipped} skipped (already a member)`
+            : `${summary.skipped} skipped`;
+        parts.push(skippedLabel);
       }
       return parts.length > 0 ? parts.join(", ") : "No invitations sent.";
     },
@@ -152,7 +156,7 @@ const ru = {
     submit: "Отправить приглашения",
     validationError: "Добавьте от 1 до 10 корректных адресов email.",
     success: "Приглашения отправлены.",
-    successSummary: (summary: { sent: number; skipped: number; resent: number }) => {
+    successSummary: (summary: { sent: number; skipped: number; skippedAlreadyMember: number; resent: number }) => {
       const parts: string[] = [];
       if (summary.sent > 0) {
         parts.push(`отправлено приглашений: ${summary.sent}`);
@@ -161,7 +165,11 @@ const ru = {
         parts.push(`повторно: ${summary.resent}`);
       }
       if (summary.skipped > 0) {
-        parts.push(`пропущено: ${summary.skipped}`);
+        const skippedLabel =
+          summary.skippedAlreadyMember > 0 && summary.skippedAlreadyMember === summary.skipped
+            ? `пропущено: ${summary.skipped} (уже в команде)`
+            : `пропущено: ${summary.skipped}`;
+        parts.push(skippedLabel);
       }
       return parts.length > 0 ? parts.join(", ") : "Приглашения не отправлены.";
     },

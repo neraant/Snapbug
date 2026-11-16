@@ -12,6 +12,7 @@ export type SendInvitationsInputDtoType = z.infer<typeof sendInvitationsInputDto
 export const sendInvitationsOutputDtoSchema = z.object({
   sent: z.number().int().nonnegative(),
   skipped: z.number().int().nonnegative(),
+  skippedAlreadyMember: z.number().int().nonnegative(),
   resent: z.number().int().nonnegative(),
 });
 

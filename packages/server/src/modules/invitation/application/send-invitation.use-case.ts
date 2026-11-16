@@ -58,6 +58,7 @@ export class SendInvitationsUseCase {
     const emails = this.normalizeEmails(input.emails);
     let sent = 0;
     let skipped = 0;
+    let skippedAlreadyMember = 0;
     let resent = 0;
 
     for (const email of emails) {
@@ -74,6 +75,7 @@ export class SendInvitationsUseCase {
         });
         if (membership) {
           skipped += 1;
+          skippedAlreadyMember += 1;
           continue;
         }
       }
@@ -147,7 +149,7 @@ export class SendInvitationsUseCase {
       sent += 1;
     }
 
-    return { sent, skipped, resent };
+    return { sent, skipped, skippedAlreadyMember, resent };
   }
 
   private recipientName(user: { name: string | null } | null): string | undefined {
