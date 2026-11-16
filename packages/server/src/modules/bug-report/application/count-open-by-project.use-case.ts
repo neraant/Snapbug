@@ -26,7 +26,7 @@ export class CountOpenByProjectUseCase {
       membership,
       projects.map((project) => project.id),
     );
-    const rows = await this.bugReportRepository.countOpenByProject(projectIds);
+    const rows = await this.bugReportRepository.summarizeTicketsByProject(projectIds);
 
     return BugReportMapper.toCountOpenByProjectOutput(rows);
   }

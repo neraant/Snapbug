@@ -55,7 +55,7 @@ export function readStoredProjectFilters(organizationId: string): ProjectFilters
 }
 
 export function writeStoredProjectFilters(organizationId: string, filters: ProjectFilters) {
-  const raw = JSON.stringify({ search: filters.search });
+  const raw = JSON.stringify({ search: filters.search, archiveStatus: filters.archiveStatus });
   const cached = snapshotByOrganizationId.get(organizationId);
   if (cached?.raw === raw) {
     return;
@@ -82,8 +82,19 @@ function parseStoredProjectFilters(raw: string | null): ProjectFilters {
       return defaultProjectFilters;
     }
 
-    const search = (parsed as Record<string, unknown>).search;
-    return typeof search === "string" ? { search } : defaultProjectFilters;
+    const record = parsed as Record<string, unknown>;
+    const search = record.search;
+    const archiveStatus = record.archiveStatus;
+
+    if (typeof search !== "string") {
+      return defaultProjectFilters;
+    }
+
+    if (archiveStatus === "active" || archiveStatus === "archived" || archiveStatus === "all") {
+      return { search, archiveStatus };
+    }
+
+    return { search, archiveStatus: defaultProjectFilters.archiveStatus };
   } catch {
     return defaultProjectFilters;
   }

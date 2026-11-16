@@ -7,7 +7,7 @@ import type {
   AssigneeOpenCountRow,
   DailyMetricRow,
   NullableStringCountRow,
-  ProjectOpenCountRow,
+  ProjectTicketSummaryRow,
   SeverityCountRow,
   StatusCountRow,
   WeekdayHourCountRow,
@@ -17,7 +17,7 @@ import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import { BugReportSeverity } from "@workspace/validation/modules/bug-report/consts/bug-report-severity.const";
 import { formatBugReportShortId } from "@workspace/validation/modules/bug-report/consts/bug-report-short-id.const";
 import { BugReportStatus } from "@workspace/validation/modules/bug-report/consts/bug-report-status.const";
-import { and, count, desc, eq, gte, ilike, inArray, isNotNull, lt, or, sql } from "drizzle-orm";
+import { and, count, desc, eq, gte, ilike, inArray, isNotNull, lt, max, or, sql } from "drizzle-orm";
 
 const openStatuses = [BugReportStatus.NEW, BugReportStatus.IN_PROGRESS] as const;
 const criticalHighSeverities = [BugReportSeverity.HIGH, BugReportSeverity.CRITICAL] as const;
@@ -190,21 +190,30 @@ export class BugReportRepository {
     }));
   }
 
-  async countOpenByProject(projectIds: string[]): Promise<ProjectOpenCountRow[]> {
+  async summarizeTicketsByProject(projectIds: string[]): Promise<ProjectTicketSummaryRow[]> {
     if (projectIds.length === 0) return [];
+
+    const openStatusList = sql.join(
+      openStatuses.map((status) => sql`${status}`),
+      sql`, `,
+    );
 
     const rows = await this.db
       .select({
         projectId: bugReportTable.projectId,
-        count: count(),
+        openCount: sql<number>`count(*) filter (where ${bugReportTable.status} in (${openStatusList}))`.mapWith(Number),
+        totalCount: count(),
+        lastTicketAt: max(bugReportTable.createdAt),
       })
       .from(bugReportTable)
-      .where(and(inArray(bugReportTable.projectId, projectIds), inArray(bugReportTable.status, [...openStatuses])))
+      .where(inArray(bugReportTable.projectId, projectIds))
       .groupBy(bugReportTable.projectId);
 
     return rows.map((row) => ({
       projectId: row.projectId,
-      count: Number(row.count),
+      openCount: Number(row.openCount),
+      totalCount: Number(row.totalCount),
+      lastTicketAt: row.lastTicketAt ?? null,
     }));
   }
 

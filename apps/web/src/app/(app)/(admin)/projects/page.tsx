@@ -29,7 +29,7 @@ export default function Page() {
       <Column gap="lg" width="full" minWidth="0">
         <ProjectFiltersBar filters={filters} onFiltersChange={setFilters} />
         <Suspense fallback={<ProjectList.Fallback />}>
-          <ProjectList search={filters.search} />
+          <ProjectList filters={filters} />
         </Suspense>
       </Column>
       {createOpen ? (

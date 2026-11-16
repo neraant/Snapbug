@@ -2,7 +2,7 @@ import { BugReport } from "@workspace/server/modules/bug-report/entity/bug-repor
 import type {
   AssigneeOpenCountRow,
   BugReportPersistedType,
-  ProjectOpenCountRow,
+  ProjectTicketSummaryRow,
 } from "@workspace/server/modules/bug-report/entity/bug-report.types";
 import type { BugReportModelType } from "@workspace/validation/modules/bug-report/dto/bug-report.model";
 import type { CountOpenByAssigneeOutputDtoType } from "@workspace/validation/modules/bug-report/dto/count-open-by-assignee.schema";
@@ -96,8 +96,13 @@ export abstract class BugReportMapper {
     return rows.flatMap((row) => (row.assignedTo ? [{ userId: row.assignedTo, openCount: row.count }] : []));
   }
 
-  static toCountOpenByProjectOutput(rows: ProjectOpenCountRow[]): CountOpenByProjectOutputDtoType {
-    return rows.map((row) => ({ projectId: row.projectId, openCount: row.count }));
+  static toCountOpenByProjectOutput(rows: ProjectTicketSummaryRow[]): CountOpenByProjectOutputDtoType {
+    return rows.map((row) => ({
+      projectId: row.projectId,
+      openCount: row.openCount,
+      totalCount: row.totalCount,
+      lastTicketAt: row.lastTicketAt?.toISOString() ?? null,
+    }));
   }
 
   static toFindStatsOutput(items: FindStatsOutputDtoType["items"]): FindStatsOutputDtoType {
