@@ -13,12 +13,31 @@ import { FieldGroup } from "@workspace/design-system/components/ui/field";
 import { SubmitButton } from "@workspace/design-system/components/ui/submit-button";
 
 import { SecretRevealDialog } from "@/client/modules/shared/components/secret-reveal-dialog";
+import { CreateUserTokenPermissions } from "@/client/modules/user-token/components/create-user-token-permissions";
 import { texts } from "@/client/modules/user-token/consts/texts.const";
 import { useCreateUserTokenDialog } from "@/client/modules/user-token/hooks/use-create-user-token-dialog";
 
 export function CreateUserTokenDialog() {
-  const { control, onSubmit, open, secret, createdTokenName, isPending, onOpenChange, onOpenCreate } =
-    useCreateUserTokenDialog();
+  const {
+    control,
+    onSubmit,
+    open,
+    secret,
+    createdTokenName,
+    isPending,
+    onOpenChange,
+    onOpenCreate,
+    preset,
+    customScopes,
+    projectMode,
+    selectedProjectIds,
+    projects,
+    toolSummary,
+    onPresetChange,
+    onToggleScope,
+    onProjectModeChange,
+    onToggleProject,
+  } = useCreateUserTokenDialog();
 
   return (
     <>
@@ -26,7 +45,7 @@ export function CreateUserTokenDialog() {
         {texts.create.action}
       </Button>
       <Dialog open={open} onOpenChange={onOpenChange} disablePointerDismissal={secret != null}>
-        <DialogContent showClose={secret == null}>
+        <DialogContent showClose={secret == null} className="max-w-lg">
           {secret ? (
             <SecretRevealDialog
               secret={secret}
@@ -51,6 +70,19 @@ export function CreateUserTokenDialog() {
                     autoComplete="off"
                   />
                 </FieldGroup>
+                <CreateUserTokenPermissions
+                  preset={preset}
+                  customScopes={customScopes}
+                  projectMode={projectMode}
+                  selectedProjectIds={selectedProjectIds}
+                  projects={projects}
+                  toolSummary={toolSummary}
+                  isPending={isPending}
+                  onPresetChange={onPresetChange}
+                  onToggleScope={onToggleScope}
+                  onProjectModeChange={onProjectModeChange}
+                  onToggleProject={onToggleProject}
+                />
                 <DialogFooter>
                   <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                     {texts.create.dialog.cancel}

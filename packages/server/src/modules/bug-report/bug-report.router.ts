@@ -29,10 +29,20 @@ export const bugReportRouter = os.router({
   ),
   findOne: authed.findOne.handler(
     async ({ input, context }) =>
-      await container.bugReport.findOne.execute(input, context.user.id, context.organizationId),
+      await container.bugReport.findOne.execute(
+        input,
+        context.user.id,
+        context.organizationId,
+        context.mcp?.projectIds,
+      ),
   ),
   findScreenshot: authed.findScreenshot.handler(async ({ input, context }) => {
-    const screenshot = await container.bugReport.findScreenshot.execute(input, context.user.id, context.organizationId);
+    const screenshot = await container.bugReport.findScreenshot.execute(
+      input,
+      context.user.id,
+      context.organizationId,
+      context.mcp?.projectIds,
+    );
     return new Blob([Buffer.from(screenshot.bytes)], { type: screenshot.contentType });
   }),
   findReplay: authed.findReplay.handler(async ({ input, context }) => {
@@ -48,17 +58,25 @@ export const bugReportRouter = os.router({
       await container.bugReport.updateBugReport.execute(input, context.user.id, context.actor),
   ),
   listTickets: authed.listTickets.handler(
-    async ({ input, context }) => await container.bugReport.listTickets.execute(input, context.user.id),
+    async ({ input, context }) =>
+      await container.bugReport.listTickets.execute(input, context.user.id, context.mcp?.projectIds),
   ),
   listTicketLogs: authed.listTicketLogs.handler(
-    async ({ input, context }) => await container.bugReport.listTicketLogs.execute(input, context.user.id),
+    async ({ input, context }) =>
+      await container.bugReport.listTicketLogs.execute(input, context.user.id, context.mcp?.projectIds),
   ),
   getTicketEnvironment: authed.getTicketEnvironment.handler(
-    async ({ input, context }) => await container.bugReport.getTicketEnvironment.execute(input, context.user.id),
+    async ({ input, context }) =>
+      await container.bugReport.getTicketEnvironment.execute(input, context.user.id, context.mcp?.projectIds),
   ),
   getOverviewStats: authed.getOverviewStats.handler(
     async ({ input, context }) =>
-      await container.bugReport.getOverviewStats.execute(input, context.user.id, context.organizationId),
+      await container.bugReport.getOverviewStats.execute(
+        input,
+        context.user.id,
+        context.organizationId,
+        context.mcp?.projectIds,
+      ),
   ),
   findStats: authed.findStats.handler(
     async ({ input, context }) =>

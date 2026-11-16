@@ -2,6 +2,7 @@ import { RevokeUserTokenUseCase } from "@workspace/server/modules/user-token/app
 import { UserToken } from "@workspace/server/modules/user-token/entity/user-token.entity";
 import type { UserTokenRepository } from "@workspace/server/modules/user-token/repository/user-token.repository";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
+import { LEGACY_USER_TOKEN_SCOPES } from "@workspace/validation/modules/user-token/consts/mcp-scope.const";
 import { describe, expect, it, vi } from "vitest";
 
 const userId = "0a8c69a1-1ab1-45a8-8497-eae1e506d9d4";
@@ -15,6 +16,9 @@ function createUserToken(ownerId: string, revokedAt: Date | null = null) {
     tokenHash: "hashed-secret",
     name: "Cursor MCP",
     prefix: "snb_ut_live_ab12",
+    scopes: [...LEGACY_USER_TOKEN_SCOPES],
+    scopePreset: "fullAccess",
+    projectIds: null,
     createdAt,
     revokedAt,
   });

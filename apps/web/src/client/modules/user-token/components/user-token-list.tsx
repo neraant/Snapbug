@@ -1,4 +1,5 @@
 import { Column } from "@workspace/design-system/components/layout/column";
+import { Row } from "@workspace/design-system/components/layout/row";
 import { Button } from "@workspace/design-system/components/ui/button";
 import { ConfirmDialog } from "@workspace/design-system/components/ui/confirm-dialog";
 import {
@@ -16,6 +17,7 @@ import { EllipsisVerticalIcon } from "lucide-react";
 
 import { useConfirmDialog } from "@/client/modules/shared/hooks/use-confirm-dialog";
 import { CreateUserTokenDialog } from "@/client/modules/user-token/components/create-user-token-dialog";
+import { UserTokenScopeBadges } from "@/client/modules/user-token/components/user-token-scope-badges";
 import { texts } from "@/client/modules/user-token/consts/texts.const";
 import { useUserTokenList } from "@/client/modules/user-token/hooks/use-user-token-list";
 import { formatUserTokenCreatedAt } from "@/client/modules/user-token/utils/format-user-token-created-at.util";
@@ -63,6 +65,7 @@ export function UserTokenList() {
             <Table.Header>
               <Table.Row>
                 <Table.Head>{texts.column.token}</Table.Head>
+                <Table.Head>{texts.column.scopes}</Table.Head>
                 <Table.Head>{texts.column.created}</Table.Head>
                 <Table.Head>{texts.column.actions}</Table.Head>
               </Table.Row>
@@ -72,6 +75,15 @@ export function UserTokenList() {
                 <Table.Row key={token.id}>
                   <Table.Cell>
                     <Typography variant="text-sm">{token.name}</Typography>
+                  </Table.Cell>
+                  <Table.Cell>
+                    <Row gap="xs" wrap>
+                      <UserTokenScopeBadges
+                        scopePreset={token.scopePreset}
+                        scopes={token.scopes}
+                        projectIds={token.projectIds}
+                      />
+                    </Row>
                   </Table.Cell>
                   <Table.Cell>
                     <Typography variant="text-sm">{formatUserTokenCreatedAt(token.createdAt)}</Typography>

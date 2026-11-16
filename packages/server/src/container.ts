@@ -393,7 +393,12 @@ const getProject = new GetProjectUseCase(membershipAdapter, projectRepository);
 const listMembers = new ListMembersUseCase(membershipRepository, userAdapter);
 const userTokenRepository = new UserTokenRepository();
 const userTokenService = new UserTokenService();
-const createUserToken = new CreateUserTokenUseCase(userTokenService, userTokenRepository);
+const createUserToken = new CreateUserTokenUseCase(
+  userTokenService,
+  userTokenRepository,
+  membershipAdapter,
+  projectAdapter,
+);
 const findUserTokens = new FindUserTokensUseCase(userTokenRepository);
 const revokeUserToken = new RevokeUserTokenUseCase(userTokenRepository);
 const findUserByToken = new FindUserByTokenUseCase(userTokenService, userTokenRepository, userAdapter);
