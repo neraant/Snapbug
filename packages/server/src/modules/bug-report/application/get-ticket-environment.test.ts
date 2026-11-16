@@ -2,6 +2,7 @@ import { GetTicketEnvironmentUseCase } from "@workspace/server/modules/bug-repor
 import { BugReport } from "@workspace/server/modules/bug-report/entity/bug-report.entity";
 import type { MembershipPort } from "@workspace/server/modules/bug-report/port/membership.port";
 import type { BugReportRepository } from "@workspace/server/modules/bug-report/repository/bug-report.repository";
+import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import { BugReportSeverity } from "@workspace/validation/modules/bug-report/consts/bug-report-severity.const";
 import { BugReportStatus } from "@workspace/validation/modules/bug-report/consts/bug-report-status.const";
 import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
@@ -61,5 +62,23 @@ describe("GetTicketEnvironmentUseCase", () => {
 
     expect(result.browser).toBe("Chrome");
     expect(result.viewportWidth).toBe(1280);
+  });
+
+  it("does not return environment for a ticket the member cannot access", async () => {
+    const membershipPort = {
+      findByUserAndOrganization: vi.fn().mockResolvedValue({ organizationId, role: UserRole.USER }),
+      filterProjectIds: vi.fn().mockResolvedValue([]),
+    };
+    const bugReportRepository = {
+      findManyByShortId: vi.fn().mockResolvedValue([{ bugReport, organizationId }]),
+    };
+    const useCase = new GetTicketEnvironmentUseCase(
+      membershipPort as unknown as MembershipPort,
+      bugReportRepository as unknown as BugReportRepository,
+    );
+
+    await expect(useCase.execute({ shortId: "SNB-2" }, userId)).rejects.toMatchObject({
+      errorCode: ERROR_CODES.BUG_REPORT_NOT_FOUND,
+    });
   });
 });

@@ -63,13 +63,17 @@ export class GetOverviewStatsUseCase {
     };
   }
 
-  private async resolveProjectIds(input: GetOverviewStatsInputDtoType, membership: MembershipModelType): Promise<string[]> {
+  private async resolveProjectIds(
+    input: GetOverviewStatsInputDtoType,
+    membership: MembershipModelType,
+  ): Promise<string[]> {
     if (input.projectId) {
       const project = await this.projectPort.findById(input.projectId);
       if (!project || project.organizationId !== membership.organizationId) {
         throw new NotFoundError(ERROR_CODES.PROJECT_NOT_FOUND);
       }
       const allowedProjectIds = await this.membershipPort.filterProjectIds(membership, [project.id]);
+      if (allowedProjectIds.length === 0) throw new NotFoundError(ERROR_CODES.PROJECT_NOT_FOUND);
       return allowedProjectIds;
     }
 

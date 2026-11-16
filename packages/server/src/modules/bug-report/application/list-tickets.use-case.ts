@@ -1,4 +1,4 @@
-import { BugReport } from "@workspace/server/modules/bug-report/entity/bug-report.entity";
+import type { BugReport } from "@workspace/server/modules/bug-report/entity/bug-report.entity";
 import { BugReportMapper } from "@workspace/server/modules/bug-report/entity/bug-report.mapper";
 import type { MembershipPort } from "@workspace/server/modules/bug-report/port/membership.port";
 import type { ProjectPort } from "@workspace/server/modules/bug-report/port/project.port";
@@ -39,7 +39,7 @@ export class ListTicketsUseCase {
     const hasMore = page.length > limit;
     const items = page.slice(0, limit).map((bugReport) => this.toListItem(bugReport));
     const last = page[limit - 1];
-    const nextCursor = hasMore && last ? encodeTicketListCursor(last.boardOrder, last.id) : null;
+    const nextCursor = hasMore && last ? encodeTicketListCursor(last.boardOrder, last.createdAt, last.id) : null;
 
     return { items, nextCursor };
   }
@@ -97,7 +97,9 @@ export class ListTicketsUseCase {
   private sortForCursor(bugReports: BugReport[]): BugReport[] {
     return [...bugReports].sort((left, right) => {
       if (left.boardOrder !== right.boardOrder) return left.boardOrder - right.boardOrder;
-      return right.createdAt.getTime() - left.createdAt.getTime();
+      const createdAtDiff = right.createdAt.getTime() - left.createdAt.getTime();
+      if (createdAtDiff !== 0) return createdAtDiff;
+      return left.id.localeCompare(right.id);
     });
   }
 
@@ -109,7 +111,10 @@ export class ListTicketsUseCase {
     const index = bugReports.findIndex(
       (bugReport) =>
         bugReport.boardOrder > decoded.boardOrder ||
-        (bugReport.boardOrder === decoded.boardOrder && bugReport.id > decoded.id),
+        (bugReport.boardOrder === decoded.boardOrder && bugReport.createdAt.getTime() < decoded.createdAtMs) ||
+        (bugReport.boardOrder === decoded.boardOrder &&
+          bugReport.createdAt.getTime() === decoded.createdAtMs &&
+          bugReport.id > decoded.id),
     );
     return index === -1 ? bugReports.length : index;
   }

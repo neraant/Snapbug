@@ -2,6 +2,7 @@ import { ListMembersUseCase } from "@workspace/server/modules/membership/applica
 import { Membership } from "@workspace/server/modules/membership/entity/membership.entity";
 import type { UserPort } from "@workspace/server/modules/membership/port/user.port";
 import type { MembershipRepository } from "@workspace/server/modules/membership/repository/membership.repository";
+import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
 import { describe, expect, it, vi } from "vitest";
 
@@ -88,5 +89,23 @@ describe("ListMembersUseCase", () => {
     const result = await useCase.execute({}, userId, organizationId);
 
     expect(result[0]?.email).toBe("member@test.io");
+  });
+
+  it("does not list members when the caller is not in the organization", async () => {
+    const membershipRepository = {
+      findByUserAndOrganization: vi.fn().mockResolvedValue(null),
+      findManyByOrganizationId: vi.fn(),
+    };
+    const userPort = { findManyByIds: vi.fn() };
+    const useCase = new ListMembersUseCase(
+      membershipRepository as unknown as MembershipRepository,
+      userPort as unknown as UserPort,
+    );
+
+    await expect(useCase.execute({}, userId, organizationId)).rejects.toMatchObject({
+      errorCode: ERROR_CODES.ORGANIZATION_NOT_FOUND,
+    });
+
+    expect(membershipRepository.findManyByOrganizationId).not.toHaveBeenCalled();
   });
 });
