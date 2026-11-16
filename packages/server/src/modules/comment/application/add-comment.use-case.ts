@@ -14,6 +14,10 @@ import type {
   AddCommentInputDtoType,
   AddCommentOutputDtoType,
 } from "@workspace/validation/modules/comment/dto/add-comment.schema";
+import {
+  CommentAuthorSource,
+  type CommentAuthorSourceType,
+} from "@workspace/validation/modules/comment/consts/comment-author-source.const";
 import type { UserModelType } from "@workspace/validation/modules/user/dto/user.model";
 
 export class AddCommentUseCase {
@@ -37,6 +41,7 @@ export class AddCommentUseCase {
       bugReportId: ticket.bugReport.id,
       authorUserId: userId,
       body: input.body,
+      authorSource: resolveAuthorSource(actor),
     });
 
     await this.withTransaction(async (tx) => {
@@ -78,4 +83,8 @@ type AccessibleTicket = {
 function isReportAuthor(callerEmail: string, reporterEmail: string | null): boolean {
   if (!reporterEmail) return false;
   return callerEmail.toLowerCase() === reporterEmail.toLowerCase();
+}
+
+function resolveAuthorSource(actor: AuditActor): CommentAuthorSourceType {
+  return actor.type === "mcp" ? CommentAuthorSource.MCP : CommentAuthorSource.WEB;
 }

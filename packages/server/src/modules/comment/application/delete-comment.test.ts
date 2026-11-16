@@ -76,7 +76,9 @@ function existingComment(authorUserId: string) {
     bugReportId,
     authorUserId,
     body: "The price is missing.",
+    authorSource: "web",
     createdAt: new Date("2026-10-03T10:00:00.000Z"),
+    updatedAt: null,
   });
 }
 
