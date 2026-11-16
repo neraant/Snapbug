@@ -25,7 +25,7 @@ import { useInviteSignUp } from "@/client/modules/auth/hooks/use-invite-sign-up"
 import { invitationDaysUntilExpiry } from "@/client/modules/auth/utils/invitation-expiry-label.util";
 import { useAcceptInvitation } from "@/client/modules/shared/queries/use-accept-invitation";
 import { useFindInvitationByToken } from "@/client/modules/shared/queries/use-find-invitation-by-token";
-import { appendQueryParams, url } from "@/shared/build-url.util";
+import { url } from "@/shared/build-url.util";
 import { selectActiveOrganization } from "@/shared/organization/select-active-organization";
 import { parseInvitationToken } from "@/shared/utils/parse-invitation-token.util";
 
