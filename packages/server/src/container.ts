@@ -106,6 +106,7 @@ import { UpdateProjectUseCase } from "@workspace/server/modules/project/applicat
 import { UpdateProjectWidgetSettingUseCase } from "@workspace/server/modules/project/application/update-project-widget-setting.use-case";
 import { ProjectRepository } from "@workspace/server/modules/project/repository/project.repository";
 import { ProjectService } from "@workspace/server/modules/project/service/project.service";
+import { ListToolsUseCase } from "@workspace/server/modules/mcp/application/list-tools.use-case";
 import { SearchUseCase } from "@workspace/server/modules/search/application/search.use-case";
 import { CreateUserTokenUseCase } from "@workspace/server/modules/user-token/application/create-user-token.use-case";
 import { FindUserByTokenUseCase } from "@workspace/server/modules/user-token/application/find-user-by-token.use-case";
@@ -119,8 +120,10 @@ import { withTransactionFactory } from "@workspace/server/shared/database/transa
 import { resendClient } from "@workspace/server/shared/email/email.client";
 import { EmailService } from "@workspace/server/shared/email/service/email.service";
 import { env } from "@workspace/server/shared/env/env.schema";
+import { McpToolListingService } from "@workspace/server/shared/orpc/mcp/mcp-tool-listing.service";
 
 const withTransaction = withTransactionFactory(db);
+const mcpToolListingService = new McpToolListingService();
 
 const authService = new AuthService();
 const emailService = new EmailService(resendClient);
@@ -397,6 +400,7 @@ const createUserToken = new CreateUserTokenUseCase(userTokenService, userTokenRe
 const findUserTokens = new FindUserTokensUseCase(userTokenRepository);
 const revokeUserToken = new RevokeUserTokenUseCase(userTokenRepository);
 const findUserByToken = new FindUserByTokenUseCase(userTokenService, userTokenRepository, userAdapter);
+const listTools = new ListToolsUseCase(mcpToolListingService);
 const addComment = new AddCommentUseCase(
   bugReportAdapter,
   projectAdapter,
@@ -497,6 +501,9 @@ export const container = {
     listTicketLogs,
     getTicketEnvironment,
     getOverviewStats,
+  },
+  mcp: {
+    listTools,
   },
   userToken: {
     create: createUserToken,
