@@ -8,6 +8,14 @@ const en = {
     placeholder: "Search projects…",
     clear: "Clear search",
   },
+  filter: {
+    archive: {
+      ariaLabel: "Show projects",
+      active: "Active",
+      archived: "Archived",
+      all: "All",
+    },
+  },
   empty: {
     title: "No projects yet",
     description: "Create a project to start collecting bug reports.",
@@ -17,17 +25,34 @@ const en = {
     description: "Try a different search term.",
   },
   card: {
-    openIssues: (count: number) => (count === 1 ? "1 open issue" : `${count} open issues`),
-    created: (dateLabel: string) => `Created ${dateLabel}`,
     menu: "Project actions",
     settings: "Settings",
+    openSdkSetup: "Open SDK setup",
     archive: "Archive",
-    archivedBadge: "Archived",
+    restore: "Restore",
+    delete: "Delete",
+    archivedStrip: "Archived",
+    openTickets: (count: number) => (count === 1 ? "1 open" : `${count} open`),
+    totalTickets: (count: number) => (count === 1 ? "1 ticket" : `${count} tickets`),
+    noTicketsYet: "No tickets yet",
+    lastTicket: (relative: string) => `Last ${relative}`,
+    created: (dateLabel: string) => `Created ${dateLabel}`,
+    navigateToTickets: (name: string) => `Open tickets for ${name}`,
     archiveDialog: {
       title: (name: string) => `Archive "${name}"?`,
       description: (name: string) =>
         `${name} will stop accepting new bug reports. You can restore it later from project settings.`,
       confirm: "Archive",
+    },
+    restoreDialog: {
+      title: (name: string) => `Restore "${name}"?`,
+      description: (name: string) => `${name} will accept new bug reports again.`,
+      confirm: "Restore",
+    },
+    deleteDialog: {
+      title: (name: string) => `Delete "${name}"?`,
+      description: () => "This project and all of its tickets will be permanently deleted. This cannot be undone.",
+      confirm: "Delete",
     },
     member: (name: string) => name,
     moreMembers: (count: number) => `+${count}`,
@@ -147,6 +172,14 @@ const ru = {
     placeholder: "Поиск проектов…",
     clear: "Очистить поиск",
   },
+  filter: {
+    archive: {
+      ariaLabel: "Показать проекты",
+      active: "Активные",
+      archived: "В архиве",
+      all: "Все",
+    },
+  },
   empty: {
     title: "Проектов пока нет",
     description: "Создайте проект, чтобы начать собирать отчёты об ошибках.",
@@ -156,23 +189,46 @@ const ru = {
     description: "Попробуйте другой запрос.",
   },
   card: {
-    openIssues: (count: number) => {
-      const mod10 = count % 10;
-      const mod100 = count % 100;
-      if (mod10 === 1 && mod100 !== 11) return `${count} открытая проблема`;
-      if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return `${count} открытые проблемы`;
-      return `${count} открытых проблем`;
-    },
-    created: (dateLabel: string) => `Создан ${dateLabel}`,
     menu: "Действия с проектом",
     settings: "Настройки",
+    openSdkSetup: "Открыть настройку SDK",
     archive: "В архив",
-    archivedBadge: "В архиве",
+    restore: "Восстановить",
+    delete: "Удалить",
+    archivedStrip: "В архиве",
+    openTickets: (count: number) => {
+      const mod10 = count % 10;
+      const mod100 = count % 100;
+      if (mod10 === 1 && mod100 !== 11) return `${count} открыт`;
+      if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return `${count} открыто`;
+      return `${count} открытых`;
+    },
+    totalTickets: (count: number) => {
+      const mod10 = count % 10;
+      const mod100 = count % 100;
+      if (mod10 === 1 && mod100 !== 11) return `${count} тикет`;
+      if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return `${count} тикета`;
+      return `${count} тикетов`;
+    },
+    noTicketsYet: "Тикетов пока нет",
+    lastTicket: (relative: string) => `Последний ${relative}`,
+    created: (dateLabel: string) => `Создан ${dateLabel}`,
+    navigateToTickets: (name: string) => `Открыть тикеты проекта «${name}»`,
     archiveDialog: {
       title: (name: string) => `Отправить «${name}» в архив?`,
       description: (name: string) =>
         `Проект «${name}» перестанет принимать новые отчёты. Его можно восстановить в настройках проекта.`,
       confirm: "В архив",
+    },
+    restoreDialog: {
+      title: (name: string) => `Восстановить «${name}»?`,
+      description: (name: string) => `Проект «${name}» снова будет принимать новые отчёты.`,
+      confirm: "Восстановить",
+    },
+    deleteDialog: {
+      title: (name: string) => `Удалить «${name}»?`,
+      description: () => "Проект и все его тикеты будут удалены без возможности восстановления.",
+      confirm: "Удалить",
     },
     member: (name: string) => name,
     moreMembers: (count: number) => `+${count}`,

@@ -7,7 +7,7 @@ import type {
   AssigneeOpenCountRow,
   DailyMetricRow,
   NullableStringCountRow,
-  ProjectOpenCountRow,
+  ProjectTicketSummaryRow,
   SeverityCountRow,
   StatusCountRow,
   WeekdayHourCountRow,
@@ -190,21 +190,28 @@ export class BugReportRepository {
     }));
   }
 
-  async countOpenByProject(projectIds: string[]): Promise<ProjectOpenCountRow[]> {
+  async summarizeTicketsByProject(projectIds: string[]): Promise<ProjectTicketSummaryRow[]> {
     if (projectIds.length === 0) return [];
 
     const rows = await this.db
       .select({
         projectId: bugReportTable.projectId,
-        count: count(),
+        openCount: sql<number>`sum(case when ${bugReportTable.status} in (${sql.join(
+          openStatuses.map((status) => sql`${status}`),
+          sql`, `,
+        )}) then 1 else 0 end)`.mapWith(Number),
+        totalCount: count(),
+        lastTicketAt: sql<Date | null>`max(${bugReportTable.createdAt})`,
       })
       .from(bugReportTable)
-      .where(and(inArray(bugReportTable.projectId, projectIds), inArray(bugReportTable.status, [...openStatuses])))
+      .where(inArray(bugReportTable.projectId, projectIds))
       .groupBy(bugReportTable.projectId);
 
     return rows.map((row) => ({
       projectId: row.projectId,
-      count: Number(row.count),
+      openCount: Number(row.openCount),
+      totalCount: Number(row.totalCount),
+      lastTicketAt: row.lastTicketAt,
     }));
   }
 

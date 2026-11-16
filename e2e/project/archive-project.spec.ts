@@ -20,10 +20,8 @@ test("an administrator archives a project from the projects page", async ({ page
   await page.goto("/projects");
   await expect(page.getByRole("button", { name: "New project" })).toBeVisible();
 
-  const marketingActions = page
-    .locator('[data-slot="card"]')
-    .filter({ has: page.getByRole("heading", { name: "Acme Marketing" }) })
-    .getByRole("button", { name: "Project actions" });
+  const marketingCard = page.getByRole("link", { name: "Open tickets for Acme Marketing" });
+  const marketingActions = marketingCard.getByRole("button", { name: "Project actions" });
 
   await expect(async () => {
     await marketingActions.click();
@@ -35,5 +33,8 @@ test("an administrator archives a project from the projects page", async ({ page
   await page.getByRole("button", { name: "Archive", exact: true }).click();
 
   await expect(page.getByText("Project archived.")).toBeVisible({ timeout: 30_000 });
-  await expect(page.getByText("Archived").first()).toBeVisible();
+
+  await page.getByRole("button", { name: "Archived" }).click();
+  await expect(marketingCard).toBeVisible();
+  await expect(marketingCard.getByText("Archived")).toBeVisible();
 });

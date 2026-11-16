@@ -22,6 +22,7 @@ const gridVariants = cva("grid w-full min-w-0", {
       "fluid-lg": "grid-cols-[repeat(auto-fit,minmax(min(100%,18rem),1fr))]",
       "responsive-2": "grid-cols-1 sm:grid-cols-2",
       "responsive-3": "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
+      "responsive-projects": "grid-cols-1 md:grid-cols-2 xl:grid-cols-3",
       "responsive-4": "grid-cols-1 sm:grid-cols-2 xl:grid-cols-4",
     },
   },

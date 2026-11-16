@@ -2,4 +2,6 @@ import type { ProjectModelType } from "@workspace/validation/modules/project/dto
 
 export type ProjectListItem = ProjectModelType & {
   openCount: number;
+  totalCount: number;
+  lastTicketAt: string | null;
 };

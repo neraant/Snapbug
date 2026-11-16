@@ -18,8 +18,11 @@ describe("CountOpenByProjectUseCase", () => {
     const projectPort = {
       findManyByOrganizationId: vi.fn().mockResolvedValue([{ id: projectId }]),
     };
+    const lastTicketAt = new Date("2025-01-15T12:00:00.000Z");
     const bugReportRepository = {
-      countOpenByProject: vi.fn().mockResolvedValue([{ projectId, count: 4 }]),
+      summarizeTicketsByProject: vi
+        .fn()
+        .mockResolvedValue([{ projectId, openCount: 4, totalCount: 10, lastTicketAt }]),
     };
     const useCase = new CountOpenByProjectUseCase(
       membershipPort as unknown as MembershipPort,
@@ -30,8 +33,10 @@ describe("CountOpenByProjectUseCase", () => {
     const result = await useCase.execute(userId, organizationId);
 
     expect(projectPort.findManyByOrganizationId).toHaveBeenCalledWith({ organizationId });
-    expect(bugReportRepository.countOpenByProject).toHaveBeenCalledWith([projectId]);
-    expect(result).toEqual([{ projectId, openCount: 4 }]);
+    expect(bugReportRepository.summarizeTicketsByProject).toHaveBeenCalledWith([projectId]);
+    expect(result).toEqual([
+      { projectId, openCount: 4, totalCount: 10, lastTicketAt: lastTicketAt.toISOString() },
+    ]);
   });
 
   it("rejects users without an organization before counting reports", async () => {
@@ -40,7 +45,7 @@ describe("CountOpenByProjectUseCase", () => {
       findByUserAndOrganization: vi.fn().mockResolvedValue(null),
     };
     const projectPort = { findManyByOrganizationId: vi.fn() };
-    const bugReportRepository = { countOpenByProject: vi.fn() };
+    const bugReportRepository = { summarizeTicketsByProject: vi.fn() };
     const useCase = new CountOpenByProjectUseCase(
       membershipPort as unknown as MembershipPort,
       projectPort as unknown as ProjectPort,
@@ -52,6 +57,6 @@ describe("CountOpenByProjectUseCase", () => {
     });
 
     expect(projectPort.findManyByOrganizationId).not.toHaveBeenCalled();
-    expect(bugReportRepository.countOpenByProject).not.toHaveBeenCalled();
+    expect(bugReportRepository.summarizeTicketsByProject).not.toHaveBeenCalled();
   });
 });

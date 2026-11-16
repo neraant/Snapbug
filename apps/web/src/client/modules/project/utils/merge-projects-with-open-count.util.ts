@@ -7,10 +7,16 @@ export function mergeProjectsWithOpenCount(
   projects: FindProjectsOutputDtoType,
   openCounts: CountOpenByProjectOutputDtoType,
 ): ProjectListItem[] {
-  const openCountByProjectId = new Map(openCounts.map((row) => [row.projectId, row.openCount]));
+  const ticketStatsByProjectId = new Map(openCounts.map((row) => [row.projectId, row]));
 
-  return projects.map((project) => ({
-    ...project,
-    openCount: openCountByProjectId.get(project.id) ?? 0,
-  }));
+  return projects.map((project) => {
+    const stats = ticketStatsByProjectId.get(project.id);
+
+    return {
+      ...project,
+      openCount: stats?.openCount ?? 0,
+      totalCount: stats?.totalCount ?? 0,
+      lastTicketAt: stats?.lastTicketAt ?? null,
+    };
+  });
 }
