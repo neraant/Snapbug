@@ -2,7 +2,7 @@ import { toast } from "@workspace/design-system/components/ui/toast";
 import { getAppErrorMessage } from "@workspace/server/error/get-app-error-message";
 import { interfaceLanguageSchema } from "@workspace/validation/modules/user/consts/interface-language.const";
 import { useRouter } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 import { useFindCurrentUser } from "@/client/modules/shared/queries/use-find-current-user";
 import { useUpdateInterfaceLanguage } from "@/client/modules/shared/queries/use-update-interface-language";
@@ -12,6 +12,7 @@ export function useInterfaceLanguageForm() {
   const router = useRouter();
   const { data: user } = useFindCurrentUser();
   const { mutateAsync: updateInterfaceLanguage, isPending } = useUpdateInterfaceLanguage();
+  const [savedVisible, setSavedVisible] = useState(false);
 
   const onValueChange = useCallback(
     async (next: string) => {
@@ -21,12 +22,13 @@ export function useInterfaceLanguageForm() {
       }
 
       const previous = user.interfaceLanguage;
+      setSavedVisible(false);
 
       try {
         const updated = await updateInterfaceLanguage({
           interfaceLanguage: parsed.data,
         });
-        toast.add({ title: texts.toast.success, type: "success" });
+        setSavedVisible(true);
         if (updated.interfaceLanguage !== previous) {
           router.refresh();
         }
@@ -44,5 +46,6 @@ export function useInterfaceLanguageForm() {
     value: user.interfaceLanguage,
     onValueChange,
     saving: isPending,
+    savedVisible,
   };
 }

@@ -18,8 +18,9 @@ test("an administrator saves the organization name and retention period", async 
   await expect(page).toHaveURL(/\/overview/, { timeout: 30_000 });
 
   await page.goto("/settings");
-  await expect(page.getByRole("heading", { name: "Organization settings" })).toBeVisible();
-  await expect(page.getByText("Days to keep reports for this organization.")).toBeVisible();
+  await expect(page.getByRole("tablist", { name: "Settings sections" })).toBeVisible();
+  await page.getByRole("tab", { name: "Organization" }).click();
+  await expect(page).toHaveURL(/tab=organization/);
   await page.waitForFunction(() => {
     const form = document.querySelector("form");
     if (!form) return false;
@@ -27,10 +28,11 @@ test("an administrator saves the organization name and retention period", async 
   });
 
   await page.getByRole("textbox", { name: "Name" }).fill("Acme Studio");
-  await page.getByRole("textbox", { name: "Retention period" }).fill("45");
+  await page.getByRole("combobox", { name: "Retention period" }).click();
+  await page.getByRole("option", { name: "45 days" }).click();
   await page.getByRole("button", { name: "Save", exact: true }).click();
 
-  await expect(page.getByText("Organization settings saved")).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByText("Saved")).toBeVisible({ timeout: 30_000 });
   await expect(page.getByRole("textbox", { name: "Name" })).toHaveValue("Acme Studio");
-  await expect(page.getByRole("textbox", { name: "Retention period" })).toHaveValue("45");
+  await expect(page.getByRole("combobox", { name: "Retention period" })).toContainText("45 days");
 });
