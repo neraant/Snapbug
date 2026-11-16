@@ -7,7 +7,10 @@ import { useForm } from "react-hook-form";
 
 import { texts } from "@/client/modules/auth/consts/texts.const";
 import { signInSchema, type SignInSchemaType } from "@/client/modules/auth/schemas/sign-in.schema";
-import { acceptInvitationAfterAuth } from "@/client/modules/auth/utils/accept-invitation-after-auth.util";
+import {
+  acceptInvitationAfterAuth,
+  waitForAuthenticatedSession,
+} from "@/client/modules/auth/utils/accept-invitation-after-auth.util";
 import { useAcceptInvitation } from "@/client/modules/shared/queries/use-accept-invitation";
 import { url } from "@/shared/build-url.util";
 
@@ -40,6 +43,12 @@ export function useInviteSignIn({ token, email, organizationName }: UseInviteSig
 
     if (result?.error) {
       toast.add({ title: texts.signIn.toast.invalidCredentials, type: "error" });
+      return;
+    }
+
+    const sessionReady = await waitForAuthenticatedSession();
+    if (!sessionReady) {
+      toast.add({ title: texts.invitePage.toast.sessionWaitTimedOut, type: "error" });
       return;
     }
 

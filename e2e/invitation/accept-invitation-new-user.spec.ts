@@ -1,14 +1,11 @@
 import { expect, test } from "@playwright/test";
 
 import { seedDatabase } from "../shared/seed/seed-database";
+import { waitForReactFormHydration } from "../shared/wait-for-react-form-hydration";
 
 async function adminInviteEmail(page: import("@playwright/test").Page, inviteEmail: string): Promise<string> {
   await page.goto("/sign-in");
-  await page.waitForFunction(() => {
-    const form = document.querySelector("form");
-    if (!form) return false;
-    return Object.getOwnPropertyNames(form).some((name) => name.startsWith("__reactProps$"));
-  });
+  await waitForReactFormHydration(page);
   await page.getByRole("textbox", { name: "Work Email" }).fill("admin@example.com");
   await page.getByRole("textbox", { name: "Password" }).fill("password");
   await page.getByRole("button", { name: "Log in" }).click();
@@ -51,6 +48,7 @@ test("a new user creates an account from the invite page and joins the team", as
     timeout: 30_000,
   });
   await expect(page.getByText(inviteEmail)).toBeVisible();
+  await waitForReactFormHydration(page);
 
   await page.getByRole("textbox", { name: "Name" }).fill("New Invitee");
   await page.getByRole("textbox", { name: "Password" }).fill("password123");

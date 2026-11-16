@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 import { seedDatabase } from "../shared/seed/seed-database";
+import { waitForReactFormHydration } from "../shared/wait-for-react-form-hydration";
 
 test("a signed-in member opening someone else's invite sees the wrong-account screen", async ({ page }) => {
   test.setTimeout(120_000);
@@ -9,11 +10,7 @@ test("a signed-in member opening someone else's invite sees the wrong-account sc
   const inviteEmail = `invitee-${Date.now()}@example.com`;
 
   await page.goto("/sign-in");
-  await page.waitForFunction(() => {
-    const form = document.querySelector("form");
-    if (!form) return false;
-    return Object.getOwnPropertyNames(form).some((name) => name.startsWith("__reactProps$"));
-  });
+  await waitForReactFormHydration(page);
   await page.getByRole("textbox", { name: "Work Email" }).fill("admin@example.com");
   await page.getByRole("textbox", { name: "Password" }).fill("password");
   await page.getByRole("button", { name: "Log in" }).click();

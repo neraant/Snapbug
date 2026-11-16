@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 import { seedDatabase } from "../shared/seed/seed-database";
+import { waitForReactFormHydration } from "../shared/wait-for-react-form-hydration";
 
 test("an existing user signs in from the invite page and joins the team", async ({ page, browser }) => {
   test.setTimeout(150_000);
@@ -11,6 +12,7 @@ test("an existing user signs in from the invite page and joins the team", async 
 
   const signupPage = await browser.newPage();
   await signupPage.goto("/sign-up");
+  await waitForReactFormHydration(signupPage);
   await signupPage.getByLabel("Name").fill("Existing Invitee");
   await signupPage.getByLabel("Work Email").fill(inviteEmail);
   await signupPage.getByRole("textbox", { name: "Password" }).fill(password);
@@ -20,6 +22,7 @@ test("an existing user signs in from the invite page and joins the team", async 
   await signupPage.close();
 
   await page.goto("/sign-in");
+  await waitForReactFormHydration(page);
   await page.getByRole("textbox", { name: "Work Email" }).fill("admin@example.com");
   await page.getByRole("textbox", { name: "Password" }).fill("password");
   await page.getByRole("button", { name: "Log in" }).click();
@@ -53,11 +56,7 @@ test("an existing user signs in from the invite page and joins the team", async 
   await expect(page.getByRole("button", { name: "Sign in to join" })).toBeVisible({
     timeout: 30_000,
   });
-  await page.waitForFunction(() => {
-    const form = document.querySelector("form");
-    if (!form) return false;
-    return Object.getOwnPropertyNames(form).some((name) => name.startsWith("__reactProps$"));
-  });
+  await waitForReactFormHydration(page);
   await page.getByRole("textbox", { name: "Password" }).fill(password);
   await page.getByRole("button", { name: "Sign in to join" }).click();
 

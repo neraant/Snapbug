@@ -253,8 +253,7 @@ const en = {
     roleMember: "Member",
     roleLabel: (role: string) => (role === "admin" ? "Admin" : "Member"),
     invitedEmail: (email: string) => `This invitation is for ${email}`,
-    expiresIn: (days: number) =>
-      days === 1 ? "Expires in 1 day" : `Expires in ${days} days`,
+    expiresIn: (days: number) => (days === 1 ? "Expires in 1 day" : `Expires in ${days} days`),
     alreadyMemberTitle: (organizationName: string) => `You're already a member of ${organizationName}`,
     openOrganization: (organizationName: string) => `Open ${organizationName}`,
     wrongAccountTitle: "Wrong account",
@@ -271,6 +270,7 @@ const en = {
     toast: {
       joined: (organizationName: string) => `You joined ${organizationName}`,
       acceptError: "We could not accept your invitation. Try again.",
+      sessionWaitTimedOut: "Your session did not load in time. Try signing in again.",
     },
   },
 } as const;
@@ -521,8 +521,7 @@ const ru = {
     expiredDescription: (organizationName: string, inviterName: string) =>
       `Попросите администратора ${organizationName} отправить новое. Последнее приглашение отправил(а) ${inviterName}.`,
     signInLink: "Войти",
-    cardTitle: (inviterName: string, organizationName: string) =>
-      `${inviterName} приглашает вас в ${organizationName}`,
+    cardTitle: (inviterName: string, organizationName: string) => `${inviterName} приглашает вас в ${organizationName}`,
     roleAdmin: "Администратор",
     roleMember: "Участник",
     roleLabel: (role: string) => (role === "admin" ? "Администратор" : "Участник"),
@@ -544,6 +543,7 @@ const ru = {
     toast: {
       joined: (organizationName: string) => `Вы вступили в ${organizationName}`,
       acceptError: "Не удалось принять приглашение. Попробуйте ещё раз.",
+      sessionWaitTimedOut: "Сеанс не успел загрузиться. Попробуйте войти снова.",
     },
   },
 } as const;
