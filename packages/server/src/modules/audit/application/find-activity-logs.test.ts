@@ -169,6 +169,15 @@ describe("FindActivityLogsUseCase", () => {
     });
   });
 
+  it("requests twenty rows by default when limit is omitted", async () => {
+    const auditLogRepository = { findPageByOrganizationId: vi.fn().mockResolvedValue([auditLog]) };
+    const useCase = createUseCase({ auditLogRepository });
+
+    await useCase.execute(userId, organizationId, {});
+
+    expect(auditLogRepository.findPageByOrganizationId).toHaveBeenCalledWith(expect.objectContaining({ limit: 20 }));
+  });
+
   it("returns a cursor when another page of activity exists", async () => {
     const olderLog = new AuditLog({
       ...auditLog.toObject(),

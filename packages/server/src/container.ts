@@ -98,9 +98,9 @@ import { ArchiveProjectUseCase } from "@workspace/server/modules/project/applica
 import { CreateProjectUseCase } from "@workspace/server/modules/project/application/create-project.use-case";
 import { DeleteProjectUseCase } from "@workspace/server/modules/project/application/delete-project.use-case";
 import { FindProjectWidgetSettingUseCase } from "@workspace/server/modules/project/application/find-project-widget-setting.use-case";
+import { FindProjectsUseCase } from "@workspace/server/modules/project/application/find-projects.use-case";
 import { GetProjectUseCase } from "@workspace/server/modules/project/application/get-project.use-case";
 import { ListProjectsUseCase } from "@workspace/server/modules/project/application/list-projects.use-case";
-import { FindProjectsUseCase } from "@workspace/server/modules/project/application/find-projects.use-case";
 import { RestoreProjectUseCase } from "@workspace/server/modules/project/application/restore-project.use-case";
 import { UpdateProjectUseCase } from "@workspace/server/modules/project/application/update-project.use-case";
 import { UpdateProjectWidgetSettingUseCase } from "@workspace/server/modules/project/application/update-project-widget-setting.use-case";
@@ -388,7 +388,7 @@ const listTickets = new ListTicketsUseCase(membershipAdapter, projectAdapter, bu
 const listTicketLogs = new ListTicketLogsUseCase(membershipAdapter, bugReportRepository);
 const getTicketEnvironment = new GetTicketEnvironmentUseCase(membershipAdapter, bugReportRepository);
 const getOverviewStats = new GetOverviewStatsUseCase(membershipAdapter, projectAdapter, bugReportRepository);
-const listProjects = new ListProjectsUseCase(findMembershipsByUser, membershipAdapter, projectRepository);
+const listProjects = new ListProjectsUseCase(membershipAdapter, projectRepository);
 const getProject = new GetProjectUseCase(membershipAdapter, projectRepository);
 const listMembers = new ListMembersUseCase(membershipRepository, userAdapter);
 const userTokenRepository = new UserTokenRepository();

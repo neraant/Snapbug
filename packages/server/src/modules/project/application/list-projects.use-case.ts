@@ -1,4 +1,3 @@
-import type { FindMembershipsByUserUseCase } from "@workspace/server/modules/membership/application/find-memberships-by-user.use-case";
 import { ProjectMapper } from "@workspace/server/modules/project/entity/project.mapper";
 import type { MembershipPort } from "@workspace/server/modules/project/port/membership.port";
 import type { ProjectRepository } from "@workspace/server/modules/project/repository/project.repository";
@@ -7,13 +6,12 @@ import type { FindProjectsOutputDtoType } from "@workspace/validation/modules/pr
 
 export class ListProjectsUseCase {
   constructor(
-    private readonly findMembershipsByUser: FindMembershipsByUserUseCase,
     private readonly membershipPort: MembershipPort,
     private readonly projectRepository: ProjectRepository,
   ) {}
 
   async execute(userId: string): Promise<FindProjectsOutputDtoType> {
-    const memberships = await this.findMembershipsByUser.execute(userId);
+    const memberships = await this.membershipPort.findManyByUser(userId);
     const projects = await this.collectProjects(memberships);
     const uniqueById = new Map(projects.map((project) => [project.id, project]));
     return [...uniqueById.values()].map((project) => ProjectMapper.toDto(project));

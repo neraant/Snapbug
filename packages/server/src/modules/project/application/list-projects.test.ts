@@ -1,4 +1,3 @@
-import type { FindMembershipsByUserUseCase } from "@workspace/server/modules/membership/application/find-memberships-by-user.use-case";
 import { ListProjectsUseCase } from "@workspace/server/modules/project/application/list-projects.use-case";
 import { projectTestFields } from "@workspace/server/modules/project/application/project-test.const";
 import { Project } from "@workspace/server/modules/project/entity/project.entity";
@@ -31,38 +30,33 @@ const project = new Project({
 
 describe("ListProjectsUseCase", () => {
   it("returns projects the token owner can access across memberships", async () => {
-    const findMembershipsByUser = {
-      execute: vi.fn().mockResolvedValue([membership]),
-    };
     const membershipPort = {
+      findManyByUser: vi.fn().mockResolvedValue([membership]),
       filterProjectIds: vi.fn().mockResolvedValue([projectId]),
     };
     const projectRepository = {
       findManyByOrganizationId: vi.fn().mockResolvedValue([project]),
     };
     const useCase = new ListProjectsUseCase(
-      findMembershipsByUser as unknown as FindMembershipsByUserUseCase,
       membershipPort as unknown as MembershipPort,
       projectRepository as unknown as ProjectRepository,
     );
 
     const result = await useCase.execute(userId);
 
+    expect(membershipPort.findManyByUser).toHaveBeenCalledWith(userId);
     expect(result).toEqual([expect.objectContaining({ id: projectId, slug: project.slug })]);
   });
 
   it("returns no projects when the member has no project access", async () => {
-    const findMembershipsByUser = {
-      execute: vi.fn().mockResolvedValue([membership]),
-    };
     const membershipPort = {
+      findManyByUser: vi.fn().mockResolvedValue([membership]),
       filterProjectIds: vi.fn().mockResolvedValue([]),
     };
     const projectRepository = {
       findManyByOrganizationId: vi.fn().mockResolvedValue([project]),
     };
     const useCase = new ListProjectsUseCase(
-      findMembershipsByUser as unknown as FindMembershipsByUserUseCase,
       membershipPort as unknown as MembershipPort,
       projectRepository as unknown as ProjectRepository,
     );
