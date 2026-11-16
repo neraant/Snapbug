@@ -86,5 +86,5 @@ export function useProjectSettingsForm({ project, onSaved }: UseProjectSettingsF
 
   const loading = formState.isSubmitting || isPending;
 
-  return { control, onSubmit, loading, memberOptions };
+  return { control, onSubmit, loading, memberOptions, isDirty: formState.isDirty, reset };
 }

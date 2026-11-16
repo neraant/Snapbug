@@ -1,6 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "@workspace/design-system/components/ui/toast";
-import { getAppErrorMessage } from "@workspace/server/error/get-app-error-message";
 import { useCallback } from "react";
 
 import { texts } from "@/client/modules/project/consts/texts.const";
@@ -37,17 +36,10 @@ export function useProjectDangerActions({ project, onProjectChanged, onProjectDe
   }, [archiveProject, invalidateProjectLists, onProjectChanged, project.id]);
 
   const onRestore = useCallback(async () => {
-    try {
-      await restoreProject({ projectId: project.id });
-      await invalidateProjectLists();
-      toast.add({ title: texts.settingsSheet.toast.restoreSuccess, type: "success" });
-      onProjectChanged();
-    } catch (error) {
-      toast.add({
-        title: getAppErrorMessage(error, texts.settingsSheet.toast.restoreError),
-        type: "error",
-      });
-    }
+    await restoreProject({ projectId: project.id });
+    await invalidateProjectLists();
+    toast.add({ title: texts.settingsSheet.toast.restoreSuccess, type: "success" });
+    onProjectChanged();
   }, [invalidateProjectLists, onProjectChanged, project.id, restoreProject]);
 
   const onDelete = useCallback(async () => {

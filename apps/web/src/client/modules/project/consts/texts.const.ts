@@ -34,10 +34,18 @@ const en = {
   },
   settingsSheet: {
     title: "Project settings",
-    description: "Update how this project appears and how the widget collects visitor data.",
     archivedBadge: "Archived",
-    submit: "Save",
+    submit: "Save changes",
     cancel: "Cancel",
+    section: {
+      general: "General",
+      privacy: "Privacy",
+    },
+    unsavedClose: {
+      title: "Discard unsaved changes?",
+      description: "You have unsaved changes to this project. Discard them and close settings?",
+      confirm: "Discard changes",
+    },
     field: {
       name: {
         label: "Project name",
@@ -68,10 +76,18 @@ const en = {
     },
     danger: {
       title: "Danger zone",
-      description: "Archive, restore, or permanently delete this project.",
-      archive: "Archive",
-      restore: "Restore",
-      delete: "Delete project",
+      description: "These actions affect every ticket in this project.",
+      archive: {
+        label: "Archive project",
+        description: "New tickets are rejected. Existing tickets stay readable.",
+        action: "Archive",
+        actionRestore: "Restore",
+      },
+      delete: {
+        label: "Delete project",
+        description: "Permanently removes the project, its tickets and their files.",
+        action: "Delete",
+      },
     },
     deleteDialog: {
       title: (name: string) => `Delete "${name}"?`,
@@ -83,6 +99,11 @@ const en = {
       description: (name: string) =>
         `${name} will stop accepting new bug reports. You can restore it later from project settings.`,
       confirm: "Archive",
+    },
+    restoreDialog: {
+      title: (name: string) => `Restore "${name}"?`,
+      description: (name: string) => `${name} will accept new bug reports again.`,
+      confirm: "Restore",
     },
     toast: {
       saveSuccess: "Project settings saved.",
@@ -158,10 +179,18 @@ const ru = {
   },
   settingsSheet: {
     title: "Настройки проекта",
-    description: "Измените название, slug и параметры сбора данных в виджете.",
     archivedBadge: "В архиве",
-    submit: "Сохранить",
+    submit: "Сохранить изменения",
     cancel: "Отмена",
+    section: {
+      general: "Общие",
+      privacy: "Конфиденциальность",
+    },
+    unsavedClose: {
+      title: "Отменить несохранённые изменения?",
+      description: "Есть несохранённые настройки проекта. Закрыть без сохранения?",
+      confirm: "Отменить изменения",
+    },
     field: {
       name: {
         label: "Название проекта",
@@ -192,10 +221,18 @@ const ru = {
     },
     danger: {
       title: "Опасная зона",
-      description: "Архивирование, восстановление или полное удаление проекта.",
-      archive: "В архив",
-      restore: "Восстановить",
-      delete: "Удалить проект",
+      description: "Эти действия затрагивают все тикеты в проекте.",
+      archive: {
+        label: "Архивировать проект",
+        description: "Новые тикеты отклоняются. Существующие остаются доступны для чтения.",
+        action: "В архив",
+        actionRestore: "Восстановить",
+      },
+      delete: {
+        label: "Удалить проект",
+        description: "Проект, все тикеты и файлы будут удалены безвозвратно.",
+        action: "Удалить",
+      },
     },
     deleteDialog: {
       title: (name: string) => `Удалить «${name}»?`,
@@ -207,6 +244,11 @@ const ru = {
       description: (name: string) =>
         `Проект «${name}» перестанет принимать новые отчёты. Его можно восстановить в настройках проекта.`,
       confirm: "В архив",
+    },
+    restoreDialog: {
+      title: (name: string) => `Восстановить «${name}»?`,
+      description: (name: string) => `Проект «${name}» снова будет принимать новые отчёты.`,
+      confirm: "Восстановить",
     },
     toast: {
       saveSuccess: "Настройки проекта сохранены.",
