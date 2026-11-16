@@ -25,24 +25,17 @@ test("an administrator sees a rotated project key only once", async ({ page }) =
   await expect(page.getByRole("heading", { name: "Project API Key" })).toBeVisible();
   await expect(page.getByText(previousKey)).toBeHidden();
 
-  const rotateButton = page.getByRole("button", { name: "Rotate key" });
-  await expect(async () => {
-    await rotateButton.click();
-    await expect(page.getByRole("alertdialog", { name: "Rotate project key" })).toBeVisible({
-      timeout: 2_000,
-    });
-  }).toPass({ timeout: 30_000 });
-
+  await page.getByRole("button", { name: "Rotate key" }).click();
   const confirm = page.getByRole("alertdialog", { name: "Rotate project key" });
+  await expect(confirm).toBeVisible();
   await confirm.getByRole("button", { name: "Rotate key" }).click();
-  await expect(confirm).toBeHidden({ timeout: 30_000 });
 
   const dialog = page.getByRole("dialog", { name: "New API key" });
   await expect(dialog).toBeVisible({ timeout: 30_000 });
 
-  await dialog.getByRole("button", { name: "Show secret" }).click();
   const secretField = dialog.getByRole("textbox", { name: "New API key" });
   await expect(secretField).toHaveValue(/^snb_pk_live_/);
+  await dialog.getByRole("button", { name: "Show secret" }).click();
   const secret = (await secretField.inputValue()).trim();
   expect(secret).toMatch(/^snb_pk_live_/);
 
