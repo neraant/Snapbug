@@ -43,8 +43,22 @@ export const bugReportRouter = os.router({
     async ({ input, context }) =>
       await container.bugReport.updateBugReport.execute(input, context.user.id, context.actor),
   ),
+  updateTicketMcp: authed.updateTicketMcp.handler(
+    async ({ input, context }) =>
+      await container.bugReport.updateBugReport.execute(input, context.user.id, context.actor),
+  ),
   listTickets: authed.listTickets.handler(
     async ({ input, context }) => await container.bugReport.listTickets.execute(input, context.user.id),
+  ),
+  listTicketLogs: authed.listTicketLogs.handler(
+    async ({ input, context }) => await container.bugReport.listTicketLogs.execute(input, context.user.id),
+  ),
+  getTicketEnvironment: authed.getTicketEnvironment.handler(
+    async ({ input, context }) => await container.bugReport.getTicketEnvironment.execute(input, context.user.id),
+  ),
+  getOverviewStats: authed.getOverviewStats.handler(
+    async ({ input, context }) =>
+      await container.bugReport.getOverviewStats.execute(input, context.user.id, context.organizationId),
   ),
   findStats: authed.findStats.handler(
     async ({ input, context }) =>

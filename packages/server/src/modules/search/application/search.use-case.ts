@@ -19,8 +19,21 @@ export class SearchUseCase {
     userId: string,
     organizationId: string | null,
   ): Promise<SearchOutputDtoType> {
-    if (!organizationId) throw new NotFoundError(ERROR_CODES.ORGANIZATION_NOT_FOUND);
+    const resolvedOrganizationId = input.organizationId ?? organizationId;
+    if (!resolvedOrganizationId) {
+      const memberships = await this.membershipPort.findManyByUser(userId);
+      if (memberships.length === 0) return { projects: [], tickets: [] };
+      return await this.searchOrganization(input, userId, memberships[0]!.organizationId);
+    }
 
+    return await this.searchOrganization(input, userId, resolvedOrganizationId);
+  }
+
+  private async searchOrganization(
+    input: SearchInputDtoType,
+    userId: string,
+    organizationId: string,
+  ): Promise<SearchOutputDtoType> {
     const membership = await this.membershipPort.findByUserAndOrganization({ userId, organizationId });
     if (!membership) throw new NotFoundError(ERROR_CODES.ORGANIZATION_NOT_FOUND);
 

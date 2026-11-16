@@ -22,7 +22,7 @@ const comment = oc.$meta<OrpcMetaType>({});
 
 export const commentContract = {
   addComment: comment
-    .meta({ mcp: true, name: "add_comment", readOnlyHint: false })
+    .meta({ mcp: true, name: "add_comment", readOnlyHint: false, destructiveHint: false })
     .input(addCommentInputDtoSchema)
     .output(addCommentOutputDtoSchema)
     .route({
@@ -33,6 +33,7 @@ export const commentContract = {
       spec: sessionAuthSpec,
     }),
   findComments: comment
+    .meta({ mcp: true, name: "list_comments", readOnlyHint: true })
     .input(findCommentsInputDtoSchema)
     .output(findCommentsOutputDtoSchema)
     .route({

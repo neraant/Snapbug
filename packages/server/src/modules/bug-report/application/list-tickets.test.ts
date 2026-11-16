@@ -91,11 +91,12 @@ describe("ListTicketsUseCase", () => {
     const result = await useCase.execute({}, userId);
 
     expect(bugReportRepository.findManyByProjectIds).toHaveBeenCalledWith([projectId]);
-    expect(result).toHaveLength(1);
-    expect(result[0]?.title).toBe("Pay button throws");
-    expect(result[0]?.hasReplay).toBe(true);
-    expect(result[0]).not.toHaveProperty("replay");
-    expect(result[0]).not.toHaveProperty("replayKey");
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0]?.title).toBe("Pay button throws");
+    expect(result.items[0]?.hasReplay).toBe(true);
+    expect(result.items[0]).not.toHaveProperty("replay");
+    expect(result.items[0]).not.toHaveProperty("replayKey");
+    expect(result.nextCursor).toBeNull();
   });
 
   it("does not list a project the member cannot access", async () => {

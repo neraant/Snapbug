@@ -1,5 +1,6 @@
 import { oc } from "@orpc/contract";
 import { sessionAuthSpec } from "@workspace/server/shared/openapi/session-auth.const";
+import type { OrpcMetaType } from "@workspace/server/shared/orpc/mcp/walk-mcp-tools";
 import { createProjectInputDtoSchema } from "@workspace/validation/modules/project/dto/create-project.schema";
 import {
   findProjectWidgetSettingInputDtoSchema,
@@ -17,7 +18,10 @@ import {
   updateProjectWidgetSettingInputDtoSchema,
   updateProjectWidgetSettingOutputDtoSchema,
 } from "@workspace/validation/modules/project/dto/update-project-widget-setting.schema";
+import { getProjectInputDtoSchema, getProjectOutputDtoSchema } from "@workspace/validation/modules/project/dto/get-project.schema";
 import { z } from "zod";
+
+const project = oc.$meta<OrpcMetaType>({});
 
 export const projectContract = {
   createProject: oc
@@ -33,6 +37,15 @@ export const projectContract = {
   findProjects: oc
     .output(findProjectsOutputDtoSchema)
     .route({ method: "GET", path: "/projects", tags: ["project"], summary: "List projects", spec: sessionAuthSpec }),
+  listProjects: project
+    .meta({ mcp: true, name: "list_projects", readOnlyHint: true })
+    .output(findProjectsOutputDtoSchema)
+    .route({ method: "GET", path: "/mcp/projects", tags: ["project"], summary: "List projects for MCP", spec: sessionAuthSpec }),
+  getProject: project
+    .meta({ mcp: true, name: "get_project", readOnlyHint: true })
+    .input(getProjectInputDtoSchema)
+    .output(getProjectOutputDtoSchema)
+    .route({ method: "GET", path: "/mcp/projects/by-id", tags: ["project"], summary: "Get project", spec: sessionAuthSpec }),
   updateProject: oc
     .input(updateProjectInputDtoSchema)
     .output(projectModelSchema)

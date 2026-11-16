@@ -1,6 +1,7 @@
 import { container } from "@workspace/server/container";
 import { AppError } from "@workspace/server/error/app-errors";
 import { mcpHandler } from "@workspace/server/orpc/handler.const";
+import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
 
 export const dynamic = "force-dynamic";
 
@@ -12,10 +13,18 @@ async function handleRequest(request: Request) {
 
   try {
     const user = await container.userToken.findUserByToken.execute({ token });
+    const memberships = await container.membership.findMembershipsByUser.execute(user.id);
+    const adminMembership = memberships.find((membership) => membership.role === UserRole.ADMIN);
+    const primaryMembership = adminMembership ?? memberships[0];
     const { response } = await mcpHandler.handle(request, {
       context: {
-        user: { id: user.id, email: user.email, name: user.name },
-        organizationId: null,
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: primaryMembership?.role,
+        },
+        organizationId: primaryMembership?.organizationId ?? null,
         ip: readClientIp(request),
         actor: { type: "mcp", id: user.id },
         requestOrigin: request.headers.get("origin"),

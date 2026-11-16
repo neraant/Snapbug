@@ -5,7 +5,11 @@ import { projectSlugSchema } from "@workspace/validation/shared/project-slug.sch
 import { z } from "zod";
 
 export const searchInputDtoSchema = z.object({
-  query: z.string().trim().min(1).max(200),
+  query: z.string().trim().min(1).max(200).describe("Keywords to match project names or ticket fields."),
+  organizationId: z
+    .uuid()
+    .optional()
+    .describe("Organization to search; defaults to the caller's primary organization when omitted."),
 });
 export type SearchInputDtoType = z.infer<typeof searchInputDtoSchema>;
 

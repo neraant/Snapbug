@@ -12,12 +12,12 @@ export const activityLogEntityTypeFilterSchema = z.enum([
 ]);
 
 export const findActivityLogsInputDtoSchema = z.object({
-  cursor: z.string().trim().min(1).optional(),
-  limit: z.coerce.number().int().min(1).max(50).optional(),
-  search: z.string().trim().max(200).optional(),
-  actorId: z.uuid().optional(),
-  entityType: activityLogEntityTypeFilterSchema.optional(),
-  range: activityLogDateRangeSchema.optional(),
+  cursor: z.string().trim().min(1).optional().describe("Opaque cursor from a previous list_activity response."),
+  limit: z.coerce.number().int().min(1).max(50).optional().describe("Page size; default 50, maximum 50."),
+  search: z.string().trim().max(200).optional().describe("Free-text filter on activity details."),
+  actorId: z.uuid().optional().describe("Filter by actor user id."),
+  entityType: activityLogEntityTypeFilterSchema.optional().describe("Filter by entity kind."),
+  range: activityLogDateRangeSchema.optional().describe("Relative time window for results."),
 });
 
 export type FindActivityLogsInputDtoType = z.infer<typeof findActivityLogsInputDtoSchema>;
