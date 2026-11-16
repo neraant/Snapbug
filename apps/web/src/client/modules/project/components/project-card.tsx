@@ -26,8 +26,9 @@ import {
   TicketIcon,
   Trash2Icon,
 } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { type KeyboardEvent, type PropsWithChildren, Suspense, useCallback, useState } from "react";
+import { type PropsWithChildren, Suspense, useCallback, useState } from "react";
 
 import { ProjectCardMember } from "@/client/modules/project/components/project-card-member";
 import { ProjectSettingsSheet } from "@/client/modules/project/components/project-settings-sheet";
@@ -64,10 +65,6 @@ export function ProjectCard({ project }: ProjectCardProps) {
   const ticketsHref = buildPathWithProjectScopeSearchParam(url.ticketsBoard(), project.id);
   const sdkHref = buildPathWithProjectScopeSearchParam(url.sdk(), project.id);
   const lastTicketLabel = formatProjectLastTicketRelative(project.lastTicketAt, texts.card.noTicketsYet);
-
-  const openTickets = useCallback(() => {
-    router.push(ticketsHref);
-  }, [router, ticketsHref]);
 
   const openSdkSetup = useCallback(() => {
     router.push(sdkHref);
@@ -134,7 +131,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
       <ProjectCardLink
         isArchived={isArchived}
         ariaLabel={texts.card.navigateToTickets(project.name)}
-        onActivate={openTickets}
+        href={ticketsHref}
       >
         {isArchived ? (
           <Row align="center" gap="xs" className="border-b border-border bg-muted/60 px-3 py-1.5 text-muted-foreground">
@@ -154,7 +151,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
             >
               <AvatarFallback>{getProjectInitials(project.name)}</AvatarFallback>
             </Avatar>
-            <div onPointerDown={stopMenuPointer} onClick={stopMenuPointer}>
+            <div className="pointer-events-auto" onPointerDown={stopMenuPointer} onClick={stopMenuPointer}>
               <DropdownMenu>
                 <DropdownMenuTrigger
                   render={<Button type="button" variant="ghost" size="icon-sm" aria-label={texts.card.menu} />}
@@ -254,41 +251,31 @@ export function ProjectCard({ project }: ProjectCardProps) {
 type ProjectCardLinkProps = PropsWithChildren<{
   isArchived: boolean;
   ariaLabel: string;
-  onActivate: () => void;
+  href: string;
 }>;
 
-function ProjectCardLink({ children, isArchived, ariaLabel, onActivate }: ProjectCardLinkProps) {
-  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      onActivate();
-    }
-  };
-
+function ProjectCardLink({ children, isArchived, ariaLabel, href }: ProjectCardLinkProps) {
   return (
-    <div
-      role="link"
-      tabIndex={0}
-      aria-label={ariaLabel}
+    <Card
+      width="full"
+      padding="none"
+      gap="none"
       className={cn(
-        "block w-full min-w-0 cursor-pointer rounded-lg outline-none",
-        "focus-visible:ring-3 focus-visible:ring-ring/50",
-        isArchived && "opacity-90",
+        "relative h-full border-border shadow-xs transition-[box-shadow,border-color] hover:border-border/80 hover:shadow-md",
+        isArchived && "bg-muted/20 opacity-90",
       )}
-      onClick={onActivate}
-      onKeyDown={handleKeyDown}
     >
-      <Card
-        width="full"
-        padding="none"
-        gap="none"
+      <Link
+        href={href}
+        aria-label={ariaLabel}
         className={cn(
-          "h-full border-border shadow-xs transition-[box-shadow,border-color] hover:border-border/80 hover:shadow-md",
-          isArchived && "bg-muted/20",
+          "absolute inset-0 z-[1] block rounded-lg outline-none",
+          "focus-visible:ring-3 focus-visible:ring-ring/50",
         )}
-      >
+      />
+      <Column gap="none" width="full" className="pointer-events-none relative z-[2]">
         {children}
-      </Card>
-    </div>
+      </Column>
+    </Card>
   );
 }

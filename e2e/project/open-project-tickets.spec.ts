@@ -22,5 +22,5 @@ test("an administrator opens a project's tickets from the project card", async (
 
   await page.getByRole("link", { name: "Open tickets for Acme Store" }).click();
   await expect(page).toHaveURL(/\/tickets\?.*projectId=/, { timeout: 30_000 });
-  await expect(page.getByRole("heading", { name: "Tickets" })).toBeVisible();
+  await expect(page.getByRole("searchbox", { name: "Search tickets" })).toBeVisible();
 });

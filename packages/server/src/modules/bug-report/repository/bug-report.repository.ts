@@ -17,7 +17,7 @@ import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import { BugReportSeverity } from "@workspace/validation/modules/bug-report/consts/bug-report-severity.const";
 import { formatBugReportShortId } from "@workspace/validation/modules/bug-report/consts/bug-report-short-id.const";
 import { BugReportStatus } from "@workspace/validation/modules/bug-report/consts/bug-report-status.const";
-import { and, count, desc, eq, gte, ilike, inArray, isNotNull, lt, or, sql } from "drizzle-orm";
+import { and, count, desc, eq, gte, ilike, inArray, isNotNull, lt, max, or, sql } from "drizzle-orm";
 
 const openStatuses = [BugReportStatus.NEW, BugReportStatus.IN_PROGRESS] as const;
 const criticalHighSeverities = [BugReportSeverity.HIGH, BugReportSeverity.CRITICAL] as const;
@@ -193,15 +193,17 @@ export class BugReportRepository {
   async summarizeTicketsByProject(projectIds: string[]): Promise<ProjectTicketSummaryRow[]> {
     if (projectIds.length === 0) return [];
 
+    const openStatusList = sql.join(
+      openStatuses.map((status) => sql`${status}`),
+      sql`, `,
+    );
+
     const rows = await this.db
       .select({
         projectId: bugReportTable.projectId,
-        openCount: sql<number>`sum(case when ${bugReportTable.status} in (${sql.join(
-          openStatuses.map((status) => sql`${status}`),
-          sql`, `,
-        )}) then 1 else 0 end)`.mapWith(Number),
+        openCount: sql<number>`count(*) filter (where ${bugReportTable.status} in (${openStatusList}))`.mapWith(Number),
         totalCount: count(),
-        lastTicketAt: sql<Date | null>`max(${bugReportTable.createdAt})`,
+        lastTicketAt: max(bugReportTable.createdAt),
       })
       .from(bugReportTable)
       .where(inArray(bugReportTable.projectId, projectIds))
@@ -211,7 +213,7 @@ export class BugReportRepository {
       projectId: row.projectId,
       openCount: Number(row.openCount),
       totalCount: Number(row.totalCount),
-      lastTicketAt: row.lastTicketAt,
+      lastTicketAt: row.lastTicketAt ?? null,
     }));
   }
 
