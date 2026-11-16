@@ -5,6 +5,7 @@ import { bugReportRouter } from "@workspace/server/modules/bug-report/bug-report
 import { commentRouter } from "@workspace/server/modules/comment/comment.router";
 import { identityRouter } from "@workspace/server/modules/identity/identity.router";
 import { invitationRouter } from "@workspace/server/modules/invitation/invitation.router";
+import { mcpRouter } from "@workspace/server/modules/mcp/mcp.router";
 import { membershipRouter } from "@workspace/server/modules/membership/membership.router";
 import { organizationRouter } from "@workspace/server/modules/organization/organization.router";
 import { projectRouter } from "@workspace/server/modules/project/project.router";
@@ -12,6 +13,7 @@ import { searchRouter } from "@workspace/server/modules/search/search.router";
 import { userTokenRouter } from "@workspace/server/modules/user-token/user-token.router";
 
 export const router = {
+  mcp: mcpRouter,
   apiKey: apiKeyRouter,
   audit: auditRouter,
   auth: authRouter,
