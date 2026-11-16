@@ -5,7 +5,9 @@ import { type FormEvent, useState } from "react";
 
 import { useFindMembershipByUser } from "@/client/modules/shared/queries/use-find-membership-by-user";
 import { useSendInvitations } from "@/client/modules/shared/queries/use-send-invitations";
+import { teamTabs } from "@/client/modules/team/consts/team-tab.const";
 import { texts } from "@/client/modules/team/consts/texts.const";
+import { useTeamTab } from "@/client/modules/team/hooks/use-team-tab";
 
 export function useInvitePeople() {
   const [open, setOpen] = useState(false);
@@ -13,6 +15,7 @@ export function useInvitePeople() {
   const [error, setError] = useState<string>();
   const { data: currentMembership } = useFindMembershipByUser();
   const { mutateAsync: sendInvitations, isPending } = useSendInvitations();
+  const { tab, setTab } = useTeamTab();
 
   const onOpenChange = (nextOpen: boolean) => {
     setOpen(nextOpen);
@@ -43,7 +46,19 @@ export function useInvitePeople() {
 
     try {
       await sendInvitations(result.data);
-      toast.add({ title: texts.invite.success, type: "success" });
+      const sentFromMembersTab = tab === teamTabs.members;
+      toast.add({
+        title: texts.invite.success,
+        type: "success",
+        ...(sentFromMembersTab
+          ? {
+              actionProps: {
+                children: texts.invite.viewInvitations,
+                onClick: () => setTab(teamTabs.invitations),
+              },
+            }
+          : {}),
+      });
       onOpenChange(false);
     } catch (sendError) {
       toast.add({

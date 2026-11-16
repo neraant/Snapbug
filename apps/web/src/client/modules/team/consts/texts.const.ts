@@ -4,6 +4,12 @@ import { localize } from "@/client/modules/shared/locale/interface-language";
 
 const en = {
   title: "Team",
+  description: "Manage who has access to your organization and pending invitations.",
+  tabs: {
+    ariaLabel: "Team sections",
+    members: "Members",
+    invitations: "Invitations",
+  },
   invite: {
     action: "Invite people",
     title: "Invite people",
@@ -16,6 +22,7 @@ const en = {
     submit: "Send invitations",
     validationError: "Add between 1 and 10 valid email addresses.",
     success: "Invitations sent.",
+    viewInvitations: "View",
     error: "Could not send invitations. Try again.",
   },
   search: {
@@ -71,10 +78,17 @@ const en = {
   empty: "No team members match your search.",
   pending: {
     title: "Pending invitations",
+    empty: "No pending invitations",
     column: {
       email: "Email",
+      sent: "Sent",
       expires: "Expires",
+      status: "Status",
       actions: "Actions",
+    },
+    status: {
+      pending: "Pending",
+      expired: "Expired",
     },
     menu: (email: string) => `Invitation actions for ${email}`,
     resend: "Resend",
@@ -96,6 +110,12 @@ const en = {
 
 const ru = {
   title: "Команда",
+  description: "Управляйте доступом к организации и ожидающими приглашениями.",
+  tabs: {
+    ariaLabel: "Разделы команды",
+    members: "Участники",
+    invitations: "Приглашения",
+  },
   invite: {
     action: "Пригласить",
     title: "Пригласить людей",
@@ -108,6 +128,7 @@ const ru = {
     submit: "Отправить приглашения",
     validationError: "Добавьте от 1 до 10 корректных адресов email.",
     success: "Приглашения отправлены.",
+    viewInvitations: "Открыть",
     error: "Не удалось отправить приглашения. Попробуйте ещё раз.",
   },
   search: {
@@ -163,10 +184,17 @@ const ru = {
   empty: "Нет участников по этому запросу.",
   pending: {
     title: "Ожидающие приглашения",
+    empty: "Нет ожидающих приглашений",
     column: {
       email: "Email",
+      sent: "Отправлено",
       expires: "Истекает",
+      status: "Статус",
       actions: "Действия",
+    },
+    status: {
+      pending: "Ожидает",
+      expired: "Истекло",
     },
     menu: (email: string) => `Действия для ${email}`,
     resend: "Отправить снова",
