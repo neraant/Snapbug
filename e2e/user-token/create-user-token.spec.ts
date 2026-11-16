@@ -32,13 +32,16 @@ test("a member can create a personal MCP token and see the secret once", async (
   await createDialog.getByRole("textbox", { name: "Name" }).fill(tokenName);
   await createDialog.getByRole("button", { name: "Create", exact: true }).click();
 
-  const secretDialog = page.getByRole("dialog", { name: "Copy this token" });
+  const secretDialog = page.getByRole("dialog", { name: "Token created" });
   await expect(secretDialog).toBeVisible();
-  await expect(secretDialog.getByText("This token is shown once.")).toBeVisible();
-  await expect(secretDialog.getByText(/snb_ut_live_/)).toBeVisible();
+  await expect(secretDialog.getByText("Copy it now. You won't be able to see it again.")).toBeVisible();
+  await secretDialog.getByRole("button", { name: "Show secret" }).click();
+  await expect(secretDialog.getByRole("textbox")).toHaveValue(/snb_ut_live_/);
 
-  await page.getByRole("button", { name: "Close" }).click();
+  await secretDialog.getByRole("button", { name: "I've copied it" }).click();
   await expect(page.getByText(tokenName)).toBeVisible();
   await page.getByRole("button", { name: "Revoke" }).click();
+  const revokeDialog = page.getByRole("alertdialog", { name: /Revoke token/ });
+  await revokeDialog.getByRole("button", { name: "Revoke" }).click();
   await expect(page.getByText("Revoked", { exact: true })).toBeVisible({ timeout: 30_000 });
 });

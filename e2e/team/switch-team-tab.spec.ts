@@ -25,7 +25,9 @@ test("an administrator switches between team tabs", async ({ page }) => {
 
   await page.getByRole("tab", { name: /Invitations/ }).click();
   await expect(page).toHaveURL(/tab=invitations/);
-  await expect(page.getByText("No pending invitations")).toBeVisible();
+  await expect(page.getByRole("tab", { name: /Invitations/ })).toHaveAttribute("aria-selected", "true");
+  await expect(page.getByRole("tabpanel", { name: /Invitations/ })).toBeVisible();
+  await expect(page.getByRole("columnheader", { name: "Member" })).not.toBeVisible();
 
   await page.getByRole("tab", { name: /Members/ }).click();
   await expect(page).toHaveURL(/tab=members/);

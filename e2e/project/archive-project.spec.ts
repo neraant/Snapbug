@@ -31,7 +31,7 @@ test("an administrator archives a project from the projects page", async ({ page
   }).toPass({ timeout: 15_000 });
 
   await page.getByRole("menuitem", { name: "Archive" }).click();
-  await expect(page.getByRole("heading", { name: "Archive project?" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: 'Archive "Acme Marketing"?' })).toBeVisible();
   await page.getByRole("button", { name: "Archive", exact: true }).click();
 
   await expect(page.getByText("Project archived.")).toBeVisible({ timeout: 30_000 });
