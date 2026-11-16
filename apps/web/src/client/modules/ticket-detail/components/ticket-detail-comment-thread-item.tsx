@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback } from "@workspace/design-system/components/ui/a
 import { Badge } from "@workspace/design-system/components/ui/badge";
 import { Button } from "@workspace/design-system/components/ui/button";
 import { ConfirmDialog } from "@workspace/design-system/components/ui/confirm-dialog";
-import { Field, FieldError } from "@workspace/design-system/components/ui/field";
+import { Field } from "@workspace/design-system/components/ui/field";
 import { SubmitButton } from "@workspace/design-system/components/ui/submit-button";
 import { Textarea } from "@workspace/design-system/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@workspace/design-system/components/ui/tooltip";
@@ -14,12 +14,14 @@ import { getAppErrorMessage } from "@workspace/server/error/get-app-error-messag
 import { CommentAuthorSource } from "@workspace/validation/modules/comment/consts/comment-author-source.const";
 import type { CommentModelType } from "@workspace/validation/modules/comment/dto/comment.model";
 import { PencilIcon, Trash2Icon } from "lucide-react";
-import { Controller } from "react-hook-form";
 
 import { useConfirmDialog } from "@/client/modules/shared/hooks/use-confirm-dialog";
 import { TicketDetailCommentBody } from "@/client/modules/ticket-detail/components/ticket-detail-comment-body";
 import { texts } from "@/client/modules/ticket-detail/consts/texts.const";
-import { useTicketDetailCommentItem } from "@/client/modules/ticket-detail/hooks/use-ticket-detail-comment-item";
+import {
+  editCommentTextareaId,
+  useTicketDetailCommentItem,
+} from "@/client/modules/ticket-detail/hooks/use-ticket-detail-comment-item";
 import {
   formatTicketDetailCommentExactTimestamp,
   formatTicketDetailCommentRelativeTimestamp,
@@ -40,7 +42,8 @@ export function TicketDetailCommentThreadItem({
   onDeleted,
 }: TicketDetailCommentThreadItemProps) {
   const {
-    control,
+    draftBody,
+    setDraftBody,
     isEditing,
     isRemoving,
     isUpdating,
@@ -164,23 +167,19 @@ export function TicketDetailCommentThreadItem({
             ) : null}
           </Row>
           {isEditing ? (
-            <Column as="form" gap="sm" width="full" onSubmit={onSave}>
-              <Controller
-                name="body"
-                control={control}
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <Textarea
-                      {...field}
-                      aria-label={texts.comments.fieldLabel}
-                      rows={4}
-                      className="min-h-[4.5rem] resize-none"
-                      onKeyDown={onEditKeyDown}
-                    />
-                    {fieldState.invalid ? <FieldError errors={[fieldState.error]} /> : null}
-                  </Field>
-                )}
-              />
+            <Column as="form" gap="sm" width="full" noValidate onSubmit={onSave}>
+              <Field>
+                <Textarea
+                  id={editCommentTextareaId}
+                  name="commentBody"
+                  value={draftBody}
+                  onChange={(event) => setDraftBody(event.target.value)}
+                  aria-label={texts.comments.fieldLabel}
+                  rows={4}
+                  className="min-h-[4.5rem] resize-none"
+                  onKeyDown={onEditKeyDown}
+                />
+              </Field>
               <Row justify="end" gap="sm">
                 <Button type="button" variant="outline" size="sm" onClick={onCancel}>
                   {texts.comments.cancel}

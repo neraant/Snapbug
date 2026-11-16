@@ -2,7 +2,7 @@ import { Column } from "@workspace/design-system/components/layout/column";
 import { Panel } from "@workspace/design-system/components/ui/panel";
 import { SegmentedControl, type SegmentedControlItem } from "@workspace/design-system/components/ui/segmented-control";
 import { MessageSquareIcon } from "lucide-react";
-import { Suspense, useMemo, useRef, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 
 import { useFindComments } from "@/client/modules/shared/queries/use-find-comments";
 import { TicketDetailCommentComposer } from "@/client/modules/ticket-detail/components/ticket-detail-comment-composer";
@@ -65,10 +65,9 @@ function TicketDetailCommentHeaderFallback() {
 export function TicketDetailCommentList({ bugReportId }: TicketDetailCommentListProps) {
   const [sort, setSort] = useState<TicketDetailCommentSortType>(TicketDetailCommentSort.OLDEST);
   const [scrollCommentId, setScrollCommentId] = useState<string | null>(null);
-  const composerRef = useRef<HTMLTextAreaElement | null>(null);
 
   const focusComposer = () => {
-    composerRef.current?.focus();
+    document.getElementById("commentBody")?.focus();
   };
 
   return (
@@ -86,11 +85,12 @@ export function TicketDetailCommentList({ bugReportId }: TicketDetailCommentList
               onDeleted={focusComposer}
             />
           </Suspense>
-          <TicketDetailCommentComposer
-            bugReportId={bugReportId}
-            composerRef={composerRef}
-            onCommentAdded={(commentId) => setScrollCommentId(commentId)}
-          />
+          <Suspense fallback={<TicketDetailCommentComposer.Fallback />}>
+            <TicketDetailCommentComposer
+              bugReportId={bugReportId}
+              onCommentAdded={(commentId) => setScrollCommentId(commentId)}
+            />
+          </Suspense>
         </Column>
       </Panel.Content>
     </Panel>

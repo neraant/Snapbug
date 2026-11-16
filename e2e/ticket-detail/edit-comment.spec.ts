@@ -31,18 +31,28 @@ test("the author edits their comment on the ticket", async ({ page }) => {
   await page.goto(`/tickets/${shortId}`);
   await expect(page.getByRole("heading", { name: ticketTitle })).toBeVisible({ timeout: 30_000 });
   await expect(page.getByRole("heading", { name: /Comments/ })).toBeVisible();
-  const commentBox = page.getByRole("textbox", { name: "Comment" });
-  await commentBox.click();
-  await commentBox.fill(commentBody);
-  await page.getByRole("button", { name: "Comment" }).click();
+  await page.waitForFunction(() => {
+    const textarea = document.getElementById("commentBody");
+    if (!textarea) return false;
+    return Object.getOwnPropertyNames(textarea).some((name) => name.startsWith("__reactProps$"));
+  });
 
   const commentsPanel = page
     .getByRole("heading", { name: /Comments/ })
     .locator("xpath=ancestor::*[@data-slot='panel'][1]");
+  const commentBox = commentsPanel.getByRole("textbox", { name: "Comment" });
+  await commentBox.click();
+  await commentBox.fill(commentBody);
+  await commentsPanel.getByRole("button", { name: "Comment" }).click();
   await expect(commentsPanel.getByText(commentBody, { exact: true })).toBeVisible({ timeout: 30_000 });
 
   await commentsPanel.getByRole("button", { name: "Edit comment" }).click();
-  const editBox = commentsPanel.getByRole("textbox", { name: "Comment" });
+  await page.waitForFunction(() => {
+    const textarea = document.getElementById("ticket-detail-comment-edit");
+    if (!textarea) return false;
+    return Object.getOwnPropertyNames(textarea).some((name) => name.startsWith("__reactProps$"));
+  });
+  const editBox = page.locator("#ticket-detail-comment-edit");
   await editBox.fill(editedBody);
   await commentsPanel.getByRole("button", { name: "Save" }).click();
 
