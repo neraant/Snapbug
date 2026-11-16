@@ -717,7 +717,6 @@ def update_from_master(auth: TokenSource, task_id: str, branch: str) -> None:
 
 
 def release_worktree(task_id: str, keep: bool) -> None:
-    remove_task_containers(task_id)
     path = worktree_for(task_id)
     if keep:
         if path.exists():
@@ -899,6 +898,10 @@ def container_remove_command(container_ids: list[str]) -> list[str] | None:
 
 def remove_task_containers(task_id: str) -> None:
     """Remove the compose containers for this task. Other projects stay.
+
+    Called only once the loop treats the task as done (merged) or skipped
+    (approved, waiting on GitHub). Pushes and worktree release do not remove
+    containers.
 
     `docker compose up` in the task worktree names the project after that
     directory (`P-03` → `p-03`, container `p-03-postgres-1`). A missing docker
@@ -1940,11 +1943,13 @@ def one_task(
         if phase == "merged":
             clear_review_rounds(state, task_id)
             record(notes, f"{task_id} merged.")
+            remove_task_containers(task_id)
             return "continue", False
         if phase == "ready":
             clear_review_rounds(state, task_id)
             record(notes, f"{task_id} is approved and waiting for GitHub to merge.")
             skipped.add(task_id)
+            remove_task_containers(task_id)
             return "continue", False
         if phase == "pending":
             record(notes, f"{task_id} is still waiting on ci or agent-review.")
@@ -2092,11 +2097,13 @@ def one_task(
         if phase == "merged":
             clear_review_rounds(state, task_id)
             record(notes, f"{task_id} merged.")
+            remove_task_containers(task_id)
             return "continue", used_agent
         if phase == "ready":
             clear_review_rounds(state, task_id)
             record(notes, f"{task_id} is approved and waiting for GitHub to merge.")
             skipped.add(task_id)
+            remove_task_containers(task_id)
             return "continue", used_agent
         record(notes, f"{task_id} is waiting on checks or review.")
         return "stop", used_agent
