@@ -3,6 +3,7 @@ import { db as defaultDb } from "@workspace/database";
 import { commentTable } from "@workspace/database/schema/comment.const";
 import type { Comment } from "@workspace/server/modules/comment/entity/comment.entity";
 import { CommentMapper } from "@workspace/server/modules/comment/entity/comment.mapper";
+import type { CommentPersistedType } from "@workspace/server/modules/comment/entity/comment.types";
 import { InternalServerError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import { eq } from "drizzle-orm";
@@ -16,7 +17,7 @@ export class CommentRepository {
 
   async findById(id: string): Promise<Comment | null> {
     const [row] = await this.db.select().from(commentTable).where(eq(commentTable.id, id));
-    return row ? CommentMapper.fromPersistence(row) : null;
+    return row ? CommentMapper.fromPersistence(row as CommentPersistedType) : null;
   }
 
   async findManyByBugReportId(bugReportId: string): Promise<Comment[]> {
@@ -24,7 +25,7 @@ export class CommentRepository {
       where: { bugReportId },
       orderBy: { createdAt: "asc" },
     });
-    return rows.map((row) => CommentMapper.fromPersistence(row));
+    return rows.map((row) => CommentMapper.fromPersistence(row as CommentPersistedType));
   }
 
   async save(comment: Comment): Promise<void> {
@@ -36,7 +37,7 @@ export class CommentRepository {
         .values(values)
         .onConflictDoUpdate({
           target: commentTable.id,
-          set: { body: values.body },
+          set: { body: values.body, updatedAt: values.updatedAt },
         });
     } catch (error) {
       throw new InternalServerError(ERROR_CODES.INTERNAL_SERVER_ERROR, undefined, { cause: error });

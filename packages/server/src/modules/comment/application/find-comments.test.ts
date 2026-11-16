@@ -52,7 +52,9 @@ const comment = new Comment({
   bugReportId,
   authorUserId: userId,
   body: "The price is missing.",
+  authorSource: "web",
   createdAt,
+  updatedAt: null,
 });
 
 function bugReport(reporterEmail: string | null) {

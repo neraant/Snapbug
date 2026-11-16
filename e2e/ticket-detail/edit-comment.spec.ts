@@ -30,26 +30,29 @@ test("the author edits their comment on the ticket", async ({ page }) => {
   }
   await page.goto(`/tickets/${shortId}`);
   await expect(page.getByRole("heading", { name: ticketTitle })).toBeVisible({ timeout: 30_000 });
-  await expect(page.getByRole("heading", { name: "Comments" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Comments/ })).toBeVisible();
   await page.waitForFunction(() => {
-    const button = [...document.querySelectorAll("button")].find(
-      (element) => element.textContent?.trim() === "Add comment",
-    );
-    if (!button) return false;
-    return Object.getOwnPropertyNames(button).some((name) => name.startsWith("__reactProps$"));
+    const textarea = document.getElementById("commentBody");
+    if (!textarea) return false;
+    return Object.getOwnPropertyNames(textarea).some((name) => name.startsWith("__reactProps$"));
   });
 
-  const commentBox = page.getByRole("textbox", { name: "Comment" });
-  await commentBox.fill(commentBody);
-  await page.getByRole("button", { name: "Add comment" }).click();
-
   const commentsPanel = page
-    .getByRole("heading", { name: "Comments" })
+    .getByRole("heading", { name: /Comments/ })
     .locator("xpath=ancestor::*[@data-slot='panel'][1]");
+  const commentBox = commentsPanel.getByRole("textbox", { name: "Comment" });
+  await commentBox.click();
+  await commentBox.fill(commentBody);
+  await commentsPanel.getByRole("button", { name: "Comment" }).click();
   await expect(commentsPanel.getByText(commentBody, { exact: true })).toBeVisible({ timeout: 30_000 });
 
-  await commentsPanel.getByRole("button", { name: "Edit" }).click();
-  const editBox = commentsPanel.getByRole("textbox", { name: "Comment" });
+  await commentsPanel.getByRole("button", { name: "Edit comment" }).click();
+  await page.waitForFunction(() => {
+    const textarea = document.getElementById("ticket-detail-comment-edit");
+    if (!textarea) return false;
+    return Object.getOwnPropertyNames(textarea).some((name) => name.startsWith("__reactProps$"));
+  });
+  const editBox = page.locator("#ticket-detail-comment-edit");
   await editBox.fill(editedBody);
   await commentsPanel.getByRole("button", { name: "Save" }).click();
 

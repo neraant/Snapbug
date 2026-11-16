@@ -9,7 +9,9 @@ export abstract class CommentFactory {
       bugReportId: comment.bugReportId,
       authorUserId: comment.authorUserId,
       body: comment.body,
+      authorSource: comment.authorSource,
       createdAt: new Date(),
+      updatedAt: null,
     });
   }
 }
