@@ -1,3 +1,4 @@
+import type { Invitation } from "@workspace/server/modules/invitation/entity/invitation.entity";
 import type { MembershipPort } from "@workspace/server/modules/invitation/port/membership.port";
 import type { ProjectPort } from "@workspace/server/modules/invitation/port/project.port";
 import type { UserPort } from "@workspace/server/modules/invitation/port/user.port";
@@ -10,6 +11,10 @@ import type {
   AcceptInvitationInputDtoType,
   AcceptInvitationOutputDtoType,
 } from "@workspace/validation/modules/invitation/dto/accept-invitation.schema";
+import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
+
+/** Pending invites created before `project_ids` was stored use empty json and still mean all projects. */
+const STORED_PROJECT_ACCESS_RELEASED_AT = new Date("2026-11-16T11:29:39.000Z");
 
 export class AcceptInvitationUseCase {
   constructor(
@@ -59,8 +64,8 @@ export class AcceptInvitationUseCase {
       const invitationService = this.invitationService.withTx(tx).withActor({ type: "user", id: userId });
       const createdMembership = await membershipPort.createInvited(invitation.organizationId, userId, invitation.role);
       const projects = await projectPort.findManyByOrganizationId({ organizationId: invitation.organizationId });
-      const projectIdsToGrant =
-        invitation.projectIds.length > 0 ? invitation.projectIds : projects.map((project) => project.id);
+      const organizationProjectIds = projects.map((project) => project.id);
+      const projectIdsToGrant = this.resolveProjectIdsToGrant(invitation, organizationProjectIds);
       await membershipPort.grantProjects(createdMembership.id, projectIdsToGrant, userId);
       await invitationService.saveWithAudit(acceptedInvitation, "Accept invitation");
       return createdMembership;
@@ -69,5 +74,20 @@ export class AcceptInvitationUseCase {
     await this.userPort.markOnboardingComplete(userId);
 
     return membership;
+  }
+
+  private resolveProjectIdsToGrant(invitation: Invitation, organizationProjectIds: string[]): string[] {
+    if (invitation.projectIds.length > 0) {
+      return invitation.projectIds;
+    }
+
+    if (
+      invitation.role === UserRole.ADMIN ||
+      invitation.createdAt.getTime() < STORED_PROJECT_ACCESS_RELEASED_AT.getTime()
+    ) {
+      return organizationProjectIds;
+    }
+
+    return [];
   }
 }

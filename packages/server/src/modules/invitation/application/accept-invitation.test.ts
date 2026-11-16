@@ -36,6 +36,8 @@ const pendingInvitation = new Invitation({
   createdAt: persistedAt,
 });
 
+const storedProjectAccessReleasedAt = new Date("2026-11-16T11:29:39.000Z");
+
 function createTransactionalDeps() {
   const membershipPort = {
     findByUserAndOrganization: vi.fn().mockResolvedValue(null),
@@ -184,6 +186,56 @@ describe("AcceptInvitationUseCase", () => {
     expect(membershipPort.findByUserAndOrganization).toHaveBeenCalledWith({ userId, organizationId });
     expect(result.userId).toBe(userId);
     expect(result.organizationId).toBe(organizationId);
+  });
+
+  it("grants no projects when a member invitation stores an empty project list", async () => {
+    const invitationWithoutProjects = new Invitation({
+      ...pendingInvitation.toObject(),
+      projectIds: [],
+      createdAt: storedProjectAccessReleasedAt,
+    });
+    const { membershipPort, projectPort, invitationRepository, invitationService, withTransactionFn, userPort } =
+      createTransactionalDeps();
+    invitationRepository.findByToken.mockResolvedValue(invitationWithoutProjects);
+    const useCase = new AcceptInvitationUseCase(
+      invitationRepository as unknown as InvitationRepository,
+      membershipPort as unknown as MembershipPort,
+      projectPort as unknown as ProjectPort,
+      withTransactionFn,
+      invitationService as unknown as InvitationService,
+      userPort as unknown as UserPort,
+    );
+
+    await useCase.execute({ token }, userId, "invitee@company.com");
+
+    expect(membershipPort.grantProjects).toHaveBeenCalledWith("1a8c69a1-1ab1-45a8-8497-eae1e506d9d1", [], userId);
+  });
+
+  it("grants every organization project for a legacy pending invite with an empty project list", async () => {
+    const legacyInvitation = new Invitation({
+      ...pendingInvitation.toObject(),
+      projectIds: [],
+      createdAt: new Date(storedProjectAccessReleasedAt.getTime() - 1),
+    });
+    const { membershipPort, projectPort, invitationRepository, invitationService, withTransactionFn, userPort } =
+      createTransactionalDeps();
+    invitationRepository.findByToken.mockResolvedValue(legacyInvitation);
+    const useCase = new AcceptInvitationUseCase(
+      invitationRepository as unknown as InvitationRepository,
+      membershipPort as unknown as MembershipPort,
+      projectPort as unknown as ProjectPort,
+      withTransactionFn,
+      invitationService as unknown as InvitationService,
+      userPort as unknown as UserPort,
+    );
+
+    await useCase.execute({ token }, userId, "invitee@company.com");
+
+    expect(membershipPort.grantProjects).toHaveBeenCalledWith(
+      "1a8c69a1-1ab1-45a8-8497-eae1e506d9d1",
+      [projectId],
+      userId,
+    );
   });
 
   it("accepts an invitation when the user already belongs to another organization", async () => {

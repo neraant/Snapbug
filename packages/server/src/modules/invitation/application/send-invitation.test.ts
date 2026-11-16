@@ -307,6 +307,33 @@ describe("SendInvitationsUseCase", () => {
     expect(emailMarkup(unnamed.react)).not.toContain("Ada Lovelace");
   });
 
+  it("stores an empty project list when a member invite clears every project", async () => {
+    const membershipPort = {
+      findByUserAndOrganization: vi.fn().mockResolvedValue({ role: UserRole.ADMIN }),
+    };
+    const invitations = invitationService();
+    const emailService = { send: vi.fn().mockResolvedValue(undefined) };
+    const useCase = new SendInvitationsUseCase(
+      invitations as unknown as InvitationService,
+      invitationRepositoryMock() as never,
+      membershipPort as unknown as MembershipPort,
+      userPortMock() as unknown as UserPort,
+      organizationPort(),
+      projectPortMock(),
+      emailService as unknown as EmailService,
+      withTransaction as unknown as WithTransactionType,
+    );
+
+    await useCase.execute(
+      { organizationId, role: UserRole.USER, projectIds: [], emails: ["no-projects@company.com"] },
+      userId,
+      inviterEmail,
+    );
+
+    const saved = invitations.saveWithAudit.mock.calls[0]?.[0];
+    expect(saved.projectIds).toEqual([]);
+  });
+
   it("stores administrator role and all organization projects on an admin invite", async () => {
     const membershipPort = {
       findByUserAndOrganization: vi.fn().mockResolvedValue({ role: UserRole.ADMIN }),
