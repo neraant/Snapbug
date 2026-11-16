@@ -46,6 +46,10 @@ test("create dialog shows fewer tools for a read-only token", async ({ page }) =
   const secretDialog = page.getByRole("dialog", { name: "Token created" });
   await expect(secretDialog).toBeVisible({ timeout: 30_000 });
   await secretDialog.getByRole("button", { name: "I've copied it" }).click();
-  await expect(page.getByText(tokenName)).toBeVisible();
-  await expect(page.getByText("Read only")).toBeVisible();
+  await expect(page.getByRole("dialog", { name: "Create token" })).toBeHidden({ timeout: 30_000 });
+
+  const tokensPanel = page.getByRole("tabpanel", { name: "Tokens" });
+  const tokenRow = tokensPanel.getByRole("row").filter({ hasText: tokenName });
+  await expect(tokenRow).toBeVisible();
+  await expect(tokenRow.getByText("Read only", { exact: true })).toBeVisible();
 });
