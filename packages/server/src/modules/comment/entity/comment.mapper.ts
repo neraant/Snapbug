@@ -29,8 +29,10 @@ export abstract class CommentMapper {
       authorUserId: row.authorUserId,
       authorName: author?.name ?? null,
       authorEmail: author?.email ?? null,
+      authorSource: row.authorSource,
       body: row.body,
       createdAt: row.createdAt.toISOString(),
+      updatedAt: row.updatedAt?.toISOString() ?? null,
     };
   }
 }

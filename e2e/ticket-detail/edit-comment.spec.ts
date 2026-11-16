@@ -30,25 +30,18 @@ test("the author edits their comment on the ticket", async ({ page }) => {
   }
   await page.goto(`/tickets/${shortId}`);
   await expect(page.getByRole("heading", { name: ticketTitle })).toBeVisible({ timeout: 30_000 });
-  await expect(page.getByRole("heading", { name: "Comments" })).toBeVisible();
-  await page.waitForFunction(() => {
-    const button = [...document.querySelectorAll("button")].find(
-      (element) => element.textContent?.trim() === "Add comment",
-    );
-    if (!button) return false;
-    return Object.getOwnPropertyNames(button).some((name) => name.startsWith("__reactProps$"));
-  });
-
+  await expect(page.getByRole("heading", { name: /Comments/ })).toBeVisible();
   const commentBox = page.getByRole("textbox", { name: "Comment" });
+  await commentBox.click();
   await commentBox.fill(commentBody);
-  await page.getByRole("button", { name: "Add comment" }).click();
+  await page.getByRole("button", { name: "Comment" }).click();
 
   const commentsPanel = page
-    .getByRole("heading", { name: "Comments" })
+    .getByRole("heading", { name: /Comments/ })
     .locator("xpath=ancestor::*[@data-slot='panel'][1]");
   await expect(commentsPanel.getByText(commentBody, { exact: true })).toBeVisible({ timeout: 30_000 });
 
-  await commentsPanel.getByRole("button", { name: "Edit" }).click();
+  await commentsPanel.getByRole("button", { name: "Edit comment" }).click();
   const editBox = commentsPanel.getByRole("textbox", { name: "Comment" });
   await editBox.fill(editedBody);
   await commentsPanel.getByRole("button", { name: "Save" }).click();

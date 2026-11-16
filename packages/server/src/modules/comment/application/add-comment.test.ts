@@ -107,6 +107,7 @@ describe("AddCommentUseCase", () => {
     const result = await useCase.execute({ bugReportId, body: "The price is missing." }, userId, actor);
 
     expect(result.body).toBe("The price is missing.");
+    expect(result.authorSource).toBe("mcp");
     expect(result.authorEmail).toBe(teammate.email);
     expect(result.bugReportId).toBe(bugReportId);
     expect(withActor).toHaveBeenCalledWith(actor);
