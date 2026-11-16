@@ -21,6 +21,15 @@ test("create dialog shows fewer tools for a read-only token", async ({ page }) =
   await expect(page).toHaveURL(/\/overview/, { timeout: 30_000 });
 
   await page.goto("/settings?tab=tokens");
+  await expect(page.getByRole("tab", { name: "Access tokens" })).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByRole("button", { name: "Create token" })).toBeVisible({ timeout: 30_000 });
+  await page.waitForFunction(() => {
+    const create = Array.from(document.querySelectorAll("button")).find((button) =>
+      button.textContent?.includes("Create token"),
+    );
+    if (!create) return false;
+    return Object.getOwnPropertyNames(create).some((name) => name.startsWith("__reactProps$"));
+  });
   await page.getByRole("button", { name: "Create token" }).click();
   const createDialog = page.getByRole("dialog", { name: "Create token" });
   await expect(createDialog).toBeVisible({ timeout: 30_000 });
