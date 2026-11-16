@@ -240,6 +240,39 @@ const en = {
       acceptError: "We could not accept your invitation. Try again from the link in your email.",
     },
   },
+  invitePage: {
+    invalidTitle: "This invitation is no longer valid",
+    invalidDescription: "Ask your administrator for a new invitation or sign in with an existing account.",
+    expiredTitle: "This invitation has expired",
+    expiredDescription: (organizationName: string, inviterName: string) =>
+      `Ask an administrator of ${organizationName} to send a new one. ${inviterName} sent the last invitation.`,
+    signInLink: "Sign in",
+    cardTitle: (inviterName: string, organizationName: string) =>
+      `${inviterName} invited you to join ${organizationName}`,
+    roleAdmin: "Admin",
+    roleMember: "Member",
+    roleLabel: (role: string) => (role === "admin" ? "Admin" : "Member"),
+    invitedEmail: (email: string) => `This invitation is for ${email}`,
+    expiresIn: (days: number) =>
+      days === 1 ? "Expires in 1 day" : `Expires in ${days} days`,
+    alreadyMemberTitle: (organizationName: string) => `You're already a member of ${organizationName}`,
+    openOrganization: (organizationName: string) => `Open ${organizationName}`,
+    wrongAccountTitle: "Wrong account",
+    wrongAccountDescription: (signedInEmail: string, invitedEmail: string) =>
+      `You're signed in as ${signedInEmail}, this invitation is for ${invitedEmail}.`,
+    signOutAndContinue: (invitedEmail: string) => `Sign out and continue as ${invitedEmail}`,
+    goToApp: "Go to app",
+    joinOrganization: (organizationName: string) => `Join ${organizationName}`,
+    notYouSignOut: "Not you? Sign out",
+    createAccountToJoin: "Create account to join",
+    signInToJoin: "Sign in to join",
+    forgotPassword: "Forgot password?",
+    retry: "Try again",
+    toast: {
+      joined: (organizationName: string) => `You joined ${organizationName}`,
+      acceptError: "We could not accept your invitation. Try again.",
+    },
+  },
 } as const;
 
 const ru = {
@@ -479,6 +512,38 @@ const ru = {
     continueToApp: "Перейти в Snapbug",
     toast: {
       acceptError: "Не удалось принять приглашение. Попробуйте ещё раз по ссылке из письма.",
+    },
+  },
+  invitePage: {
+    invalidTitle: "Это приглашение больше недействительно",
+    invalidDescription: "Попросите администратора отправить новое приглашение или войдите в существующий аккаунт.",
+    expiredTitle: "Срок приглашения истёк",
+    expiredDescription: (organizationName: string, inviterName: string) =>
+      `Попросите администратора ${organizationName} отправить новое. Последнее приглашение отправил(а) ${inviterName}.`,
+    signInLink: "Войти",
+    cardTitle: (inviterName: string, organizationName: string) =>
+      `${inviterName} приглашает вас в ${organizationName}`,
+    roleAdmin: "Администратор",
+    roleMember: "Участник",
+    roleLabel: (role: string) => (role === "admin" ? "Администратор" : "Участник"),
+    invitedEmail: (email: string) => `Приглашение для ${email}`,
+    expiresIn: (days: number) => (days === 1 ? "Истекает через 1 день" : `Истекает через ${days} дней`),
+    alreadyMemberTitle: (organizationName: string) => `Вы уже состоите в ${organizationName}`,
+    openOrganization: (organizationName: string) => `Открыть ${organizationName}`,
+    wrongAccountTitle: "Другой аккаунт",
+    wrongAccountDescription: (signedInEmail: string, invitedEmail: string) =>
+      `Вы вошли как ${signedInEmail}, приглашение для ${invitedEmail}.`,
+    signOutAndContinue: (invitedEmail: string) => `Выйти и продолжить как ${invitedEmail}`,
+    goToApp: "Перейти в приложение",
+    joinOrganization: (organizationName: string) => `Вступить в ${organizationName}`,
+    notYouSignOut: "Не вы? Выйти",
+    createAccountToJoin: "Создать аккаунт, чтобы вступить",
+    signInToJoin: "Войти, чтобы вступить",
+    forgotPassword: "Забыли пароль?",
+    retry: "Повторить",
+    toast: {
+      joined: (organizationName: string) => `Вы вступили в ${organizationName}`,
+      acceptError: "Не удалось принять приглашение. Попробуйте ещё раз.",
     },
   },
 } as const;

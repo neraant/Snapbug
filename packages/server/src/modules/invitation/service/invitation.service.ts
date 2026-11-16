@@ -34,7 +34,7 @@ export class InvitationService {
 
   inviteUrl(token: string): string {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-    return `${appUrl}/sign-up?invitation=${token}`;
+    return `${appUrl}/invite/${token}`;
   }
 
   async saveWithAudit(invitation: Invitation, action: string): Promise<void> {

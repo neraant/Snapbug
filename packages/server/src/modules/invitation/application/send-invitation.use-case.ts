@@ -3,6 +3,7 @@ import { InvitationFactory } from "@workspace/server/modules/invitation/entity/i
 import type { MembershipPort } from "@workspace/server/modules/invitation/port/membership.port";
 import type { OrganizationPort } from "@workspace/server/modules/invitation/port/organization.port";
 import type { UserPort } from "@workspace/server/modules/invitation/port/user.port";
+import type { InvitationRepository } from "@workspace/server/modules/invitation/repository/invitation.repository";
 import type { InvitationService } from "@workspace/server/modules/invitation/service/invitation.service";
 import type { WithTransactionType } from "@workspace/server/shared/database/transaction.util";
 import type { EmailService } from "@workspace/server/shared/email/service/email.service";
@@ -21,6 +22,7 @@ const INITIAL_TOKEN_VERSION = 1;
 export class SendInvitationsUseCase {
   constructor(
     private readonly invitationService: InvitationService,
+    private readonly invitationRepository: InvitationRepository,
     private readonly membershipPort: MembershipPort,
     private readonly userPort: UserPort,
     private readonly organizationPort: OrganizationPort,
@@ -49,11 +51,20 @@ export class SendInvitationsUseCase {
       throw new NotFoundError(ERROR_CODES.ORGANIZATION_NOT_FOUND);
     }
 
+    const inviter = await this.userPort.findById(userId);
+    const inviterName = inviter.name?.trim() ? inviter.name.trim() : inviter.email;
+
     const normalizedInviterEmail = inviterEmail.toLowerCase();
     const emails = this.normalizeEmails(input.emails);
+    let sent = 0;
+    let skipped = 0;
+    let resent = 0;
 
     for (const email of emails) {
-      if (email === normalizedInviterEmail) continue;
+      if (email === normalizedInviterEmail) {
+        skipped += 1;
+        continue;
+      }
 
       const existingUser = await this.userPort.findByEmail(email);
       if (existingUser) {
@@ -61,10 +72,48 @@ export class SendInvitationsUseCase {
           userId: existingUser.id,
           organizationId: input.organizationId,
         });
-        if (membership) continue;
+        if (membership) {
+          skipped += 1;
+          continue;
+        }
       }
 
       const recipientName = this.recipientName(existingUser);
+      const existingInvitation = await this.invitationRepository.findByOrganizationAndEmail(
+        input.organizationId,
+        email,
+      );
+
+      if (existingInvitation?.isPending()) {
+        const tokenVersion = existingInvitation.tokenVersion + 1;
+        const token = this.invitationService.buildInvitationToken(existingInvitation.id, tokenVersion);
+        const rotatedInvitation = existingInvitation.withRotatedToken({
+          tokenHash: this.invitationService.hashToken(token),
+          tokenVersion,
+          expiresAt: new Date(Date.now() + TOKEN_TTL_MS),
+          invitedByUserId: userId,
+        });
+
+        await this.withTransaction(async (tx) => {
+          await this.invitationService
+            .withTx(tx)
+            .withActor({ type: "user", id: userId })
+            .saveWithAudit(rotatedInvitation, "Resend invitation");
+        });
+
+        await this.emailService.send({
+          to: email,
+          subject: `You're invited to join ${organization.name} on Snapbug`,
+          react: InvitationEmailTemplate({
+            inviteUrl: this.invitationService.inviteUrl(token),
+            organizationName: organization.name,
+            inviterName,
+            recipientName,
+          }),
+        });
+        resent += 1;
+        continue;
+      }
 
       const invitationId = randomUUID();
       const token = this.invitationService.buildInvitationToken(invitationId, INITIAL_TOKEN_VERSION);
@@ -91,10 +140,14 @@ export class SendInvitationsUseCase {
         react: InvitationEmailTemplate({
           inviteUrl: this.invitationService.inviteUrl(token),
           organizationName: organization.name,
+          inviterName,
           recipientName,
         }),
       });
+      sent += 1;
     }
+
+    return { sent, skipped, resent };
   }
 
   private recipientName(user: { name: string | null } | null): string | undefined {

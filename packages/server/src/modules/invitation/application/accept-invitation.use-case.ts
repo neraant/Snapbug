@@ -3,7 +3,7 @@ import type { ProjectPort } from "@workspace/server/modules/invitation/port/proj
 import type { InvitationRepository } from "@workspace/server/modules/invitation/repository/invitation.repository";
 import type { InvitationService } from "@workspace/server/modules/invitation/service/invitation.service";
 import type { WithTransactionType } from "@workspace/server/shared/database/transaction.util";
-import { BadRequestError, ConflictError } from "@workspace/server/shared/error/app-errors";
+import { BadRequestError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import type {
   AcceptInvitationInputDtoType,
@@ -38,7 +38,15 @@ export class AcceptInvitationUseCase {
       organizationId: invitation.organizationId,
     });
     if (existingMembership) {
-      throw new ConflictError(ERROR_CODES.MEMBERSHIP_ALREADY_EXISTS);
+      if (invitation.isPending()) {
+        await this.withTransaction(async (tx) => {
+          await this.invitationService
+            .withTx(tx)
+            .withActor({ type: "user", id: userId })
+            .saveWithAudit(invitation.accept(), "Accept invitation");
+        });
+      }
+      return existingMembership;
     }
 
     const acceptedInvitation = invitation.accept();

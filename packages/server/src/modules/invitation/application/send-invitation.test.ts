@@ -35,14 +35,26 @@ function invitationService(saveWithAudit = vi.fn().mockResolvedValue(undefined))
   const service = {
     saveWithAudit,
     hashToken,
-    buildInvitationToken: vi.fn(() => `invite-token-${++tokenCounter}`),
-    inviteUrl: vi.fn((token: string) => `http://localhost:3000/sign-up?invitation=${token}`),
+    buildInvitationToken: vi.fn(() => `c${String(++tokenCounter).padStart(63, "0")}`),
+    inviteUrl: vi.fn((token: string) => `http://localhost:3000/invite/${token}`),
     withActor: vi.fn(),
     withTx: vi.fn(),
   };
   service.withActor.mockReturnValue(service);
   service.withTx.mockReturnValue(service);
   return service;
+}
+
+function invitationRepositoryMock() {
+  return { findByOrganizationAndEmail: vi.fn().mockResolvedValue(null) };
+}
+
+function userPortMock(overrides: Record<string, unknown> = {}) {
+  return {
+    findByEmail: vi.fn().mockResolvedValue(null),
+    findById: vi.fn().mockResolvedValue({ id: userId, email: inviterEmail, name: "Inviter" }),
+    ...overrides,
+  };
 }
 
 function organizationPort(found = true): OrganizationPort {
@@ -64,8 +76,9 @@ describe("SendInvitationsUseCase", () => {
     };
     const useCase = new SendInvitationsUseCase(
       invitationService() as unknown as InvitationService,
+      invitationRepositoryMock() as never,
       membershipPort as unknown as MembershipPort,
-      { findByEmail: vi.fn() } as unknown as UserPort,
+      userPortMock() as unknown as UserPort,
       organizationPort(),
       { send: vi.fn() } as unknown as EmailService,
       withTransaction as unknown as WithTransactionType,
@@ -86,8 +99,9 @@ describe("SendInvitationsUseCase", () => {
     const emailService = { send: vi.fn() };
     const useCase = new SendInvitationsUseCase(
       invitations as unknown as InvitationService,
+      invitationRepositoryMock() as never,
       membershipPort as unknown as MembershipPort,
-      { findByEmail: vi.fn() } as unknown as UserPort,
+      userPortMock() as unknown as UserPort,
       organizationPort(),
       emailService as unknown as EmailService,
       withTransaction as unknown as WithTransactionType,
@@ -107,11 +121,12 @@ describe("SendInvitationsUseCase", () => {
     const membershipPort = {
       findByUserAndOrganization: vi.fn().mockResolvedValue({ role: UserRole.ADMIN }),
     };
-    const userPort = { findByEmail: vi.fn().mockResolvedValue(null) };
+    const userPort = userPortMock();
     const invitations = invitationService();
     const emailService = { send: vi.fn().mockResolvedValue(undefined) };
     const useCase = new SendInvitationsUseCase(
       invitations as unknown as InvitationService,
+      invitationRepositoryMock() as never,
       membershipPort as unknown as MembershipPort,
       userPort as unknown as UserPort,
       organizationPort(),
@@ -142,19 +157,20 @@ describe("SendInvitationsUseCase", () => {
         return { role: UserRole.ADMIN };
       }),
     };
-    const userPort = {
+    const userPort = userPortMock({
       findByEmail: vi.fn(async (email: string) => {
         if (email === "member@company.com") {
           return { id: "member-user-id", email, name: "Member" };
         }
         return null;
       }),
-    };
+    });
     const invitations = invitationService();
     const emailService = { send: vi.fn().mockResolvedValue(undefined) };
     const organizations = organizationPort();
     const useCase = new SendInvitationsUseCase(
       invitations as unknown as InvitationService,
+      invitationRepositoryMock() as never,
       membershipPort as unknown as MembershipPort,
       userPort as unknown as UserPort,
       organizations,
@@ -183,9 +199,9 @@ describe("SendInvitationsUseCase", () => {
 
     const sent = emailService.send.mock.calls.find((call) => call[0].to === "new@company.com")?.[0];
     const markup = emailMarkup(sent?.react as ReactElement);
-    expect(markup).toContain(`invitation=${firstToken}`);
+    expect(markup).toContain(`/invite/${firstToken}`);
     expect(markup).toContain("Join Acme");
-    expect(markup).toContain("You're invited to join Acme");
+    expect(markup).toContain("Inviter invited you to join Acme");
     expect(markup).not.toContain("Ada Lovelace");
   });
 
@@ -196,8 +212,9 @@ describe("SendInvitationsUseCase", () => {
     const emailService = { send: vi.fn() };
     const useCase = new SendInvitationsUseCase(
       invitationService() as unknown as InvitationService,
+      invitationRepositoryMock() as never,
       membershipPort as unknown as MembershipPort,
-      { findByEmail: vi.fn() } as unknown as UserPort,
+      userPortMock() as unknown as UserPort,
       organizationPort(false),
       emailService as unknown as EmailService,
       withTransaction as unknown as WithTransactionType,
@@ -219,7 +236,7 @@ describe("SendInvitationsUseCase", () => {
         return null;
       }),
     };
-    const userPort = {
+    const userPort = userPortMock({
       findByEmail: vi.fn(async (email: string) => {
         if (email === "ada@company.com") {
           return { id: "ada-user-id", email, name: "Ada Lovelace" };
@@ -229,11 +246,12 @@ describe("SendInvitationsUseCase", () => {
         }
         return null;
       }),
-    };
+    });
     const invitations = invitationService();
     const emailService = { send: vi.fn().mockResolvedValue(undefined) };
     const useCase = new SendInvitationsUseCase(
       invitations as unknown as InvitationService,
+      invitationRepositoryMock() as never,
       membershipPort as unknown as MembershipPort,
       userPort as unknown as UserPort,
       organizationPort(),
@@ -246,8 +264,8 @@ describe("SendInvitationsUseCase", () => {
     const named = emailService.send.mock.calls.find((call) => call[0].to === "ada@company.com")?.[0];
     const unnamed = emailService.send.mock.calls.find((call) => call[0].to === "blank@company.com")?.[0];
 
-    expect(emailMarkup(named.react)).toContain("Ada Lovelace, you're invited to join Acme");
-    expect(emailMarkup(unnamed.react)).toContain("You're invited to join Acme");
+    expect(emailMarkup(named.react)).toContain("Ada Lovelace, Inviter invited you to join Acme");
+    expect(emailMarkup(unnamed.react)).toContain("Inviter invited you to join Acme");
     expect(emailMarkup(unnamed.react)).not.toContain("Ada Lovelace");
   });
 });

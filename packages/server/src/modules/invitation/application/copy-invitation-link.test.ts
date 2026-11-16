@@ -32,7 +32,7 @@ function invitationService() {
   return {
     buildInvitationToken: vi.fn(() => token),
     hashToken: (value: string) => createHash("sha256").update(value).digest("hex"),
-    inviteUrl: vi.fn((value: string) => `http://localhost:3000/sign-up?invitation=${value}`),
+    inviteUrl: vi.fn((value: string) => `http://localhost:3000/invite/${value}`),
   };
 }
 
@@ -52,7 +52,7 @@ describe("CopyInvitationLinkUseCase", () => {
 
     const result = await useCase.execute({ invitationId }, userId, organizationId);
 
-    expect(result.inviteUrl).toBe(`http://localhost:3000/sign-up?invitation=${token}`);
+    expect(result.inviteUrl).toBe(`http://localhost:3000/invite/${token}`);
   });
 
   it("rejects legacy invitations whose hash does not match a versioned token", async () => {

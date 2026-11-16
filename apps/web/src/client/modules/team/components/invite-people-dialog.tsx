@@ -15,6 +15,7 @@ import {
 import { Field, FieldDescription, FieldLabel } from "@workspace/design-system/components/ui/field";
 import { SubmitButton } from "@workspace/design-system/components/ui/submit-button";
 import { TagsInput } from "@workspace/design-system/components/ui/tags-input";
+import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
 import { InfoIcon, UserPlusIcon } from "lucide-react";
 
 import { texts } from "@/client/modules/team/consts/texts.const";
@@ -54,6 +55,11 @@ export function InvitePeopleDialog() {
               removeTagLabel={texts.invite.removeEmail}
             />
             <FieldDescription>{texts.invite.hint}</FieldDescription>
+          </Field>
+          <Field>
+            <FieldLabel>{texts.invite.roleLabel}</FieldLabel>
+            <FieldDescription>{texts.role.label[UserRole.USER]}</FieldDescription>
+            <FieldDescription>{texts.invite.roleHint}</FieldDescription>
           </Field>
           <DialogFooter>
             <DialogClose render={<Button type="button" variant="outline" />}>{texts.invite.cancel}</DialogClose>

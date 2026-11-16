@@ -76,6 +76,8 @@ export class ResendInvitationUseCase {
 
     const existingUser = await this.userPort.findByEmail(invitation.email);
     const recipientName = existingUser?.name?.trim() ? existingUser.name.trim() : undefined;
+    const inviter = await this.userPort.findById(userId);
+    const inviterName = inviter.name?.trim() ? inviter.name.trim() : inviter.email;
 
     await this.emailService.send({
       to: invitation.email,
@@ -83,6 +85,7 @@ export class ResendInvitationUseCase {
       react: InvitationEmailTemplate({
         inviteUrl: this.invitationService.inviteUrl(token),
         organizationName: organization.name,
+        inviterName,
         recipientName,
       }),
     });

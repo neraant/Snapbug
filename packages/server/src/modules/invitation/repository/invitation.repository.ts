@@ -24,6 +24,14 @@ export class InvitationRepository {
     return row ? InvitationMapper.fromPersistence(row) : null;
   }
 
+  async findByOrganizationAndEmail(organizationId: string, email: string): Promise<Invitation | null> {
+    const [row] = await this.db
+      .select()
+      .from(invitationTable)
+      .where(and(eq(invitationTable.organizationId, organizationId), eq(invitationTable.email, email)));
+    return row ? InvitationMapper.fromPersistence(row) : null;
+  }
+
   async findManyPendingByOrganizationId(organizationId: string): Promise<Invitation[]> {
     const rows = await this.db
       .select()

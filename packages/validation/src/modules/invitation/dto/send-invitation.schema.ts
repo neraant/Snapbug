@@ -9,6 +9,10 @@ export const sendInvitationsInputDtoSchema = z.object({
 
 export type SendInvitationsInputDtoType = z.infer<typeof sendInvitationsInputDtoSchema>;
 
-export const sendInvitationsOutputDtoSchema = z.void();
+export const sendInvitationsOutputDtoSchema = z.object({
+  sent: z.number().int().nonnegative(),
+  skipped: z.number().int().nonnegative(),
+  resent: z.number().int().nonnegative(),
+});
 
 export type SendInvitationsOutputDtoType = z.infer<typeof sendInvitationsOutputDtoSchema>;

@@ -42,8 +42,8 @@ export function useInvitePeople() {
     }
 
     try {
-      await sendInvitations(result.data);
-      toast.add({ title: texts.invite.success, type: "success" });
+      const summary = await sendInvitations(result.data);
+      toast.add({ title: texts.invite.successSummary(summary), type: "success" });
       onOpenChange(false);
     } catch (sendError) {
       toast.add({

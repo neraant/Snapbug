@@ -16,7 +16,7 @@ function hashToken(value: string): string {
 
 const userId = "0a8c69a1-1ab1-45a8-8497-eae1e506d9d4";
 const organizationId = "2a8c69a1-1ab1-45a8-8497-eae1e506d9d1";
-const token = "550e8400-e29b-41d4-a716-446655440000";
+const token = "b".repeat(64);
 const projectId = "4a8c69a1-1ab1-45a8-8497-eae1e506d9d1";
 const persistedAt = new Date("2026-10-03T09:00:00.000Z");
 
@@ -121,16 +121,17 @@ describe("AcceptInvitationUseCase", () => {
     expect(withTransactionFn).not.toHaveBeenCalled();
   });
 
-  it("throws when the user is already a member of the invited organization", async () => {
-    const { membershipPort, projectPort, invitationRepository, invitationService, withTransactionFn } =
-      createTransactionalDeps();
-    membershipPort.findByUserAndOrganization.mockResolvedValue({
+  it("returns the existing membership when the user is already a member", async () => {
+    const existingMembership = {
       id: "1a8c69a1-1ab1-45a8-8497-eae1e506d9d1",
       userId,
       organizationId,
       role: UserRole.ADMIN,
       createdAt: persistedAt.toISOString(),
-    });
+    };
+    const { membershipPort, projectPort, invitationRepository, invitationService, withTransactionFn } =
+      createTransactionalDeps();
+    membershipPort.findByUserAndOrganization.mockResolvedValue(existingMembership);
     const useCase = new AcceptInvitationUseCase(
       invitationRepository as unknown as InvitationRepository,
       membershipPort as unknown as MembershipPort,
@@ -139,11 +140,11 @@ describe("AcceptInvitationUseCase", () => {
       invitationService as unknown as InvitationService,
     );
 
-    await expect(useCase.execute({ token }, userId, "invitee@company.com")).rejects.toMatchObject({
-      errorCode: ERROR_CODES.MEMBERSHIP_ALREADY_EXISTS,
-    });
+    const result = await useCase.execute({ token }, userId, "invitee@company.com");
 
-    expect(withTransactionFn).not.toHaveBeenCalled();
+    expect(result).toEqual(existingMembership);
+    expect(membershipPort.createInvited).not.toHaveBeenCalled();
+    expect(invitationService.saveWithAudit).toHaveBeenCalledOnce();
   });
 
   it("creates a user membership and marks the invitation accepted", async () => {

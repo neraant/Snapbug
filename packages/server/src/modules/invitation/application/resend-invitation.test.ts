@@ -55,7 +55,10 @@ describe("ResendInvitationUseCase", () => {
     const organizationPort = {
       findById: vi.fn().mockResolvedValue({ id: organizationId, name: "Acme" }),
     };
-    const userPort = { findByEmail: vi.fn().mockResolvedValue(null) };
+    const userPort = {
+      findByEmail: vi.fn().mockResolvedValue(null),
+      findById: vi.fn().mockResolvedValue({ id: userId, email: "admin@example.com", name: "Admin" }),
+    };
     const invitations = invitationService();
     invitations.withActor.mockReturnValue({ saveWithAudit: invitations.saveWithAudit });
     invitations.withTx.mockReturnValue(invitations);

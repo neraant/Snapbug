@@ -1,6 +1,8 @@
+import { redirect } from "next/navigation";
+
 import { auth } from "@/auth";
-import { AcceptSignedInInvitation } from "@/client/modules/auth/components/accept-signed-in-invitation";
 import { SignInContent } from "@/client/modules/auth/components/sign-in-content";
+import { url } from "@/shared/build-url.util";
 import { readInvitationSearchParam } from "@/shared/utils/parse-invitation-token.util";
 
 type PageProps = {
@@ -9,11 +11,14 @@ type PageProps = {
 
 export default async function Page({ searchParams }: PageProps) {
   const invitationToken = readInvitationSearchParam((await searchParams).invitation);
-  const session = await auth();
-
-  if (session?.user?.id && invitationToken) {
-    return <AcceptSignedInInvitation invitationToken={invitationToken} />;
+  if (invitationToken) {
+    redirect(url.invite(invitationToken));
   }
 
-  return <SignInContent invitationToken={invitationToken} />;
+  const session = await auth();
+  if (session?.user?.id) {
+    redirect(url.overview());
+  }
+
+  return <SignInContent />;
 }

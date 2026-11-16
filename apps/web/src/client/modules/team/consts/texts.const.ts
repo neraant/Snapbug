@@ -16,6 +16,21 @@ const en = {
     submit: "Send invitations",
     validationError: "Add between 1 and 10 valid email addresses.",
     success: "Invitations sent.",
+    successSummary: (summary: { sent: number; skipped: number; resent: number }) => {
+      const parts: string[] = [];
+      if (summary.sent > 0) {
+        parts.push(`${summary.sent} invitation${summary.sent === 1 ? "" : "s"} sent`);
+      }
+      if (summary.resent > 0) {
+        parts.push(`${summary.resent} resent`);
+      }
+      if (summary.skipped > 0) {
+        parts.push(`${summary.skipped} skipped`);
+      }
+      return parts.length > 0 ? parts.join(", ") : "No invitations sent.";
+    },
+    roleLabel: "Role",
+    roleHint: "New members are invited as Members with access to all projects.",
     error: "Could not send invitations. Try again.",
   },
   search: {
@@ -108,6 +123,23 @@ const ru = {
     submit: "Отправить приглашения",
     validationError: "Добавьте от 1 до 10 корректных адресов email.",
     success: "Приглашения отправлены.",
+    successSummary: (summary: { sent: number; skipped: number; resent: number }) => {
+      const parts: string[] = [];
+      if (summary.sent > 0) {
+        parts.push(
+          `отправлено приглашений: ${summary.sent}`,
+        );
+      }
+      if (summary.resent > 0) {
+        parts.push(`повторно: ${summary.resent}`);
+      }
+      if (summary.skipped > 0) {
+        parts.push(`пропущено: ${summary.skipped}`);
+      }
+      return parts.length > 0 ? parts.join(", ") : "Приглашения не отправлены.";
+    },
+    roleLabel: "Роль",
+    roleHint: "Новые участники получают роль Member и доступ ко всем проектам.",
     error: "Не удалось отправить приглашения. Попробуйте ещё раз.",
   },
   search: {
