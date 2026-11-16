@@ -44,7 +44,9 @@ export default auth(async (req) => {
   );
   const completed = hasCompletedOnboarding(snapshot);
 
-  if (isGuestAuthPage) {
+  const isInvitePage = pathname.startsWith("/invite/");
+
+  if (isGuestAuthPage && !isInvitePage) {
     return Response.redirect(new URL(completed ? url.overview() : url.onboarding(), req.nextUrl));
   }
 
@@ -52,7 +54,7 @@ export default auth(async (req) => {
     return Response.redirect(new URL(url.overview(), req.nextUrl));
   }
 
-  if (!completed && !isOnboardingPage) {
+  if (!completed && !isOnboardingPage && !isInvitePage) {
     return Response.redirect(new URL(url.onboarding(), req.nextUrl));
   }
 });

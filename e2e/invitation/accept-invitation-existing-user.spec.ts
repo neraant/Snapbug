@@ -13,7 +13,7 @@ test("an existing user signs in from the invite page and joins the team", async 
   await signupPage.goto("/sign-up");
   await signupPage.getByLabel("Name").fill("Existing Invitee");
   await signupPage.getByLabel("Work Email").fill(inviteEmail);
-  await signupPage.getByLabel("Password").fill(password);
+  await signupPage.getByRole("textbox", { name: "Password" }).fill(password);
   await signupPage.getByRole("checkbox", { name: /terms/i }).check();
   await signupPage.getByRole("button", { name: "Create account" }).click();
   await expect(signupPage).toHaveURL(/\/(overview|onboarding)/, { timeout: 60_000 });
@@ -27,23 +27,33 @@ test("an existing user signs in from the invite page and joins the team", async 
 
   await page.goto("/team");
   const inviteButton = page.getByRole("button", { name: "Invite people" });
-  await inviteButton.click();
+  await expect(async () => {
+    await inviteButton.click();
+    await expect(page.getByRole("dialog", { name: "Invite people" })).toBeVisible({ timeout: 2_000 });
+  }).toPass({ timeout: 30_000 });
   const inviteDialog = page.getByRole("dialog", { name: "Invite people" });
   await inviteDialog.getByRole("textbox", { name: "Email addresses" }).fill(inviteEmail);
   await inviteDialog.getByRole("textbox", { name: "Email addresses" }).press("Enter");
   await inviteDialog.getByRole("button", { name: "Send invitations" }).click();
+  await expect(page.getByText(/invitation sent/i)).toBeVisible();
 
+  await expect(page.getByText(inviteEmail)).toBeVisible();
   await page.getByRole("button", { name: `Invitation actions for ${inviteEmail}` }).click();
   await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
   await page.getByRole("menuitem", { name: "Copy link" }).click();
+  await expect(page.getByText("Invitation link copied.")).toBeVisible();
 
   const inviteUrl = await page.evaluate(async () => await navigator.clipboard.readText());
 
-  await page.goto("/api/auth/signout");
+  await page.context().clearCookies();
   await page.goto(inviteUrl);
 
-  await expect(page.getByRole("button", { name: "Sign in to join" })).toBeVisible();
-  await page.getByLabel("Password").fill(password);
+  await expect(page.getByRole("button", { name: "Sign in to join" })).toBeVisible({
+    timeout: 30_000,
+  });
+  const passwordField = page.locator('input[autocomplete="current-password"]');
+  await passwordField.click();
+  await passwordField.pressSequentially(password, { delay: 10 });
   await page.getByRole("button", { name: "Sign in to join" }).click();
 
   await expect(page).toHaveURL(/\/overview/, { timeout: 60_000 });

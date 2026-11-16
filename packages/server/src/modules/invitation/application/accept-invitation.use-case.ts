@@ -1,5 +1,6 @@
 import type { MembershipPort } from "@workspace/server/modules/invitation/port/membership.port";
 import type { ProjectPort } from "@workspace/server/modules/invitation/port/project.port";
+import type { UserPort } from "@workspace/server/modules/invitation/port/user.port";
 import type { InvitationRepository } from "@workspace/server/modules/invitation/repository/invitation.repository";
 import type { InvitationService } from "@workspace/server/modules/invitation/service/invitation.service";
 import type { WithTransactionType } from "@workspace/server/shared/database/transaction.util";
@@ -17,6 +18,7 @@ export class AcceptInvitationUseCase {
     private readonly projectPort: ProjectPort,
     private readonly withTransaction: WithTransactionType,
     private readonly invitationService: InvitationService,
+    private readonly userPort: UserPort,
   ) {}
 
   async execute(
@@ -65,6 +67,8 @@ export class AcceptInvitationUseCase {
       await invitationService.saveWithAudit(acceptedInvitation, "Accept invitation");
       return createdMembership;
     });
+
+    await this.userPort.markOnboardingComplete(userId);
 
     return membership;
   }

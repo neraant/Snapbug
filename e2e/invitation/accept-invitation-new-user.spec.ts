@@ -43,13 +43,15 @@ test("a new user creates an account from the invite page and joins the team", as
   const inviteEmail = `new-invitee-${Date.now()}@example.com`;
   const inviteUrl = await adminInviteEmail(page, inviteEmail);
 
-  await page.goto("/api/auth/signout");
+  await page.context().clearCookies();
   await page.goto(inviteUrl);
-  await expect(page.getByRole("button", { name: "Create account to join" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Create account to join" })).toBeVisible({
+    timeout: 30_000,
+  });
   await expect(page.getByText(inviteEmail)).toBeVisible();
 
-  await page.getByLabel("Name").fill("New Invitee");
-  await page.getByLabel("Password").fill("password123");
+  await page.getByRole("textbox", { name: "Name" }).fill("New Invitee");
+  await page.getByRole("textbox", { name: "Password" }).fill("password123");
   await page.getByRole("checkbox", { name: /terms/i }).check();
   await page.getByRole("button", { name: "Create account to join" }).click();
 

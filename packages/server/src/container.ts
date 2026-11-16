@@ -293,6 +293,7 @@ const acceptInvitation = new AcceptInvitationUseCase(
   projectAdapter,
   withTransaction,
   invitationService,
+  userAdapter,
 );
 const resendInvitation = new ResendInvitationUseCase(
   invitationRepository,

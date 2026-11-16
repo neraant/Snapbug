@@ -8,10 +8,10 @@ import { useForm } from "react-hook-form";
 
 import { texts } from "@/client/modules/auth/consts/texts.const";
 import { signUpSchema, type SignUpSchemaType } from "@/client/modules/auth/schemas/sign-up.schema";
+import { acceptInvitationAfterAuth } from "@/client/modules/auth/utils/accept-invitation-after-auth.util";
 import { useAcceptInvitation } from "@/client/modules/shared/queries/use-accept-invitation";
 import { useSignUp } from "@/client/modules/shared/queries/use-sign-up";
 import { url } from "@/shared/build-url.util";
-import { selectActiveOrganization } from "@/shared/organization/select-active-organization";
 
 type UseInviteSignUpInput = {
   token: string;
@@ -61,17 +61,14 @@ export function useInviteSignUp({ token, email, organizationName }: UseInviteSig
       return;
     }
 
-    try {
-      const membership = await acceptInvitation({ token });
-      await selectActiveOrganization(membership.organizationId);
-      toast.add({ title: texts.invitePage.toast.joined(organizationName), type: "success" });
-      router.replace(url.overview());
-    } catch (error) {
-      toast.add({
-        title: getAppErrorMessage(error, texts.invitePage.toast.acceptError),
-        type: "error",
-      });
+    router.refresh();
+    const accepted = await acceptInvitationAfterAuth(token, acceptInvitation);
+    if (!accepted) {
+      return;
     }
+
+    toast.add({ title: texts.invitePage.toast.joined(organizationName), type: "success" });
+    router.replace(url.overview());
   };
 
   return {

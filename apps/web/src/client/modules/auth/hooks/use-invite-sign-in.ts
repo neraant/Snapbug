@@ -1,15 +1,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "@workspace/design-system/components/ui/toast";
-import { getAppErrorMessage } from "@workspace/server/error/get-app-error-message";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
 
 import { texts } from "@/client/modules/auth/consts/texts.const";
 import { signInSchema, type SignInSchemaType } from "@/client/modules/auth/schemas/sign-in.schema";
+import { acceptInvitationAfterAuth } from "@/client/modules/auth/utils/accept-invitation-after-auth.util";
 import { useAcceptInvitation } from "@/client/modules/shared/queries/use-accept-invitation";
 import { url } from "@/shared/build-url.util";
-import { selectActiveOrganization } from "@/shared/organization/select-active-organization";
 
 type UseInviteSignInInput = {
   token: string;
@@ -38,17 +37,14 @@ export function useInviteSignIn({ token, email, organizationName }: UseInviteSig
       return;
     }
 
-    try {
-      const membership = await acceptInvitation({ token });
-      await selectActiveOrganization(membership.organizationId);
-      toast.add({ title: texts.invitePage.toast.joined(organizationName), type: "success" });
-      router.replace(url.overview());
-    } catch (error) {
-      toast.add({
-        title: getAppErrorMessage(error, texts.invitePage.toast.acceptError),
-        type: "error",
-      });
+    router.refresh();
+    const accepted = await acceptInvitationAfterAuth(token, acceptInvitation);
+    if (!accepted) {
+      return;
     }
+
+    toast.add({ title: texts.invitePage.toast.joined(organizationName), type: "success" });
+    router.replace(url.overview());
   };
 
   return {
