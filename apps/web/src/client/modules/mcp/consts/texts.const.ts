@@ -27,6 +27,16 @@ const en = {
     readBadge: "Read",
     writeBadge: "Write",
     unavailableTooltip: "Requires an administrator",
+    scopeTooltips: {
+      "tickets:read": "List and read tickets, screenshots, logs, environment, and search",
+      "tickets:write": "Update ticket status, severity, and assignee",
+      "comments:read": "Read ticket comments",
+      "comments:write": "Post comments on tickets",
+      "projects:read": "List and read project metadata",
+      "members:read": "List organization members",
+      "stats:read": "Read overview ticket counts",
+      "activity:read": "Organization audit log (admins only)",
+    },
     areas: {
       tickets: "Tickets",
       comments: "Comments",
@@ -93,6 +103,16 @@ const ru = {
     readBadge: "Чтение",
     writeBadge: "Запись",
     unavailableTooltip: "Требуются права администратора",
+    scopeTooltips: {
+      "tickets:read": "Просмотр тикетов, скриншотов, логов, окружения и поиск",
+      "tickets:write": "Изменение статуса, критичности и исполнителя тикета",
+      "comments:read": "Чтение комментариев к тикетам",
+      "comments:write": "Добавление комментариев к тикетам",
+      "projects:read": "Список и метаданные проектов",
+      "members:read": "Список участников организации",
+      "stats:read": "Сводные счётчики тикетов",
+      "activity:read": "Журнал аудита организации (только админы)",
+    },
     areas: {
       tickets: "Тикеты",
       comments: "Комментарии",
