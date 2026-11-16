@@ -44,70 +44,65 @@ export function UserTokenList() {
 
   const activeTokens = tokens.filter((token) => token.revokedAt === null);
 
-  if (activeTokens.length === 0) {
-    return (
-      <>
-        <Column align="center" gap="md" padding="lg" width="full">
+  return (
+    <>
+      <Column
+        align={activeTokens.length === 0 ? "center" : "stretch"}
+        gap="md"
+        padding={activeTokens.length === 0 ? "lg" : undefined}
+        width="full"
+      >
+        {activeTokens.length === 0 ? (
           <Typography variant="text-sm" color="muted">
             {texts.empty}
           </Typography>
-          <CreateUserTokenDialog />
-        </Column>
-        <ConfirmDialog {...bind()} />
-      </>
-    );
-  }
-
-  return (
-    <>
-      <Column gap="md" width="full">
+        ) : null}
         <CreateUserTokenDialog />
-        <Table>
-          <Table.Header>
-            <Table.Row>
-              <Table.Head>{texts.column.token}</Table.Head>
-              <Table.Head>{texts.column.created}</Table.Head>
-              <Table.Head>{texts.column.actions}</Table.Head>
-            </Table.Row>
-          </Table.Header>
-          <Table.Body>
-            {activeTokens.map((token) => (
-              <Table.Row key={token.id}>
-                <Table.Cell>
-                  <Typography variant="text-sm">{token.name}</Typography>
-                </Table.Cell>
-                <Table.Cell>
-                  <Typography variant="text-sm">{formatUserTokenCreatedAt(token.createdAt)}</Typography>
-                </Table.Cell>
-                <Table.Cell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger
-                      render={
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon-sm"
-                          disabled={isPending}
-                          aria-label={texts.actionsMenuLabel}
-                        />
-                      }
-                    >
-                      <EllipsisVerticalIcon />
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        variant="destructive"
-                        onClick={() => openRevokeConfirm(token.id, token.name)}
-                      >
-                        {texts.revoke.action}
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </Table.Cell>
+        {activeTokens.length > 0 ? (
+          <Table>
+            <Table.Header>
+              <Table.Row>
+                <Table.Head>{texts.column.token}</Table.Head>
+                <Table.Head>{texts.column.created}</Table.Head>
+                <Table.Head>{texts.column.actions}</Table.Head>
               </Table.Row>
-            ))}
-          </Table.Body>
-        </Table>
+            </Table.Header>
+            <Table.Body>
+              {activeTokens.map((token) => (
+                <Table.Row key={token.id}>
+                  <Table.Cell>
+                    <Typography variant="text-sm">{token.name}</Typography>
+                  </Table.Cell>
+                  <Table.Cell>
+                    <Typography variant="text-sm">{formatUserTokenCreatedAt(token.createdAt)}</Typography>
+                  </Table.Cell>
+                  <Table.Cell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger
+                        render={
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-sm"
+                            disabled={isPending}
+                            aria-label={texts.actionsMenuLabel}
+                          />
+                        }
+                      >
+                        <EllipsisVerticalIcon />
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem variant="destructive" onClick={() => openRevokeConfirm(token.id, token.name)}>
+                          {texts.revoke.action}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </Table.Cell>
+                </Table.Row>
+              ))}
+            </Table.Body>
+          </Table>
+        ) : null}
       </Column>
       <ConfirmDialog {...bind()} />
     </>
