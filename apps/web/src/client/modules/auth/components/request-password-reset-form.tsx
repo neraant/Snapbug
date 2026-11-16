@@ -14,7 +14,11 @@ import {
 } from "@/client/modules/auth/schemas/request-password-reset.schema";
 import { useRequestPasswordReset } from "@/client/modules/shared/queries/use-request-password-reset";
 
-export function RequestPasswordResetForm() {
+type RequestPasswordResetFormProps = {
+  invitationToken?: string;
+};
+
+export function RequestPasswordResetForm({ invitationToken }: RequestPasswordResetFormProps) {
   const { mutateAsync: requestPasswordReset } = useRequestPasswordReset();
   const { control, handleSubmit, formState, reset } = useForm<RequestPasswordResetSchemaType>({
     resolver: zodResolver(requestPasswordResetSchema),
@@ -23,7 +27,10 @@ export function RequestPasswordResetForm() {
 
   const onSubmit = async (values: RequestPasswordResetSchemaType) => {
     try {
-      await requestPasswordReset(values);
+      await requestPasswordReset({
+        email: values.email,
+        invitation: invitationToken,
+      });
     } catch (error) {
       toast.add({
         title: getAppErrorMessage(error, texts.requestPasswordReset.toast.genericError),

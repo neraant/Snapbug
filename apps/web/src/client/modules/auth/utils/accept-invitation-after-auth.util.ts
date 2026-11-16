@@ -1,8 +1,23 @@
 import { toast } from "@workspace/design-system/components/ui/toast";
 import { getAppErrorMessage } from "@workspace/server/error/get-app-error-message";
+import { getSession } from "next-auth/react";
 
 import { texts } from "@/client/modules/auth/consts/texts.const";
 import { selectActiveOrganization } from "@/shared/organization/select-active-organization";
+
+const SESSION_WAIT_MS = 45_000;
+
+export async function waitForAuthenticatedSession(): Promise<boolean> {
+  const deadline = Date.now() + SESSION_WAIT_MS;
+  while (Date.now() < deadline) {
+    const session = await getSession();
+    if (session?.user?.id) {
+      return true;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  return false;
+}
 
 type AcceptInvitationFn = (input: { token: string }) => Promise<{ organizationId: string }>;
 
@@ -34,6 +49,11 @@ export function acceptInvitationAfterAuth(
 
 async function acceptInvitationToken(token: string, acceptInvitation: AcceptInvitationFn): Promise<boolean> {
   try {
+    const sessionReady = await waitForAuthenticatedSession();
+    if (!sessionReady) {
+      toast.add({ title: texts.invitePage.toast.sessionWaitTimedOut, type: "error" });
+      return false;
+    }
     const membership = await acceptInvitation({ token });
     await selectActiveOrganization(membership.organizationId);
     return true;

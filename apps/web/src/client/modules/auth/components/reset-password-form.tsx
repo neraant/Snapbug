@@ -16,9 +16,10 @@ import { url } from "@/shared/build-url.util";
 
 type ResetPasswordFormProps = {
   token: string;
+  invitationToken?: string;
 };
 
-export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
+export function ResetPasswordForm({ token, invitationToken }: ResetPasswordFormProps) {
   const router = useRouter();
   const { mutateAsync: resetPassword } = useResetPassword();
   const { control, handleSubmit, formState } = useForm<ResetPasswordSchemaType>({
@@ -58,7 +59,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
       title: texts.resetPassword.toast.success,
       type: "success",
     });
-    router.replace(url.overview());
+    router.replace(invitationToken ? url.invite(invitationToken) : url.overview());
   };
 
   return (

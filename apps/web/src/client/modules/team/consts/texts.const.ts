@@ -22,6 +22,34 @@ const en = {
     submit: "Send invitations",
     validationError: "Add between 1 and 10 valid email addresses.",
     success: "Invitations sent.",
+    successSummary: (summary: { sent: number; skipped: number; skippedAlreadyMember: number; resent: number }) => {
+      const parts: string[] = [];
+      if (summary.sent > 0) {
+        parts.push(`${summary.sent} invitation${summary.sent === 1 ? "" : "s"} sent`);
+      }
+      if (summary.resent > 0) {
+        parts.push(`${summary.resent} resent`);
+      }
+      if (summary.skipped > 0) {
+        const skippedLabel =
+          summary.skippedAlreadyMember > 0 && summary.skippedAlreadyMember === summary.skipped
+            ? `${summary.skipped} skipped (already a member)`
+            : `${summary.skipped} skipped`;
+        parts.push(skippedLabel);
+      }
+      return parts.length > 0 ? parts.join(", ") : "No invitations sent.";
+    },
+    roleLabel: "Role",
+    roleSelectLabel: "Role for invited people",
+    roleHint: "Admins manage organization settings and all projects. Members only see selected projects.",
+    chipAlreadyMember: "Already in your team",
+    chipPendingInvitation: "Pending invitation",
+    chipResend: "Resend",
+    projectAccessLabel: "Project access",
+    projectAccessDescription: "All projects are selected by default. Clear a project to limit access.",
+    projectAccessAdmin: "Admins always have access to all projects.",
+    projectAccessEmpty: "This organization has no projects.",
+    projectAccessProject: (name: string) => `Access to ${name}`,
     viewInvitations: "View",
     error: "Could not send invitations. Try again.",
   },
@@ -128,6 +156,35 @@ const ru = {
     submit: "Отправить приглашения",
     validationError: "Добавьте от 1 до 10 корректных адресов email.",
     success: "Приглашения отправлены.",
+    successSummary: (summary: { sent: number; skipped: number; skippedAlreadyMember: number; resent: number }) => {
+      const parts: string[] = [];
+      if (summary.sent > 0) {
+        parts.push(`отправлено приглашений: ${summary.sent}`);
+      }
+      if (summary.resent > 0) {
+        parts.push(`повторно: ${summary.resent}`);
+      }
+      if (summary.skipped > 0) {
+        const skippedLabel =
+          summary.skippedAlreadyMember > 0 && summary.skippedAlreadyMember === summary.skipped
+            ? `пропущено: ${summary.skipped} (уже в команде)`
+            : `пропущено: ${summary.skipped}`;
+        parts.push(skippedLabel);
+      }
+      return parts.length > 0 ? parts.join(", ") : "Приглашения не отправлены.";
+    },
+    roleLabel: "Роль",
+    roleSelectLabel: "Роль для приглашённых",
+    roleHint:
+      "Администраторы управляют настройками организации и всеми проектами. Участники видят только выбранные проекты.",
+    chipAlreadyMember: "Уже в команде",
+    chipPendingInvitation: "Ожидает приглашения",
+    chipResend: "Отправить снова",
+    projectAccessLabel: "Доступ к проектам",
+    projectAccessDescription: "По умолчанию выбраны все проекты. Снимите галочку, чтобы ограничить доступ.",
+    projectAccessAdmin: "Администраторы всегда имеют доступ ко всем проектам.",
+    projectAccessEmpty: "В этой организации нет проектов.",
+    projectAccessProject: (name: string) => `Доступ к ${name}`,
     viewInvitations: "Открыть",
     error: "Не удалось отправить приглашения. Попробуйте ещё раз.",
   },

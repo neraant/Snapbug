@@ -323,6 +323,8 @@ JSON_SCHEMA_REGISTRY.add(sendInvitationsInputDtoSchema, {
     {
       organizationId: "2a8c69a1-1ab1-45a8-8497-eae1e506d9d1",
       emails: ["teammate@example.com"],
+      role: UserRole.USER,
+      projectIds: ["4a8c69a1-1ab1-45a8-8497-eae1e506d9d3"],
     },
   ],
 });
@@ -330,19 +332,31 @@ JSON_SCHEMA_REGISTRY.add(sendInvitationsInputDtoSchema, {
 JSON_SCHEMA_REGISTRY.add(findInvitationByTokenInputDtoSchema, {
   title: "Find invitation by token",
   description: "Public invitation details for sign-up",
-  examples: [{ token: "550e8400-e29b-41d4-a716-446655440000" }],
+  examples: [{ token: "a".repeat(64) }],
 });
 
 JSON_SCHEMA_REGISTRY.add(findInvitationByTokenOutputDtoSchema, {
   title: "Invitation preview",
-  description: "Invited email and organization name",
-  examples: [{ email: "teammate@example.com", organizationName: "Acme" }],
+  description: "Invitation status and sign-up context",
+  examples: [
+    {
+      status: "pending",
+      email: "teammate@example.com",
+      organizationId: "2a8c69a1-1ab1-45a8-8497-eae1e506d9d1",
+      organizationName: "Acme",
+      inviterName: "Morgan",
+      role: UserRole.USER,
+      expiresAt: "2099-01-01T00:00:00.000Z",
+      accountExists: false,
+      alreadyMember: false,
+    },
+  ],
 });
 
 JSON_SCHEMA_REGISTRY.add(acceptInvitationInputDtoSchema, {
   title: "Accept invitation",
   description: "Join an organization with a valid invitation token",
-  examples: [{ token: "550e8400-e29b-41d4-a716-446655440000" }],
+  examples: [{ token: "a".repeat(64) }],
 });
 
 JSON_SCHEMA_REGISTRY.add(findInvitationsOutputDtoSchema, {

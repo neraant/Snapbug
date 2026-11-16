@@ -63,7 +63,7 @@ export function ActivityLogDetailSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" showCloseButton aria-label={texts.detail.close}>
+      <SheetContent side="right" showCloseButton>
         <SheetHeader>
           <Row align="start" justify="between" gap="sm" width="full">
             <Column gap="sm" minWidth="0" className="min-w-0 pr-8">

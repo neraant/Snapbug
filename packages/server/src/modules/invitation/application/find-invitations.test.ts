@@ -20,6 +20,8 @@ function pendingInvitation(): Invitation {
     tokenHash: createHash("sha256").update("token").digest("hex"),
     tokenVersion: 1,
     invitedByUserId: userId,
+    role: UserRole.USER,
+    projectIds: [],
     expiresAt,
     acceptedAt: null,
     revokedAt: null,

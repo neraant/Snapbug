@@ -1,3 +1,5 @@
+import type { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
+
 export type InvitationPersistedType = {
   id: string;
   organizationId: string;
@@ -5,6 +7,8 @@ export type InvitationPersistedType = {
   tokenHash: string;
   tokenVersion: number;
   invitedByUserId: string;
+  role: UserRole;
+  projectIds: string[];
   expiresAt: Date;
   acceptedAt: Date | null;
   revokedAt: Date | null;
@@ -18,5 +22,7 @@ export type CreateInvitationType = {
   tokenHash: string;
   tokenVersion: number;
   invitedByUserId: string;
+  role: UserRole;
+  projectIds: string[];
   expiresAt: Date;
 };
