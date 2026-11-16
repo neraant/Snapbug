@@ -36,6 +36,8 @@ test("an existing user signs in from the invite page and joins the team", async 
   await inviteDialog.getByRole("textbox", { name: "Email addresses" }).press("Enter");
   await inviteDialog.getByRole("button", { name: "Send invitations" }).click();
   await expect(page.getByText(/invitation sent/i)).toBeVisible();
+  await page.getByRole("button", { name: "View" }).click();
+  await expect(page).toHaveURL(/tab=invitations/);
 
   await expect(page.getByText(inviteEmail)).toBeVisible();
   await page.getByRole("button", { name: `Invitation actions for ${inviteEmail}` }).click();
@@ -56,6 +58,6 @@ test("an existing user signs in from the invite page and joins the team", async 
   await passwordField.pressSequentially(password, { delay: 10 });
   await page.getByRole("button", { name: "Sign in to join" }).click();
 
+  await expect(page.getByText(/You joined Acme/)).toBeVisible({ timeout: 60_000 });
   await expect(page).toHaveURL(/\/overview/, { timeout: 60_000 });
-  await expect(page.getByText("You joined")).toBeVisible();
 });
