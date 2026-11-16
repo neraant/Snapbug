@@ -229,6 +229,7 @@ const baseURL = `http://localhost:${port}`;
 export default defineConfig({
   testDir: here,
   testMatch: "**/*.spec.ts",
+  globalSetup: path.join(here, "global-setup.ts"),
   outputDir: path.join(here, "test-results"),
   // One Next dev server and a shared database seed. Spec files must not run at once.
   fullyParallel: false,
