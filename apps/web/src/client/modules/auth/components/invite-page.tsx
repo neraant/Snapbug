@@ -120,14 +120,14 @@ function InvitePendingState({ token, invitation, sessionEmail, isSignedIn }: Inv
   return (
     <Column width="full" gap="lg">
       <InviteSummaryCard invitation={invitation} />
-      {invitation.alreadyMember ? (
+      {wrongAccount && sessionEmail ? (
+        <InviteWrongAccountActions sessionEmail={sessionEmail} invitedEmail={invitation.email} />
+      ) : invitation.alreadyMember ? (
         <InviteAlreadyMemberActions
           token={token}
           organizationId={invitation.organizationId}
           organizationName={invitation.organizationName}
         />
-      ) : wrongAccount && sessionEmail ? (
-        <InviteWrongAccountActions sessionEmail={sessionEmail} invitedEmail={invitation.email} />
       ) : isSignedIn && emailsMatch ? (
         <InviteJoinActions token={token} organizationName={invitation.organizationName} />
       ) : invitation.accountExists ? (

@@ -36,7 +36,16 @@ const en = {
       return parts.length > 0 ? parts.join(", ") : "No invitations sent.";
     },
     roleLabel: "Role",
-    roleHint: "New members are invited as Members with access to all projects.",
+    roleSelectLabel: "Role for invited people",
+    roleHint: "Admins manage organization settings and all projects. Members only see selected projects.",
+    chipAlreadyMember: "Already in your team",
+    chipPendingInvitation: "Pending invitation",
+    chipResend: "Resend",
+    projectAccessLabel: "Project access",
+    projectAccessDescription: "All projects are selected by default. Clear a project to limit access.",
+    projectAccessAdmin: "Admins always have access to all projects.",
+    projectAccessEmpty: "This organization has no projects.",
+    projectAccessProject: (name: string) => `Access to ${name}`,
     viewInvitations: "View",
     error: "Could not send invitations. Try again.",
   },
@@ -146,9 +155,7 @@ const ru = {
     successSummary: (summary: { sent: number; skipped: number; resent: number }) => {
       const parts: string[] = [];
       if (summary.sent > 0) {
-        parts.push(
-          `отправлено приглашений: ${summary.sent}`,
-        );
+        parts.push(`отправлено приглашений: ${summary.sent}`);
       }
       if (summary.resent > 0) {
         parts.push(`повторно: ${summary.resent}`);
@@ -159,7 +166,17 @@ const ru = {
       return parts.length > 0 ? parts.join(", ") : "Приглашения не отправлены.";
     },
     roleLabel: "Роль",
-    roleHint: "Новые участники получают роль Member и доступ ко всем проектам.",
+    roleSelectLabel: "Роль для приглашённых",
+    roleHint:
+      "Администраторы управляют настройками организации и всеми проектами. Участники видят только выбранные проекты.",
+    chipAlreadyMember: "Уже в команде",
+    chipPendingInvitation: "Ожидает приглашения",
+    chipResend: "Отправить снова",
+    projectAccessLabel: "Доступ к проектам",
+    projectAccessDescription: "По умолчанию выбраны все проекты. Снимите галочку, чтобы ограничить доступ.",
+    projectAccessAdmin: "Администраторы всегда имеют доступ ко всем проектам.",
+    projectAccessEmpty: "В этой организации нет проектов.",
+    projectAccessProject: (name: string) => `Доступ к ${name}`,
     viewInvitations: "Открыть",
     error: "Не удалось отправить приглашения. Попробуйте ещё раз.",
   },

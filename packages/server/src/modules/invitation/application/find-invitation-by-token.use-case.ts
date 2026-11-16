@@ -1,5 +1,5 @@
-import { InvitationMapper } from "@workspace/server/modules/invitation/entity/invitation.mapper";
 import type { Invitation } from "@workspace/server/modules/invitation/entity/invitation.entity";
+import { InvitationMapper } from "@workspace/server/modules/invitation/entity/invitation.mapper";
 import type { MembershipPort } from "@workspace/server/modules/invitation/port/membership.port";
 import type { OrganizationPort } from "@workspace/server/modules/invitation/port/organization.port";
 import type { UserPort } from "@workspace/server/modules/invitation/port/user.port";
@@ -58,7 +58,7 @@ export class FindInvitationByTokenUseCase {
     const inviteeUser = await this.userPort.findByEmail(invitation.email);
     const accountExists = inviteeUser !== null;
     let alreadyMember = false;
-    if (session) {
+    if (session && session.userEmail.toLowerCase() === invitation.email) {
       const membership = await this.membershipPort.findByUserAndOrganization({
         userId: session.userId,
         organizationId: invitation.organizationId,

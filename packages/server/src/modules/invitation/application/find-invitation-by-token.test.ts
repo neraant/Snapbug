@@ -126,6 +126,20 @@ describe("FindInvitationByTokenUseCase", () => {
     });
   });
 
+  it("does not flag alreadyMember when the signed-in email differs from the invitation", async () => {
+    const { useCase, membershipPort } = createUseCase({
+      membership: { id: "membership-id" },
+    });
+
+    const result = await useCase.execute({ token }, { userId: sessionUserId, userEmail: "bob@example.com" });
+
+    expect(result).toMatchObject({
+      status: "pending",
+      alreadyMember: false,
+    });
+    expect(membershipPort.findByUserAndOrganization).not.toHaveBeenCalled();
+  });
+
   it("returns expired details when the invitation is past its expiry", async () => {
     const { useCase } = createUseCase({
       invitation: pendingInvitation({ expiresAt: new Date("2020-01-01T00:00:00.000Z") }),
