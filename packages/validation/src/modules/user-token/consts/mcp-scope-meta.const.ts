@@ -1,12 +1,6 @@
 import type { McpToolScopeType } from "@workspace/validation/modules/user-token/consts/mcp-scope.const";
 
-export type McpScopeGroupIdType =
-  | "tickets"
-  | "comments"
-  | "projects"
-  | "members"
-  | "stats"
-  | "activity";
+export type McpScopeGroupIdType = "tickets" | "comments" | "projects" | "members" | "stats" | "activity";
 
 export type McpScopeGroupMetaType = {
   id: McpScopeGroupIdType;
@@ -27,6 +21,7 @@ export const MCP_SCOPE_GROUPS: McpScopeGroupMetaType[] = [
       "list_ticket_logs",
       "get_ticket_environment",
       "search",
+      "update_ticket",
     ],
   },
   {
@@ -58,3 +53,6 @@ export const MCP_SCOPE_GROUPS: McpScopeGroupMetaType[] = [
 ];
 
 export const MCP_TOOL_COUNT = MCP_SCOPE_GROUPS.reduce((count, group) => count + group.toolNames.length, 0);
+
+/** Tools that require an organization admin at call time, regardless of token scope. */
+export const MCP_ADMIN_ONLY_TOOL_NAMES = ["list_activity"] as const;
