@@ -2,12 +2,13 @@ import "@workspace/database/env/load-root-env";
 
 import { db } from "@workspace/database";
 import { bugReportTable, notificationTable, projectTable, userTable } from "@workspace/database/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 const ADMIN_EMAIL = "admin@example.com";
 const ORGANIZATION_ID = "2a8c69a1-1ab1-45a8-8497-eae1e506d9d1";
 const TICKET_ID = "6a8c69a1-1ab1-45a8-8497-eae1e506d901";
-const NOTIFICATION_ID = "7a8c69a1-1ab1-45a8-8497-eae1e506d9d1";
+const NOTIFICATION_ASSIGNED_ID = "7a8c69a1-1ab1-45a8-8497-eae1e506d9d1";
+const NOTIFICATION_COMMENT_ID = "7a8c69a1-1ab1-45a8-8497-eae1e506d9d2";
 
 async function main(): Promise<void> {
   const [admin] = await db.select().from(userTable).where(eq(userTable.email, ADMIN_EMAIL)).limit(1);
@@ -27,34 +28,58 @@ async function main(): Promise<void> {
   const now = new Date();
 
   await db
-    .insert(notificationTable)
-    .values({
-      id: NOTIFICATION_ID,
-      organizationId: ORGANIZATION_ID,
-      recipientUserId: admin.id,
-      type: "ticket.assigned",
-      actorUserId: alice?.id ?? null,
-      objectType: "bug-report",
-      objectId: TICKET_ID,
-      projectId: ticket.projectId,
+    .delete(notificationTable)
+    .where(and(eq(notificationTable.organizationId, ORGANIZATION_ID), eq(notificationTable.recipientUserId, admin.id)));
+
+  const notifications = [
+    {
+      id: NOTIFICATION_ASSIGNED_ID,
+      type: "ticket.assigned" as const,
       payload: {
         ticketShortId: ticket.shortId,
         ticketTitle: ticket.title,
         projectName: project?.name ?? "Store",
         actorName: alice?.name ?? "Alice",
       },
-      readAt: null,
-      archivedAt: null,
-      createdAt: now,
-    })
-    .onConflictDoUpdate({
-      target: notificationTable.id,
-      set: {
+    },
+    {
+      id: NOTIFICATION_COMMENT_ID,
+      type: "comment.created" as const,
+      payload: {
+        ticketShortId: ticket.shortId,
+        ticketTitle: ticket.title,
+        projectName: project?.name ?? "Store",
+        actorName: alice?.name ?? "Alice",
+      },
+    },
+  ];
+
+  for (const row of notifications) {
+    await db
+      .insert(notificationTable)
+      .values({
+        id: row.id,
+        organizationId: ORGANIZATION_ID,
+        recipientUserId: admin.id,
+        type: row.type,
+        actorUserId: alice?.id ?? null,
+        objectType: "bug-report",
+        objectId: TICKET_ID,
+        projectId: ticket.projectId,
+        payload: row.payload,
         readAt: null,
         archivedAt: null,
         createdAt: now,
-      },
-    });
+      })
+      .onConflictDoUpdate({
+        target: notificationTable.id,
+        set: {
+          readAt: null,
+          archivedAt: null,
+          createdAt: now,
+        },
+      });
+  }
 
   process.stdout.write(`${JSON.stringify({ ticketShortId: ticket.shortId })}\n`);
 }

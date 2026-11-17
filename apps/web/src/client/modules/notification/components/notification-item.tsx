@@ -10,7 +10,7 @@ import { cn } from "@workspace/design-system/lib/utils";
 import type { NotificationModelType } from "@workspace/validation/modules/notification/dto/notification.model";
 import { ArchiveIcon, BotIcon, CheckIcon, MailIcon } from "lucide-react";
 import Link from "next/link";
-import { type KeyboardEvent, type MouseEvent } from "react";
+import { type MouseEvent } from "react";
 
 import { NotificationMessage } from "@/client/modules/notification/components/notification-message";
 import { texts } from "@/client/modules/notification/consts/texts.const";
@@ -82,12 +82,6 @@ export function NotificationItem({
     handleOpen();
   };
 
-  const handleKeyDown = (event: KeyboardEvent) => {
-    if (event.key !== "Enter" || unavailable || !href) return;
-    event.preventDefault();
-    handleOpen();
-  };
-
   const rowClassName = cn(
     "group relative flex gap-3 rounded-lg px-3 py-2.5 transition-colors outline-none",
     isUnread ? "bg-primary/5 hover:bg-primary/10" : "hover:bg-muted/50",
@@ -107,7 +101,7 @@ export function NotificationItem({
             <AvatarFallback>{actorInitials(notification)}</AvatarFallback>
           )}
         </Avatar>
-        <span className="absolute -bottom-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full border border-background bg-muted text-muted-foreground">
+        <span className="absolute -right-0.5 -bottom-0.5 flex size-4 items-center justify-center rounded-full border border-background bg-muted text-muted-foreground">
           <TypeIcon className="size-2.5" aria-hidden />
         </span>
       </div>
@@ -134,10 +128,7 @@ export function NotificationItem({
         {selectable ? (
           <Checkbox
             checked={selected}
-            className={cn(
-              "opacity-0 transition-opacity group-hover:opacity-100",
-              selected ? "opacity-100" : null,
-            )}
+            className={cn("opacity-0 transition-opacity group-hover:opacity-100", selected ? "opacity-100" : null)}
             aria-label={texts.item.select(notification.id)}
             onCheckedChange={(checked) => onToggleSelect?.(notification.id, checked === true)}
           />
@@ -204,7 +195,6 @@ export function NotificationItem({
       className={rowClassName}
       aria-label={texts.item.open(summary)}
       onClick={handleRowClick}
-      onKeyDown={handleKeyDown}
       onFocus={onFocus}
     >
       {content}

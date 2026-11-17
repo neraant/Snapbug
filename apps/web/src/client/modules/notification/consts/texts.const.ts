@@ -3,6 +3,10 @@ import { localize } from "@/client/modules/shared/locale/interface-language";
 const en = {
   bell: {
     label: "Notifications",
+    labelUnread: (count: number) => {
+      const n = count > 9 ? "9+" : String(count);
+      return `Notifications, ${n} unread`;
+    },
     settings: "Notification settings",
     markAllRead: "Mark all as read",
     viewAll: "View all notifications",
@@ -59,11 +63,7 @@ const en = {
       ],
     }),
     ticketCreated: (ticketId: string, title: string) => ({
-      parts: [
-        { text: "New ticket " },
-        { text: ticketId, bold: true },
-        { text: ` ${title}` },
-      ],
+      parts: [{ text: "New ticket " }, { text: ticketId, bold: true }, { text: ` ${title}` }],
     }),
     ticketStatusChanged: (actor: string, ticketId: string, status: string) => ({
       parts: [
@@ -74,25 +74,13 @@ const en = {
       ],
     }),
     ticketStatusChangedGrouped: (count: number, ticketId: string) => ({
-      parts: [
-        { text: String(count), bold: true },
-        { text: ` status updates on ` },
-        { text: ticketId, bold: true },
-      ],
+      parts: [{ text: String(count), bold: true }, { text: ` status updates on ` }, { text: ticketId, bold: true }],
     }),
     commentCreated: (actor: string, ticketId: string) => ({
-      parts: [
-        { text: actor, bold: true },
-        { text: " commented on " },
-        { text: ticketId, bold: true },
-      ],
+      parts: [{ text: actor, bold: true }, { text: " commented on " }, { text: ticketId, bold: true }],
     }),
     commentCreatedGrouped: (count: number, ticketId: string) => ({
-      parts: [
-        { text: String(count), bold: true },
-        { text: " new comments on " },
-        { text: ticketId, bold: true },
-      ],
+      parts: [{ text: String(count), bold: true }, { text: " new comments on " }, { text: ticketId, bold: true }],
     }),
     membershipRoleChanged: (actor: string, member: string, role: string) => ({
       parts: [
@@ -103,50 +91,24 @@ const en = {
       ],
     }),
     projectAccessGranted: (actor: string, project: string) => ({
-      parts: [
-        { text: actor, bold: true },
-        { text: " granted you access to " },
-        { text: project, bold: true },
-      ],
+      parts: [{ text: actor, bold: true }, { text: " granted you access to " }, { text: project, bold: true }],
     }),
     projectAccessRevoked: (actor: string, project: string) => ({
-      parts: [
-        { text: actor, bold: true },
-        { text: " revoked your access to " },
-        { text: project, bold: true },
-      ],
+      parts: [{ text: actor, bold: true }, { text: " revoked your access to " }, { text: project, bold: true }],
     }),
     invitationAccepted: (member: string) => ({
-      parts: [
-        { text: member, bold: true },
-        { text: " joined your team" },
-      ],
+      parts: [{ text: member, bold: true }, { text: " joined your team" }],
     }),
     projectArchived: (project: string, restored: boolean) => ({
       parts: restored
-        ? [
-            { text: "Project " },
-            { text: project, bold: true },
-            { text: " was restored" },
-          ]
-        : [
-            { text: "Project " },
-            { text: project, bold: true },
-            { text: " was archived" },
-          ],
+        ? [{ text: "Project " }, { text: project, bold: true }, { text: " was restored" }]
+        : [{ text: "Project " }, { text: project, bold: true }, { text: " was archived" }],
     }),
     securityApiKeyRotated: (project: string) => ({
-      parts: [
-        { text: "API key rotated for " },
-        { text: project, bold: true },
-      ],
+      parts: [{ text: "API key rotated for " }, { text: project, bold: true }],
     }),
     securityTokenCreated: (token: string) => ({
-      parts: [
-        { text: "New access token " },
-        { text: token, bold: true },
-        { text: " was created" },
-      ],
+      parts: [{ text: "New access token " }, { text: token, bold: true }, { text: " was created" }],
     }),
     fallback: (type: string) => ({
       parts: [{ text: type }],
@@ -157,6 +119,10 @@ const en = {
 const ru = {
   bell: {
     label: "Уведомления",
+    labelUnread: (count: number) => {
+      const n = count > 9 ? "9+" : String(count);
+      return `Уведомления, ${n} непрочитанных`;
+    },
     settings: "Настройки уведомлений",
     markAllRead: "Отметить все как прочитанные",
     viewAll: "Все уведомления",
@@ -213,11 +179,7 @@ const ru = {
       ],
     }),
     ticketCreated: (ticketId: string, title: string) => ({
-      parts: [
-        { text: "Новый тикет " },
-        { text: ticketId, bold: true },
-        { text: ` ${title}` },
-      ],
+      parts: [{ text: "Новый тикет " }, { text: ticketId, bold: true }, { text: ` ${title}` }],
     }),
     ticketStatusChanged: (actor: string, ticketId: string, status: string) => ({
       parts: [
@@ -228,25 +190,13 @@ const ru = {
       ],
     }),
     ticketStatusChangedGrouped: (count: number, ticketId: string) => ({
-      parts: [
-        { text: String(count), bold: true },
-        { text: ` обновления статуса у ` },
-        { text: ticketId, bold: true },
-      ],
+      parts: [{ text: String(count), bold: true }, { text: ` обновления статуса у ` }, { text: ticketId, bold: true }],
     }),
     commentCreated: (actor: string, ticketId: string) => ({
-      parts: [
-        { text: actor, bold: true },
-        { text: " прокомментировал(а) " },
-        { text: ticketId, bold: true },
-      ],
+      parts: [{ text: actor, bold: true }, { text: " прокомментировал(а) " }, { text: ticketId, bold: true }],
     }),
     commentCreatedGrouped: (count: number, ticketId: string) => ({
-      parts: [
-        { text: String(count), bold: true },
-        { text: " новых комментария к " },
-        { text: ticketId, bold: true },
-      ],
+      parts: [{ text: String(count), bold: true }, { text: " новых комментария к " }, { text: ticketId, bold: true }],
     }),
     membershipRoleChanged: (actor: string, member: string, role: string) => ({
       parts: [
@@ -257,50 +207,24 @@ const ru = {
       ],
     }),
     projectAccessGranted: (actor: string, project: string) => ({
-      parts: [
-        { text: actor, bold: true },
-        { text: " дал(а) вам доступ к " },
-        { text: project, bold: true },
-      ],
+      parts: [{ text: actor, bold: true }, { text: " дал(а) вам доступ к " }, { text: project, bold: true }],
     }),
     projectAccessRevoked: (actor: string, project: string) => ({
-      parts: [
-        { text: actor, bold: true },
-        { text: " забрал(а) доступ к " },
-        { text: project, bold: true },
-      ],
+      parts: [{ text: actor, bold: true }, { text: " забрал(а) доступ к " }, { text: project, bold: true }],
     }),
     invitationAccepted: (member: string) => ({
-      parts: [
-        { text: member, bold: true },
-        { text: " присоединился(ась) к команде" },
-      ],
+      parts: [{ text: member, bold: true }, { text: " присоединился(ась) к команде" }],
     }),
     projectArchived: (project: string, restored: boolean) => ({
       parts: restored
-        ? [
-            { text: "Проект " },
-            { text: project, bold: true },
-            { text: " восстановлен" },
-          ]
-        : [
-            { text: "Проект " },
-            { text: project, bold: true },
-            { text: " архивирован" },
-          ],
+        ? [{ text: "Проект " }, { text: project, bold: true }, { text: " восстановлен" }]
+        : [{ text: "Проект " }, { text: project, bold: true }, { text: " архивирован" }],
     }),
     securityApiKeyRotated: (project: string) => ({
-      parts: [
-        { text: "Ключ API для " },
-        { text: project, bold: true },
-        { text: " обновлён" },
-      ],
+      parts: [{ text: "Ключ API для " }, { text: project, bold: true }, { text: " обновлён" }],
     }),
     securityTokenCreated: (token: string) => ({
-      parts: [
-        { text: "Создан токен доступа " },
-        { text: token, bold: true },
-      ],
+      parts: [{ text: "Создан токен доступа " }, { text: token, bold: true }],
     }),
     fallback: (type: string) => ({
       parts: [{ text: type }],

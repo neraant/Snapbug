@@ -10,6 +10,7 @@ import { useState } from "react";
 import { NotificationPopoverPanel } from "@/client/modules/notification/components/notification-popover-panel";
 import { texts } from "@/client/modules/notification/consts/texts.const";
 import { formatUnreadBadge } from "@/client/modules/notification/utils/format-unread-badge.util";
+import { notificationBellAriaLabel } from "@/client/modules/notification/utils/notification-bell-aria-label.util";
 import { useNotificationUnreadCount } from "@/client/modules/shared/queries/use-notification-unread-count";
 
 export function NotificationBell() {
@@ -17,6 +18,7 @@ export function NotificationBell() {
   const { data } = useNotificationUnreadCount();
   const unreadCount = data?.count ?? 0;
   const badgeLabel = formatUnreadBadge(unreadCount);
+  const ariaLabel = notificationBellAriaLabel(unreadCount);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -30,7 +32,7 @@ export function NotificationBell() {
                   variant="ghost"
                   size="icon"
                   className="relative size-9 shrink-0"
-                  aria-label={texts.bell.label}
+                  aria-label={ariaLabel}
                 />
               }
             />
@@ -40,7 +42,7 @@ export function NotificationBell() {
           {badgeLabel ? (
             <span
               className={cn(
-                "absolute -top-0.5 -right-0.5 flex min-w-4 items-center justify-center rounded-full bg-primary px-1 py-0 text-[10px] font-semibold leading-none text-primary-foreground",
+                "absolute -top-0.5 -right-0.5 flex min-w-4 items-center justify-center rounded-full bg-primary px-1 py-0 text-[10px] leading-none font-semibold text-primary-foreground",
               )}
               aria-hidden
             >
@@ -55,7 +57,7 @@ export function NotificationBell() {
         align="end"
         side="bottom"
         sideOffset={8}
-        className="w-[400px] max-h-[480px] gap-0 overflow-hidden p-0"
+        className="max-h-[480px] w-[400px] gap-0 overflow-hidden p-0"
       >
         <NotificationPopoverPanel onClose={() => setOpen(false)} />
       </PopoverContent>
