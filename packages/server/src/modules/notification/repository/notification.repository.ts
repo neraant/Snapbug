@@ -9,6 +9,7 @@ import { InternalServerError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import type { NotificationListFilter } from "@workspace/validation/modules/notification/consts/notification-list-filter.const";
 import type { NotificationType } from "@workspace/validation/modules/notification/consts/notification-type.const";
+import { randomUUID } from "crypto";
 import { and, desc, eq, gt, inArray, isNull, lt, or, sql } from "drizzle-orm";
 
 export type FindNotificationsPageInput = {
@@ -23,10 +24,34 @@ export type FindNotificationsPageInput = {
 const GROUPABLE_TYPES: NotificationType[] = ["comment.created", "ticket.status_changed"];
 
 export class NotificationRepository {
-  constructor(private readonly db: DbClient = defaultDb) {}
+  constructor(
+    private readonly db: DbClient = defaultDb,
+    private readonly inTransaction = false,
+  ) {}
 
   withTx(tx: DbClient): NotificationRepository {
-    return new NotificationRepository(tx);
+    return new NotificationRepository(tx, true);
+  }
+
+  async runIsolated(callback: () => Promise<void>): Promise<boolean> {
+    if (!this.inTransaction) {
+      try {
+        await callback();
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
+    const savepoint = `nsp_${randomUUID().replace(/-/g, "")}`;
+    await this.db.execute(sql.raw(`SAVEPOINT ${savepoint}`));
+    try {
+      await callback();
+      return true;
+    } catch {
+      await this.db.execute(sql.raw(`ROLLBACK TO SAVEPOINT ${savepoint}`));
+      return false;
+    }
   }
 
   async save(notification: Notification): Promise<void> {
@@ -130,7 +155,11 @@ export class NotificationRepository {
     return row?.count ?? 0;
   }
 
-  async findManyByIdsForRecipient(ids: string[], recipientUserId: string, organizationId: string): Promise<Notification[]> {
+  async findManyByIdsForRecipient(
+    ids: string[],
+    recipientUserId: string,
+    organizationId: string,
+  ): Promise<Notification[]> {
     if (ids.length === 0) return [];
 
     const rows = await this.db

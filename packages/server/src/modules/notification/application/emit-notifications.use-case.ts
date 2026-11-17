@@ -40,9 +40,7 @@ export class EmitNotificationsUseCase {
     assigneeUserId: string;
     payload: NotificationPayloadType;
   }): Promise<void> {
-    const recipients = await this.filterProjectAccess(input.organizationId, input.projectId, [
-      input.assigneeUserId,
-    ]);
+    const recipients = await this.filterProjectAccess(input.organizationId, input.projectId, [input.assigneeUserId]);
     await this.deliver("ticket.assigned", recipients, {
       organizationId: input.organizationId,
       actorUserId: input.actorUserId,
@@ -89,15 +87,15 @@ export class EmitNotificationsUseCase {
     payload: NotificationPayloadType;
   }): Promise<void> {
     const participantIds = await this.commentPort.findAuthorUserIdsByBugReportId(input.ticketId);
-    const candidateIds = [
-      ...(input.assigneeUserId ? [input.assigneeUserId] : []),
-      ...participantIds,
-    ];
+    const candidateIds = [...(input.assigneeUserId ? [input.assigneeUserId] : []), ...participantIds];
     const reporterUserId = await this.resolveReporterUserId(input.reporterEmail, candidateIds);
-    const withoutReporter = reporterUserId
-      ? candidateIds.filter((userId) => userId !== reporterUserId)
-      : candidateIds;
-    const recipients = await this.filterProjectAccess(input.organizationId, input.projectId, withoutReporter, input.actorUserId);
+    const withoutReporter = reporterUserId ? candidateIds.filter((userId) => userId !== reporterUserId) : candidateIds;
+    const recipients = await this.filterProjectAccess(
+      input.organizationId,
+      input.projectId,
+      withoutReporter,
+      input.actorUserId,
+    );
 
     await this.deliver("ticket.status_changed", recipients, {
       organizationId: input.organizationId,
@@ -118,10 +116,7 @@ export class EmitNotificationsUseCase {
     payload: NotificationPayloadType;
   }): Promise<void> {
     const participantIds = await this.commentPort.findAuthorUserIdsByBugReportId(input.ticketId);
-    const candidateIds = [
-      ...(input.assigneeUserId ? [input.assigneeUserId] : []),
-      ...participantIds,
-    ];
+    const candidateIds = [...(input.assigneeUserId ? [input.assigneeUserId] : []), ...participantIds];
     const recipients = await this.filterProjectAccess(
       input.organizationId,
       input.projectId,
@@ -221,7 +216,11 @@ export class EmitNotificationsUseCase {
     restored: boolean;
     payload: NotificationPayloadType;
   }): Promise<void> {
-    const recipients = await this.resolveMembersWithProjectAccess(input.organizationId, input.projectId, input.actorUserId);
+    const recipients = await this.resolveMembersWithProjectAccess(
+      input.organizationId,
+      input.projectId,
+      input.actorUserId,
+    );
     await this.deliver("project.archived", recipients, {
       organizationId: input.organizationId,
       actorUserId: input.actorUserId,
@@ -257,7 +256,7 @@ export class EmitNotificationsUseCase {
     ownerUserId: string;
     payload: NotificationPayloadType;
   }): Promise<void> {
-    const recipients = this.excludeActor([input.ownerUserId], input.actorUserId);
+    const recipients = this.unique([input.ownerUserId]);
     await this.deliver("security.token_created", recipients, {
       organizationId: input.organizationId,
       actorUserId: input.actorUserId,

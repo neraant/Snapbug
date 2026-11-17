@@ -27,7 +27,7 @@ export class NotificationService {
   }
 
   async deliverToRecipient(input: DeliverNotificationInput): Promise<void> {
-    try {
+    const delivered = await this.notificationRepository.runIsolated(async () => {
       if (GROUPABLE_TYPES.has(input.type)) {
         const since = new Date(Date.now() - GROUPING_WINDOW_MS);
         const existing = await this.notificationRepository.findGroupable({
@@ -64,8 +64,15 @@ export class NotificationService {
       });
 
       await this.notificationRepository.save(notification);
-    } catch {
-      // Notification failures must not block the primary action.
+    });
+
+    if (!delivered) {
+      console.error("[notification] delivery failed", {
+        type: input.type,
+        recipientUserId: input.recipientUserId,
+        objectType: input.objectType,
+        objectId: input.objectId,
+      });
     }
   }
 

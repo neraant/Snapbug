@@ -1,11 +1,10 @@
-import type { CommentRepository } from "@workspace/server/modules/comment/repository/comment.repository";
+import type { CommentAdapter } from "@workspace/server/modules/comment/adapter/comment.adapter";
 import type { NotificationCommentPort } from "@workspace/server/modules/notification/port/comment.port";
 
 export class NotificationCommentAdapter implements NotificationCommentPort {
-  constructor(private readonly commentRepository: CommentRepository) {}
+  constructor(private readonly commentAdapter: CommentAdapter) {}
 
   async findAuthorUserIdsByBugReportId(bugReportId: string): Promise<string[]> {
-    const comments = await this.commentRepository.findManyByBugReportId(bugReportId);
-    return [...new Set(comments.map((comment) => comment.authorUserId))];
+    return await this.commentAdapter.findAuthorUserIdsByBugReportId(bugReportId);
   }
 }

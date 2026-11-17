@@ -75,6 +75,81 @@ describe("ListNotificationsUseCase", () => {
     expect(result.items[0]?.accessible).toBe(false);
   });
 
+  it("returns a next cursor when more rows are available", async () => {
+    const first = NotificationFactory.create({
+      organizationId,
+      recipientUserId: userId,
+      type: "ticket.created",
+      actorUserId: null,
+      objectType: "bug-report",
+      objectId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01",
+      projectId,
+      payload: {},
+      createdAt: new Date("2026-01-02T12:00:00.000Z"),
+    });
+    const second = NotificationFactory.create({
+      organizationId,
+      recipientUserId: userId,
+      type: "ticket.created",
+      actorUserId: null,
+      objectType: "bug-report",
+      objectId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa02",
+      projectId,
+      payload: {},
+      createdAt: new Date("2026-01-01T12:00:00.000Z"),
+    });
+
+    const membershipPort: NotificationMembershipPort = {
+      findManyByOrganizationId: vi
+        .fn()
+        .mockResolvedValue([{ id: membershipId, userId, organizationId, role: UserRole.USER }]),
+      filterProjectIds: vi.fn().mockResolvedValue([projectId]),
+    };
+
+    const notificationRepository = {
+      findPage: vi.fn().mockResolvedValue([first, second]),
+    } as unknown as NotificationRepository;
+
+    const useCase = new ListNotificationsUseCase(membershipPort, notificationRepository);
+    const result = await useCase.execute(userId, organizationId, { limit: 1 });
+
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0]?.id).toBe(first.id);
+    expect(result.nextCursor).toBeTruthy();
+    expect(notificationRepository.findPage).toHaveBeenCalledWith(
+      expect.objectContaining({ limit: 1, recipientUserId: userId }),
+    );
+  });
+
+  it("passes cursor and filter options to the repository", async () => {
+    const membershipPort: NotificationMembershipPort = {
+      findManyByOrganizationId: vi
+        .fn()
+        .mockResolvedValue([{ id: membershipId, userId, organizationId, role: UserRole.USER }]),
+      filterProjectIds: vi.fn(),
+    };
+    const notificationRepository = {
+      findPage: vi.fn().mockResolvedValue([]),
+    } as unknown as NotificationRepository;
+    const useCase = new ListNotificationsUseCase(membershipPort, notificationRepository);
+
+    await useCase.execute(userId, organizationId, {
+      limit: 10,
+      cursor: "cursor-token",
+      filter: "unread",
+      types: ["comment.created"],
+    });
+
+    expect(notificationRepository.findPage).toHaveBeenCalledWith({
+      organizationId,
+      recipientUserId: userId,
+      limit: 10,
+      cursor: "cursor-token",
+      filter: "unread",
+      types: ["comment.created"],
+    });
+  });
+
   it("rejects a caller outside the organization", async () => {
     const membershipPort: NotificationMembershipPort = {
       findManyByOrganizationId: vi
