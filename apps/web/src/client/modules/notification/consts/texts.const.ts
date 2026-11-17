@@ -53,6 +53,71 @@ const en = {
     list: "Could not load notifications.",
     retry: "Retry",
   },
+  settings: {
+    saved: "Saved",
+    matrix: {
+      sectionTitle: "Notification types",
+      sectionDescription: "Choose how you are notified for each category. Changes save automatically.",
+      inApp: "In-app",
+      email: "Email",
+      lockedTooltip: "Always on for your security",
+    },
+    rows: {
+      assigned_to_me: {
+        title: "Assigned to me",
+        description: "When someone assigns a ticket to you",
+      },
+      new_tickets_in_my_projects: {
+        title: "New tickets in my projects",
+        description: "When a new report arrives in a project you can access",
+      },
+      status_changes_on_my_tickets: {
+        title: "Status changes on my tickets",
+        description: "When status changes on tickets you follow or are assigned to",
+      },
+      comments_on_followed_tickets: {
+        title: "Comments on tickets I follow",
+        description: "When someone comments on a ticket you participate in",
+      },
+      project_access_and_role_changes: {
+        title: "Project access and role changes",
+        description: "When your project access or role in the organization changes",
+      },
+      team_invitation_accepted: {
+        title: "Team: invitation accepted",
+        description: "When someone accepts an invitation and joins your team",
+      },
+      project_archived_or_restored: {
+        title: "Project archived or restored",
+        description: "When a project you can access is archived or restored",
+      },
+      security: {
+        title: "Security: API key rotated, new token created",
+        description: "When API keys are rotated or a new personal access token is created",
+      },
+    },
+    mute: {
+      sectionTitle: "Mute projects",
+      sectionDescription: "Mute notifications from selected projects. Applies to ticket-related types above.",
+      projectCheckbox: (name: string) => `Mute ${name}`,
+      empty: "No projects available",
+    },
+    digest: {
+      sectionTitle: "Email digest",
+      sectionDescription: "How often we send email when email notifications are enabled.",
+      label: "Send emails",
+      immediate: "Immediately",
+      hourly: "Hourly digest",
+      daily: "Daily digest (09:00 in my time zone)",
+    },
+    switch: {
+      inApp: (title: string) => `In-app: ${title}`,
+      email: (title: string) => `Email: ${title}`,
+    },
+    toast: {
+      error: "Could not save notification settings.",
+    },
+  },
   message: {
     ticketAssigned: (actor: string, ticketId: string, title: string) => ({
       parts: [
@@ -168,6 +233,71 @@ const ru = {
   error: {
     list: "Не удалось загрузить уведомления.",
     retry: "Повторить",
+  },
+  settings: {
+    saved: "Сохранено",
+    matrix: {
+      sectionTitle: "Типы уведомлений",
+      sectionDescription: "Выберите способ уведомления для каждой категории. Изменения сохраняются автоматически.",
+      inApp: "В приложении",
+      email: "Email",
+      lockedTooltip: "Всегда включено для вашей безопасности",
+    },
+    rows: {
+      assigned_to_me: {
+        title: "Назначено мне",
+        description: "Когда кто-то назначает вам тикет",
+      },
+      new_tickets_in_my_projects: {
+        title: "Новые тикеты в моих проектах",
+        description: "Когда в доступном вам проекте появляется новый отчёт",
+      },
+      status_changes_on_my_tickets: {
+        title: "Смена статуса моих тикетов",
+        description: "Когда меняется статус тикетов, за которыми вы следите или которые назначены вам",
+      },
+      comments_on_followed_tickets: {
+        title: "Комментарии к тикетам, за которыми я слежу",
+        description: "Когда кто-то комментирует тикет, в котором вы участвуете",
+      },
+      project_access_and_role_changes: {
+        title: "Доступ к проектам и смена роли",
+        description: "Когда меняется ваш доступ к проекту или роль в организации",
+      },
+      team_invitation_accepted: {
+        title: "Команда: приглашение принято",
+        description: "Когда кто-то принимает приглашение и присоединяется к команде",
+      },
+      project_archived_or_restored: {
+        title: "Проект архивирован или восстановлен",
+        description: "Когда проект, к которому у вас есть доступ, архивируют или восстанавливают",
+      },
+      security: {
+        title: "Безопасность: смена API-ключа, новый токен",
+        description: "Когда меняют API-ключи или создают новый личный токен доступа",
+      },
+    },
+    mute: {
+      sectionTitle: "Заглушить проекты",
+      sectionDescription: "Заглушить уведомления от выбранных проектов. Относится к типам, связанным с тикетами, выше.",
+      projectCheckbox: (name: string) => `Заглушить ${name}`,
+      empty: "Нет доступных проектов",
+    },
+    digest: {
+      sectionTitle: "Сводка по email",
+      sectionDescription: "Как часто отправлять письма, когда включены email-уведомления.",
+      label: "Отправлять письма",
+      immediate: "Сразу",
+      hourly: "Раз в час",
+      daily: "Раз в день (09:00 в вашем часовом поясе)",
+    },
+    switch: {
+      inApp: (title: string) => `В приложении: ${title}`,
+      email: (title: string) => `Email: ${title}`,
+    },
+    toast: {
+      error: "Не удалось сохранить настройки уведомлений.",
+    },
   },
   message: {
     ticketAssigned: (actor: string, ticketId: string, title: string) => ({

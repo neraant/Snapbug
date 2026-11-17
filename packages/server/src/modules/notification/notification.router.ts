@@ -31,4 +31,11 @@ export const notificationRouter = os.router({
     async ({ context, input }) =>
       await container.notification.archive.execute(input, context.user.id, context.organizationId),
   ),
+  findPreference: authed.findPreference.handler(
+    async ({ context }) => await container.notification.findPreference.execute(context.user.id, context.organizationId),
+  ),
+  updatePreference: authed.updatePreference.handler(
+    async ({ context, input }) =>
+      await container.notification.updatePreference.execute(context.user.id, context.organizationId, input),
+  ),
 });

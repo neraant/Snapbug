@@ -3,7 +3,10 @@ import { bugReportTable } from "@workspace/database/schema/bug-report.const";
 import { commentTable } from "@workspace/database/schema/comment.const";
 import { invitationTable } from "@workspace/database/schema/invitation.const";
 import { membershipTable } from "@workspace/database/schema/membership.const";
+import { notificationEmailPendingTable } from "@workspace/database/schema/notification-email-pending.const";
 import { notificationTable } from "@workspace/database/schema/notification.const";
+import { userNotificationPreferenceTable } from "@workspace/database/schema/user-notification-preference.const";
+import { userOrganizationNotificationPreferenceTable } from "@workspace/database/schema/user-organization-notification-preference.const";
 import { organizationTable } from "@workspace/database/schema/organization.const";
 import { projectTable } from "@workspace/database/schema/project.const";
 import { projectAccessTable } from "@workspace/database/schema/project-access.const";
@@ -19,8 +22,11 @@ const tables = {
   commentTable,
   invitationTable,
   membershipTable,
+  notificationEmailPendingTable,
   notificationTable,
   organizationTable,
+  userNotificationPreferenceTable,
+  userOrganizationNotificationPreferenceTable,
   projectAccessTable,
   projectTable,
   userTable,
@@ -50,6 +56,18 @@ export const relations = defineRelations(tables, (relation) => ({
       from: relation.userTable.id,
       to: relation.notificationTable.recipientUserId,
     }),
+    notificationPreference: relation.one.userNotificationPreferenceTable({
+      from: relation.userTable.id,
+      to: relation.userNotificationPreferenceTable.userId,
+    }),
+    notificationEmailPending: relation.many.notificationEmailPendingTable({
+      from: relation.userTable.id,
+      to: relation.notificationEmailPendingTable.userId,
+    }),
+    organizationNotificationPreferences: relation.many.userOrganizationNotificationPreferenceTable({
+      from: relation.userTable.id,
+      to: relation.userOrganizationNotificationPreferenceTable.userId,
+    }),
     sentInvitations: relation.many.invitationTable({
       from: relation.userTable.id,
       to: relation.invitationTable.invitedByUserId,
@@ -71,6 +89,45 @@ export const relations = defineRelations(tables, (relation) => ({
     memberships: relation.many.membershipTable(),
     projects: relation.many.projectTable(),
     invitations: relation.many.invitationTable(),
+    notificationPreferences: relation.many.userOrganizationNotificationPreferenceTable({
+      from: relation.organizationTable.id,
+      to: relation.userOrganizationNotificationPreferenceTable.organizationId,
+    }),
+  },
+  userNotificationPreferenceTable: {
+    user: relation.one.userTable({
+      from: relation.userNotificationPreferenceTable.userId,
+      to: relation.userTable.id,
+      optional: false,
+    }),
+  },
+  userOrganizationNotificationPreferenceTable: {
+    user: relation.one.userTable({
+      from: relation.userOrganizationNotificationPreferenceTable.userId,
+      to: relation.userTable.id,
+      optional: false,
+    }),
+    organization: relation.one.organizationTable({
+      from: relation.userOrganizationNotificationPreferenceTable.organizationId,
+      to: relation.organizationTable.id,
+      optional: false,
+    }),
+  },
+  notificationEmailPendingTable: {
+    user: relation.one.userTable({
+      from: relation.notificationEmailPendingTable.userId,
+      to: relation.userTable.id,
+      optional: false,
+    }),
+    organization: relation.one.organizationTable({
+      from: relation.notificationEmailPendingTable.organizationId,
+      to: relation.organizationTable.id,
+      optional: false,
+    }),
+    project: relation.one.projectTable({
+      from: relation.notificationEmailPendingTable.projectId,
+      to: relation.projectTable.id,
+    }),
   },
   resetPasswordTokenTable: {
     user: relation.one.userTable({

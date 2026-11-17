@@ -13,6 +13,11 @@ import {
 } from "@workspace/validation/modules/notification/dto/mark-all-read.schema";
 import { markReadInputDtoSchema, markReadOutputDtoSchema } from "@workspace/validation/modules/notification/dto/mark-read.schema";
 import { markUnreadInputDtoSchema, markUnreadOutputDtoSchema } from "@workspace/validation/modules/notification/dto/mark-unread.schema";
+import { findNotificationPreferenceOutputDtoSchema } from "@workspace/validation/modules/notification/dto/find-notification-preference.schema";
+import {
+  updateNotificationPreferenceInputDtoSchema,
+  updateNotificationPreferenceOutputDtoSchema,
+} from "@workspace/validation/modules/notification/dto/update-notification-preference.schema";
 import { unreadCountOutputDtoSchema } from "@workspace/validation/modules/notification/dto/unread-count.schema";
 
 export const notificationContract = {
@@ -72,6 +77,23 @@ export const notificationContract = {
       path: "/notifications/archive",
       tags: ["notification"],
       summary: "Archive notifications",
+      spec: sessionAuthSpec,
+    }),
+  findPreference: oc.output(findNotificationPreferenceOutputDtoSchema).route({
+    method: "GET",
+    path: "/notifications/preferences",
+    tags: ["notification"],
+    summary: "Find notification delivery preferences",
+    spec: sessionAuthSpec,
+  }),
+  updatePreference: oc
+    .input(updateNotificationPreferenceInputDtoSchema)
+    .output(updateNotificationPreferenceOutputDtoSchema)
+    .route({
+      method: "PATCH",
+      path: "/notifications/preferences",
+      tags: ["notification"],
+      summary: "Update notification delivery preferences",
       spec: sessionAuthSpec,
     }),
 };

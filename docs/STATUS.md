@@ -65,11 +65,11 @@ Do not start tasks marked TBD: an implementer agent must not take them.
 - P-44 Settings gain personal preferences: profile (name, password, time zone) and an Appearance tab (theme, accent, density, date format, motion, landing page, sidebar) with a live preview, saved on change. Brief with the expected UI/UX: `docs/tasks/P-44.md`. Read it first; shared rules are in `docs/tasks/README.md`.
 - P-45 Notifications part 1: an in-app notification model with defined types and recipient rules, written in the same transaction as the event, with list, unread count, mark read, and archive endpoints. Brief with the expected UI/UX: `docs/tasks/P-45.md`. Read it first; shared rules are in `docs/tasks/README.md`.
 - P-46 Notifications part 2: a bell with an unread badge in the header, a popover with Unread and All tabs, infinite scroll, per-item read state, and a full inbox page. Brief with the expected UI/UX: `docs/tasks/P-46.md`. Read it first; shared rules are in `docs/tasks/README.md`.
+- P-47 Notifications part 3: a Settings tab with per-type in-app and email switches, muted projects, an email digest option, and email delivery; security notifications are always on. Brief with the expected UI/UX: `docs/tasks/P-47.md`. Read it first; shared rules are in `docs/tasks/README.md`.
 
 ## Open
 
 - P-24 error responses that return the real status, including 400, 401, 403, 404, 500, and any other real code. The error screen always shows 500.
-- P-47 Notifications part 3: a Settings tab with per-type in-app and email switches, muted projects, an email digest option, and email delivery; security notifications are always on. Brief with the expected UI/UX: `docs/tasks/P-47.md`. Read it first; shared rules are in `docs/tasks/README.md`.
 - P-48 Refactor: unit tests stay only for application use-cases; tests of utils, services, adapters, wiring, and anything in `apps/web` and `packages/design-system` are removed, with business rules moved into the owning use-case test. Brief: `docs/tasks/P-48.md`. Read it first; shared rules are in `docs/tasks/README.md`.
 
 ## TBD
