@@ -35,6 +35,7 @@ export const ERROR_CODES = {
   PROJECT_KEY_NOT_ACCEPTED: "project-key-not-accepted",
   COMMENT_NOT_FOUND: "comment-not-found",
   CANNOT_MANAGE_COMMENT: "cannot-manage-comment",
+  INVALID_CURRENT_PASSWORD: "invalid-current-password",
 } as const;
 
 export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES];

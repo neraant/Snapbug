@@ -1,23 +1,41 @@
 import type { ActivityLogType } from "@workspace/validation/modules/audit/dto/find-activity-logs.schema";
-import { format, formatDistance, isToday, isYesterday } from "date-fns";
+import type { UserPreferenceModelType } from "@workspace/validation/modules/preference/dto/user-preference.model";
+import { userPreferenceDefaults } from "@workspace/validation/modules/preference/dto/user-preference.model";
+import { format, isToday, isYesterday } from "date-fns";
 
 import { texts } from "@/client/modules/activity-log/consts/texts.const";
+import { formatUserDate } from "@/client/modules/preference/utils/format-user-date.util";
 
-const activityExactFormat = new Intl.DateTimeFormat(undefined, {
-  year: "numeric",
-  month: "short",
-  day: "numeric",
-  hour: "numeric",
-  minute: "2-digit",
-  timeZoneName: "short",
-});
+type ActivityDatePreference = Pick<UserPreferenceModelType, "dateFormat" | "timeZone" | "use24HourTime">;
 
-export function formatActivityRelativeWhen(occurredAt: string): string {
-  return formatDistance(new Date(occurredAt), new Date(), { addSuffix: true });
+const defaultDatePreference: ActivityDatePreference = {
+  dateFormat: userPreferenceDefaults.dateFormat,
+  timeZone: userPreferenceDefaults.timeZone,
+  use24HourTime: userPreferenceDefaults.use24HourTime,
+};
+
+export function formatActivityWhen(
+  occurredAt: string,
+  preference: ActivityDatePreference = defaultDatePreference,
+): string {
+  return formatUserDate({ createdAt: occurredAt, preference });
 }
 
-export function formatActivityExactWhen(occurredAt: string): string {
-  return activityExactFormat.format(new Date(occurredAt));
+export function formatActivityRelativeWhen(occurredAt: string): string {
+  return formatUserDate({
+    createdAt: occurredAt,
+    preference: { ...defaultDatePreference, dateFormat: "relative" },
+  });
+}
+
+export function formatActivityExactWhen(
+  occurredAt: string,
+  preference: ActivityDatePreference = defaultDatePreference,
+): string {
+  return formatUserDate({
+    createdAt: occurredAt,
+    preference: { ...preference, dateFormat: "absolute" },
+  });
 }
 
 export function formatActivityDayLabel(occurredAt: string): string {

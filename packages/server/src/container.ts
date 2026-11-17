@@ -51,7 +51,9 @@ import { UserAdapter } from "@workspace/server/modules/identity/adapter/user.ada
 import { CreateUserUseCase } from "@workspace/server/modules/identity/application/create-user.use-case";
 import { FindUserUseCase } from "@workspace/server/modules/identity/application/find-user.use-case";
 import { FindUserByEmailUseCase } from "@workspace/server/modules/identity/application/find-user-by-email.use-case";
+import { ChangePasswordUseCase } from "@workspace/server/modules/identity/application/change-password.use-case";
 import { UpdateInterfaceLanguageUseCase } from "@workspace/server/modules/identity/application/update-interface-language.use-case";
+import { UpdateProfileUseCase } from "@workspace/server/modules/identity/application/update-profile.use-case";
 import { UserRepository } from "@workspace/server/modules/identity/repository/user.repository";
 import { AcceptInvitationUseCase } from "@workspace/server/modules/invitation/application/accept-invitation.use-case";
 import { CopyInvitationLinkUseCase } from "@workspace/server/modules/invitation/application/copy-invitation-link.use-case";
@@ -121,6 +123,9 @@ import { UpdateProjectUseCase } from "@workspace/server/modules/project/applicat
 import { UpdateProjectWidgetSettingUseCase } from "@workspace/server/modules/project/application/update-project-widget-setting.use-case";
 import { ProjectRepository } from "@workspace/server/modules/project/repository/project.repository";
 import { ProjectService } from "@workspace/server/modules/project/service/project.service";
+import { FindUserPreferenceUseCase } from "@workspace/server/modules/preference/application/find-user-preference.use-case";
+import { UpdateUserPreferenceUseCase } from "@workspace/server/modules/preference/application/update-user-preference.use-case";
+import { UserPreferenceRepository } from "@workspace/server/modules/preference/repository/user-preference.repository";
 import { SearchUseCase } from "@workspace/server/modules/search/application/search.use-case";
 import { CreateUserTokenUseCase } from "@workspace/server/modules/user-token/application/create-user-token.use-case";
 import { FindUserByTokenUseCase } from "@workspace/server/modules/user-token/application/find-user-by-token.use-case";
@@ -233,6 +238,8 @@ const createUser = new CreateUserUseCase(userRepository);
 const findUserByEmail = new FindUserByEmailUseCase(userRepository);
 const findCurrentUser = new FindUserUseCase(userRepository);
 const updateInterfaceLanguage = new UpdateInterfaceLanguageUseCase(userRepository);
+const updateProfile = new UpdateProfileUseCase(userRepository);
+const changePassword = new ChangePasswordUseCase(userRepository, authService);
 
 const projectBugReportAdapter = new ProjectBugReportAdapter(bugReportRepository, bugReportFileStorage);
 const projectApiKeyAdapter = new ProjectApiKeyAdapter(apiKeyRepository);
@@ -446,6 +453,9 @@ const getOverviewStats = new GetOverviewStatsUseCase(membershipAdapter, projectA
 const listProjects = new ListProjectsUseCase(membershipAdapter, projectRepository);
 const getProject = new GetProjectUseCase(membershipAdapter, projectRepository);
 const listMembers = new ListMembersUseCase(membershipRepository, projectAccessRepository, userAdapter);
+const userPreferenceRepository = new UserPreferenceRepository();
+const findUserPreference = new FindUserPreferenceUseCase(userPreferenceRepository);
+const updateUserPreference = new UpdateUserPreferenceUseCase(userPreferenceRepository);
 const userTokenRepository = new UserTokenRepository();
 const userTokenService = new UserTokenService();
 const createUserToken = new CreateUserTokenUseCase(
@@ -515,7 +525,18 @@ export const container = {
     replaceMembershipProjectAccess,
     listMembers,
   },
-  identity: { createUser, findUserByEmail, findCurrentUser, updateInterfaceLanguage },
+  identity: {
+    createUser,
+    findUserByEmail,
+    findCurrentUser,
+    updateInterfaceLanguage,
+    updateProfile,
+    changePassword,
+  },
+  preference: {
+    findUserPreference,
+    updateUserPreference,
+  },
   project: {
     createProject,
     findProjects,

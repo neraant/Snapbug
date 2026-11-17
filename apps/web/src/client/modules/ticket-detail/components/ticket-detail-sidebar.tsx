@@ -6,11 +6,12 @@ import { StatusIndicator } from "@workspace/design-system/components/ui/status-i
 
 import { useFindBugReport } from "@/client/modules/shared/queries/use-find-bug-report";
 import { useFindProjects } from "@/client/modules/shared/queries/use-find-projects";
+import { useFindUserPreference } from "@/client/modules/shared/queries/use-find-user-preference";
 import { TicketDetailCopyableUrlValue } from "@/client/modules/ticket-detail/components/ticket-detail-copyable-url-value";
 import { TicketDetailPropertyRow } from "@/client/modules/ticket-detail/components/ticket-detail-property-row";
 import { bugReportSeverityBadgeVariant } from "@/client/modules/ticket-detail/consts/bug-report-severity-badge-variant.const";
 import { texts } from "@/client/modules/ticket-detail/consts/texts.const";
-import { formatTicketDetailExactTimestamp } from "@/client/modules/ticket-detail/utils/format-ticket-detail-timestamp.util";
+import { formatTicketDetailExactWhen } from "@/client/modules/ticket-detail/utils/format-ticket-detail-timestamp.util";
 
 type TicketDetailSidebarProps = {
   shortId: string;
@@ -19,6 +20,12 @@ type TicketDetailSidebarProps = {
 export function TicketDetailSidebar({ shortId }: TicketDetailSidebarProps) {
   const { data: ticket } = useFindBugReport({ shortId });
   const { data: projects } = useFindProjects();
+  const { data: preference } = useFindUserPreference();
+  const datePreference = {
+    dateFormat: preference.dateFormat,
+    timeZone: preference.timeZone,
+    use24HourTime: preference.use24HourTime,
+  };
 
   const projectName = projects.find((project) => project.id === ticket.projectId)?.name ?? "—";
   const assigneeLabel = ticket.assignee?.name?.trim() || texts.sidebar.unassigned;
@@ -57,11 +64,11 @@ export function TicketDetailSidebar({ shortId }: TicketDetailSidebarProps) {
             <TicketDetailPropertyRow label={texts.sidebar.reporter} value={ticket.reporterEmail ?? "—"} />
             <TicketDetailPropertyRow
               label={texts.sidebar.created}
-              value={formatTicketDetailExactTimestamp(ticket.createdAt)}
+              value={formatTicketDetailExactWhen(ticket.createdAt, datePreference)}
             />
             <TicketDetailPropertyRow
               label={texts.sidebar.updated}
-              value={formatTicketDetailExactTimestamp(ticket.updatedAt)}
+              value={formatTicketDetailExactWhen(ticket.updatedAt, datePreference)}
             />
           </Column>
         </Panel.Content>

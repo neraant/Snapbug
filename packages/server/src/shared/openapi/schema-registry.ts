@@ -47,7 +47,11 @@ import {
   createUserWithPasswordHashInputDtoSchema,
 } from "@workspace/validation/modules/user/dto/create-user.schema";
 import { findUserByEmailInputDtoSchema } from "@workspace/validation/modules/user/dto/find-user-by-email.schema";
+import { userPreferenceModelSchema } from "@workspace/validation/modules/preference/dto/user-preference.model";
+import { updateUserPreferenceInputDtoSchema } from "@workspace/validation/modules/preference/dto/update-user-preference.schema";
+import { changePasswordInputDtoSchema } from "@workspace/validation/modules/user/dto/change-password.schema";
 import { updateInterfaceLanguageInputDtoSchema } from "@workspace/validation/modules/user/dto/update-interface-language.schema";
+import { updateProfileInputDtoSchema } from "@workspace/validation/modules/user/dto/update-profile.schema";
 import { userModelSchema } from "@workspace/validation/modules/user/dto/user.model";
 
 JSON_SCHEMA_REGISTRY.add(userModelSchema, {
@@ -180,6 +184,44 @@ JSON_SCHEMA_REGISTRY.add(updateInterfaceLanguageInputDtoSchema, {
   title: "Update interface language",
   description: "Store the signed-in user's interface language",
   examples: [{ interfaceLanguage: "ru" }],
+});
+
+JSON_SCHEMA_REGISTRY.add(updateProfileInputDtoSchema, {
+  title: "Update profile",
+  description: "Update the signed-in user's display name",
+  examples: [{ name: "Alex Chen" }],
+});
+
+JSON_SCHEMA_REGISTRY.add(changePasswordInputDtoSchema, {
+  title: "Change password",
+  description: "Change the signed-in user's password",
+  examples: [{ currentPassword: "password1", newPassword: "password2", confirmPassword: "password2" }],
+});
+
+JSON_SCHEMA_REGISTRY.add(userPreferenceModelSchema, {
+  title: "User preference",
+  description: "Personal appearance and display preferences",
+  examples: [
+    {
+      timeZone: "UTC",
+      theme: "system",
+      accent: "#F97316",
+      density: "comfortable",
+      dateFormat: "relative",
+      use24HourTime: true,
+      reduceMotion: null,
+      defaultLandingPage: "overview",
+      sidebarCollapsed: false,
+      createdAt: "2026-10-03T09:00:00.000Z",
+      updatedAt: "2026-10-03T09:00:00.000Z",
+    },
+  ],
+});
+
+JSON_SCHEMA_REGISTRY.add(updateUserPreferenceInputDtoSchema, {
+  title: "Update user preference",
+  description: "Patch personal appearance and display preferences",
+  examples: [{ theme: "dark", accent: "#3B82F6" }],
 });
 
 JSON_SCHEMA_REGISTRY.add(membershipModelSchema, {

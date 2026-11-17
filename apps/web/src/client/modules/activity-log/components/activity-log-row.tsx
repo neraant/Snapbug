@@ -17,8 +17,9 @@ import {
   formatActivityEventSentence,
   formatActivityExactWhen,
   formatActivityObjectBadge,
-  formatActivityRelativeWhen,
+  formatActivityWhen,
 } from "@/client/modules/activity-log/utils/format-activity-log.util";
+import { useFindUserPreference } from "@/client/modules/shared/queries/use-find-user-preference";
 
 type ActivityLogRowProps = {
   entry: ActivityLogType;
@@ -27,9 +28,15 @@ type ActivityLogRowProps = {
 };
 
 export function ActivityLogRow({ entry, selected, onOpen }: ActivityLogRowProps) {
+  const { data: preference } = useFindUserPreference();
   const sentence = formatActivityEventSentence(entry);
   const actorName = formatActivityActorName(entry);
   const isSystem = !entry.actorId;
+  const datePreference = {
+    dateFormat: preference.dateFormat,
+    timeZone: preference.timeZone,
+    use24HourTime: preference.use24HourTime,
+  };
 
   const onKeyDown = (event: KeyboardEvent<HTMLTableRowElement>) => {
     if (event.key === "Enter" || event.key === " ") {
@@ -52,11 +59,11 @@ export function ActivityLogRow({ entry, selected, onOpen }: ActivityLogRowProps)
           <TooltipTrigger
             render={
               <Typography variant="text-sm" color="muted" className="truncate">
-                {formatActivityRelativeWhen(entry.occurredAt)}
+                {formatActivityWhen(entry.occurredAt, datePreference)}
               </Typography>
             }
           />
-          <TooltipContent>{formatActivityExactWhen(entry.occurredAt)}</TooltipContent>
+          <TooltipContent>{formatActivityExactWhen(entry.occurredAt, datePreference)}</TooltipContent>
         </Tooltip>
       </Table.Cell>
       <Table.Cell className="w-44">

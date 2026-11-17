@@ -15,13 +15,14 @@ import type { BugReportSeverity } from "@workspace/validation/modules/bug-report
 import { bugReportSeverities } from "@workspace/validation/modules/bug-report/consts/bug-report-severity.const";
 import type { BugReportStatus } from "@workspace/validation/modules/bug-report/consts/bug-report-status.const";
 import { bugReportStatuses } from "@workspace/validation/modules/bug-report/consts/bug-report-status.const";
-import { formatDistance } from "date-fns";
 
+import { useFormatUserDate } from "@/client/modules/preference/hooks/use-format-user-date";
 import { useFindProjects } from "@/client/modules/shared/queries/use-find-projects";
+import { useFindUserPreference } from "@/client/modules/shared/queries/use-find-user-preference";
 import { bugReportSeverityBadgeVariant } from "@/client/modules/ticket-detail/consts/bug-report-severity-badge-variant.const";
 import { texts } from "@/client/modules/ticket-detail/consts/texts.const";
 import { useTicketDetailHeader } from "@/client/modules/ticket-detail/hooks/use-ticket-detail-header";
-import { formatTicketDetailExactTimestamp } from "@/client/modules/ticket-detail/utils/format-ticket-detail-timestamp.util";
+import { formatTicketDetailExactWhen } from "@/client/modules/ticket-detail/utils/format-ticket-detail-timestamp.util";
 
 type TicketDetailHeaderProps = {
   shortId: string;
@@ -30,9 +31,15 @@ type TicketDetailHeaderProps = {
 export function TicketDetailHeader({ shortId }: TicketDetailHeaderProps) {
   const { ticket, isPending, updateStatus, updateSeverity } = useTicketDetailHeader({ shortId });
   const { data: projects } = useFindProjects();
+  const { data: preference } = useFindUserPreference();
+  const formatDate = useFormatUserDate();
   const projectName = projects.find((project) => project.id === ticket.projectId)?.name ?? "—";
-  const createdRelative = formatDistance(new Date(ticket.createdAt), new Date(), { addSuffix: true });
-  const createdExact = formatTicketDetailExactTimestamp(ticket.createdAt);
+  const createdLabel = formatDate(ticket.createdAt);
+  const createdExact = formatTicketDetailExactWhen(ticket.createdAt, {
+    dateFormat: preference.dateFormat,
+    timeZone: preference.timeZone,
+    use24HourTime: preference.use24HourTime,
+  });
 
   return (
     <Column gap="md" width="full" minWidth="0">
@@ -73,7 +80,7 @@ export function TicketDetailHeader({ shortId }: TicketDetailHeaderProps) {
               <TooltipTrigger
                 render={
                   <Typography variant="text-xs" color="muted" className="cursor-default">
-                    {createdRelative}
+                    {createdLabel}
                   </Typography>
                 }
               />

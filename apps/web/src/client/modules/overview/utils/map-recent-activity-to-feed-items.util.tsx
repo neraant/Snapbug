@@ -16,7 +16,14 @@ const severityBadgeVariant: Record<BugReportSeverity, BadgeVariant> = {
   [BugReportSeverity.LOW]: "severityLow",
 };
 
-export function mapRecentActivityToFeedItems(items: FindRecentOutputDtoType): FeedListItem[] {
+type MapRecentActivityToFeedItemsOptions = {
+  formatDate?: (createdAt: string) => string;
+};
+
+export function mapRecentActivityToFeedItems(
+  items: FindRecentOutputDtoType,
+  { formatDate = formatActivityDate }: MapRecentActivityToFeedItemsOptions = {},
+): FeedListItem[] {
   return items.map((item) => {
     const details = [item.projectName, item.browser].filter((part): part is string => Boolean(part));
 
@@ -42,7 +49,7 @@ export function mapRecentActivityToFeedItems(items: FindRecentOutputDtoType): Fe
       ),
       trailing: (
         <Typography variant="text-xs" color="muted">
-          {formatActivityDate(item.createdAt)}
+          {formatDate(item.createdAt)}
         </Typography>
       ),
       accessory: (
