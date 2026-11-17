@@ -91,7 +91,13 @@ import { NotificationProjectAdapter } from "@workspace/server/modules/notificati
 import { NotificationUserAdapter } from "@workspace/server/modules/notification/adapter/notification-user.adapter";
 import { ArchiveNotificationUseCase } from "@workspace/server/modules/notification/application/archive-notification.use-case";
 import { EmitNotificationsUseCase } from "@workspace/server/modules/notification/application/emit-notifications.use-case";
+import { FindNotificationPreferenceUseCase } from "@workspace/server/modules/notification/application/find-notification-preference.use-case";
 import { ListNotificationsUseCase } from "@workspace/server/modules/notification/application/list-notifications.use-case";
+import { UpdateNotificationPreferenceUseCase } from "@workspace/server/modules/notification/application/update-notification-preference.use-case";
+import { NotificationEmailDispatchService } from "@workspace/server/modules/notification/service/notification-email-dispatch.service";
+import { NotificationPreferenceService } from "@workspace/server/modules/notification/service/notification-preference.service";
+import { NotificationEmailPendingRepository } from "@workspace/server/modules/notification/repository/notification-email-pending.repository";
+import { UserNotificationPreferenceRepository } from "@workspace/server/modules/notification/repository/user-notification-preference.repository";
 import { MarkAllReadUseCase } from "@workspace/server/modules/notification/application/mark-all-read.use-case";
 import { MarkReadUseCase } from "@workspace/server/modules/notification/application/mark-read.use-case";
 import { MarkUnreadUseCase } from "@workspace/server/modules/notification/application/mark-unread.use-case";
@@ -167,7 +173,9 @@ const organizationService = new OrganizationService(organizationRepository, audi
 const membershipService = new MembershipService(membershipRepository, auditLogService);
 const invitationService = new InvitationService(invitationRepository, auditLogService);
 const notificationRepository = new NotificationRepository();
-const notificationService = new NotificationService(notificationRepository);
+const userNotificationPreferenceRepository = new UserNotificationPreferenceRepository();
+const notificationEmailPendingRepository = new NotificationEmailPendingRepository();
+const notificationPreferenceService = new NotificationPreferenceService(userNotificationPreferenceRepository);
 const commentService = new CommentService(commentRepository, auditLogService);
 const bugReportService = new BugReportService(bugReportRepository, auditLogService);
 const projectService = new ProjectService(projectRepository, auditLogService);
@@ -196,6 +204,19 @@ const notificationBugReportAdapter = new NotificationBugReportAdapter(bugReportA
 const commentAdapter = new CommentAdapter(commentRepository);
 const notificationCommentAdapter = new NotificationCommentAdapter(commentAdapter);
 const notificationUserAdapter = new NotificationUserAdapter(userAdapter);
+const userPreferenceRepository = new UserPreferenceRepository();
+const notificationEmailDispatchService = new NotificationEmailDispatchService(
+  emailService,
+  notificationEmailPendingRepository,
+  userNotificationPreferenceRepository,
+  userPreferenceRepository,
+  notificationUserAdapter,
+);
+const notificationService = new NotificationService(
+  notificationRepository,
+  notificationPreferenceService,
+  notificationEmailDispatchService,
+);
 const emitNotifications = new EmitNotificationsUseCase(
   notificationMembershipAdapter,
   notificationProjectAdapter,
@@ -456,7 +477,6 @@ const getOverviewStats = new GetOverviewStatsUseCase(membershipAdapter, projectA
 const listProjects = new ListProjectsUseCase(membershipAdapter, projectRepository);
 const getProject = new GetProjectUseCase(membershipAdapter, projectRepository);
 const listMembers = new ListMembersUseCase(membershipRepository, projectAccessRepository, userAdapter);
-const userPreferenceRepository = new UserPreferenceRepository();
 const findUserPreference = new FindUserPreferenceUseCase(userPreferenceRepository);
 const updateUserPreference = new UpdateUserPreferenceUseCase(userPreferenceRepository);
 const userTokenRepository = new UserTokenRepository();
@@ -488,6 +508,14 @@ const markRead = new MarkReadUseCase(notificationRepository, withTransaction);
 const markUnread = new MarkUnreadUseCase(notificationRepository, withTransaction);
 const markAllRead = new MarkAllReadUseCase(notificationMembershipAdapter, notificationRepository, withTransaction);
 const archiveNotification = new ArchiveNotificationUseCase(notificationRepository, withTransaction);
+const findNotificationPreference = new FindNotificationPreferenceUseCase(
+  userNotificationPreferenceRepository,
+  notificationMembershipAdapter,
+);
+const updateNotificationPreference = new UpdateNotificationPreferenceUseCase(
+  userNotificationPreferenceRepository,
+  notificationMembershipAdapter,
+);
 const findComments = new FindCommentsUseCase(
   bugReportAdapter,
   projectAdapter,
@@ -617,5 +645,7 @@ export const container = {
     markUnread,
     markAllRead,
     archive: archiveNotification,
+    findPreference: findNotificationPreference,
+    updatePreference: updateNotificationPreference,
   },
 };

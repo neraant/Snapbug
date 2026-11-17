@@ -1,6 +1,8 @@
 import type { DbClient } from "@workspace/database";
 import { NotificationFactory } from "@workspace/server/modules/notification/entity/notification.factory";
 import type { NotificationRepository } from "@workspace/server/modules/notification/repository/notification.repository";
+import type { NotificationEmailDispatchService } from "@workspace/server/modules/notification/service/notification-email-dispatch.service";
+import type { NotificationPreferenceService } from "@workspace/server/modules/notification/service/notification-preference.service";
 import type { NotificationObjectType } from "@workspace/validation/modules/notification/consts/notification-object-type.const";
 import type { NotificationType } from "@workspace/validation/modules/notification/consts/notification-type.const";
 import type { NotificationPayloadType } from "@workspace/validation/modules/notification/dto/notification-payload.schema";
@@ -20,10 +22,18 @@ export type DeliverNotificationInput = {
 };
 
 export class NotificationService {
-  constructor(private readonly notificationRepository: NotificationRepository) {}
+  constructor(
+    private readonly notificationRepository: NotificationRepository,
+    private readonly notificationPreferenceService: NotificationPreferenceService,
+    private readonly notificationEmailDispatchService: NotificationEmailDispatchService,
+  ) {}
 
   withTx(tx: DbClient): NotificationService {
-    return new NotificationService(this.notificationRepository.withTx(tx));
+    return new NotificationService(
+      this.notificationRepository.withTx(tx),
+      this.notificationPreferenceService.withTx(tx),
+      this.notificationEmailDispatchService,
+    );
   }
 
   async emitSafely(work: () => Promise<void>, context: { type: string }): Promise<void> {
@@ -34,7 +44,18 @@ export class NotificationService {
   }
 
   async deliverToRecipient(input: DeliverNotificationInput): Promise<void> {
+    const resolution = await this.notificationPreferenceService.resolveDelivery({
+      userId: input.recipientUserId,
+      organizationId: input.organizationId,
+      type: input.type,
+      projectId: input.projectId,
+    });
+
     const delivered = await this.notificationRepository.runIsolated(async () => {
+      if (!resolution.inApp) {
+        return;
+      }
+
       if (GROUPABLE_TYPES.has(input.type)) {
         const since = new Date(Date.now() - GROUPING_WINDOW_MS);
         const existing = await this.notificationRepository.findGroupable({
@@ -79,6 +100,21 @@ export class NotificationService {
         recipientUserId: input.recipientUserId,
         objectType: input.objectType,
         objectId: input.objectId,
+      });
+    }
+
+    if (resolution.email) {
+      this.notificationEmailDispatchService.scheduleAfterCommit(async () => {
+        await this.notificationEmailDispatchService.deliver({
+          userId: input.recipientUserId,
+          organizationId: input.organizationId,
+          type: input.type,
+          actorUserId: input.actorUserId,
+          objectType: input.objectType,
+          objectId: input.objectId,
+          projectId: input.projectId,
+          payload: input.payload,
+        });
       });
     }
   }

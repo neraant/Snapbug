@@ -5,6 +5,8 @@ import type { NotificationMembershipPort } from "@workspace/server/modules/notif
 import type { NotificationUserPort } from "@workspace/server/modules/notification/port/user.port";
 import type { NotificationRepository } from "@workspace/server/modules/notification/repository/notification.repository";
 import { NotificationService } from "@workspace/server/modules/notification/service/notification.service";
+import type { NotificationEmailDispatchService } from "@workspace/server/modules/notification/service/notification-email-dispatch.service";
+import type { NotificationPreferenceService } from "@workspace/server/modules/notification/service/notification-preference.service";
 import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
 import { describe, expect, it, vi } from "vitest";
 
@@ -486,7 +488,21 @@ describe("EmitNotificationsUseCase", () => {
     } as unknown as NotificationRepository;
     notificationRepository.withTx = vi.fn().mockReturnValue(notificationRepository);
 
-    const notificationService = new NotificationService(notificationRepository);
+    const notificationPreferenceService = {
+      resolveDelivery: vi.fn().mockResolvedValue({ inApp: true, email: false }),
+      withTx: vi.fn(),
+    } as unknown as NotificationPreferenceService;
+    notificationPreferenceService.withTx = vi.fn().mockReturnValue(notificationPreferenceService);
+
+    const notificationEmailDispatchService = {
+      scheduleAfterCommit: vi.fn(),
+    } as unknown as NotificationEmailDispatchService;
+
+    const notificationService = new NotificationService(
+      notificationRepository,
+      notificationPreferenceService,
+      notificationEmailDispatchService,
+    );
     const membershipPort: NotificationMembershipPort = {
       findManyByOrganizationId: vi
         .fn()

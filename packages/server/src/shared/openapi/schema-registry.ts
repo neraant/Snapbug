@@ -49,6 +49,8 @@ import {
 import { findUserByEmailInputDtoSchema } from "@workspace/validation/modules/user/dto/find-user-by-email.schema";
 import { userPreferenceModelSchema } from "@workspace/validation/modules/preference/dto/user-preference.model";
 import { updateUserPreferenceInputDtoSchema } from "@workspace/validation/modules/preference/dto/update-user-preference.schema";
+import { notificationPreferenceModelSchema } from "@workspace/validation/modules/notification/dto/notification-preference.model";
+import { updateNotificationPreferenceInputDtoSchema } from "@workspace/validation/modules/notification/dto/update-notification-preference.schema";
 import { changePasswordInputDtoSchema } from "@workspace/validation/modules/user/dto/change-password.schema";
 import { updateInterfaceLanguageInputDtoSchema } from "@workspace/validation/modules/user/dto/update-interface-language.schema";
 import { updateProfileInputDtoSchema } from "@workspace/validation/modules/user/dto/update-profile.schema";
@@ -222,6 +224,30 @@ JSON_SCHEMA_REGISTRY.add(updateUserPreferenceInputDtoSchema, {
   title: "Update user preference",
   description: "Patch personal appearance and display preferences",
   examples: [{ theme: "dark", accent: "#3B82F6" }],
+});
+
+JSON_SCHEMA_REGISTRY.add(notificationPreferenceModelSchema, {
+  title: "Notification preference",
+  description: "Per-type in-app and email delivery preferences",
+  examples: [
+    {
+      emailDigest: "immediately",
+      channels: {
+        assigned_to_me: { inApp: true, email: true },
+        security: { inApp: true, email: true },
+      },
+      mutedProjectIds: [],
+      lockedGroups: ["security"],
+      createdAt: "2026-10-03T09:00:00.000Z",
+      updatedAt: "2026-10-03T09:00:00.000Z",
+    },
+  ],
+});
+
+JSON_SCHEMA_REGISTRY.add(updateNotificationPreferenceInputDtoSchema, {
+  title: "Update notification preference",
+  description: "Patch notification delivery and mute settings",
+  examples: [{ emailDigest: "daily", mutedProjectIds: [] }],
 });
 
 JSON_SCHEMA_REGISTRY.add(membershipModelSchema, {

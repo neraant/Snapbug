@@ -14,6 +14,7 @@ function parseSettingsTab(value: string | null): SettingsTab {
   if (
     value === settingsTabs.profile ||
     value === settingsTabs.appearance ||
+    value === settingsTabs.notifications ||
     value === settingsTabs.organization ||
     value === settingsTabs.tokens
   ) {

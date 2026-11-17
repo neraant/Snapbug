@@ -9,6 +9,7 @@ import { Suspense, useCallback, useRef, useState } from "react";
 
 import { OrganizationSettingsForm } from "@/client/modules/organization/components/organization-settings-form";
 import { texts as organizationTexts } from "@/client/modules/organization/consts/texts.const";
+import { NotificationSettingsForm } from "@/client/modules/notification/components/notification-settings-form";
 import { AppearanceSettingsForm } from "@/client/modules/preference/components/appearance-settings-form";
 import { settingsTabs } from "@/client/modules/settings/consts/settings-tab.const";
 import { texts } from "@/client/modules/settings/consts/texts.const";
@@ -38,6 +39,7 @@ export function SettingsTabs() {
   const allowedTabs = new Set<string>([
     settingsTabs.profile,
     settingsTabs.appearance,
+    settingsTabs.notifications,
     settingsTabs.organization,
     settingsTabs.tokens,
   ]);
@@ -55,6 +57,7 @@ export function SettingsTabs() {
         <TabsList aria-label={texts.tabs.ariaLabel}>
           <TabsTab value={settingsTabs.profile}>{texts.tabs.profile}</TabsTab>
           <TabsTab value={settingsTabs.appearance}>{texts.tabs.appearance}</TabsTab>
+          <TabsTab value={settingsTabs.notifications}>{texts.tabs.notifications}</TabsTab>
           <TabsTab value={settingsTabs.organization}>{texts.tabs.organization}</TabsTab>
           <TabsTab value={settingsTabs.tokens}>{texts.tabs.tokens}</TabsTab>
           <TabsIndicator />
@@ -67,6 +70,11 @@ export function SettingsTabs() {
         <TabsPanel value={settingsTabs.appearance} keepMounted>
           <Suspense fallback={<AppearanceSettingsForm.Fallback />}>
             <AppearanceSettingsForm />
+          </Suspense>
+        </TabsPanel>
+        <TabsPanel value={settingsTabs.notifications} keepMounted>
+          <Suspense fallback={<NotificationSettingsForm.Fallback />}>
+            <NotificationSettingsForm />
           </Suspense>
         </TabsPanel>
         <TabsPanel value={settingsTabs.organization} keepMounted>
@@ -108,6 +116,7 @@ SettingsTabs.Fallback = function SettingsTabsFallback() {
       <TabsList aria-label={texts.tabs.ariaLabel}>
         <TabsTab value={settingsTabs.profile}>{texts.tabs.profile}</TabsTab>
         <TabsTab value={settingsTabs.appearance}>{texts.tabs.appearance}</TabsTab>
+        <TabsTab value={settingsTabs.notifications}>{texts.tabs.notifications}</TabsTab>
         <TabsTab value={settingsTabs.organization}>{texts.tabs.organization}</TabsTab>
         <TabsTab value={settingsTabs.tokens}>{texts.tabs.tokens}</TabsTab>
         <TabsIndicator />
