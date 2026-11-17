@@ -12,6 +12,7 @@ import {
   markAllReadOutputDtoSchema,
 } from "@workspace/validation/modules/notification/dto/mark-all-read.schema";
 import { markReadInputDtoSchema, markReadOutputDtoSchema } from "@workspace/validation/modules/notification/dto/mark-read.schema";
+import { markUnreadInputDtoSchema, markUnreadOutputDtoSchema } from "@workspace/validation/modules/notification/dto/mark-unread.schema";
 import { unreadCountOutputDtoSchema } from "@workspace/validation/modules/notification/dto/unread-count.schema";
 
 export const notificationContract = {
@@ -42,6 +43,16 @@ export const notificationContract = {
       path: "/notifications/mark-read",
       tags: ["notification"],
       summary: "Mark notifications as read",
+      spec: sessionAuthSpec,
+    }),
+  markUnread: oc
+    .input(markUnreadInputDtoSchema)
+    .output(markUnreadOutputDtoSchema)
+    .route({
+      method: "POST",
+      path: "/notifications/mark-unread",
+      tags: ["notification"],
+      summary: "Mark notifications as unread",
       spec: sessionAuthSpec,
     }),
   markAllRead: oc

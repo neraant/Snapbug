@@ -94,6 +94,7 @@ import { EmitNotificationsUseCase } from "@workspace/server/modules/notification
 import { ListNotificationsUseCase } from "@workspace/server/modules/notification/application/list-notifications.use-case";
 import { MarkAllReadUseCase } from "@workspace/server/modules/notification/application/mark-all-read.use-case";
 import { MarkReadUseCase } from "@workspace/server/modules/notification/application/mark-read.use-case";
+import { MarkUnreadUseCase } from "@workspace/server/modules/notification/application/mark-unread.use-case";
 import { UnreadCountUseCase } from "@workspace/server/modules/notification/application/unread-count.use-case";
 import { NotificationRepository } from "@workspace/server/modules/notification/repository/notification.repository";
 import { NotificationService } from "@workspace/server/modules/notification/service/notification.service";
@@ -484,6 +485,7 @@ const addComment = new AddCommentUseCase(
 const listNotifications = new ListNotificationsUseCase(notificationMembershipAdapter, notificationRepository);
 const unreadCount = new UnreadCountUseCase(notificationMembershipAdapter, notificationRepository);
 const markRead = new MarkReadUseCase(notificationRepository, withTransaction);
+const markUnread = new MarkUnreadUseCase(notificationRepository, withTransaction);
 const markAllRead = new MarkAllReadUseCase(notificationMembershipAdapter, notificationRepository, withTransaction);
 const archiveNotification = new ArchiveNotificationUseCase(notificationRepository, withTransaction);
 const findComments = new FindCommentsUseCase(
@@ -612,6 +614,7 @@ export const container = {
     list: listNotifications,
     unreadCount,
     markRead,
+    markUnread,
     markAllRead,
     archive: archiveNotification,
   },

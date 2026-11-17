@@ -11,6 +11,7 @@ const en = {
   projects: "Projects",
   team: "Team",
   settings: "Settings",
+  notifications: "Notifications",
   activity: "Activity",
   organization: {
     ariaLabel: "Organization",
@@ -42,6 +43,7 @@ const ru = {
   projects: "Проекты",
   team: "Команда",
   settings: "Настройки",
+  notifications: "Уведомления",
   activity: "Журнал",
   organization: {
     ariaLabel: "Организация",

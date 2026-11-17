@@ -51,6 +51,11 @@ export class Notification {
     return new Notification({ ...this.toObject(), readAt: at });
   }
 
+  markUnread(): Notification {
+    if (!this.readAt) return this;
+    return new Notification({ ...this.toObject(), readAt: null });
+  }
+
   archive(at: Date): Notification {
     if (this.archivedAt) return this;
     return new Notification({ ...this.toObject(), archivedAt: at });
