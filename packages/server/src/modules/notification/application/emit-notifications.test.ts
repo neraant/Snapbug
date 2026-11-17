@@ -22,6 +22,13 @@ function createHarness(deliverBatch = vi.fn().mockResolvedValue(undefined)) {
   const notificationService = {
     deliverBatch,
     withTx: vi.fn(),
+    emitSafely: vi.fn(async (work: () => Promise<void>, context: { type: string }) => {
+      try {
+        await work();
+      } catch {
+        console.error("[notification] emission failed", { type: context.type });
+      }
+    }),
   } as unknown as NotificationService;
   notificationService.withTx = vi.fn().mockReturnValue(notificationService);
 
@@ -51,12 +58,17 @@ function createHarness(deliverBatch = vi.fn().mockResolvedValue(undefined)) {
     notificationService,
   );
 
-  return { useCase, deliverBatch, membershipPort, commentPort, userPort };
+  return { useCase, deliverBatch, membershipPort, commentPort, userPort, notificationService };
 }
 
 describe("EmitNotificationsUseCase", () => {
   it("does not notify the actor on ticket assignment", async () => {
-    const { useCase, deliverBatch } = createHarness();
+    const deliverBatch = vi.fn().mockResolvedValue(undefined);
+    const { useCase, membershipPort } = createHarness(deliverBatch);
+    membershipPort.findManyByOrganizationId = vi.fn().mockResolvedValue([
+      { id: "actor-membership", userId: actorUserId, organizationId, role: UserRole.USER },
+      { id: memberId, userId: assigneeUserId, organizationId, role: UserRole.USER },
+    ]);
 
     await useCase.ticketAssigned({
       organizationId,
@@ -68,6 +80,47 @@ describe("EmitNotificationsUseCase", () => {
     });
 
     expect(deliverBatch).toHaveBeenCalledWith([]);
+  });
+
+  it("does not notify the actor on ticket creation when they are the default assignee", async () => {
+    const deliverBatch = vi.fn().mockResolvedValue(undefined);
+    const { useCase, membershipPort } = createHarness(deliverBatch);
+    membershipPort.findManyByOrganizationId = vi
+      .fn()
+      .mockResolvedValue([{ id: "actor-membership", userId: actorUserId, organizationId, role: UserRole.USER }]);
+
+    await useCase.ticketCreated({
+      organizationId,
+      actorUserId,
+      projectId,
+      ticketId,
+      defaultAssigneeId: actorUserId,
+      payload: { ticketShortId: "SB-1b", ticketTitle: "Self assigned" },
+    });
+
+    expect(deliverBatch).toHaveBeenCalledWith([]);
+  });
+
+  it("swallows recipient lookup failures without rethrowing", async () => {
+    const deliverBatch = vi.fn().mockResolvedValue(undefined);
+    const { useCase, membershipPort } = createHarness(deliverBatch);
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    membershipPort.findManyByOrganizationId = vi.fn().mockRejectedValue(new Error("lookup failed"));
+
+    await expect(
+      useCase.ticketAssigned({
+        organizationId,
+        actorUserId,
+        projectId,
+        ticketId,
+        assigneeUserId,
+        payload: { ticketShortId: "SB-1c", ticketTitle: "Bug" },
+      }),
+    ).resolves.toBeUndefined();
+
+    expect(deliverBatch).not.toHaveBeenCalled();
+    expect(errorSpy).toHaveBeenCalledWith("[notification] emission failed", { type: "ticket.assigned" });
+    errorSpy.mockRestore();
   });
 
   it("notifies the assignee for ticket assignment", async () => {

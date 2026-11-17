@@ -40,14 +40,21 @@ export class EmitNotificationsUseCase {
     assigneeUserId: string;
     payload: NotificationPayloadType;
   }): Promise<void> {
-    const recipients = await this.filterProjectAccess(input.organizationId, input.projectId, [input.assigneeUserId]);
-    await this.deliver("ticket.assigned", recipients, {
-      organizationId: input.organizationId,
-      actorUserId: input.actorUserId,
-      objectType: "bug-report",
-      objectId: input.ticketId,
-      projectId: input.projectId,
-      payload: input.payload,
+    await this.emit("ticket.assigned", async () => {
+      const recipients = await this.filterProjectAccess(
+        input.organizationId,
+        input.projectId,
+        [input.assigneeUserId],
+        input.actorUserId,
+      );
+      await this.deliver("ticket.assigned", recipients, {
+        organizationId: input.organizationId,
+        actorUserId: input.actorUserId,
+        objectType: "bug-report",
+        objectId: input.ticketId,
+        projectId: input.projectId,
+        payload: input.payload,
+      });
     });
   }
 
@@ -59,21 +66,28 @@ export class EmitNotificationsUseCase {
     defaultAssigneeId: string | null;
     payload: NotificationPayloadType;
   }): Promise<void> {
-    let recipientIds: string[] = [];
+    await this.emit("ticket.created", async () => {
+      let recipientIds: string[] = [];
 
-    if (input.defaultAssigneeId) {
-      recipientIds = await this.filterProjectAccess(input.organizationId, input.projectId, [input.defaultAssigneeId]);
-    } else {
-      recipientIds = await this.adminUserIds(input.organizationId, input.actorUserId);
-    }
+      if (input.defaultAssigneeId) {
+        recipientIds = await this.filterProjectAccess(
+          input.organizationId,
+          input.projectId,
+          [input.defaultAssigneeId],
+          input.actorUserId,
+        );
+      } else {
+        recipientIds = await this.adminUserIds(input.organizationId, input.actorUserId);
+      }
 
-    await this.deliver("ticket.created", recipientIds, {
-      organizationId: input.organizationId,
-      actorUserId: input.actorUserId,
-      objectType: "bug-report",
-      objectId: input.ticketId,
-      projectId: input.projectId,
-      payload: input.payload,
+      await this.deliver("ticket.created", recipientIds, {
+        organizationId: input.organizationId,
+        actorUserId: input.actorUserId,
+        objectType: "bug-report",
+        objectId: input.ticketId,
+        projectId: input.projectId,
+        payload: input.payload,
+      });
     });
   }
 
@@ -86,24 +100,28 @@ export class EmitNotificationsUseCase {
     reporterEmail: string | null;
     payload: NotificationPayloadType;
   }): Promise<void> {
-    const participantIds = await this.commentPort.findAuthorUserIdsByBugReportId(input.ticketId);
-    const candidateIds = [...(input.assigneeUserId ? [input.assigneeUserId] : []), ...participantIds];
-    const reporterUserId = await this.resolveReporterUserId(input.reporterEmail, candidateIds);
-    const withoutReporter = reporterUserId ? candidateIds.filter((userId) => userId !== reporterUserId) : candidateIds;
-    const recipients = await this.filterProjectAccess(
-      input.organizationId,
-      input.projectId,
-      withoutReporter,
-      input.actorUserId,
-    );
+    await this.emit("ticket.status_changed", async () => {
+      const participantIds = await this.commentPort.findAuthorUserIdsByBugReportId(input.ticketId);
+      const candidateIds = [...(input.assigneeUserId ? [input.assigneeUserId] : []), ...participantIds];
+      const reporterUserId = await this.resolveReporterUserId(input.reporterEmail, candidateIds);
+      const withoutReporter = reporterUserId
+        ? candidateIds.filter((userId) => userId !== reporterUserId)
+        : candidateIds;
+      const recipients = await this.filterProjectAccess(
+        input.organizationId,
+        input.projectId,
+        withoutReporter,
+        input.actorUserId,
+      );
 
-    await this.deliver("ticket.status_changed", recipients, {
-      organizationId: input.organizationId,
-      actorUserId: input.actorUserId,
-      objectType: "bug-report",
-      objectId: input.ticketId,
-      projectId: input.projectId,
-      payload: input.payload,
+      await this.deliver("ticket.status_changed", recipients, {
+        organizationId: input.organizationId,
+        actorUserId: input.actorUserId,
+        objectType: "bug-report",
+        objectId: input.ticketId,
+        projectId: input.projectId,
+        payload: input.payload,
+      });
     });
   }
 
@@ -115,22 +133,24 @@ export class EmitNotificationsUseCase {
     assigneeUserId: string | null;
     payload: NotificationPayloadType;
   }): Promise<void> {
-    const participantIds = await this.commentPort.findAuthorUserIdsByBugReportId(input.ticketId);
-    const candidateIds = [...(input.assigneeUserId ? [input.assigneeUserId] : []), ...participantIds];
-    const recipients = await this.filterProjectAccess(
-      input.organizationId,
-      input.projectId,
-      candidateIds,
-      input.actorUserId,
-    );
+    await this.emit("comment.created", async () => {
+      const participantIds = await this.commentPort.findAuthorUserIdsByBugReportId(input.ticketId);
+      const candidateIds = [...(input.assigneeUserId ? [input.assigneeUserId] : []), ...participantIds];
+      const recipients = await this.filterProjectAccess(
+        input.organizationId,
+        input.projectId,
+        candidateIds,
+        input.actorUserId,
+      );
 
-    await this.deliver("comment.created", recipients, {
-      organizationId: input.organizationId,
-      actorUserId: input.actorUserId,
-      objectType: "bug-report",
-      objectId: input.ticketId,
-      projectId: input.projectId,
-      payload: input.payload,
+      await this.deliver("comment.created", recipients, {
+        organizationId: input.organizationId,
+        actorUserId: input.actorUserId,
+        objectType: "bug-report",
+        objectId: input.ticketId,
+        projectId: input.projectId,
+        payload: input.payload,
+      });
     });
   }
 
@@ -141,14 +161,16 @@ export class EmitNotificationsUseCase {
     affectedUserId: string;
     payload: NotificationPayloadType;
   }): Promise<void> {
-    const recipients = this.excludeActor([input.affectedUserId], input.actorUserId);
-    await this.deliver("membership.role_changed", recipients, {
-      organizationId: input.organizationId,
-      actorUserId: input.actorUserId,
-      objectType: "membership",
-      objectId: input.membershipId,
-      projectId: null,
-      payload: input.payload,
+    await this.emit("membership.role_changed", async () => {
+      const recipients = this.excludeActor([input.affectedUserId], input.actorUserId);
+      await this.deliver("membership.role_changed", recipients, {
+        organizationId: input.organizationId,
+        actorUserId: input.actorUserId,
+        objectType: "membership",
+        objectId: input.membershipId,
+        projectId: null,
+        payload: input.payload,
+      });
     });
   }
 
@@ -160,14 +182,16 @@ export class EmitNotificationsUseCase {
     projectId: string;
     payload: NotificationPayloadType;
   }): Promise<void> {
-    const recipients = this.excludeActor([input.affectedUserId], input.actorUserId);
-    await this.deliver("project.access_granted", recipients, {
-      organizationId: input.organizationId,
-      actorUserId: input.actorUserId,
-      objectType: "membership",
-      objectId: input.membershipId,
-      projectId: input.projectId,
-      payload: input.payload,
+    await this.emit("project.access_granted", async () => {
+      const recipients = this.excludeActor([input.affectedUserId], input.actorUserId);
+      await this.deliver("project.access_granted", recipients, {
+        organizationId: input.organizationId,
+        actorUserId: input.actorUserId,
+        objectType: "membership",
+        objectId: input.membershipId,
+        projectId: input.projectId,
+        payload: input.payload,
+      });
     });
   }
 
@@ -179,14 +203,16 @@ export class EmitNotificationsUseCase {
     projectId: string;
     payload: NotificationPayloadType;
   }): Promise<void> {
-    const recipients = this.excludeActor([input.affectedUserId], input.actorUserId);
-    await this.deliver("project.access_revoked", recipients, {
-      organizationId: input.organizationId,
-      actorUserId: input.actorUserId,
-      objectType: "membership",
-      objectId: input.membershipId,
-      projectId: input.projectId,
-      payload: input.payload,
+    await this.emit("project.access_revoked", async () => {
+      const recipients = this.excludeActor([input.affectedUserId], input.actorUserId);
+      await this.deliver("project.access_revoked", recipients, {
+        organizationId: input.organizationId,
+        actorUserId: input.actorUserId,
+        objectType: "membership",
+        objectId: input.membershipId,
+        projectId: input.projectId,
+        payload: input.payload,
+      });
     });
   }
 
@@ -197,15 +223,17 @@ export class EmitNotificationsUseCase {
     inviterUserId: string;
     payload: NotificationPayloadType;
   }): Promise<void> {
-    const admins = await this.adminUserIds(input.organizationId, input.actorUserId);
-    const recipients = this.unique([input.inviterUserId, ...admins].filter((id) => id !== input.actorUserId));
-    await this.deliver("invitation.accepted", recipients, {
-      organizationId: input.organizationId,
-      actorUserId: input.actorUserId,
-      objectType: "invitation",
-      objectId: input.invitationId,
-      projectId: null,
-      payload: input.payload,
+    await this.emit("invitation.accepted", async () => {
+      const admins = await this.adminUserIds(input.organizationId, input.actorUserId);
+      const recipients = this.unique([input.inviterUserId, ...admins].filter((id) => id !== input.actorUserId));
+      await this.deliver("invitation.accepted", recipients, {
+        organizationId: input.organizationId,
+        actorUserId: input.actorUserId,
+        objectType: "invitation",
+        objectId: input.invitationId,
+        projectId: null,
+        payload: input.payload,
+      });
     });
   }
 
@@ -216,18 +244,20 @@ export class EmitNotificationsUseCase {
     restored: boolean;
     payload: NotificationPayloadType;
   }): Promise<void> {
-    const recipients = await this.resolveMembersWithProjectAccess(
-      input.organizationId,
-      input.projectId,
-      input.actorUserId,
-    );
-    await this.deliver("project.archived", recipients, {
-      organizationId: input.organizationId,
-      actorUserId: input.actorUserId,
-      objectType: "project",
-      objectId: input.projectId,
-      projectId: input.projectId,
-      payload: { ...input.payload, restored: input.restored },
+    await this.emit("project.archived", async () => {
+      const recipients = await this.resolveMembersWithProjectAccess(
+        input.organizationId,
+        input.projectId,
+        input.actorUserId,
+      );
+      await this.deliver("project.archived", recipients, {
+        organizationId: input.organizationId,
+        actorUserId: input.actorUserId,
+        objectType: "project",
+        objectId: input.projectId,
+        projectId: input.projectId,
+        payload: { ...input.payload, restored: input.restored },
+      });
     });
   }
 
@@ -238,14 +268,16 @@ export class EmitNotificationsUseCase {
     apiKeyId: string;
     payload: NotificationPayloadType;
   }): Promise<void> {
-    const recipients = await this.adminUserIds(input.organizationId, input.actorUserId);
-    await this.deliver("security.api_key_rotated", recipients, {
-      organizationId: input.organizationId,
-      actorUserId: input.actorUserId,
-      objectType: "api-key",
-      objectId: input.apiKeyId,
-      projectId: input.projectId,
-      payload: input.payload,
+    await this.emit("security.api_key_rotated", async () => {
+      const recipients = await this.adminUserIds(input.organizationId, input.actorUserId);
+      await this.deliver("security.api_key_rotated", recipients, {
+        organizationId: input.organizationId,
+        actorUserId: input.actorUserId,
+        objectType: "api-key",
+        objectId: input.apiKeyId,
+        projectId: input.projectId,
+        payload: input.payload,
+      });
     });
   }
 
@@ -256,15 +288,21 @@ export class EmitNotificationsUseCase {
     ownerUserId: string;
     payload: NotificationPayloadType;
   }): Promise<void> {
-    const recipients = this.unique([input.ownerUserId]);
-    await this.deliver("security.token_created", recipients, {
-      organizationId: input.organizationId,
-      actorUserId: input.actorUserId,
-      objectType: "user-token",
-      objectId: input.tokenId,
-      projectId: null,
-      payload: input.payload,
+    await this.emit("security.token_created", async () => {
+      const recipients = this.unique([input.ownerUserId]);
+      await this.deliver("security.token_created", recipients, {
+        organizationId: input.organizationId,
+        actorUserId: input.actorUserId,
+        objectType: "user-token",
+        objectId: input.tokenId,
+        projectId: null,
+        payload: input.payload,
+      });
     });
+  }
+
+  private async emit(type: string, work: () => Promise<void>): Promise<void> {
+    await this.notificationService.emitSafely(work, { type });
   }
 
   private async deliver(

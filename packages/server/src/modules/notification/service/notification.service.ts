@@ -26,6 +26,13 @@ export class NotificationService {
     return new NotificationService(this.notificationRepository.withTx(tx));
   }
 
+  async emitSafely(work: () => Promise<void>, context: { type: string }): Promise<void> {
+    const ok = await this.notificationRepository.runIsolated(work);
+    if (!ok) {
+      console.error("[notification] emission failed", { type: context.type });
+    }
+  }
+
   async deliverToRecipient(input: DeliverNotificationInput): Promise<void> {
     const delivered = await this.notificationRepository.runIsolated(async () => {
       if (GROUPABLE_TYPES.has(input.type)) {
