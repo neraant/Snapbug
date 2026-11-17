@@ -1,4 +1,5 @@
 import { MembershipMapper } from "@workspace/server/modules/membership/entity/membership.mapper";
+import type { MembershipNotificationPort } from "@workspace/server/modules/membership/port/notification.port";
 import type { MembershipRepository } from "@workspace/server/modules/membership/repository/membership.repository";
 import type { MembershipService } from "@workspace/server/modules/membership/service/membership.service";
 import type { WithTransactionType } from "@workspace/server/shared/database/transaction.util";
@@ -14,6 +15,7 @@ export class UpdateMembershipRoleUseCase {
   constructor(
     private readonly membershipRepository: MembershipRepository,
     private readonly membershipService: MembershipService,
+    private readonly notificationPort: MembershipNotificationPort,
     private readonly withTransaction: WithTransactionType,
   ) {}
 
@@ -45,6 +47,17 @@ export class UpdateMembershipRoleUseCase {
         .withTx(tx)
         .withActor({ type: "user", id: currentUserId })
         .saveWithAudit(updatedMembership, "Update membership role");
+
+      await this.notificationPort.withTx(tx).membershipRoleChanged({
+        organizationId: currentMembership.organizationId,
+        actorUserId: currentUserId,
+        membershipId: updatedMembership.id,
+        affectedUserId: updatedMembership.userId,
+        payload: {
+          oldValue: membership.role,
+          newValue: updatedMembership.role,
+        },
+      });
     });
 
     return MembershipMapper.toDto(updatedMembership);

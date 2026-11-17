@@ -41,6 +41,7 @@ import { BugReportStatService } from "@workspace/server/modules/bug-report/servi
 import { WidgetIngestOriginService } from "@workspace/server/modules/bug-report/service/widget-ingest-origin.service";
 import { WidgetIngestRateLimitService } from "@workspace/server/modules/bug-report/service/widget-ingest-rate-limit.service";
 import { WidgetUserAgentService } from "@workspace/server/modules/bug-report/service/widget-user-agent.service";
+import { CommentAdapter } from "@workspace/server/modules/comment/adapter/comment.adapter";
 import { AddCommentUseCase } from "@workspace/server/modules/comment/application/add-comment.use-case";
 import { DeleteCommentUseCase } from "@workspace/server/modules/comment/application/delete-comment.use-case";
 import { FindCommentsUseCase } from "@workspace/server/modules/comment/application/find-comments.use-case";
@@ -48,10 +49,10 @@ import { UpdateCommentUseCase } from "@workspace/server/modules/comment/applicat
 import { CommentRepository } from "@workspace/server/modules/comment/repository/comment.repository";
 import { CommentService } from "@workspace/server/modules/comment/service/comment.service";
 import { UserAdapter } from "@workspace/server/modules/identity/adapter/user.adapter";
+import { ChangePasswordUseCase } from "@workspace/server/modules/identity/application/change-password.use-case";
 import { CreateUserUseCase } from "@workspace/server/modules/identity/application/create-user.use-case";
 import { FindUserUseCase } from "@workspace/server/modules/identity/application/find-user.use-case";
 import { FindUserByEmailUseCase } from "@workspace/server/modules/identity/application/find-user-by-email.use-case";
-import { ChangePasswordUseCase } from "@workspace/server/modules/identity/application/change-password.use-case";
 import { UpdateInterfaceLanguageUseCase } from "@workspace/server/modules/identity/application/update-interface-language.use-case";
 import { UpdateProfileUseCase } from "@workspace/server/modules/identity/application/update-profile.use-case";
 import { UserRepository } from "@workspace/server/modules/identity/repository/user.repository";
@@ -82,6 +83,20 @@ import { MembershipRepository } from "@workspace/server/modules/membership/repos
 import { ProjectAccessRepository } from "@workspace/server/modules/membership/repository/project-access.repository";
 import { MembershipService } from "@workspace/server/modules/membership/service/membership.service";
 import { ProjectAccessService } from "@workspace/server/modules/membership/service/project-access.service";
+import { NotificationBugReportAdapter } from "@workspace/server/modules/notification/adapter/notification-bug-report.adapter";
+import { NotificationCommentAdapter } from "@workspace/server/modules/notification/adapter/notification-comment.adapter";
+import { NotificationDispatchAdapter } from "@workspace/server/modules/notification/adapter/notification-dispatch.adapter";
+import { NotificationMembershipAdapter } from "@workspace/server/modules/notification/adapter/notification-membership.adapter";
+import { NotificationProjectAdapter } from "@workspace/server/modules/notification/adapter/notification-project.adapter";
+import { NotificationUserAdapter } from "@workspace/server/modules/notification/adapter/notification-user.adapter";
+import { ArchiveNotificationUseCase } from "@workspace/server/modules/notification/application/archive-notification.use-case";
+import { EmitNotificationsUseCase } from "@workspace/server/modules/notification/application/emit-notifications.use-case";
+import { ListNotificationsUseCase } from "@workspace/server/modules/notification/application/list-notifications.use-case";
+import { MarkAllReadUseCase } from "@workspace/server/modules/notification/application/mark-all-read.use-case";
+import { MarkReadUseCase } from "@workspace/server/modules/notification/application/mark-read.use-case";
+import { UnreadCountUseCase } from "@workspace/server/modules/notification/application/unread-count.use-case";
+import { NotificationRepository } from "@workspace/server/modules/notification/repository/notification.repository";
+import { NotificationService } from "@workspace/server/modules/notification/service/notification.service";
 import { OrganizationAdapter } from "@workspace/server/modules/organization/adapter/organization.adapter";
 import { CompleteOnboardingUseCase } from "@workspace/server/modules/organization/application/complete-onboarding.use-case";
 import { CreateOrganizationUseCase } from "@workspace/server/modules/organization/application/create-organization.use-case";
@@ -91,6 +106,9 @@ import { UpdateOnboardingOrganizationUseCase } from "@workspace/server/modules/o
 import { UpdateOrganizationUseCase } from "@workspace/server/modules/organization/application/update-organization.use-case";
 import { OrganizationRepository } from "@workspace/server/modules/organization/repository/organization.repository";
 import { OrganizationService } from "@workspace/server/modules/organization/service/organization.service";
+import { FindUserPreferenceUseCase } from "@workspace/server/modules/preference/application/find-user-preference.use-case";
+import { UpdateUserPreferenceUseCase } from "@workspace/server/modules/preference/application/update-user-preference.use-case";
+import { UserPreferenceRepository } from "@workspace/server/modules/preference/repository/user-preference.repository";
 import { ActivityLogProjectAdapter } from "@workspace/server/modules/project/adapter/activity-log-project.adapter";
 import { AuditProjectAdapter } from "@workspace/server/modules/project/adapter/audit-project.adapter";
 import { ProjectAdapter } from "@workspace/server/modules/project/adapter/project.adapter";
@@ -109,9 +127,6 @@ import { UpdateProjectUseCase } from "@workspace/server/modules/project/applicat
 import { UpdateProjectWidgetSettingUseCase } from "@workspace/server/modules/project/application/update-project-widget-setting.use-case";
 import { ProjectRepository } from "@workspace/server/modules/project/repository/project.repository";
 import { ProjectService } from "@workspace/server/modules/project/service/project.service";
-import { FindUserPreferenceUseCase } from "@workspace/server/modules/preference/application/find-user-preference.use-case";
-import { UpdateUserPreferenceUseCase } from "@workspace/server/modules/preference/application/update-user-preference.use-case";
-import { UserPreferenceRepository } from "@workspace/server/modules/preference/repository/user-preference.repository";
 import { SearchUseCase } from "@workspace/server/modules/search/application/search.use-case";
 import { CreateUserTokenUseCase } from "@workspace/server/modules/user-token/application/create-user-token.use-case";
 import { FindUserByTokenUseCase } from "@workspace/server/modules/user-token/application/find-user-by-token.use-case";
@@ -150,6 +165,8 @@ const auditLogService = new AuditLogService(auditLogRepository, auditProjectAdap
 const organizationService = new OrganizationService(organizationRepository, auditLogService);
 const membershipService = new MembershipService(membershipRepository, auditLogService);
 const invitationService = new InvitationService(invitationRepository, auditLogService);
+const notificationRepository = new NotificationRepository();
+const notificationService = new NotificationService(notificationRepository);
 const commentService = new CommentService(commentRepository, auditLogService);
 const bugReportService = new BugReportService(bugReportRepository, auditLogService);
 const projectService = new ProjectService(projectRepository, auditLogService);
@@ -172,6 +189,21 @@ const organizationAdapter = new OrganizationAdapter(organizationRepository);
 const apiKeyAdapter = new ApiKeyAdapter(apiKeyRepository, projectAdapter);
 const bugReportAdapter = new BugReportAdapter(bugReportRepository);
 const searchBugReportAdapter = new SearchBugReportAdapter(bugReportRepository);
+const notificationMembershipAdapter = new NotificationMembershipAdapter(membershipAdapter);
+const notificationProjectAdapter = new NotificationProjectAdapter(projectAdapter);
+const notificationBugReportAdapter = new NotificationBugReportAdapter(bugReportAdapter);
+const commentAdapter = new CommentAdapter(commentRepository);
+const notificationCommentAdapter = new NotificationCommentAdapter(commentAdapter);
+const notificationUserAdapter = new NotificationUserAdapter(userAdapter);
+const emitNotifications = new EmitNotificationsUseCase(
+  notificationMembershipAdapter,
+  notificationProjectAdapter,
+  notificationBugReportAdapter,
+  notificationCommentAdapter,
+  notificationUserAdapter,
+  notificationService,
+);
+const notificationDispatchAdapter = new NotificationDispatchAdapter(emitNotifications);
 
 const findMembership = new FindMembershipUseCase(membershipRepository);
 const findMembershipByUser = new FindMembershipByUserUseCase(membershipRepository);
@@ -183,7 +215,12 @@ const findProjectMembers = new FindProjectMembersUseCase(
   projectAdapter,
   userAdapter,
 );
-const updateMembershipRole = new UpdateMembershipRoleUseCase(membershipRepository, membershipService, withTransaction);
+const updateMembershipRole = new UpdateMembershipRoleUseCase(
+  membershipRepository,
+  membershipService,
+  notificationDispatchAdapter,
+  withTransaction,
+);
 const removeMembership = new RemoveMembershipUseCase(membershipRepository, membershipService, withTransaction);
 const findMembershipProjectAccess = new FindMembershipProjectAccessUseCase(
   membershipRepository,
@@ -195,6 +232,7 @@ const replaceMembershipProjectAccess = new ReplaceMembershipProjectAccessUseCase
   projectAccessRepository,
   projectAdapter,
   projectAccessService,
+  notificationDispatchAdapter,
   withTransaction,
 );
 
@@ -222,8 +260,20 @@ const updateProject = new UpdateProjectUseCase(
   projectUserAdapter,
   withTransaction,
 );
-const archiveProject = new ArchiveProjectUseCase(membershipAdapter, projectRepository, projectService, withTransaction);
-const restoreProject = new RestoreProjectUseCase(membershipAdapter, projectRepository, projectService, withTransaction);
+const archiveProject = new ArchiveProjectUseCase(
+  membershipAdapter,
+  projectRepository,
+  projectService,
+  notificationDispatchAdapter,
+  withTransaction,
+);
+const restoreProject = new RestoreProjectUseCase(
+  membershipAdapter,
+  projectRepository,
+  projectService,
+  notificationDispatchAdapter,
+  withTransaction,
+);
 const deleteProject = new DeleteProjectUseCase(
   membershipAdapter,
   projectRepository,
@@ -311,6 +361,7 @@ const acceptInvitation = new AcceptInvitationUseCase(
   withTransaction,
   invitationService,
   userAdapter,
+  notificationDispatchAdapter,
 );
 const resendInvitation = new ResendInvitationUseCase(
   invitationRepository,
@@ -352,12 +403,14 @@ const rotateProjectApiKey = new RotateProjectApiKeyUseCase(
   projectAdapter,
   apiKeyRepository,
   apiKeyService,
+  notificationDispatchAdapter,
   withTransaction,
 );
 const createBugReport = new CreateBugReportUseCase(
   apiKeyAdapter,
   projectAdapter,
   bugReportService,
+  notificationDispatchAdapter,
   withTransaction,
   widgetIngestOriginService,
   widgetUserAgentService,
@@ -392,6 +445,7 @@ const updateBugReport = new UpdateBugReportUseCase(
   projectAdapter,
   bugReportRepository,
   bugReportService,
+  notificationDispatchAdapter,
   withTransaction,
 );
 const listTickets = new ListTicketsUseCase(membershipAdapter, projectAdapter, bugReportRepository);
@@ -411,6 +465,8 @@ const createUserToken = new CreateUserTokenUseCase(
   userTokenRepository,
   membershipAdapter,
   projectAdapter,
+  notificationDispatchAdapter,
+  withTransaction,
 );
 const findUserTokens = new FindUserTokensUseCase(userTokenRepository);
 const revokeUserToken = new RevokeUserTokenUseCase(userTokenRepository);
@@ -422,8 +478,14 @@ const addComment = new AddCommentUseCase(
   membershipAdapter,
   userAdapter,
   commentService,
+  notificationDispatchAdapter,
   withTransaction,
 );
+const listNotifications = new ListNotificationsUseCase(notificationMembershipAdapter, notificationRepository);
+const unreadCount = new UnreadCountUseCase(notificationMembershipAdapter, notificationRepository);
+const markRead = new MarkReadUseCase(notificationRepository, withTransaction);
+const markAllRead = new MarkAllReadUseCase(notificationMembershipAdapter, notificationRepository, withTransaction);
+const archiveNotification = new ArchiveNotificationUseCase(notificationRepository, withTransaction);
 const findComments = new FindCommentsUseCase(
   bugReportAdapter,
   projectAdapter,
@@ -545,5 +607,12 @@ export const container = {
   },
   search: {
     search,
+  },
+  notification: {
+    list: listNotifications,
+    unreadCount,
+    markRead,
+    markAllRead,
+    archive: archiveNotification,
   },
 };

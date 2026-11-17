@@ -1,3 +1,4 @@
+import { createNotificationPortMock } from "@workspace/server/modules/notification/application/notification-test.const";
 import { ReplaceMembershipProjectAccessUseCase } from "@workspace/server/modules/membership/application/replace-membership-project-access.use-case";
 import { Membership } from "@workspace/server/modules/membership/entity/membership.entity";
 import { ProjectAccess } from "@workspace/server/modules/membership/entity/project-access.entity";
@@ -73,6 +74,7 @@ function setup(existing: ProjectAccess[] = [], memberships = [currentMembership,
       projectAccessRepository as unknown as ProjectAccessRepository,
       projectPort as unknown as ProjectPort,
       projectAccessService as unknown as ProjectAccessService,
+      createNotificationPortMock(),
       withTransaction as WithTransactionType,
     ),
   };

@@ -1,4 +1,5 @@
 import type { Invitation } from "@workspace/server/modules/invitation/entity/invitation.entity";
+import type { InvitationNotificationPort } from "@workspace/server/modules/invitation/port/notification.port";
 import type { MembershipPort } from "@workspace/server/modules/invitation/port/membership.port";
 import type { ProjectPort } from "@workspace/server/modules/invitation/port/project.port";
 import type { UserPort } from "@workspace/server/modules/invitation/port/user.port";
@@ -24,6 +25,7 @@ export class AcceptInvitationUseCase {
     private readonly withTransaction: WithTransactionType,
     private readonly invitationService: InvitationService,
     private readonly userPort: UserPort,
+    private readonly notificationPort: InvitationNotificationPort,
   ) {}
 
   async execute(
@@ -68,6 +70,16 @@ export class AcceptInvitationUseCase {
       const projectIdsToGrant = this.resolveProjectIdsToGrant(invitation, organizationProjectIds);
       await membershipPort.grantProjects(createdMembership.id, projectIdsToGrant, userId);
       await invitationService.saveWithAudit(acceptedInvitation, "Accept invitation");
+      const acceptedUser = await this.userPort.findById(userId);
+      await this.notificationPort.withTx(tx).invitationAccepted({
+        organizationId: invitation.organizationId,
+        actorUserId: userId,
+        invitationId: invitation.id,
+        inviterUserId: invitation.invitedByUserId,
+        payload: {
+          actorName: acceptedUser.name ?? acceptedUser.email ?? invitation.email,
+        },
+      });
       return createdMembership;
     });
 

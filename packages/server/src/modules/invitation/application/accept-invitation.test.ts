@@ -1,3 +1,4 @@
+import { createNotificationPortMock } from "@workspace/server/modules/notification/application/notification-test.const";
 import { AcceptInvitationUseCase } from "@workspace/server/modules/invitation/application/accept-invitation.use-case";
 import { Invitation } from "@workspace/server/modules/invitation/entity/invitation.entity";
 import type { MembershipPort } from "@workspace/server/modules/invitation/port/membership.port";
@@ -91,6 +92,7 @@ function createTransactionalDeps() {
 
   const userPort = {
     markOnboardingComplete: vi.fn().mockResolvedValue(undefined),
+    findById: vi.fn().mockResolvedValue({ id: userId, email: "user@example.com", name: "User" }),
   };
 
   return { membershipPort, projectPort, invitationRepository, invitationService, withTransactionFn, userPort };
@@ -106,6 +108,7 @@ describe("AcceptInvitationUseCase", () => {
       vi.fn() as WithTransactionType,
       { hashToken, withTx: vi.fn(), withActor: vi.fn() } as unknown as InvitationService,
       { markOnboardingComplete: vi.fn() } as unknown as UserPort,
+      createNotificationPortMock(),
     );
 
     await expect(useCase.execute({ token }, userId, "invitee@company.com")).rejects.toMatchObject({
@@ -123,6 +126,7 @@ describe("AcceptInvitationUseCase", () => {
       withTransactionFn,
       invitationService as unknown as InvitationService,
       userPort as unknown as UserPort,
+      createNotificationPortMock(),
     );
 
     await expect(useCase.execute({ token }, userId, "other@company.com")).rejects.toMatchObject({
@@ -150,6 +154,7 @@ describe("AcceptInvitationUseCase", () => {
       withTransactionFn,
       invitationService as unknown as InvitationService,
       userPort as unknown as UserPort,
+      createNotificationPortMock(),
     );
 
     const result = await useCase.execute({ token }, userId, "invitee@company.com");
@@ -169,6 +174,7 @@ describe("AcceptInvitationUseCase", () => {
       withTransactionFn,
       invitationService as unknown as InvitationService,
       userPort as unknown as UserPort,
+      createNotificationPortMock(),
     );
 
     const result = await useCase.execute({ token }, userId, "invitee@company.com");
@@ -204,6 +210,7 @@ describe("AcceptInvitationUseCase", () => {
       withTransactionFn,
       invitationService as unknown as InvitationService,
       userPort as unknown as UserPort,
+      createNotificationPortMock(),
     );
 
     await useCase.execute({ token }, userId, "invitee@company.com");
@@ -227,6 +234,7 @@ describe("AcceptInvitationUseCase", () => {
       withTransactionFn,
       invitationService as unknown as InvitationService,
       userPort as unknown as UserPort,
+      createNotificationPortMock(),
     );
 
     await useCase.execute({ token }, userId, "invitee@company.com");
@@ -248,6 +256,7 @@ describe("AcceptInvitationUseCase", () => {
       withTransactionFn,
       invitationService as unknown as InvitationService,
       userPort as unknown as UserPort,
+      createNotificationPortMock(),
     );
 
     const result = await useCase.execute({ token }, userId, "invitee@company.com");

@@ -1,5 +1,6 @@
 import { ProjectMapper } from "@workspace/server/modules/project/entity/project.mapper";
 import type { MembershipPort } from "@workspace/server/modules/project/port/membership.port";
+import type { ProjectNotificationPort } from "@workspace/server/modules/project/port/notification.port";
 import type { ProjectRepository } from "@workspace/server/modules/project/repository/project.repository";
 import type { ProjectService } from "@workspace/server/modules/project/service/project.service";
 import type { WithTransactionType } from "@workspace/server/shared/database/transaction.util";
@@ -13,6 +14,7 @@ export class RestoreProjectUseCase {
     private readonly membershipPort: MembershipPort,
     private readonly projectRepository: ProjectRepository,
     private readonly projectService: ProjectService,
+    private readonly notificationPort: ProjectNotificationPort,
     private readonly withTransaction: WithTransactionType,
   ) {}
 
@@ -39,6 +41,13 @@ export class RestoreProjectUseCase {
         .withTx(tx)
         .withActor({ type: "user", id: userId })
         .saveWithAudit(restoredProject, "Restore project");
+      await this.notificationPort.withTx(tx).projectArchived({
+        organizationId: project.organizationId,
+        actorUserId: userId,
+        projectId: project.id,
+        restored: true,
+        payload: { projectName: restoredProject.name, projectSlug: restoredProject.slug },
+      });
     });
 
     return ProjectMapper.toDto(restoredProject);

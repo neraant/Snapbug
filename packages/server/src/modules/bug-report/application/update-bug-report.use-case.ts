@@ -1,5 +1,6 @@
 import { BugReportMapper } from "@workspace/server/modules/bug-report/entity/bug-report.mapper";
 import type { MembershipPort } from "@workspace/server/modules/bug-report/port/membership.port";
+import type { BugReportNotificationPort } from "@workspace/server/modules/bug-report/port/notification.port";
 import type { ProjectPort } from "@workspace/server/modules/bug-report/port/project.port";
 import type { BugReportRepository } from "@workspace/server/modules/bug-report/repository/bug-report.repository";
 import type { BugReportService } from "@workspace/server/modules/bug-report/service/bug-report.service";
@@ -19,6 +20,7 @@ export class UpdateBugReportUseCase {
     private readonly projectPort: ProjectPort,
     private readonly bugReportRepository: BugReportRepository,
     private readonly bugReportService: BugReportService,
+    private readonly notificationPort: BugReportNotificationPort,
     private readonly withTransaction: WithTransactionType,
   ) {}
 
@@ -56,10 +58,46 @@ export class UpdateBugReportUseCase {
 
     await this.withTransaction(async (tx) => {
       const bugReportService = this.bugReportService.withTx(tx).withActor(actor);
+      const notificationPort = this.notificationPort.withTx(tx);
       await bugReportService.saveWithAudit(updatedBugReport, "Update bug report");
 
       if (shouldNormalizeBoardOrder) {
         await bugReportService.normalizeBoardOrder(updatedBugReport.projectId, updatedBugReport.status);
+      }
+
+      const actorUserId = actor.type === "user" || actor.type === "mcp" ? actor.id : null;
+      const payload = {
+        ticketShortId: updatedBugReport.shortId,
+        ticketTitle: updatedBugReport.title,
+        projectName: project.name,
+        projectSlug: project.slug,
+      };
+
+      if (patch.assignedTo !== undefined && updatedBugReport.assignedTo !== bugReport.assignedTo && updatedBugReport.assignedTo) {
+        await notificationPort.ticketAssigned({
+          organizationId: project.organizationId,
+          actorUserId,
+          projectId: project.id,
+          ticketId: updatedBugReport.id,
+          assigneeUserId: updatedBugReport.assignedTo,
+          payload,
+        });
+      }
+
+      if (patch.status !== undefined && updatedBugReport.status !== bugReport.status) {
+        await notificationPort.ticketStatusChanged({
+          organizationId: project.organizationId,
+          actorUserId,
+          projectId: project.id,
+          ticketId: updatedBugReport.id,
+          assigneeUserId: updatedBugReport.assignedTo,
+          reporterEmail: updatedBugReport.reporterEmail,
+          payload: {
+            ...payload,
+            oldValue: bugReport.status,
+            newValue: updatedBugReport.status,
+          },
+        });
       }
     });
 

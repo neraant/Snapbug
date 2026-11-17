@@ -1,5 +1,6 @@
 import { ProjectAccessFactory } from "@workspace/server/modules/membership/entity/project-access.factory";
 import { ProjectAccessMapper } from "@workspace/server/modules/membership/entity/project-access.mapper";
+import type { MembershipNotificationPort } from "@workspace/server/modules/membership/port/notification.port";
 import type { ProjectPort } from "@workspace/server/modules/membership/port/project.port";
 import type { MembershipRepository } from "@workspace/server/modules/membership/repository/membership.repository";
 import type { ProjectAccessRepository } from "@workspace/server/modules/membership/repository/project-access.repository";
@@ -19,6 +20,7 @@ export class ReplaceMembershipProjectAccessUseCase {
     private readonly projectAccessRepository: ProjectAccessRepository,
     private readonly projectPort: ProjectPort,
     private readonly projectAccessService: ProjectAccessService,
+    private readonly notificationPort: MembershipNotificationPort,
     private readonly withTransaction: WithTransactionType,
   ) {}
 
@@ -69,9 +71,20 @@ export class ReplaceMembershipProjectAccessUseCase {
 
     await this.withTransaction(async (tx) => {
       const service = this.projectAccessService.withTx(tx).withActor({ type: "user", id: currentUserId });
+      const notificationPort = this.notificationPort.withTx(tx);
 
       for (const projectAccess of removed) {
         await service.deleteWithAudit(projectAccess, "Remove project access");
+        const project = projects.find((item) => item.id === projectAccess.projectId);
+        if (!project) continue;
+        await notificationPort.projectAccessRevoked({
+          organizationId: currentMembership.organizationId,
+          actorUserId: currentUserId,
+          membershipId: membership.id,
+          affectedUserId: membership.userId,
+          projectId: projectAccess.projectId,
+          payload: { projectName: project.name, projectSlug: project.slug },
+        });
       }
 
       for (const projectId of addedProjectIds) {
@@ -79,6 +92,16 @@ export class ReplaceMembershipProjectAccessUseCase {
           ProjectAccessFactory.create({ membershipId: membership.id, projectId }),
           "Grant project access",
         );
+        const project = projects.find((item) => item.id === projectId);
+        if (!project) continue;
+        await notificationPort.projectAccessGranted({
+          organizationId: currentMembership.organizationId,
+          actorUserId: currentUserId,
+          membershipId: membership.id,
+          affectedUserId: membership.userId,
+          projectId,
+          payload: { projectName: project.name, projectSlug: project.slug },
+        });
       }
     });
 

@@ -1,6 +1,8 @@
 import { UserTokenFactory } from "@workspace/server/modules/user-token/entity/user-token.factory";
 import { UserTokenMapper } from "@workspace/server/modules/user-token/entity/user-token.mapper";
 import type { MembershipPort } from "@workspace/server/modules/user-token/port/membership.port";
+import type { UserTokenNotificationPort } from "@workspace/server/modules/user-token/port/notification.port";
+import type { WithTransactionType } from "@workspace/server/shared/database/transaction.util";
 import type { ProjectPort } from "@workspace/server/modules/user-token/port/project.port";
 import type { UserTokenRepository } from "@workspace/server/modules/user-token/repository/user-token.repository";
 import type { UserTokenService } from "@workspace/server/modules/user-token/service/user-token.service";
@@ -24,6 +26,8 @@ export class CreateUserTokenUseCase {
     private readonly userTokenRepository: UserTokenRepository,
     private readonly membershipPort: MembershipPort,
     private readonly projectPort: ProjectPort,
+    private readonly notificationPort: UserTokenNotificationPort,
+    private readonly withTransaction: WithTransactionType,
   ) {}
 
   async execute(input: CreateUserTokenInputDtoType, userId: string): Promise<CreateUserTokenOutputDtoType> {
@@ -44,7 +48,19 @@ export class CreateUserTokenUseCase {
       projectIds,
     });
 
-    await this.userTokenRepository.save(userToken);
+    const organizationId = memberships[0]?.organizationId;
+    await this.withTransaction(async (tx) => {
+      await this.userTokenRepository.withTx(tx).save(userToken);
+      if (organizationId) {
+        await this.notificationPort.withTx(tx).tokenCreated({
+          organizationId,
+          actorUserId: userId,
+          tokenId: userToken.id,
+          ownerUserId: userId,
+          payload: { tokenName: userToken.name },
+        });
+      }
+    });
     return UserTokenMapper.toCreatedDto(userToken, secret);
   }
 

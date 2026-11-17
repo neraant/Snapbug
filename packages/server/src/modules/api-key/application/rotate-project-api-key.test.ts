@@ -1,3 +1,4 @@
+import { createNotificationPortMock } from "@workspace/server/modules/notification/application/notification-test.const";
 import { RotateProjectApiKeyUseCase } from "@workspace/server/modules/api-key/application/rotate-project-api-key.use-case";
 import { ApiKey } from "@workspace/server/modules/api-key/entity/api-key.entity";
 import type { MembershipPort } from "@workspace/server/modules/api-key/port/membership.port";
@@ -38,6 +39,7 @@ function setup(activeApiKey: ApiKey | null = apiKey) {
     projectPort as unknown as ProjectPort,
     apiKeyRepository as unknown as ApiKeyRepository,
     apiKeyService as unknown as ApiKeyService,
+    createNotificationPortMock(),
     withTransaction as WithTransactionType,
   );
   return {
