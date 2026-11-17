@@ -5,6 +5,7 @@ import type { ProjectPort } from "@workspace/server/modules/bug-report/port/proj
 import type { BugReportRepository } from "@workspace/server/modules/bug-report/repository/bug-report.repository";
 import { NotFoundError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
+import { narrowProjectIds } from "@workspace/server/shared/orpc/mcp/mcp-project-scope.util";
 import {
   decodeTicketListCursor,
   encodeTicketListCursor,
@@ -25,9 +26,13 @@ export class ListTicketsUseCase {
     private readonly bugReportRepository: BugReportRepository,
   ) {}
 
-  async execute(input: ListTicketsInputDtoType, userId: string): Promise<ListTicketsOutputDtoType> {
+  async execute(
+    input: ListTicketsInputDtoType,
+    userId: string,
+    mcpProjectIds?: string[] | null,
+  ): Promise<ListTicketsOutputDtoType> {
     const memberships = await this.membershipPort.findManyByUser(userId);
-    const projectIds = await this.resolveProjectIds(input, memberships);
+    const projectIds = narrowProjectIds(await this.resolveProjectIds(input, memberships), mcpProjectIds);
     if (projectIds.length === 0) return { items: [], nextCursor: null };
 
     const bugReports = await this.bugReportRepository.findManyByProjectIds(projectIds);

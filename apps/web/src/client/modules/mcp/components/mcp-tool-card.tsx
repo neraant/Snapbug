@@ -6,6 +6,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@workspace/design-syste
 import { Typography } from "@workspace/design-system/components/ui/typography";
 import { cn } from "@workspace/design-system/lib/utils";
 import type { McpToolDtoType } from "@workspace/validation/modules/mcp/dto/list-tools.schema";
+import type { McpToolScopeType } from "@workspace/validation/modules/user-token/consts/mcp-scope.const";
 import { LockIcon } from "lucide-react";
 import type { KeyboardEvent } from "react";
 
@@ -63,9 +64,12 @@ export function McpToolCard({ tool, onOpen }: McpToolCardProps) {
         <Typography variant="text-sm" color="muted">
           {tool.shortDescription}
         </Typography>
-        <Badge variant="outline" className="w-fit">
-          {tool.scope}
-        </Badge>
+        <Tooltip>
+          <TooltipTrigger render={<Badge variant="outline" className="w-fit" />}>
+            {tool.scope}
+          </TooltipTrigger>
+          <TooltipContent>{texts.tools.scopeTooltips[tool.scope as McpToolScopeType]}</TooltipContent>
+        </Tooltip>
       </Column>
     </Card>
   );

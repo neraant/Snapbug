@@ -1,14 +1,20 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { type AnyProcedure, createProcedureClient } from "@orpc/server";
+import { EvaluateMcpToolAccessUseCase } from "@workspace/server/modules/user-token/application/evaluate-mcp-tool-access.use-case";
+import type { OrpcContext } from "@workspace/server/shared/orpc/context.const";
+import { installScopedMcpToolsListHandler } from "@workspace/server/shared/orpc/mcp/mcp-tool-list-handler.util";
 import {
-  filterMcpToolsForContext,
+  filterMcpToolsForRole,
+  filterMcpToolsForTokenList,
   listMcpTools,
 } from "@workspace/server/shared/orpc/mcp/walk-mcp-tools";
 
 export type McpHandlerType = {
   handle(request: Request, options: { context: object }): Promise<{ response: Response }>;
 };
+
+const evaluateMcpToolAccess = new EvaluateMcpToolAccessUseCase();
 
 export function createMcpHandler(router: unknown): McpHandlerType {
   return {
@@ -17,10 +23,13 @@ export function createMcpHandler(router: unknown): McpHandlerType {
         return { response: new Response(null, { status: 405, headers: { Allow: "POST" } }) };
       }
 
+      const orpcContext = context as OrpcContext;
       const server = new McpServer({ name: "Snapbug MCP", version: "1.0.0" });
-      const tools = filterMcpToolsForContext(listMcpTools(router), context as { user?: { role?: string } | null });
+      const allTools = listMcpTools(router);
+      const registeredTools = filterMcpToolsForRole(allTools, orpcContext);
+      const listableTools = filterMcpToolsForTokenList(allTools, orpcContext);
 
-      for (const tool of tools) {
+      for (const tool of registeredTools) {
         registerMcpTool(
           server,
           tool.name,
@@ -28,9 +37,11 @@ export function createMcpHandler(router: unknown): McpHandlerType {
           tool.readOnlyHint,
           tool.destructiveHint,
           tool.procedure,
-          context,
+          orpcContext,
         );
       }
+
+      installScopedMcpToolsListHandler(server, new Set(listableTools.map((tool) => tool.name)));
 
       const transport = new WebStandardStreamableHTTPServerTransport({
         sessionIdGenerator: undefined,
@@ -49,7 +60,7 @@ function registerMcpTool(
   readOnlyHint: boolean,
   destructiveHint: boolean,
   procedure: AnyProcedure,
-  context: object,
+  context: OrpcContext,
 ): void {
   const inputSchema = procedure["~orpc"].inputSchema;
 
@@ -61,6 +72,25 @@ function registerMcpTool(
       annotations: { readOnlyHint, destructiveHint },
     },
     async (args) => {
+      if (context.mcp?.tokenScopes) {
+        const access = evaluateMcpToolAccess.execute({
+          toolName: name,
+          tokenScopes: context.mcp.tokenScopes,
+          userRole: context.user?.role,
+        });
+        if (!access.allowed && access.reason === "scope") {
+          return {
+            isError: true,
+            content: [
+              {
+                type: "text" as const,
+                text: `This token does not have the \`${access.missingScope}\` scope`,
+              },
+            ],
+          };
+        }
+      }
+
       try {
         const result = await createProcedureClient(procedure, { context })(args);
         if (result instanceof Blob) {

@@ -6,6 +6,9 @@ export class UserToken {
   readonly tokenHash: UserTokenPersistedType["tokenHash"];
   readonly name: UserTokenPersistedType["name"];
   readonly prefix: UserTokenPersistedType["prefix"];
+  readonly scopes: UserTokenPersistedType["scopes"];
+  readonly scopePreset: UserTokenPersistedType["scopePreset"];
+  readonly projectIds: UserTokenPersistedType["projectIds"];
   readonly createdAt: UserTokenPersistedType["createdAt"];
   readonly revokedAt: UserTokenPersistedType["revokedAt"];
 
@@ -15,6 +18,9 @@ export class UserToken {
     this.tokenHash = userToken.tokenHash;
     this.name = userToken.name;
     this.prefix = userToken.prefix;
+    this.scopes = userToken.scopes;
+    this.scopePreset = userToken.scopePreset;
+    this.projectIds = userToken.projectIds;
     this.createdAt = userToken.createdAt;
     this.revokedAt = userToken.revokedAt;
   }
@@ -30,6 +36,9 @@ export class UserToken {
       tokenHash: this.tokenHash,
       name: this.name,
       prefix: this.prefix,
+      scopes: this.scopes,
+      scopePreset: this.scopePreset,
+      projectIds: this.projectIds,
       createdAt: this.createdAt,
       revokedAt: this.revokedAt,
     };

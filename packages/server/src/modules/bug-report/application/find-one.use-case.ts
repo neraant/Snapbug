@@ -2,6 +2,7 @@ import { BugReportMapper } from "@workspace/server/modules/bug-report/entity/bug
 import type { MembershipPort } from "@workspace/server/modules/bug-report/port/membership.port";
 import type { UserPort } from "@workspace/server/modules/bug-report/port/user.port";
 import type { BugReportRepository } from "@workspace/server/modules/bug-report/repository/bug-report.repository";
+import { assertMcpProjectAllowed } from "@workspace/server/shared/orpc/mcp/mcp-project-scope.util";
 import { NotFoundError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import type {
@@ -20,6 +21,7 @@ export class FindOneUseCase {
     input: FindOneInputDtoType,
     userId: string,
     organizationId: string | null,
+    mcpProjectIds?: string[] | null,
   ): Promise<FindOneOutputDtoType> {
     const candidates = await this.bugReportRepository.findManyByShortId(input.shortId);
     const orderedCandidates = [...candidates].sort((left, right) => {
@@ -37,6 +39,12 @@ export class FindOneUseCase {
 
       const allowedProjectIds = await this.membershipPort.filterProjectIds(membership, [candidate.bugReport.projectId]);
       if (allowedProjectIds.length === 0) continue;
+
+      try {
+        assertMcpProjectAllowed(candidate.bugReport.projectId, mcpProjectIds);
+      } catch {
+        continue;
+      }
 
       const assignee = candidate.bugReport.assignedTo
         ? ((await this.userPort.findManyByIds([candidate.bugReport.assignedTo]))[0] ?? null)

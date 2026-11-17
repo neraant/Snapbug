@@ -1,6 +1,7 @@
 import type { MembershipPort } from "@workspace/server/modules/bug-report/port/membership.port";
 import type { ProjectPort } from "@workspace/server/modules/bug-report/port/project.port";
 import type { BugReportRepository } from "@workspace/server/modules/bug-report/repository/bug-report.repository";
+import { narrowProjectIds } from "@workspace/server/shared/orpc/mcp/mcp-project-scope.util";
 import { NotFoundError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import { BugReportSeverity } from "@workspace/validation/modules/bug-report/consts/bug-report-severity.const";
@@ -22,6 +23,7 @@ export class GetOverviewStatsUseCase {
     input: GetOverviewStatsInputDtoType,
     userId: string,
     organizationId: string | null,
+    mcpProjectIds?: string[] | null,
   ): Promise<GetOverviewStatsOutputDtoType> {
     const resolvedOrganizationId = input.organizationId ?? organizationId;
     if (!resolvedOrganizationId) throw new NotFoundError(ERROR_CODES.ORGANIZATION_NOT_FOUND);
@@ -32,7 +34,7 @@ export class GetOverviewStatsUseCase {
     });
     if (!membership) throw new NotFoundError(ERROR_CODES.ORGANIZATION_NOT_FOUND);
 
-    const projectIds = await this.resolveProjectIds(input, membership);
+    const projectIds = narrowProjectIds(await this.resolveProjectIds(input, membership), mcpProjectIds);
     const allStatuses = Object.values(BugReportStatus);
 
     if (projectIds.length === 0) {

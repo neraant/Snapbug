@@ -11,4 +11,5 @@ export type FindActivityLogsPageInput = {
   actorId?: string;
   entityType?: ActivityLogEntityTypeFilterType;
   range?: ActivityLogDateRangeType;
+  projectIds?: string[];
 };

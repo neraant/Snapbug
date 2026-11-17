@@ -1,7 +1,9 @@
 import { ListMembersUseCase } from "@workspace/server/modules/membership/application/list-members.use-case";
 import { Membership } from "@workspace/server/modules/membership/entity/membership.entity";
+import { ProjectAccess } from "@workspace/server/modules/membership/entity/project-access.entity";
 import type { UserPort } from "@workspace/server/modules/membership/port/user.port";
 import type { MembershipRepository } from "@workspace/server/modules/membership/repository/membership.repository";
+import type { ProjectAccessRepository } from "@workspace/server/modules/membership/repository/project-access.repository";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
 import { describe, expect, it, vi } from "vitest";
@@ -32,6 +34,23 @@ const teamMembership = new Membership({
   createdAt: new Date("2026-10-03T09:00:00.000Z"),
 });
 
+const scopedProjectId = "7a8c69a1-1ab1-45a8-8497-eae1e506d9d4";
+const limitedMemberMembership = new Membership({
+  id: "8a8c69a1-1ab1-45a8-8497-eae1e506d9d4",
+  userId: "9a8c69a1-1ab1-45a8-8497-eae1e506d9d4",
+  organizationId,
+  role: UserRole.USER,
+  createdAt: new Date("2026-10-03T09:00:00.000Z"),
+});
+
+const outOfScopeMember = new Membership({
+  id: "aa8c69a1-1ab1-45a8-8497-eae1e506d9d4",
+  userId: "ba8c69a1-1ab1-45a8-8497-eae1e506d9d4",
+  organizationId,
+  role: UserRole.USER,
+  createdAt: new Date("2026-10-03T09:00:00.000Z"),
+});
+
 describe("ListMembersUseCase", () => {
   it("omits emails for non-admin callers", async () => {
     const membershipRepository = {
@@ -49,8 +68,10 @@ describe("ListMembersUseCase", () => {
         },
       ]),
     };
+    const projectAccessRepository = { findManyByProjectId: vi.fn() };
     const useCase = new ListMembersUseCase(
       membershipRepository as unknown as MembershipRepository,
+      projectAccessRepository as unknown as ProjectAccessRepository,
       userPort as unknown as UserPort,
     );
 
@@ -81,8 +102,10 @@ describe("ListMembersUseCase", () => {
         },
       ]),
     };
+    const projectAccessRepository = { findManyByProjectId: vi.fn() };
     const useCase = new ListMembersUseCase(
       membershipRepository as unknown as MembershipRepository,
+      projectAccessRepository as unknown as ProjectAccessRepository,
       userPort as unknown as UserPort,
     );
 
@@ -97,8 +120,10 @@ describe("ListMembersUseCase", () => {
       findManyByOrganizationId: vi.fn(),
     };
     const userPort = { findManyByIds: vi.fn() };
+    const projectAccessRepository = { findManyByProjectId: vi.fn() };
     const useCase = new ListMembersUseCase(
       membershipRepository as unknown as MembershipRepository,
+      projectAccessRepository as unknown as ProjectAccessRepository,
       userPort as unknown as UserPort,
     );
 
@@ -107,5 +132,52 @@ describe("ListMembersUseCase", () => {
     });
 
     expect(membershipRepository.findManyByOrganizationId).not.toHaveBeenCalled();
+  });
+
+  it("limits members to admins and project access when the MCP token has a project subset", async () => {
+    const membershipRepository = {
+      findByUserAndOrganization: vi.fn().mockResolvedValue(adminCallerMembership),
+      findManyByOrganizationId: vi
+        .fn()
+        .mockResolvedValue([adminCallerMembership, limitedMemberMembership, outOfScopeMember]),
+    };
+    const projectAccessRepository = {
+      findManyByProjectId: vi.fn().mockResolvedValue([
+        new ProjectAccess({
+          id: "aa8c69a1-1ab1-45a8-8497-eae1e506d9d4",
+          membershipId: limitedMemberMembership.id,
+          projectId: scopedProjectId,
+          createdAt: new Date("2026-10-03T09:00:00.000Z"),
+        }),
+      ]),
+    };
+    const userPort = {
+      findManyByIds: vi.fn().mockResolvedValue([
+        {
+          id: adminCallerMembership.userId,
+          email: "admin@test.io",
+          name: "Admin",
+          interfaceLanguage: "en",
+          onboardingCompletedAt: null,
+        },
+        {
+          id: limitedMemberMembership.userId,
+          email: "scoped@test.io",
+          name: "Scoped",
+          interfaceLanguage: "en",
+          onboardingCompletedAt: null,
+        },
+      ]),
+    };
+    const useCase = new ListMembersUseCase(
+      membershipRepository as unknown as MembershipRepository,
+      projectAccessRepository as unknown as ProjectAccessRepository,
+      userPort as unknown as UserPort,
+    );
+
+    const result = await useCase.execute({}, userId, organizationId, [scopedProjectId]);
+
+    expect(projectAccessRepository.findManyByProjectId).toHaveBeenCalledWith(scopedProjectId);
+    expect(result.map((member) => member.userId)).toEqual([userId, limitedMemberMembership.userId]);
   });
 });

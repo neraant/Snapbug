@@ -6,6 +6,7 @@ import type { UserPort } from "@workspace/server/modules/comment/port/user.port"
 import type { CommentRepository } from "@workspace/server/modules/comment/repository/comment.repository";
 import { NotFoundError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
+import { assertMcpProjectAllowed } from "@workspace/server/shared/orpc/mcp/mcp-project-scope.util";
 import type { BugReportModelType } from "@workspace/validation/modules/bug-report/dto/bug-report.model";
 import type {
   FindCommentsInputDtoType,
@@ -22,8 +23,12 @@ export class FindCommentsUseCase {
     private readonly commentRepository: CommentRepository,
   ) {}
 
-  async execute(input: FindCommentsInputDtoType, userId: string): Promise<FindCommentsOutputDtoType> {
-    const ticket = await this.loadTicket(input.bugReportId, userId);
+  async execute(
+    input: FindCommentsInputDtoType,
+    userId: string,
+    mcpProjectIds?: string[] | null,
+  ): Promise<FindCommentsOutputDtoType> {
+    const ticket = await this.loadTicket(input.bugReportId, userId, mcpProjectIds);
 
     if (isReportAuthor(ticket.caller.email, ticket.bugReport.reporterEmail)) {
       return [];
@@ -38,7 +43,11 @@ export class FindCommentsUseCase {
     return comments.map((comment) => CommentMapper.toDto(comment, authorsById.get(comment.authorUserId) ?? null));
   }
 
-  private async loadTicket(bugReportId: string, userId: string): Promise<AccessibleTicket> {
+  private async loadTicket(
+    bugReportId: string,
+    userId: string,
+    mcpProjectIds?: string[] | null,
+  ): Promise<AccessibleTicket> {
     const bugReport = await this.bugReportPort.findById(bugReportId);
     if (!bugReport) throw new NotFoundError(ERROR_CODES.BUG_REPORT_NOT_FOUND);
 
@@ -53,6 +62,8 @@ export class FindCommentsUseCase {
 
     const allowedProjectIds = await this.membershipPort.filterProjectIds(membership, [bugReport.projectId]);
     if (allowedProjectIds.length === 0) throw new NotFoundError(ERROR_CODES.BUG_REPORT_NOT_FOUND);
+
+    assertMcpProjectAllowed(bugReport.projectId, mcpProjectIds);
 
     const caller = (await this.userPort.findManyByIds([userId]))[0];
     if (!caller) throw new NotFoundError(ERROR_CODES.USER_NOT_FOUND);

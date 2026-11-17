@@ -194,6 +194,18 @@ describe("FindActivityLogsUseCase", () => {
     expect(result.nextCursor).toBe(`${occurredAt.toISOString()}|${auditLog.id}`);
   });
 
+  it("narrows activity to selected projects for an MCP token subset", async () => {
+    const projectId = "6a8c69a1-1ab1-45a8-8497-eae1e506d9d1";
+    const auditLogRepository = { findPageByOrganizationId: vi.fn().mockResolvedValue([]) };
+    const useCase = createUseCase({ auditLogRepository });
+
+    await useCase.execute(userId, organizationId, {}, [projectId]);
+
+    expect(auditLogRepository.findPageByOrganizationId).toHaveBeenCalledWith(
+      expect.objectContaining({ projectIds: [projectId] }),
+    );
+  });
+
   it("rejects a member without reading the log", async () => {
     const auditLogRepository = { findPageByOrganizationId: vi.fn() };
     const useCase = createUseCase({

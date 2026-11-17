@@ -1,14 +1,8 @@
+import type { McpToolScopeType } from "@workspace/validation/modules/user-token/consts/mcp-scope.const";
+
 export type McpToolAccessType = "read" | "write";
 
-export type McpToolScopeType =
-  | "tickets:read"
-  | "tickets:write"
-  | "comments:read"
-  | "comments:write"
-  | "projects:read"
-  | "members:read"
-  | "stats:read"
-  | "activity:read";
+export type { McpToolScopeType };
 
 export type McpToolCatalogEntryType = {
   name: string;

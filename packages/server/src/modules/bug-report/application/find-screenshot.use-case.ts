@@ -1,6 +1,7 @@
 import type { FileStoragePort } from "@workspace/server/modules/bug-report/port/file-storage.port";
 import type { MembershipPort } from "@workspace/server/modules/bug-report/port/membership.port";
 import type { BugReportRepository } from "@workspace/server/modules/bug-report/repository/bug-report.repository";
+import { assertMcpProjectAllowed } from "@workspace/server/shared/orpc/mcp/mcp-project-scope.util";
 import { NotFoundError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import type { FindScreenshotInputDtoType } from "@workspace/validation/modules/bug-report/dto/find-screenshot.schema";
@@ -21,9 +22,10 @@ export class FindScreenshotUseCase {
     input: FindScreenshotInputDtoType,
     userId: string,
     organizationId: string | null,
+    mcpProjectIds?: string[] | null,
   ): Promise<FindScreenshotResult> {
     if (!organizationId) {
-      return await this.readAccessibleScreenshot(input.shortId, userId);
+      return await this.readAccessibleScreenshot(input.shortId, userId, mcpProjectIds);
     }
 
     const membership = await this.membershipPort.findByUserAndOrganization({ userId, organizationId });
@@ -38,13 +40,19 @@ export class FindScreenshotUseCase {
     const allowedProjectIds = await this.membershipPort.filterProjectIds(membership, [bugReport.projectId]);
     if (allowedProjectIds.length === 0) throw new NotFoundError(ERROR_CODES.BUG_REPORT_NOT_FOUND);
 
+    assertMcpProjectAllowed(bugReport.projectId, mcpProjectIds);
+
     const screenshotKey = bugReport.screenshotKey;
     if (!screenshotKey) throw new NotFoundError(ERROR_CODES.BUG_REPORT_NOT_FOUND);
 
     return await this.fileStoragePort.readBugReportScreenshot(screenshotKey);
   }
 
-  private async readAccessibleScreenshot(shortId: string, userId: string): Promise<FindScreenshotResult> {
+  private async readAccessibleScreenshot(
+    shortId: string,
+    userId: string,
+    mcpProjectIds?: string[] | null,
+  ): Promise<FindScreenshotResult> {
     const candidates = await this.bugReportRepository.findManyByShortId(shortId);
 
     for (const candidate of candidates) {
@@ -56,6 +64,12 @@ export class FindScreenshotUseCase {
 
       const allowedProjectIds = await this.membershipPort.filterProjectIds(membership, [candidate.bugReport.projectId]);
       if (allowedProjectIds.length === 0) continue;
+
+      try {
+        assertMcpProjectAllowed(candidate.bugReport.projectId, mcpProjectIds);
+      } catch {
+        continue;
+      }
 
       const screenshotKey = candidate.bugReport.screenshotKey;
       if (!screenshotKey) throw new NotFoundError(ERROR_CODES.BUG_REPORT_NOT_FOUND);
