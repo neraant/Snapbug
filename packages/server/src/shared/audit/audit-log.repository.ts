@@ -1,6 +1,8 @@
 import type { DbClient } from "@workspace/database";
 import { db as defaultDb } from "@workspace/database";
 import { auditLogTable } from "@workspace/database/schema";
+import { decodeActivityLogCursor } from "@workspace/server/shared/audit/activity-log-cursor.util";
+import type { FindActivityLogsPageInput } from "@workspace/server/shared/audit/activity-log-page.types";
 import type { AuditLog } from "@workspace/server/shared/audit/audit-log.entity";
 import { AuditLogMapper } from "@workspace/server/shared/audit/audit-log.mapper";
 import type { OpenMetricsAtInstant } from "@workspace/server/shared/audit/audit-log.types";
@@ -8,8 +10,6 @@ import { InternalServerError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import { BugReportSeverity } from "@workspace/validation/modules/bug-report/consts/bug-report-severity.const";
 import { BugReportStatus } from "@workspace/validation/modules/bug-report/consts/bug-report-status.const";
-import { decodeActivityLogCursor } from "@workspace/server/shared/audit/activity-log-cursor.util";
-import type { FindActivityLogsPageInput } from "@workspace/server/shared/audit/activity-log-page.types";
 import { and, asc, desc, eq, gte, ilike, inArray, lt, lte, or, sql } from "drizzle-orm";
 
 const BUG_REPORT_ENTITY_TYPE = "bug-report";
@@ -68,6 +68,15 @@ export class AuditLogRepository {
     const since = rangeToSince(input.range);
     if (since) {
       conditions.push(gte(auditLogTable.occurredAt, since));
+    }
+
+    if (input.projectIds && input.projectIds.length > 0) {
+      conditions.push(
+        or(
+          inArray(auditLogTable.projectId, input.projectIds),
+          and(eq(auditLogTable.entityType, "project"), inArray(auditLogTable.entityId, input.projectIds)),
+        )!,
+      );
     }
 
     const search = input.search?.trim();

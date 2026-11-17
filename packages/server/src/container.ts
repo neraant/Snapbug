@@ -64,6 +64,7 @@ import { RevokeInvitationUseCase } from "@workspace/server/modules/invitation/ap
 import { SendInvitationsUseCase } from "@workspace/server/modules/invitation/application/send-invitation.use-case";
 import { InvitationRepository } from "@workspace/server/modules/invitation/repository/invitation.repository";
 import { InvitationService } from "@workspace/server/modules/invitation/service/invitation.service";
+import { ListToolsUseCase } from "@workspace/server/modules/mcp/application/list-tools.use-case";
 import { ActivityLogMembershipAdapter } from "@workspace/server/modules/membership/adapter/activity-log-membership.adapter";
 import { MembershipAdapter } from "@workspace/server/modules/membership/adapter/membership.adapter";
 import { CheckUserProjectAccessUseCase } from "@workspace/server/modules/membership/application/check-user-project-access.use-case";
@@ -108,7 +109,6 @@ import { UpdateProjectUseCase } from "@workspace/server/modules/project/applicat
 import { UpdateProjectWidgetSettingUseCase } from "@workspace/server/modules/project/application/update-project-widget-setting.use-case";
 import { ProjectRepository } from "@workspace/server/modules/project/repository/project.repository";
 import { ProjectService } from "@workspace/server/modules/project/service/project.service";
-import { ListToolsUseCase } from "@workspace/server/modules/mcp/application/list-tools.use-case";
 import { FindUserPreferenceUseCase } from "@workspace/server/modules/preference/application/find-user-preference.use-case";
 import { UpdateUserPreferenceUseCase } from "@workspace/server/modules/preference/application/update-user-preference.use-case";
 import { UserPreferenceRepository } from "@workspace/server/modules/preference/repository/user-preference.repository";
@@ -400,13 +400,18 @@ const getTicketEnvironment = new GetTicketEnvironmentUseCase(membershipAdapter, 
 const getOverviewStats = new GetOverviewStatsUseCase(membershipAdapter, projectAdapter, bugReportRepository);
 const listProjects = new ListProjectsUseCase(membershipAdapter, projectRepository);
 const getProject = new GetProjectUseCase(membershipAdapter, projectRepository);
-const listMembers = new ListMembersUseCase(membershipRepository, userAdapter);
+const listMembers = new ListMembersUseCase(membershipRepository, projectAccessRepository, userAdapter);
 const userPreferenceRepository = new UserPreferenceRepository();
 const findUserPreference = new FindUserPreferenceUseCase(userPreferenceRepository);
 const updateUserPreference = new UpdateUserPreferenceUseCase(userPreferenceRepository);
 const userTokenRepository = new UserTokenRepository();
 const userTokenService = new UserTokenService();
-const createUserToken = new CreateUserTokenUseCase(userTokenService, userTokenRepository);
+const createUserToken = new CreateUserTokenUseCase(
+  userTokenService,
+  userTokenRepository,
+  membershipAdapter,
+  projectAdapter,
+);
 const findUserTokens = new FindUserTokensUseCase(userTokenRepository);
 const revokeUserToken = new RevokeUserTokenUseCase(userTokenRepository);
 const findUserByToken = new FindUserByTokenUseCase(userTokenService, userTokenRepository, userAdapter);

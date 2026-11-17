@@ -1,6 +1,7 @@
 import type { UserPort } from "@workspace/server/modules/user-token/port/user.port";
 import type { UserTokenRepository } from "@workspace/server/modules/user-token/repository/user-token.repository";
 import type { UserTokenService } from "@workspace/server/modules/user-token/service/user-token.service";
+import { expandMcpScopes } from "@workspace/validation/modules/user-token/consts/mcp-scope.const";
 import { NotFoundError, UnauthorizedError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import type {
@@ -26,7 +27,14 @@ export class FindUserByTokenUseCase {
     }
 
     try {
-      return await this.userPort.findById(userToken.userId);
+      const user = await this.userPort.findById(userToken.userId);
+      return {
+        ...user,
+        mcpToken: {
+          scopes: expandMcpScopes(userToken.scopes),
+          projectIds: userToken.projectIds,
+        },
+      };
     } catch (error) {
       if (error instanceof NotFoundError && error.errorCode === ERROR_CODES.USER_NOT_FOUND) {
         throw new UnauthorizedError(ERROR_CODES.UNAUTHORIZED, "You need to sign in to continue");

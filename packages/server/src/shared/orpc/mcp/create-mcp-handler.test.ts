@@ -6,14 +6,21 @@ import type { OrpcContext } from "@workspace/server/shared/orpc/context.const";
 import { createMcpHandler } from "@workspace/server/shared/orpc/mcp/create-mcp-handler";
 import { MCP_TOOL_CATALOG_BY_NAME } from "@workspace/server/shared/orpc/mcp/mcp-tool-catalog.const";
 import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
+import { expandMcpScopes, MCP_READ_SCOPES } from "@workspace/validation/modules/user-token/consts/mcp-scope.const";
 import { describe, expect, it } from "vitest";
 
-const context: OrpcContext = {
+const baseContext: OrpcContext = {
   user: { id: "user-1", email: "a@b.test", name: null, role: UserRole.ADMIN },
   organizationId: null,
   ip: "127.0.0.1",
   actor: { type: "user", id: "user-1" },
   requestOrigin: null,
+  mcp: { tokenScopes: expandMcpScopes(MCP_READ_SCOPES), projectIds: null },
+};
+
+const contextWithCommentWrite: OrpcContext = {
+  ...baseContext,
+  mcp: { tokenScopes: expandMcpScopes([...MCP_READ_SCOPES, "comments:write"]), projectIds: null },
 };
 
 function buildCommentRouter(handlers: { addComment?: () => never; findComments?: () => never }) {
@@ -28,7 +35,7 @@ function buildCommentRouter(handlers: { addComment?: () => never; findComments?:
   };
 }
 
-async function postJsonRpc(router: unknown, body: object) {
+async function postJsonRpc(router: unknown, body: object, orpcContext: OrpcContext = baseContext) {
   const handler = createMcpHandler(router);
   const request = new Request("http://localhost/api/mcp", {
     method: "POST",
@@ -38,7 +45,7 @@ async function postJsonRpc(router: unknown, body: object) {
     },
     body: JSON.stringify(body),
   });
-  const { response } = await handler.handle(request, { context });
+  const { response } = await handler.handle(request, { context: orpcContext });
   return { status: response.status, body: (await response.json()) as Record<string, unknown> };
 }
 
@@ -50,7 +57,7 @@ describe("createMcpHandler", () => {
       headers: { accept: "text/event-stream" },
     });
 
-    const { response } = await handler.handle(request, { context });
+    const { response } = await handler.handle(request, { context: baseContext });
 
     expect(response.status).toBe(405);
     expect(response.headers.get("Allow")).toBe("POST");
@@ -65,9 +72,9 @@ describe("createMcpHandler", () => {
     });
     const result = body.result as { tools: { name: string; description?: string }[] };
 
-    expect(result.tools.map((tool) => tool.name).sort()).toEqual(["add_comment", "list_comments"]);
-    expect(result.tools.find((tool) => tool.name === "add_comment")?.description).toBe(
-      MCP_TOOL_CATALOG_BY_NAME.add_comment.description,
+    expect(result.tools.map((tool) => tool.name).sort()).toEqual(["list_comments"]);
+    expect(result.tools.find((tool) => tool.name === "list_comments")?.description).toBe(
+      MCP_TOOL_CATALOG_BY_NAME.list_comments.description,
     );
   });
 
@@ -76,7 +83,7 @@ describe("createMcpHandler", () => {
     const { body } = await postJsonRpc(
       buildCommentRouter({
         findComments: () => {
-          receivedUserId = context.user?.id;
+          receivedUserId = baseContext.user?.id;
           return [] as never;
         },
       }),
@@ -95,6 +102,25 @@ describe("createMcpHandler", () => {
     expect(result.isError).toBeFalsy();
     expect(receivedUserId).toBe("user-1");
     expect(JSON.parse(result.content[0]?.text ?? "")).toEqual([]);
+  });
+
+  it("returns a scope error when the token lacks write access", async () => {
+    const { body } = await postJsonRpc(buildCommentRouter({}), {
+      jsonrpc: "2.0",
+      id: 4,
+      method: "tools/call",
+      params: {
+        name: "add_comment",
+        arguments: {
+          bugReportId: "0a8c69a1-1ab1-45a8-8497-eae1e506d9d4",
+          body: "note",
+        },
+      },
+    });
+    const result = body.result as { content: { type: string; text: string }[]; isError?: boolean };
+
+    expect(result.isError).toBe(true);
+    expect(result.content[0]?.text).toBe("This token does not have the `comments:write` scope");
   });
 
   it("returns isError when the procedure throws a domain error", async () => {
@@ -116,6 +142,7 @@ describe("createMcpHandler", () => {
           },
         },
       },
+      contextWithCommentWrite,
     );
     const result = body.result as { content: { type: string; text: string }[]; isError?: boolean };
 

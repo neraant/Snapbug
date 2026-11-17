@@ -5,6 +5,7 @@ import type { UserTokenRepository } from "@workspace/server/modules/user-token/r
 import { UserTokenService } from "@workspace/server/modules/user-token/service/user-token.service";
 import { NotFoundError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
+import { LEGACY_USER_TOKEN_SCOPES } from "@workspace/validation/modules/user-token/consts/mcp-scope.const";
 import { createHash } from "crypto";
 import { describe, expect, it, vi } from "vitest";
 
@@ -25,6 +26,9 @@ const userToken = new UserToken({
   tokenHash: createHash("sha256").update(secret).digest("hex"),
   name: "Cursor MCP",
   prefix: "snb_ut_live_abc1",
+  scopes: [...LEGACY_USER_TOKEN_SCOPES],
+  scopePreset: "custom",
+  projectIds: null,
   createdAt,
   revokedAt: null,
 });
@@ -42,7 +46,10 @@ describe("FindUserByTokenUseCase", () => {
     const result = await useCase.execute({ token: secret });
 
     expect(userTokenRepository.findByHash).toHaveBeenCalledWith(userToken.tokenHash);
-    expect(result).toEqual(user);
+    expect(result).toEqual({
+      ...user,
+      mcpToken: { scopes: LEGACY_USER_TOKEN_SCOPES, projectIds: null },
+    });
   });
 
   it("rejects a project key", async () => {

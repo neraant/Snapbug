@@ -7,6 +7,7 @@ import type { AuditActor } from "@workspace/server/shared/audit/audit-log.types"
 import type { WithTransactionType } from "@workspace/server/shared/database/transaction.util";
 import { NotFoundError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
+import { assertMcpProjectAllowed } from "@workspace/server/shared/orpc/mcp/mcp-project-scope.util";
 import type {
   UpdateBugReportInputDtoType,
   UpdateBugReportOutputDtoType,
@@ -25,6 +26,7 @@ export class UpdateBugReportUseCase {
     input: UpdateBugReportInputDtoType,
     userId: string,
     actor: AuditActor,
+    mcpProjectIds?: string[] | null,
   ): Promise<UpdateBugReportOutputDtoType> {
     const bugReport = await this.bugReportRepository.findById(input.id);
     if (!bugReport) throw new NotFoundError(ERROR_CODES.BUG_REPORT_NOT_FOUND);
@@ -40,6 +42,8 @@ export class UpdateBugReportUseCase {
 
     const allowedProjectIds = await this.membershipPort.filterProjectIds(membership, [bugReport.projectId]);
     if (allowedProjectIds.length === 0) throw new NotFoundError(ERROR_CODES.BUG_REPORT_NOT_FOUND);
+
+    assertMcpProjectAllowed(bugReport.projectId, mcpProjectIds);
 
     const { id: _id, ...patch } = input;
     const updatedBugReport = bugReport.update(patch);

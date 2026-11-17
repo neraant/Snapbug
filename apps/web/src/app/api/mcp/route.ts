@@ -28,6 +28,10 @@ async function handleRequest(request: Request) {
         ip: readClientIp(request),
         actor: { type: "mcp", id: user.id },
         requestOrigin: request.headers.get("origin"),
+        mcp: {
+          tokenScopes: user.mcpToken.scopes,
+          projectIds: user.mcpToken.projectIds,
+        },
       },
     });
     return response;

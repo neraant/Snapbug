@@ -18,10 +18,11 @@ export const projectRouter = os.router({
     async ({ context }) => await container.project.findProjects.executeForUser(context.user.id, context.organizationId),
   ),
   listProjects: authed.listProjects.handler(
-    async ({ context }) => await container.project.listProjects.execute(context.user.id),
+    async ({ context }) => await container.project.listProjects.execute(context.user.id, context.mcp?.projectIds),
   ),
   getProject: authed.getProject.handler(
-    async ({ input, context }) => await container.project.getProject.execute(input, context.user.id),
+    async ({ input, context }) =>
+      await container.project.getProject.execute(input, context.user.id, context.mcp?.projectIds),
   ),
   updateProject: admin.updateProject.handler(
     async ({ input, context }) => await container.project.updateProject.execute(input, context.user.id),

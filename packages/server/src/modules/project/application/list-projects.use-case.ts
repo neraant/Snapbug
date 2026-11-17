@@ -2,6 +2,7 @@ import { ProjectMapper } from "@workspace/server/modules/project/entity/project.
 import type { MembershipPort } from "@workspace/server/modules/project/port/membership.port";
 import type { ProjectRepository } from "@workspace/server/modules/project/repository/project.repository";
 import type { MembershipModelType } from "@workspace/validation/modules/membership/dto/membership.model";
+import { isMcpProjectAllowed } from "@workspace/server/shared/orpc/mcp/mcp-project-scope.util";
 import type { FindProjectsOutputDtoType } from "@workspace/validation/modules/project/dto/find-projects.schema";
 
 export class ListProjectsUseCase {
@@ -10,11 +11,13 @@ export class ListProjectsUseCase {
     private readonly projectRepository: ProjectRepository,
   ) {}
 
-  async execute(userId: string): Promise<FindProjectsOutputDtoType> {
+  async execute(userId: string, mcpProjectIds?: string[] | null): Promise<FindProjectsOutputDtoType> {
     const memberships = await this.membershipPort.findManyByUser(userId);
     const projects = await this.collectProjects(memberships);
     const uniqueById = new Map(projects.map((project) => [project.id, project]));
-    return [...uniqueById.values()].map((project) => ProjectMapper.toDto(project));
+    return [...uniqueById.values()]
+      .filter((project) => isMcpProjectAllowed(project.id, mcpProjectIds))
+      .map((project) => ProjectMapper.toDto(project));
   }
 
   private async collectProjects(memberships: MembershipModelType[]) {

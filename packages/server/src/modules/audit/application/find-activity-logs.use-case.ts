@@ -27,6 +27,7 @@ export class FindActivityLogsUseCase {
     userId: string,
     organizationId: string | null,
     input: FindActivityLogsInputDtoType,
+    mcpProjectIds?: string[] | null,
   ): Promise<FindActivityLogsOutputDtoType> {
     if (!organizationId) throw new NotFoundError(ERROR_CODES.ORGANIZATION_NOT_FOUND);
 
@@ -45,6 +46,7 @@ export class FindActivityLogsUseCase {
       actorId: input.actorId,
       entityType: input.entityType,
       range: input.range ?? "all",
+      ...(mcpProjectIds && mcpProjectIds.length > 0 ? { projectIds: mcpProjectIds } : {}),
     });
 
     const pageItems = auditLogs.slice(0, limit);
