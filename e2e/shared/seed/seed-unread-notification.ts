@@ -1,6 +1,4 @@
-import { db } from "@workspace/database";
-import { bugReportTable, notificationTable, projectTable, userTable } from "@workspace/database/schema";
-import { eq } from "drizzle-orm";
+const DEFAULT_DATABASE_URL = "postgres://postgres:postgres@localhost:5432/snapbug";
 
 const ADMIN_EMAIL = "admin@example.com";
 const ORGANIZATION_ID = "2a8c69a1-1ab1-45a8-8497-eae1e506d9d1";
@@ -8,16 +6,18 @@ const TICKET_ID = "6a8c69a1-1ab1-45a8-8497-eae1e506d901";
 const NOTIFICATION_ID = "7a8c69a1-1ab1-45a8-8497-eae1e506d9d1";
 
 export async function seedUnreadNotification(): Promise<{ ticketShortId: string }> {
+  process.env.DATABASE_URL = process.env.DATABASE_URL ?? DEFAULT_DATABASE_URL;
+
+  const { db } = await import("@workspace/database");
+  const { bugReportTable, notificationTable, projectTable, userTable } = await import("@workspace/database/schema");
+  const { eq } = await import("drizzle-orm");
+
   const [admin] = await db.select().from(userTable).where(eq(userTable.email, ADMIN_EMAIL)).limit(1);
   if (!admin) {
     throw new Error(`Seed user ${ADMIN_EMAIL} not found`);
   }
 
-  const [alice] = await db
-    .select()
-    .from(userTable)
-    .where(eq(userTable.email, "alice@example.com"))
-    .limit(1);
+  const [alice] = await db.select().from(userTable).where(eq(userTable.email, "alice@example.com")).limit(1);
 
   const [ticket] = await db.select().from(bugReportTable).where(eq(bugReportTable.id, TICKET_ID)).limit(1);
   if (!ticket) {
