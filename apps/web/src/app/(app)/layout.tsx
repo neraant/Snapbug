@@ -8,6 +8,7 @@ import type { PropsWithChildren } from "react";
 
 import { auth } from "@/auth";
 import { GlobalSearch } from "@/client/modules/global-search/components/global-search";
+import { NotificationBell } from "@/client/modules/notification/components/notification-bell";
 import { UserPreferenceProvider } from "@/client/modules/preference/components/user-preference-provider";
 import {
   bindInterfaceLanguageStore,
@@ -44,7 +45,12 @@ export default async function Layout({ children }: PropsWithChildren) {
           isAdmin={activeOrganization?.role === UserRole.ADMIN}
           activeOrganizationId={activeOrganization?.organizationId ?? null}
           defaultSidebarOpen={defaultSidebarOpen}
-          headerToolbarStart={<GlobalSearch />}
+          headerToolbarStart={
+            <>
+              <GlobalSearch />
+              <NotificationBell />
+            </>
+          }
         >
           {children}
         </AppSidebar>

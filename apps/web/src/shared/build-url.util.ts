@@ -55,6 +55,7 @@ export const routePattern = {
   team: "/team",
   settings: "/settings",
   activity: "/activity",
+  notifications: "/notifications",
 } as const;
 
 export const url = {
@@ -78,4 +79,6 @@ export const url = {
   team: () => routePattern.team,
   settings: () => routePattern.settings,
   activity: () => routePattern.activity,
+  notifications: () => routePattern.notifications,
+  settingsNotifications: () => buildUrl(routePattern.settings, {}, { tab: "notifications" }),
 } as const;

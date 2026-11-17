@@ -1,4 +1,3 @@
-import { PageContainer } from "@workspace/design-system/components/layout/page";
 import { Row } from "@workspace/design-system/components/layout/row";
 import { Breadcrumb } from "@workspace/design-system/components/ui/breadcrumb";
 import { SidebarTrigger, useSidebar } from "@workspace/design-system/components/ui/sidebar";
@@ -51,7 +50,6 @@ export function AppSidebarHeader({ toolbarStart }: AppSidebarHeaderProps) {
       </Row>
       <Row align="center" gap="sm" wrap={false}>
         {toolbarStart}
-        <PageContainer.HeaderToolbar notificationLabel={texts.header.notifications} />
       </Row>
     </Row>
   );

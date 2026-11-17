@@ -20,6 +20,10 @@ export const notificationRouter = os.router({
     async ({ context, input }) =>
       await container.notification.markRead.execute(input, context.user.id, context.organizationId),
   ),
+  markUnread: authed.markUnread.handler(
+    async ({ context, input }) =>
+      await container.notification.markUnread.execute(input, context.user.id, context.organizationId),
+  ),
   markAllRead: authed.markAllRead.handler(
     async ({ context }) => await container.notification.markAllRead.execute(context.user.id, context.organizationId),
   ),
