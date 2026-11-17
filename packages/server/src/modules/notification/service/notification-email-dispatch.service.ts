@@ -39,14 +39,6 @@ export class NotificationEmailDispatchService {
     private readonly userPort: NotificationUserPort,
   ) {}
 
-  scheduleAfterCommit(work: () => Promise<void>): void {
-    queueMicrotask(() => {
-      void work().catch((error) => {
-        console.error("[notification-email] dispatch failed", error);
-      });
-    });
-  }
-
   async deliver(input: NotificationEmailDeliveryInput): Promise<void> {
     const preference =
       (await this.userNotificationPreferenceRepository.findByUserId(input.userId)) ??

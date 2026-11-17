@@ -4,7 +4,7 @@ import type { NotificationPayloadType } from "@workspace/validation/modules/noti
 const appUrl = () => process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
 export function notificationSettingsUrl(): string {
-  return `${appUrl()}/settings/notifications`;
+  return `${appUrl()}/settings?tab=notifications`;
 }
 
 export function notificationObjectUrl(

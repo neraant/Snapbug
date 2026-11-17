@@ -104,16 +104,19 @@ export class NotificationService {
     }
 
     if (resolution.email) {
-      this.notificationEmailDispatchService.scheduleAfterCommit(async () => {
-        await this.notificationEmailDispatchService.deliver({
-          userId: input.recipientUserId,
-          organizationId: input.organizationId,
-          type: input.type,
-          actorUserId: input.actorUserId,
-          objectType: input.objectType,
-          objectId: input.objectId,
-          projectId: input.projectId,
-          payload: input.payload,
+      const emailInput = {
+        userId: input.recipientUserId,
+        organizationId: input.organizationId,
+        type: input.type,
+        actorUserId: input.actorUserId,
+        objectType: input.objectType,
+        objectId: input.objectId,
+        projectId: input.projectId,
+        payload: input.payload,
+      };
+      setImmediate(() => {
+        void this.notificationEmailDispatchService.deliver(emailInput).catch((error) => {
+          console.error("[notification-email] dispatch failed", error);
         });
       });
     }

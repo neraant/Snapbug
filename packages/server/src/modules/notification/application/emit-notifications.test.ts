@@ -495,7 +495,7 @@ describe("EmitNotificationsUseCase", () => {
     notificationPreferenceService.withTx = vi.fn().mockReturnValue(notificationPreferenceService);
 
     const notificationEmailDispatchService = {
-      scheduleAfterCommit: vi.fn(),
+      deliver: vi.fn().mockResolvedValue(undefined),
     } as unknown as NotificationEmailDispatchService;
 
     const notificationService = new NotificationService(
