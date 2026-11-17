@@ -41,6 +41,7 @@ const ERROR_MESSAGES: Record<ErrorCode, string> = {
   [ERROR_CODES.PROJECT_KEY_NOT_ACCEPTED]: "A project key is not accepted",
   [ERROR_CODES.COMMENT_NOT_FOUND]: "Comment not found",
   [ERROR_CODES.CANNOT_MANAGE_COMMENT]: "You can only edit or delete your own comment",
+  [ERROR_CODES.INVALID_CURRENT_PASSWORD]: "The current password is incorrect",
 };
 
 function isErrorCode(value: unknown): value is ErrorCode {

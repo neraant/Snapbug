@@ -11,7 +11,12 @@ import {
 } from "@/client/modules/settings/consts/settings-tab.const";
 
 function parseSettingsTab(value: string | null): SettingsTab {
-  if (value === settingsTabs.profile || value === settingsTabs.organization || value === settingsTabs.tokens) {
+  if (
+    value === settingsTabs.profile ||
+    value === settingsTabs.appearance ||
+    value === settingsTabs.organization ||
+    value === settingsTabs.tokens
+  ) {
     return value;
   }
 

@@ -8,6 +8,7 @@ import type { PropsWithChildren } from "react";
 
 import { auth } from "@/auth";
 import { GlobalSearch } from "@/client/modules/global-search/components/global-search";
+import { UserPreferenceProvider } from "@/client/modules/preference/components/user-preference-provider";
 import {
   bindInterfaceLanguageStore,
   enterInterfaceLanguage,
@@ -26,21 +27,28 @@ export default async function Layout({ children }: PropsWithChildren) {
   const activeOrganization = userId ? await resolveActiveOrganization(userId) : null;
   const currentUser = userId ? await container.identity.findCurrentUser.execute(userId) : null;
   const cookieStore = await cookies();
-  const defaultSidebarOpen = parseSidebarOpenState(cookieStore.get(SIDEBAR_OPEN_STATE_COOKIE)?.value, false);
+  const userPreference = userId ? await container.preference.findUserPreference.execute(userId) : null;
+  const sidebarCookie = cookieStore.get(SIDEBAR_OPEN_STATE_COOKIE)?.value;
+  const defaultSidebarOpen = parseSidebarOpenState(
+    sidebarCookie,
+    userPreference ? !userPreference.sidebarCollapsed : false,
+  );
   const language: InterfaceLanguage = currentUser?.interfaceLanguage === "ru" ? "ru" : "en";
   enterInterfaceLanguage(language);
 
   return (
     <InterfaceLanguageProvider key={language} language={language}>
-      <AppSidebar
-        user={session?.user}
-        isAdmin={activeOrganization?.role === UserRole.ADMIN}
-        activeOrganizationId={activeOrganization?.organizationId ?? null}
-        defaultSidebarOpen={defaultSidebarOpen}
-        headerToolbarStart={<GlobalSearch />}
-      >
-        {children}
-      </AppSidebar>
+      <UserPreferenceProvider initialPreference={userPreference}>
+        <AppSidebar
+          user={session?.user}
+          isAdmin={activeOrganization?.role === UserRole.ADMIN}
+          activeOrganizationId={activeOrganization?.organizationId ?? null}
+          defaultSidebarOpen={defaultSidebarOpen}
+          headerToolbarStart={<GlobalSearch />}
+        >
+          {children}
+        </AppSidebar>
+      </UserPreferenceProvider>
     </InterfaceLanguageProvider>
   );
 }

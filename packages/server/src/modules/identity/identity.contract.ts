@@ -9,9 +9,17 @@ import {
   findUserByEmailOutputDtoSchema,
 } from "@workspace/validation/modules/user/dto/find-user-by-email.schema";
 import {
+  changePasswordInputDtoSchema,
+  changePasswordOutputDtoSchema,
+} from "@workspace/validation/modules/user/dto/change-password.schema";
+import {
   updateInterfaceLanguageInputDtoSchema,
   updateInterfaceLanguageOutputDtoSchema,
 } from "@workspace/validation/modules/user/dto/update-interface-language.schema";
+import {
+  updateProfileInputDtoSchema,
+  updateProfileOutputDtoSchema,
+} from "@workspace/validation/modules/user/dto/update-profile.schema";
 import { userModelSchema } from "@workspace/validation/modules/user/dto/user.model";
 
 export const identityContract = {
@@ -46,4 +54,24 @@ export const identityContract = {
     summary: "Find current user",
     spec: sessionAuthSpec,
   }),
+  updateProfile: oc
+    .input(updateProfileInputDtoSchema)
+    .output(updateProfileOutputDtoSchema)
+    .route({
+      method: "POST",
+      path: "/users/profile",
+      tags: ["identity"],
+      summary: "Update display name",
+      spec: sessionAuthSpec,
+    }),
+  changePassword: oc
+    .input(changePasswordInputDtoSchema)
+    .output(changePasswordOutputDtoSchema)
+    .route({
+      method: "POST",
+      path: "/users/change-password",
+      tags: ["identity"],
+      summary: "Change password",
+      spec: sessionAuthSpec,
+    }),
 };

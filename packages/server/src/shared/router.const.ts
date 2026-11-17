@@ -8,6 +8,7 @@ import { invitationRouter } from "@workspace/server/modules/invitation/invitatio
 import { mcpRouter } from "@workspace/server/modules/mcp/mcp.router";
 import { membershipRouter } from "@workspace/server/modules/membership/membership.router";
 import { organizationRouter } from "@workspace/server/modules/organization/organization.router";
+import { preferenceRouter } from "@workspace/server/modules/preference/preference.router";
 import { projectRouter } from "@workspace/server/modules/project/project.router";
 import { searchRouter } from "@workspace/server/modules/search/search.router";
 import { userTokenRouter } from "@workspace/server/modules/user-token/user-token.router";
@@ -23,6 +24,7 @@ export const router = {
   invitation: invitationRouter,
   membership: membershipRouter,
   organization: organizationRouter,
+  preference: preferenceRouter,
   project: projectRouter,
   search: searchRouter,
   userToken: userTokenRouter,

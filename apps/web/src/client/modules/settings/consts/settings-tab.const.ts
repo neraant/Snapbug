@@ -2,6 +2,7 @@ export const settingsTabSearchParamKey = "tab";
 
 export const settingsTabs = {
   profile: "profile",
+  appearance: "appearance",
   organization: "organization",
   tokens: "tokens",
 } as const;
