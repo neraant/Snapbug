@@ -17,6 +17,8 @@ const memberId = "11111111-1111-4111-8111-111111111111";
 const participantUserId = "22222222-2222-4222-8222-222222222222";
 const ticketId = "ffffffff-ffff-4fff-8fff-ffffffffffff";
 const tokenOwnerId = "33333333-3333-4333-8333-333333333333";
+const inviterUserId = "44444444-4444-4444-8444-444444444444";
+const invitationId = "55555555-5555-4555-8555-555555555555";
 
 function createHarness(deliverBatch = vi.fn().mockResolvedValue(undefined)) {
   const notificationService = {
@@ -239,6 +241,146 @@ describe("EmitNotificationsUseCase", () => {
     );
     const deliveries = deliverBatch.mock.calls[0]?.[0] as { recipientUserId: string }[];
     expect(deliveries.some((item) => item.recipientUserId === actorUserId)).toBe(false);
+  });
+
+  it("notifies the assignee on ticket status change without the actor", async () => {
+    const { useCase, deliverBatch } = createHarness();
+
+    await useCase.ticketStatusChanged({
+      organizationId,
+      actorUserId,
+      projectId,
+      ticketId,
+      assigneeUserId,
+      reporterEmail: null,
+      payload: { ticketShortId: "SB-7", ticketTitle: "Status", oldValue: "new", newValue: "in_progress" },
+    });
+
+    expect(deliverBatch).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({ recipientUserId: assigneeUserId, type: "ticket.status_changed" }),
+      ]),
+    );
+    const deliveries = deliverBatch.mock.calls[0]?.[0] as { recipientUserId: string }[];
+    expect(deliveries.some((item) => item.recipientUserId === actorUserId)).toBe(false);
+  });
+
+  it("notifies thread participants on ticket status change", async () => {
+    const { useCase, deliverBatch } = createHarness();
+
+    await useCase.ticketStatusChanged({
+      organizationId,
+      actorUserId,
+      projectId,
+      ticketId,
+      assigneeUserId: null,
+      reporterEmail: null,
+      payload: { ticketShortId: "SB-7a", ticketTitle: "Status", oldValue: "new", newValue: "fixed" },
+    });
+
+    expect(deliverBatch).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({ recipientUserId: participantUserId, type: "ticket.status_changed" }),
+      ]),
+    );
+  });
+
+  it("notifies the affected member on project access grant without the actor", async () => {
+    const { useCase, deliverBatch } = createHarness();
+
+    await useCase.projectAccessGranted({
+      organizationId,
+      actorUserId: adminUserId,
+      membershipId: memberId,
+      affectedUserId: assigneeUserId,
+      projectId,
+      payload: { projectName: "App" },
+    });
+
+    expect(deliverBatch).toHaveBeenCalledWith([
+      expect.objectContaining({
+        recipientUserId: assigneeUserId,
+        type: "project.access_granted",
+      }),
+    ]);
+  });
+
+  it("does not notify the actor on project access grant", async () => {
+    const deliverBatch = vi.fn().mockResolvedValue(undefined);
+    const { useCase } = createHarness(deliverBatch);
+
+    await useCase.projectAccessGranted({
+      organizationId,
+      actorUserId: assigneeUserId,
+      membershipId: memberId,
+      affectedUserId: assigneeUserId,
+      projectId,
+      payload: { projectName: "App" },
+    });
+
+    expect(deliverBatch).toHaveBeenCalledWith([]);
+  });
+
+  it("notifies the affected member on project access revoke without the actor", async () => {
+    const { useCase, deliverBatch } = createHarness();
+
+    await useCase.projectAccessRevoked({
+      organizationId,
+      actorUserId: adminUserId,
+      membershipId: memberId,
+      affectedUserId: assigneeUserId,
+      projectId,
+      payload: { projectName: "App" },
+    });
+
+    expect(deliverBatch).toHaveBeenCalledWith([
+      expect.objectContaining({
+        recipientUserId: assigneeUserId,
+        type: "project.access_revoked",
+      }),
+    ]);
+  });
+
+  it("notifies the inviter and admins on invitation accepted without the new member", async () => {
+    const { useCase, deliverBatch } = createHarness();
+
+    await useCase.invitationAccepted({
+      organizationId,
+      actorUserId: assigneeUserId,
+      invitationId,
+      inviterUserId,
+      payload: { memberName: "New member" },
+    });
+
+    expect(deliverBatch).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({ recipientUserId: inviterUserId, type: "invitation.accepted" }),
+        expect.objectContaining({ recipientUserId: adminUserId, type: "invitation.accepted" }),
+      ]),
+    );
+    const deliveries = deliverBatch.mock.calls[0]?.[0] as { recipientUserId: string }[];
+    expect(deliveries.some((item) => item.recipientUserId === assigneeUserId)).toBe(false);
+  });
+
+  it("notifies members with project access on project archive without the actor", async () => {
+    const { useCase, deliverBatch } = createHarness();
+
+    await useCase.projectArchived({
+      organizationId,
+      actorUserId: adminUserId,
+      projectId,
+      restored: false,
+      payload: { projectName: "App", projectSlug: "app" },
+    });
+
+    expect(deliverBatch).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({ recipientUserId: assigneeUserId, type: "project.archived" }),
+        expect.objectContaining({ recipientUserId: participantUserId, type: "project.archived" }),
+      ]),
+    );
+    const deliveries = deliverBatch.mock.calls[0]?.[0] as { recipientUserId: string }[];
+    expect(deliveries.some((item) => item.recipientUserId === adminUserId)).toBe(false);
   });
 
   it("notifies the affected member on role change without the actor", async () => {

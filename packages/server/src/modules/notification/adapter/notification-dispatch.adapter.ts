@@ -2,7 +2,7 @@ import type { DbClient } from "@workspace/database";
 import type { EmitNotificationsUseCase } from "@workspace/server/modules/notification/application/emit-notifications.use-case";
 import type { NotificationPayloadType } from "@workspace/validation/modules/notification/dto/notification-payload.schema";
 
-export type NotificationDispatchPort = {
+type NotificationDispatchPort = {
   withTx(tx: DbClient): NotificationDispatchPort;
   ticketAssigned(params: {
     organizationId: string;
