@@ -7,6 +7,7 @@ import { identityRouter } from "@workspace/server/modules/identity/identity.rout
 import { invitationRouter } from "@workspace/server/modules/invitation/invitation.router";
 import { mcpRouter } from "@workspace/server/modules/mcp/mcp.router";
 import { membershipRouter } from "@workspace/server/modules/membership/membership.router";
+import { notificationRouter } from "@workspace/server/modules/notification/notification.router";
 import { organizationRouter } from "@workspace/server/modules/organization/organization.router";
 import { projectRouter } from "@workspace/server/modules/project/project.router";
 import { searchRouter } from "@workspace/server/modules/search/search.router";
@@ -22,6 +23,7 @@ export const router = {
   identity: identityRouter,
   invitation: invitationRouter,
   membership: membershipRouter,
+  notification: notificationRouter,
   organization: organizationRouter,
   project: projectRouter,
   search: searchRouter,

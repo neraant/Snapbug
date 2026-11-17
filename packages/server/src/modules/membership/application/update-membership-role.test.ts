@@ -1,3 +1,4 @@
+import { createNotificationPortMock } from "@workspace/server/modules/notification/application/notification-test.const";
 import { UpdateMembershipRoleUseCase } from "@workspace/server/modules/membership/application/update-membership-role.use-case";
 import { Membership } from "@workspace/server/modules/membership/entity/membership.entity";
 import { MembershipMapper } from "@workspace/server/modules/membership/entity/membership.mapper";
@@ -45,6 +46,7 @@ function setup(memberships = [currentMembership, otherMembership]) {
     useCase: new UpdateMembershipRoleUseCase(
       membershipRepository as unknown as MembershipRepository,
       membershipService as unknown as MembershipService,
+      createNotificationPortMock(),
       withTransaction as unknown as WithTransactionType,
     ),
   };

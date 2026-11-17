@@ -1,3 +1,4 @@
+import { createNotificationPortMock } from "@workspace/server/modules/notification/application/notification-test.const";
 import { UpdateBugReportUseCase } from "@workspace/server/modules/bug-report/application/update-bug-report.use-case";
 import { BugReport } from "@workspace/server/modules/bug-report/entity/bug-report.entity";
 import type { MembershipPort } from "@workspace/server/modules/bug-report/port/membership.port";
@@ -94,6 +95,7 @@ describe("UpdateBugReportUseCase", () => {
       projectPort as unknown as ProjectPort,
       bugReportRepository as unknown as BugReportRepository,
       bugReportService as unknown as BugReportService,
+      createNotificationPortMock(),
       withTransaction,
     );
 
@@ -125,6 +127,7 @@ describe("UpdateBugReportUseCase", () => {
       projectPort as unknown as ProjectPort,
       bugReportRepository as unknown as BugReportRepository,
       bugReportService as unknown as BugReportService,
+      createNotificationPortMock(),
       withTransaction,
     );
 
@@ -156,6 +159,7 @@ describe("UpdateBugReportUseCase", () => {
       projectPort as unknown as ProjectPort,
       bugReportRepository as unknown as BugReportRepository,
       bugReportService as unknown as BugReportService,
+      createNotificationPortMock(),
       withTransaction,
     );
 
@@ -179,6 +183,7 @@ describe("UpdateBugReportUseCase", () => {
       projectPort as unknown as ProjectPort,
       bugReportRepository as unknown as BugReportRepository,
       bugReportService as unknown as BugReportService,
+      createNotificationPortMock(),
       withTransaction,
     );
 
@@ -205,6 +210,7 @@ describe("UpdateBugReportUseCase", () => {
       projectPort as unknown as ProjectPort,
       bugReportRepository as unknown as BugReportRepository,
       bugReportService as unknown as BugReportService,
+      createNotificationPortMock(),
       withTransaction,
     );
 
@@ -229,6 +235,7 @@ describe("UpdateBugReportUseCase", () => {
       projectPort as unknown as ProjectPort,
       bugReportRepository as unknown as BugReportRepository,
       bugReportService as unknown as BugReportService,
+      createNotificationPortMock(),
       withTransaction,
     );
 
@@ -262,6 +269,7 @@ describe("UpdateBugReportUseCase", () => {
       projectPort as unknown as ProjectPort,
       bugReportRepository as unknown as BugReportRepository,
       bugReportService as unknown as BugReportService,
+      createNotificationPortMock(),
       withTransaction,
     );
     const mcpActor = { type: "mcp" as const, id: userId };
@@ -285,6 +293,7 @@ describe("UpdateBugReportUseCase", () => {
       projectPort as unknown as ProjectPort,
       bugReportRepository as unknown as BugReportRepository,
       bugReportService as unknown as BugReportService,
+      createNotificationPortMock(),
       withTransaction,
     );
 

@@ -3,6 +3,7 @@ import { bugReportTable } from "@workspace/database/schema/bug-report.const";
 import { commentTable } from "@workspace/database/schema/comment.const";
 import { invitationTable } from "@workspace/database/schema/invitation.const";
 import { membershipTable } from "@workspace/database/schema/membership.const";
+import { notificationTable } from "@workspace/database/schema/notification.const";
 import { organizationTable } from "@workspace/database/schema/organization.const";
 import { projectTable } from "@workspace/database/schema/project.const";
 import { projectAccessTable } from "@workspace/database/schema/project-access.const";
@@ -17,6 +18,7 @@ const tables = {
   commentTable,
   invitationTable,
   membershipTable,
+  notificationTable,
   organizationTable,
   projectAccessTable,
   projectTable,
@@ -38,6 +40,10 @@ export const relations = defineRelations(tables, (relation) => ({
     }),
     resetPasswordTokens: relation.many.resetPasswordTokenTable(),
     userTokens: relation.many.userTokenTable(),
+    notificationsReceived: relation.many.notificationTable({
+      from: relation.userTable.id,
+      to: relation.notificationTable.recipientUserId,
+    }),
     sentInvitations: relation.many.invitationTable({
       from: relation.userTable.id,
       to: relation.invitationTable.invitedByUserId,

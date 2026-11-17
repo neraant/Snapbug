@@ -2,6 +2,7 @@ import { CommentFactory } from "@workspace/server/modules/comment/entity/comment
 import { CommentMapper } from "@workspace/server/modules/comment/entity/comment.mapper";
 import type { BugReportPort } from "@workspace/server/modules/comment/port/bug-report.port";
 import type { MembershipPort } from "@workspace/server/modules/comment/port/membership.port";
+import type { CommentNotificationPort } from "@workspace/server/modules/comment/port/notification.port";
 import type { ProjectPort } from "@workspace/server/modules/comment/port/project.port";
 import type { UserPort } from "@workspace/server/modules/comment/port/user.port";
 import type { CommentService } from "@workspace/server/modules/comment/service/comment.service";
@@ -28,6 +29,7 @@ export class AddCommentUseCase {
     private readonly membershipPort: MembershipPort,
     private readonly userPort: UserPort,
     private readonly commentService: CommentService,
+    private readonly notificationPort: CommentNotificationPort,
     private readonly withTransaction: WithTransactionType,
   ) {}
 
@@ -43,6 +45,9 @@ export class AddCommentUseCase {
       throw new NotFoundError(ERROR_CODES.BUG_REPORT_NOT_FOUND);
     }
 
+    const project = await this.projectPort.findById(ticket.projectId);
+    if (!project) throw new NotFoundError(ERROR_CODES.PROJECT_NOT_FOUND);
+
     const comment = CommentFactory.create({
       bugReportId: ticket.bugReport.id,
       authorUserId: userId,
@@ -52,6 +57,21 @@ export class AddCommentUseCase {
 
     await this.withTransaction(async (tx) => {
       await this.commentService.withTx(tx).withActor(actor).saveWithAudit(comment, ticket.projectId, "Add comment");
+      const actorUserId = actor.type === "user" || actor.type === "mcp" ? actor.id : null;
+      await this.notificationPort.withTx(tx).commentCreated({
+        organizationId: project.organizationId,
+        actorUserId,
+        projectId: ticket.projectId,
+        ticketId: ticket.bugReport.id,
+        assigneeUserId: ticket.bugReport.assignedTo,
+        payload: {
+          ticketShortId: ticket.bugReport.shortId,
+          ticketTitle: ticket.bugReport.title,
+          projectName: project.name,
+          projectSlug: project.slug,
+          actorName: ticket.caller.name ?? undefined,
+        },
+      });
     });
 
     return CommentMapper.toDto(comment, ticket.caller);

@@ -63,6 +63,20 @@ import { SendInvitationsUseCase } from "@workspace/server/modules/invitation/app
 import { InvitationRepository } from "@workspace/server/modules/invitation/repository/invitation.repository";
 import { InvitationService } from "@workspace/server/modules/invitation/service/invitation.service";
 import { ListToolsUseCase } from "@workspace/server/modules/mcp/application/list-tools.use-case";
+import { NotificationBugReportAdapter } from "@workspace/server/modules/notification/adapter/notification-bug-report.adapter";
+import { NotificationCommentAdapter } from "@workspace/server/modules/notification/adapter/notification-comment.adapter";
+import { NotificationDispatchAdapter } from "@workspace/server/modules/notification/adapter/notification-dispatch.adapter";
+import { NotificationMembershipAdapter } from "@workspace/server/modules/notification/adapter/notification-membership.adapter";
+import { NotificationProjectAdapter } from "@workspace/server/modules/notification/adapter/notification-project.adapter";
+import { NotificationUserAdapter } from "@workspace/server/modules/notification/adapter/notification-user.adapter";
+import { ArchiveNotificationUseCase } from "@workspace/server/modules/notification/application/archive-notification.use-case";
+import { EmitNotificationsUseCase } from "@workspace/server/modules/notification/application/emit-notifications.use-case";
+import { ListNotificationsUseCase } from "@workspace/server/modules/notification/application/list-notifications.use-case";
+import { MarkAllReadUseCase } from "@workspace/server/modules/notification/application/mark-all-read.use-case";
+import { MarkReadUseCase } from "@workspace/server/modules/notification/application/mark-read.use-case";
+import { UnreadCountUseCase } from "@workspace/server/modules/notification/application/unread-count.use-case";
+import { NotificationRepository } from "@workspace/server/modules/notification/repository/notification.repository";
+import { NotificationService } from "@workspace/server/modules/notification/service/notification.service";
 import { ActivityLogMembershipAdapter } from "@workspace/server/modules/membership/adapter/activity-log-membership.adapter";
 import { MembershipAdapter } from "@workspace/server/modules/membership/adapter/membership.adapter";
 import { CheckUserProjectAccessUseCase } from "@workspace/server/modules/membership/application/check-user-project-access.use-case";
@@ -145,6 +159,8 @@ const auditLogService = new AuditLogService(auditLogRepository, auditProjectAdap
 const organizationService = new OrganizationService(organizationRepository, auditLogService);
 const membershipService = new MembershipService(membershipRepository, auditLogService);
 const invitationService = new InvitationService(invitationRepository, auditLogService);
+const notificationRepository = new NotificationRepository();
+const notificationService = new NotificationService(notificationRepository);
 const commentService = new CommentService(commentRepository, auditLogService);
 const bugReportService = new BugReportService(bugReportRepository, auditLogService);
 const projectService = new ProjectService(projectRepository, auditLogService);
@@ -167,6 +183,20 @@ const organizationAdapter = new OrganizationAdapter(organizationRepository);
 const apiKeyAdapter = new ApiKeyAdapter(apiKeyRepository, projectAdapter);
 const bugReportAdapter = new BugReportAdapter(bugReportRepository);
 const searchBugReportAdapter = new SearchBugReportAdapter(bugReportRepository);
+const notificationMembershipAdapter = new NotificationMembershipAdapter(membershipAdapter);
+const notificationProjectAdapter = new NotificationProjectAdapter(projectAdapter);
+const notificationBugReportAdapter = new NotificationBugReportAdapter(bugReportAdapter);
+const notificationCommentAdapter = new NotificationCommentAdapter(commentRepository);
+const notificationUserAdapter = new NotificationUserAdapter(userAdapter);
+const emitNotifications = new EmitNotificationsUseCase(
+  notificationMembershipAdapter,
+  notificationProjectAdapter,
+  notificationBugReportAdapter,
+  notificationCommentAdapter,
+  notificationUserAdapter,
+  notificationService,
+);
+const notificationDispatchAdapter = new NotificationDispatchAdapter(emitNotifications);
 
 const findMembership = new FindMembershipUseCase(membershipRepository);
 const findMembershipByUser = new FindMembershipByUserUseCase(membershipRepository);
@@ -178,7 +208,12 @@ const findProjectMembers = new FindProjectMembersUseCase(
   projectAdapter,
   userAdapter,
 );
-const updateMembershipRole = new UpdateMembershipRoleUseCase(membershipRepository, membershipService, withTransaction);
+const updateMembershipRole = new UpdateMembershipRoleUseCase(
+  membershipRepository,
+  membershipService,
+  notificationDispatchAdapter,
+  withTransaction,
+);
 const removeMembership = new RemoveMembershipUseCase(membershipRepository, membershipService, withTransaction);
 const findMembershipProjectAccess = new FindMembershipProjectAccessUseCase(
   membershipRepository,
@@ -190,6 +225,7 @@ const replaceMembershipProjectAccess = new ReplaceMembershipProjectAccessUseCase
   projectAccessRepository,
   projectAdapter,
   projectAccessService,
+  notificationDispatchAdapter,
   withTransaction,
 );
 
@@ -215,8 +251,20 @@ const updateProject = new UpdateProjectUseCase(
   projectUserAdapter,
   withTransaction,
 );
-const archiveProject = new ArchiveProjectUseCase(membershipAdapter, projectRepository, projectService, withTransaction);
-const restoreProject = new RestoreProjectUseCase(membershipAdapter, projectRepository, projectService, withTransaction);
+const archiveProject = new ArchiveProjectUseCase(
+  membershipAdapter,
+  projectRepository,
+  projectService,
+  notificationDispatchAdapter,
+  withTransaction,
+);
+const restoreProject = new RestoreProjectUseCase(
+  membershipAdapter,
+  projectRepository,
+  projectService,
+  notificationDispatchAdapter,
+  withTransaction,
+);
 const deleteProject = new DeleteProjectUseCase(
   membershipAdapter,
   projectRepository,
@@ -304,6 +352,7 @@ const acceptInvitation = new AcceptInvitationUseCase(
   withTransaction,
   invitationService,
   userAdapter,
+  notificationDispatchAdapter,
 );
 const resendInvitation = new ResendInvitationUseCase(
   invitationRepository,
@@ -345,12 +394,14 @@ const rotateProjectApiKey = new RotateProjectApiKeyUseCase(
   projectAdapter,
   apiKeyRepository,
   apiKeyService,
+  notificationDispatchAdapter,
   withTransaction,
 );
 const createBugReport = new CreateBugReportUseCase(
   apiKeyAdapter,
   projectAdapter,
   bugReportService,
+  notificationDispatchAdapter,
   withTransaction,
   widgetIngestOriginService,
   widgetUserAgentService,
@@ -385,6 +436,7 @@ const updateBugReport = new UpdateBugReportUseCase(
   projectAdapter,
   bugReportRepository,
   bugReportService,
+  notificationDispatchAdapter,
   withTransaction,
 );
 const listTickets = new ListTicketsUseCase(membershipAdapter, projectAdapter, bugReportRepository);
@@ -401,6 +453,8 @@ const createUserToken = new CreateUserTokenUseCase(
   userTokenRepository,
   membershipAdapter,
   projectAdapter,
+  notificationDispatchAdapter,
+  withTransaction,
 );
 const findUserTokens = new FindUserTokensUseCase(userTokenRepository);
 const revokeUserToken = new RevokeUserTokenUseCase(userTokenRepository);
@@ -412,8 +466,14 @@ const addComment = new AddCommentUseCase(
   membershipAdapter,
   userAdapter,
   commentService,
+  notificationDispatchAdapter,
   withTransaction,
 );
+const listNotifications = new ListNotificationsUseCase(notificationMembershipAdapter, notificationRepository);
+const unreadCount = new UnreadCountUseCase(notificationMembershipAdapter, notificationRepository);
+const markRead = new MarkReadUseCase(notificationRepository, withTransaction);
+const markAllRead = new MarkAllReadUseCase(notificationMembershipAdapter, notificationRepository, withTransaction);
+const archiveNotification = new ArchiveNotificationUseCase(notificationRepository, withTransaction);
 const findComments = new FindCommentsUseCase(
   bugReportAdapter,
   projectAdapter,
@@ -524,5 +584,12 @@ export const container = {
   },
   search: {
     search,
+  },
+  notification: {
+    list: listNotifications,
+    unreadCount,
+    markRead,
+    markAllRead,
+    archive: archiveNotification,
   },
 };

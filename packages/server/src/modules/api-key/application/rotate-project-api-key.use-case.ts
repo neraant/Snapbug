@@ -1,4 +1,5 @@
 import { ApiKeyFactory } from "@workspace/server/modules/api-key/entity/api-key.factory";
+import type { ApiKeyNotificationPort } from "@workspace/server/modules/api-key/port/notification.port";
 import type { MembershipPort } from "@workspace/server/modules/api-key/port/membership.port";
 import type { ProjectPort } from "@workspace/server/modules/api-key/port/project.port";
 import type { ApiKeyRepository } from "@workspace/server/modules/api-key/repository/api-key.repository";
@@ -18,6 +19,7 @@ export class RotateProjectApiKeyUseCase {
     private readonly projectPort: ProjectPort,
     private readonly apiKeyRepository: ApiKeyRepository,
     private readonly apiKeyService: ApiKeyService,
+    private readonly notificationPort: ApiKeyNotificationPort,
     private readonly withTransaction: WithTransactionType,
   ) {}
 
@@ -51,6 +53,13 @@ export class RotateProjectApiKeyUseCase {
         .withTx(tx)
         .withActor({ type: "user", id: userId })
         .replaceWithAudit(revokedPrevious, next);
+      await this.notificationPort.withTx(tx).apiKeyRotated({
+        organizationId: membership.organizationId,
+        actorUserId: userId,
+        projectId: project.id,
+        apiKeyId: next.id,
+        payload: { projectName: project.name, projectSlug: project.slug },
+      });
     });
 
     return { key: next.key, createdAt: next.createdAt.toISOString() };

@@ -1,3 +1,4 @@
+import { createNotificationPortMock } from "@workspace/server/modules/notification/application/notification-test.const";
 import { CreateUserTokenUseCase } from "@workspace/server/modules/user-token/application/create-user-token.use-case";
 import type { UserTokenRepository } from "@workspace/server/modules/user-token/repository/user-token.repository";
 import { UserTokenService } from "@workspace/server/modules/user-token/service/user-token.service";
@@ -19,7 +20,11 @@ const membership = {
 
 describe("CreateUserTokenUseCase", () => {
   it("returns the secret once and stores scoped metadata", async () => {
-    const userTokenRepository = { save: vi.fn().mockResolvedValue(undefined) };
+    const userTokenRepository = {
+      save: vi.fn().mockResolvedValue(undefined),
+      withTx: vi.fn(),
+    };
+    userTokenRepository.withTx.mockImplementation(() => userTokenRepository);
     const membershipPort = {
       findManyByUser: vi.fn().mockResolvedValue([membership]),
       filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
@@ -32,6 +37,8 @@ describe("CreateUserTokenUseCase", () => {
       userTokenRepository as unknown as UserTokenRepository,
       membershipPort,
       projectPort,
+      createNotificationPortMock(),
+      vi.fn(async (callback) => await callback({})),
     );
 
     const result = await useCase.execute({ name: "Cursor MCP", preset: "readOnly" }, userId);
@@ -46,7 +53,11 @@ describe("CreateUserTokenUseCase", () => {
   });
 
   it("stores project restrictions on the token", async () => {
-    const userTokenRepository = { save: vi.fn().mockResolvedValue(undefined) };
+    const userTokenRepository = {
+      save: vi.fn().mockResolvedValue(undefined),
+      withTx: vi.fn(),
+    };
+    userTokenRepository.withTx.mockImplementation(() => userTokenRepository);
     const membershipPort = {
       findManyByUser: vi.fn().mockResolvedValue([membership]),
       filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
@@ -59,6 +70,8 @@ describe("CreateUserTokenUseCase", () => {
       userTokenRepository as unknown as UserTokenRepository,
       membershipPort,
       projectPort,
+      createNotificationPortMock(),
+      vi.fn(async (callback) => await callback({})),
     );
 
     await useCase.execute({ name: "Scoped", preset: "readOnly", projectIds: [projectId] }, userId);
@@ -68,7 +81,11 @@ describe("CreateUserTokenUseCase", () => {
   });
 
   it("allows members to create a full access preset without activity scope", async () => {
-    const userTokenRepository = { save: vi.fn().mockResolvedValue(undefined) };
+    const userTokenRepository = {
+      save: vi.fn().mockResolvedValue(undefined),
+      withTx: vi.fn(),
+    };
+    userTokenRepository.withTx.mockImplementation(() => userTokenRepository);
     const membershipPort = {
       findManyByUser: vi.fn().mockResolvedValue([membership]),
       filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
@@ -81,6 +98,8 @@ describe("CreateUserTokenUseCase", () => {
       userTokenRepository as unknown as UserTokenRepository,
       membershipPort,
       projectPort,
+      createNotificationPortMock(),
+      vi.fn(async (callback) => await callback({})),
     );
 
     await useCase.execute({ name: "Full", preset: "fullAccess" }, userId);

@@ -4,6 +4,7 @@ export * from "@workspace/database/schema/bug-report.const";
 export * from "@workspace/database/schema/comment.const";
 export * from "@workspace/database/schema/invitation.const";
 export * from "@workspace/database/schema/membership.const";
+export * from "@workspace/database/schema/notification.const";
 export * from "@workspace/database/schema/organization.const";
 export * from "@workspace/database/schema/project.const";
 export * from "@workspace/database/schema/project-access.const";

@@ -1,6 +1,7 @@
 import { BugReportMapper } from "@workspace/server/modules/bug-report/entity/bug-report.mapper";
 import type { ApiKeyPort } from "@workspace/server/modules/bug-report/port/api-key.port";
 import type { FileStoragePort } from "@workspace/server/modules/bug-report/port/file-storage.port";
+import type { BugReportNotificationPort } from "@workspace/server/modules/bug-report/port/notification.port";
 import type { ProjectPort } from "@workspace/server/modules/bug-report/port/project.port";
 import type { BugReportService } from "@workspace/server/modules/bug-report/service/bug-report.service";
 import type { WidgetIngestOriginService } from "@workspace/server/modules/bug-report/service/widget-ingest-origin.service";
@@ -41,6 +42,7 @@ export class CreateBugReportUseCase {
     private readonly apiKeyPort: ApiKeyPort,
     private readonly projectPort: ProjectPort,
     private readonly bugReportService: BugReportService,
+    private readonly notificationPort: BugReportNotificationPort,
     private readonly withTransaction: WithTransactionType,
     private readonly widgetIngestOriginService: WidgetIngestOriginService,
     private readonly widgetUserAgentService: WidgetUserAgentService,
@@ -115,8 +117,9 @@ export class CreateBugReportUseCase {
     try {
       const bugReport = await this.withTransaction(async (tx) => {
         const bugReportService = this.bugReportService.withTx(tx).withActor(actor);
+        const notificationPort = this.notificationPort.withTx(tx);
 
-        return await bugReportService.createWithAudit(
+        const created = await bugReportService.createWithAudit(
           {
             organizationId: project.organizationId,
             projectId: project.id,
@@ -143,6 +146,22 @@ export class CreateBugReportUseCase {
           },
           "Create bug report",
         );
+
+        await notificationPort.ticketCreated({
+          organizationId: project.organizationId,
+          actorUserId: actor?.type === "user" || actor?.type === "mcp" ? actor.id : null,
+          projectId: project.id,
+          ticketId: created.id,
+          defaultAssigneeId: assignedTo,
+          payload: {
+            ticketShortId: created.shortId,
+            ticketTitle: created.title,
+            projectName: project.name,
+            projectSlug: project.slug,
+          },
+        });
+
+        return created;
       });
 
       return BugReportMapper.toDto(bugReport);

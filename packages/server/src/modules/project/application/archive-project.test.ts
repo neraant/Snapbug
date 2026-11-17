@@ -1,3 +1,4 @@
+import { createNotificationPortMock } from "@workspace/server/modules/notification/application/notification-test.const";
 import { ArchiveProjectUseCase } from "@workspace/server/modules/project/application/archive-project.use-case";
 import { projectTestFields } from "@workspace/server/modules/project/application/project-test.const";
 import { Project } from "@workspace/server/modules/project/entity/project.entity";
@@ -48,6 +49,7 @@ describe("ArchiveProjectUseCase", () => {
       membershipPort as unknown as MembershipPort,
       projectRepository as unknown as ProjectRepository,
       projectService as unknown as ProjectService,
+      createNotificationPortMock(),
       withTransaction as WithTransactionType,
     );
 
@@ -70,6 +72,7 @@ describe("ArchiveProjectUseCase", () => {
       membershipPort as unknown as MembershipPort,
       projectRepository as unknown as ProjectRepository,
       projectService as unknown as ProjectService,
+      createNotificationPortMock(),
       withTransaction as WithTransactionType,
     );
 

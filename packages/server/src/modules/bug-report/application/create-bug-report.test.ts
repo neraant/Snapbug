@@ -1,3 +1,4 @@
+import { createNotificationPortMock } from "@workspace/server/modules/notification/application/notification-test.const";
 import { CreateBugReportUseCase } from "@workspace/server/modules/bug-report/application/create-bug-report.use-case";
 import { BugReportFactory } from "@workspace/server/modules/bug-report/entity/bug-report.factory";
 import { BugReportMapper } from "@workspace/server/modules/bug-report/entity/bug-report.mapper";
@@ -90,6 +91,7 @@ function createUseCase(deps: {
   apiKeyPort: ApiKeyPort;
   projectPort: ProjectPort;
   bugReportService: BugReportService;
+  notificationPort?: ReturnType<typeof createNotificationPortMock>;
   withTransaction: WithTransactionType;
   widgetIngestOriginService?: WidgetIngestOriginService;
   widgetUserAgentService?: WidgetUserAgentService;
@@ -100,6 +102,7 @@ function createUseCase(deps: {
     deps.apiKeyPort,
     deps.projectPort,
     deps.bugReportService,
+    deps.notificationPort ?? createNotificationPortMock(),
     deps.withTransaction,
     deps.widgetIngestOriginService ?? new WidgetIngestOriginService(),
     deps.widgetUserAgentService ?? new WidgetUserAgentService(),

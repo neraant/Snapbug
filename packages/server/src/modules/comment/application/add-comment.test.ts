@@ -1,3 +1,4 @@
+import { createNotificationPortMock } from "@workspace/server/modules/notification/application/notification-test.const";
 import { AddCommentUseCase } from "@workspace/server/modules/comment/application/add-comment.use-case";
 import type { BugReportPort } from "@workspace/server/modules/comment/port/bug-report.port";
 import type { MembershipPort } from "@workspace/server/modules/comment/port/membership.port";
@@ -101,6 +102,7 @@ describe("AddCommentUseCase", () => {
       membershipPort as unknown as MembershipPort,
       userPort as unknown as UserPort,
       commentService as unknown as CommentService,
+      createNotificationPortMock(),
       withTransaction,
     );
 
@@ -134,6 +136,7 @@ describe("AddCommentUseCase", () => {
       membershipPort as unknown as MembershipPort,
       userPort as unknown as UserPort,
       commentService as unknown as CommentService,
+      createNotificationPortMock(),
       withTransaction,
     );
 
@@ -163,6 +166,7 @@ describe("AddCommentUseCase", () => {
       membershipPort as unknown as MembershipPort,
       userPort as unknown as UserPort,
       commentService as unknown as CommentService,
+      createNotificationPortMock(),
       withTransaction,
     );
 
