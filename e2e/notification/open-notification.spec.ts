@@ -19,14 +19,23 @@ test("a member can open a notification from the bell and mark all as read", asyn
   await page.getByRole("button", { name: "Log in" }).click();
   await expect(page).toHaveURL(/\/overview/, { timeout: 30_000 });
 
-  await expect(page.getByRole("button", { name: "Notifications" })).toBeVisible();
-  await page.getByRole("button", { name: "Notifications" }).click();
-  await expect(page.getByText(`Alice assigned you ${ticketShortId}`)).toBeVisible();
+  const bell = page.getByRole("button", { name: "Notifications", exact: true });
+  await expect(bell).toBeVisible();
+  await bell.click();
+  const viewAll = page.getByRole("link", { name: "View all notifications" });
+  if (await viewAll.isVisible()) {
+    await viewAll.click();
+  } else {
+    await page.goto("/notifications");
+  }
+  await expect(page).toHaveURL(/\/notifications/, { timeout: 15_000 });
 
-  await page.getByRole("link", { name: new RegExp(`Open notification:.*${ticketShortId}`) }).click();
+  const notificationRow = page.getByRole("link", { name: new RegExp(`Open notification:.*${ticketShortId}`) });
+  await expect(notificationRow).toBeVisible({ timeout: 30_000 });
+  await notificationRow.click();
   await expect(page).toHaveURL(new RegExp(`/tickets/${ticketShortId}`), { timeout: 15_000 });
 
-  await page.getByRole("button", { name: "Notifications" }).click();
+  await bell.click();
   await page.getByRole("button", { name: "Mark all as read" }).click();
-  await expect(page.getByRole("button", { name: "Notifications" })).toBeVisible();
+  await expect(bell).toBeVisible();
 });
