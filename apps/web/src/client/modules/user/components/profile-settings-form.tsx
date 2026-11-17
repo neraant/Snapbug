@@ -49,6 +49,7 @@ export function ProfileSettingsForm() {
               <TextField
                 control={control}
                 name="name"
+                inputId="profile-display-name"
                 type="text"
                 label={texts.profile.displayName.label}
                 autoComplete="name"

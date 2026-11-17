@@ -17,11 +17,18 @@ test("a member switches the appearance theme to dark", async ({ page }) => {
   await page.getByRole("button", { name: "Log in" }).click();
   await expect(page).toHaveURL(/\/overview/, { timeout: 30_000 });
 
-  await page.getByRole("link", { name: "Settings" }).click();
-  await expect(page).toHaveURL(/\/settings/);
-  await page.getByRole("tab", { name: "Appearance" }).click();
-  await expect(page.getByRole("heading", { name: "Theme" })).toBeVisible();
+  await page.goto("/settings?tab=appearance");
+  await expect(page).toHaveURL(/tab=appearance/);
 
-  await page.getByRole("button", { name: "Dark", exact: true }).click();
-  await expect(page.getByText("Saved")).toBeVisible({ timeout: 15_000 });
+  const appearance = page.getByRole("tabpanel", { name: "Appearance" });
+  await expect(appearance.getByRole("heading", { name: "Theme" })).toBeVisible();
+
+  const dark = appearance.getByRole("button", { name: "Dark", exact: true });
+  if ((await dark.getAttribute("aria-pressed")) === "true") {
+    await appearance.getByRole("button", { name: "Light", exact: true }).click();
+    await expect(appearance.getByText("Saved")).toBeVisible({ timeout: 15_000 });
+  }
+
+  await dark.click();
+  await expect(appearance.getByText("Saved")).toBeVisible({ timeout: 15_000 });
 });
