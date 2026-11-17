@@ -19,4 +19,10 @@ export const identityRouter = os.router({
   findCurrentUser: authed.findCurrentUser.handler(
     async ({ context }) => await container.identity.findCurrentUser.execute(context.user.id),
   ),
+  updateProfile: authed.updateProfile.handler(
+    async ({ input, context }) => await container.identity.updateProfile.execute(context.user.id, input),
+  ),
+  changePassword: authed.changePassword.handler(
+    async ({ input, context }) => await container.identity.changePassword.execute(context.user.id, input),
+  ),
 });

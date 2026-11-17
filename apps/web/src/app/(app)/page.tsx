@@ -1,5 +1,7 @@
+import { container } from "@workspace/server/container";
 import { redirect } from "next/navigation";
 
+import { auth } from "@/auth";
 import { url } from "@/shared/build-url.util";
 
 type PageProps = {
@@ -7,6 +9,9 @@ type PageProps = {
 };
 
 export default async function Page({ searchParams }: PageProps) {
+  const session = await auth();
+  const userId = session?.user?.id;
+
   const params = await searchParams;
   const query = new URLSearchParams();
 
@@ -21,5 +26,12 @@ export default async function Page({ searchParams }: PageProps) {
   }
 
   const queryString = query.toString();
-  redirect(queryString ? `${url.overview()}?${queryString}` : url.overview());
+
+  let landingPath: string = url.overview();
+  if (userId) {
+    const preference = await container.preference.findUserPreference.execute(userId);
+    landingPath = preference.defaultLandingPage === "tickets" ? url.ticketsBoard() : url.overview();
+  }
+
+  redirect(queryString ? `${landingPath}?${queryString}` : landingPath);
 }

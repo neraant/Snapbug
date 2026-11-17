@@ -8,6 +8,7 @@ import Link from "next/link";
 
 import { texts } from "@/client/modules/overview/consts/texts.const";
 import { mapRecentActivityToFeedItems } from "@/client/modules/overview/utils/map-recent-activity-to-feed-items.util";
+import { useFormatUserDate } from "@/client/modules/preference/hooks/use-format-user-date";
 import { useFindBugReportRecent } from "@/client/modules/shared/queries/use-find-bug-report-recent";
 import { buildPathWithProjectScopeSearchParam } from "@/client/modules/shared/utils/parse-project-scope-search-param.util";
 import { url } from "@/shared/build-url.util";
@@ -19,6 +20,7 @@ type OverviewRecentActivityCardProps = {
 
 export function OverviewRecentActivityCard({ projectId, className }: OverviewRecentActivityCardProps) {
   const { data: items } = useFindBugReportRecent({ projectId: projectId ?? undefined });
+  const formatDate = useFormatUserDate();
   const ticketsHref = buildPathWithProjectScopeSearchParam(url.ticketsBoard(), projectId);
 
   return (
@@ -43,7 +45,10 @@ export function OverviewRecentActivityCard({ projectId, className }: OverviewRec
         }
       />
       <Panel.Content>
-        <FeedList items={mapRecentActivityToFeedItems(items)} emptyLabel={texts.activity.recent.empty} />
+        <FeedList
+          items={mapRecentActivityToFeedItems(items, { formatDate })}
+          emptyLabel={texts.activity.recent.empty}
+        />
       </Panel.Content>
     </Panel>
   );

@@ -1,11 +1,19 @@
-import { formatDistance } from "date-fns";
+import type { UserPreferenceModelType } from "@workspace/validation/modules/preference/dto/user-preference.model";
 
-import { formatTicketDetailExactTimestamp } from "@/client/modules/ticket-detail/utils/format-ticket-detail-timestamp.util";
+import {
+  formatTicketDetailExactWhen,
+  formatTicketDetailWhen,
+} from "@/client/modules/ticket-detail/utils/format-ticket-detail-timestamp.util";
 
-export function formatTicketDetailCommentRelativeTimestamp(isoDate: string): string {
-  return formatDistance(new Date(isoDate), new Date(), { addSuffix: true });
+type TicketDetailCommentDatePreference = Pick<UserPreferenceModelType, "dateFormat" | "timeZone" | "use24HourTime">;
+
+export function formatTicketDetailCommentWhen(isoDate: string, preference: TicketDetailCommentDatePreference): string {
+  return formatTicketDetailWhen(isoDate, preference);
 }
 
-export function formatTicketDetailCommentExactTimestamp(isoDate: string): string {
-  return formatTicketDetailExactTimestamp(isoDate);
+export function formatTicketDetailCommentExactWhen(
+  isoDate: string,
+  preference: TicketDetailCommentDatePreference,
+): string {
+  return formatTicketDetailExactWhen(isoDate, preference);
 }

@@ -9,12 +9,13 @@ import { Suspense, useCallback, useRef, useState } from "react";
 
 import { OrganizationSettingsForm } from "@/client/modules/organization/components/organization-settings-form";
 import { texts as organizationTexts } from "@/client/modules/organization/consts/texts.const";
+import { AppearanceSettingsForm } from "@/client/modules/preference/components/appearance-settings-form";
 import { settingsTabs } from "@/client/modules/settings/consts/settings-tab.const";
 import { texts } from "@/client/modules/settings/consts/texts.const";
 import { useSettingsTabChange } from "@/client/modules/settings/hooks/use-settings-tab-change";
 import { useConfirmDialog } from "@/client/modules/shared/hooks/use-confirm-dialog";
 import { useFindMembershipByUser } from "@/client/modules/shared/queries/use-find-membership-by-user";
-import { InterfaceLanguageForm } from "@/client/modules/user/components/interface-language-form";
+import { ProfileSettingsForm } from "@/client/modules/user/components/profile-settings-form";
 import { url } from "@/shared/build-url.util";
 
 export function SettingsTabs() {
@@ -34,25 +35,38 @@ export function SettingsTabs() {
     confirm,
   });
 
+  const allowedTabs = new Set<string>([
+    settingsTabs.profile,
+    settingsTabs.appearance,
+    settingsTabs.organization,
+    settingsTabs.tokens,
+  ]);
+
   return (
     <>
       <Tabs
         value={tab}
         onValueChange={(value) => {
-          if (value === settingsTabs.profile || value === settingsTabs.organization || value === settingsTabs.tokens) {
-            setTab(value);
+          if (allowedTabs.has(value)) {
+            setTab(value as typeof tab);
           }
         }}
       >
         <TabsList aria-label={texts.tabs.ariaLabel}>
           <TabsTab value={settingsTabs.profile}>{texts.tabs.profile}</TabsTab>
+          <TabsTab value={settingsTabs.appearance}>{texts.tabs.appearance}</TabsTab>
           <TabsTab value={settingsTabs.organization}>{texts.tabs.organization}</TabsTab>
           <TabsTab value={settingsTabs.tokens}>{texts.tabs.tokens}</TabsTab>
           <TabsIndicator />
         </TabsList>
         <TabsPanel value={settingsTabs.profile} keepMounted>
-          <Suspense fallback={<InterfaceLanguageForm.Fallback />}>
-            <InterfaceLanguageForm />
+          <Suspense fallback={<ProfileSettingsForm.Fallback />}>
+            <ProfileSettingsForm />
+          </Suspense>
+        </TabsPanel>
+        <TabsPanel value={settingsTabs.appearance} keepMounted>
+          <Suspense fallback={<AppearanceSettingsForm.Fallback />}>
+            <AppearanceSettingsForm />
           </Suspense>
         </TabsPanel>
         <TabsPanel value={settingsTabs.organization} keepMounted>
@@ -93,12 +107,13 @@ SettingsTabs.Fallback = function SettingsTabsFallback() {
     <Tabs value={settingsTabs.profile}>
       <TabsList aria-label={texts.tabs.ariaLabel}>
         <TabsTab value={settingsTabs.profile}>{texts.tabs.profile}</TabsTab>
+        <TabsTab value={settingsTabs.appearance}>{texts.tabs.appearance}</TabsTab>
         <TabsTab value={settingsTabs.organization}>{texts.tabs.organization}</TabsTab>
         <TabsTab value={settingsTabs.tokens}>{texts.tabs.tokens}</TabsTab>
         <TabsIndicator />
       </TabsList>
       <TabsPanel value={settingsTabs.profile}>
-        <InterfaceLanguageForm.Fallback />
+        <ProfileSettingsForm.Fallback />
       </TabsPanel>
     </Tabs>
   );

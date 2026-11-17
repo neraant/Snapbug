@@ -16,6 +16,7 @@ import type { CommentModelType } from "@workspace/validation/modules/comment/dto
 import { PencilIcon, Trash2Icon } from "lucide-react";
 
 import { useConfirmDialog } from "@/client/modules/shared/hooks/use-confirm-dialog";
+import { useFindUserPreference } from "@/client/modules/shared/queries/use-find-user-preference";
 import { TicketDetailCommentBody } from "@/client/modules/ticket-detail/components/ticket-detail-comment-body";
 import { texts } from "@/client/modules/ticket-detail/consts/texts.const";
 import {
@@ -23,8 +24,8 @@ import {
   useTicketDetailCommentItem,
 } from "@/client/modules/ticket-detail/hooks/use-ticket-detail-comment-item";
 import {
-  formatTicketDetailCommentExactTimestamp,
-  formatTicketDetailCommentRelativeTimestamp,
+  formatTicketDetailCommentExactWhen,
+  formatTicketDetailCommentWhen,
 } from "@/client/modules/ticket-detail/utils/format-ticket-detail-comment-timestamp.util";
 import { getTicketDetailCommentAuthorInitials } from "@/client/modules/ticket-detail/utils/get-ticket-detail-comment-author-initials.util";
 
@@ -60,6 +61,12 @@ export function TicketDetailCommentThreadItem({
     onDeleted,
   });
   const { confirm, bind } = useConfirmDialog();
+  const { data: preference } = useFindUserPreference();
+  const datePreference = {
+    dateFormat: preference.dateFormat,
+    timeZone: preference.timeZone,
+    use24HourTime: preference.use24HourTime,
+  };
 
   const authorName = comment.authorName ?? comment.authorEmail ?? texts.comments.unknownAuthor;
   const isAgent = comment.authorSource === CommentAuthorSource.MCP;
@@ -112,11 +119,11 @@ export function TicketDetailCommentThreadItem({
                 <TooltipTrigger
                   render={
                     <Typography variant="text-xs" color="muted" className="shrink-0">
-                      {formatTicketDetailCommentRelativeTimestamp(comment.createdAt)}
+                      {formatTicketDetailCommentWhen(comment.createdAt, datePreference)}
                     </Typography>
                   }
                 />
-                <TooltipContent>{formatTicketDetailCommentExactTimestamp(comment.createdAt)}</TooltipContent>
+                <TooltipContent>{formatTicketDetailCommentExactWhen(comment.createdAt, datePreference)}</TooltipContent>
               </Tooltip>
               {isEdited ? (
                 <Typography variant="text-xs" color="muted" className="shrink-0">

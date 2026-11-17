@@ -2,10 +2,11 @@ import { localize } from "@/client/modules/shared/locale/interface-language";
 
 const en = {
   title: "Settings",
-  description: "Profile, organization, and personal access tokens.",
+  description: "Profile, appearance, organization, and personal access tokens.",
   tabs: {
     ariaLabel: "Settings sections",
     profile: "Profile",
+    appearance: "Appearance",
     organization: "Organization",
     tokens: "Access tokens",
   },
@@ -27,10 +28,11 @@ const en = {
 
 const ru = {
   title: "Настройки",
-  description: "Профиль, организация и личные токены доступа.",
+  description: "Профиль, внешний вид, организация и личные токены доступа.",
   tabs: {
     ariaLabel: "Разделы настроек",
     profile: "Профиль",
+    appearance: "Внешний вид",
     organization: "Организация",
     tokens: "Токены доступа",
   },

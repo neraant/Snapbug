@@ -12,35 +12,41 @@ type TextFieldProps<TFieldValues extends FieldValues> = {
   name: FieldPath<TFieldValues>;
   label: string;
   description?: string;
-} & Omit<ComponentProps<typeof Input>, "name">;
+  inputId?: string;
+} & Omit<ComponentProps<typeof Input>, "name" | "id">;
 
 export function TextField<TFieldValues extends FieldValues>({
   control,
   name,
   label,
   description,
+  inputId,
   ...inputProps
 }: TextFieldProps<TFieldValues>) {
   return (
     <Controller
       name={name}
       control={control}
-      render={({ field, fieldState }) => (
-        <Field data-invalid={fieldState.invalid}>
-          <Row justify="between" className="h-5.5">
-            <FieldLabel htmlFor={field.name}>{label}</FieldLabel>
+      render={({ field, fieldState }) => {
+        const id = inputId ?? String(field.name);
 
-            {fieldState.invalid && (
-              <Badge variant="destructive">
-                <InfoIcon />
-                {fieldState.error?.message}
-              </Badge>
-            )}
-          </Row>
-          <Input {...field} {...inputProps} id={field.name} aria-invalid={fieldState.invalid} />
-          {description && <FieldDescription>{description}</FieldDescription>}
-        </Field>
-      )}
+        return (
+          <Field data-invalid={fieldState.invalid}>
+            <Row justify="between" className="h-5.5">
+              <FieldLabel htmlFor={id}>{label}</FieldLabel>
+
+              {fieldState.invalid && (
+                <Badge variant="destructive">
+                  <InfoIcon />
+                  {fieldState.error?.message}
+                </Badge>
+              )}
+            </Row>
+            <Input {...field} {...inputProps} id={id} aria-invalid={fieldState.invalid} />
+            {description && <FieldDescription>{description}</FieldDescription>}
+          </Field>
+        );
+      }}
     />
   );
 }

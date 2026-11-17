@@ -80,7 +80,14 @@ export function OrganizationSettingsForm({
           description={texts.name.sectionDescription}
         >
           <FieldGroup>
-            <TextField control={control} name="name" type="text" label={texts.name.label} autoComplete="organization" />
+            <TextField
+              control={control}
+              name="name"
+              inputId="organization-name"
+              type="text"
+              label={texts.name.label}
+              autoComplete="organization"
+            />
           </FieldGroup>
         </SettingsSection>
         <SettingsSection title={texts.retention.sectionTitle} description={texts.retention.sectionDescription}>

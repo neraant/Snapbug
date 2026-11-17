@@ -5,10 +5,14 @@ import { Toaster } from "@workspace/design-system/components/ui/toast";
 import { cn } from "@workspace/design-system/lib/utils";
 import type { Metadata } from "next";
 import { Figtree, Geist_Mono } from "next/font/google";
+import { cookies } from "next/headers";
 import type { PropsWithChildren } from "react";
 
+import { USER_PREFERENCE_COOKIE } from "@/client/modules/preference/consts/user-preference-cookie.const";
 import { QueryProvider } from "@/client/modules/shared/query-client/provider";
 import { texts } from "@/shared/consts/texts.const";
+import { buildUserPreferenceBootScript } from "@/shared/user-preference/build-user-preference-boot-script.util";
+import { parseUserPreferenceCookie } from "@/shared/user-preference/parse-user-preference-cookie.util";
 
 export const metadata: Metadata = {
   title: {
@@ -31,9 +35,12 @@ const fontMono = Geist_Mono({
   variable: "--font-mono",
 });
 
-export default function Layout({ children }: PropsWithChildren) {
+export default async function Layout({ children }: PropsWithChildren) {
   // @disabled posthog
   // const session = await auth();
+  const cookieStore = await cookies();
+  const preferenceMirror = parseUserPreferenceCookie(cookieStore.get(USER_PREFERENCE_COOKIE)?.value);
+  const preferenceBootScript = buildUserPreferenceBootScript(preferenceMirror);
 
   return (
     <html
@@ -41,6 +48,11 @@ export default function Layout({ children }: PropsWithChildren) {
       suppressHydrationWarning
       className={cn("antialiased", fontMono.variable, "font-sans", figtree.variable)}
     >
+      {preferenceBootScript ? (
+        <head>
+          <script dangerouslySetInnerHTML={{ __html: preferenceBootScript }} />
+        </head>
+      ) : null}
       <body>
         {/* @disabled posthog
         <AnalyticsProvider appName="web" user={session?.user}>
