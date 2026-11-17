@@ -7,11 +7,11 @@ import { Card } from "@workspace/design-system/components/ui/card";
 import { Typography } from "@workspace/design-system/components/ui/typography";
 import { cn } from "@workspace/design-system/lib/utils";
 import type { BugReportModelType } from "@workspace/validation/modules/bug-report/dto/bug-report.model";
-import { formatDistance } from "date-fns";
 import { CameraIcon, CirclePlayIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 
+import { useFormatUserDate } from "@/client/modules/preference/hooks/use-format-user-date";
 import { bugReportSeverityBadgeVariant } from "@/client/modules/ticket-board/consts/bug-report-severity-badge-variant.const";
 import { texts } from "@/client/modules/ticket-board/consts/texts.const";
 import { ticketBoardCardHeightClass } from "@/client/modules/ticket-board/consts/ticket-board.const";
@@ -116,6 +116,7 @@ type TicketBoardCardContentProps = {
 };
 
 function TicketBoardCardContent({ report, projectName }: TicketBoardCardContentProps) {
+  const formatDate = useFormatUserDate();
   const assigneeLabel = texts.card.unassigned;
 
   return (
@@ -161,7 +162,7 @@ function TicketBoardCardContent({ report, projectName }: TicketBoardCardContentP
           </Typography>
         </Row>
         <Typography variant="text-xs" color="muted">
-          {formatDistance(new Date(report.createdAt), new Date(), { addSuffix: true })}
+          {formatDate(report.createdAt)}
         </Typography>
       </Row>
     </Card>

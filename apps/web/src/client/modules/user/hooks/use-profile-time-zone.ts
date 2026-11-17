@@ -2,6 +2,7 @@ import { toast } from "@workspace/design-system/components/ui/toast";
 import { getAppErrorMessage } from "@workspace/server/error/get-app-error-message";
 import { useCallback, useMemo, useState } from "react";
 
+import { timeZoneUserSetStorageKey } from "@/client/modules/preference/consts/time-zone-user-set.storage-key.const";
 import { useQuietSavedIndicator } from "@/client/modules/preference/hooks/use-quiet-saved-indicator";
 import { detectBrowserTimeZone } from "@/client/modules/preference/utils/detect-browser-time-zone.util";
 import { useFindUserPreference } from "@/client/modules/shared/queries/use-find-user-preference";
@@ -39,6 +40,9 @@ export function useProfileTimeZone() {
       if (nextTimeZone === preference.timeZone || isPending) return;
 
       try {
+        if (typeof localStorage !== "undefined") {
+          localStorage.setItem(timeZoneUserSetStorageKey, "1");
+        }
         await updateUserPreference({ timeZone: nextTimeZone });
         markSaved(TIME_ZONE_SECTION);
       } catch (error) {
