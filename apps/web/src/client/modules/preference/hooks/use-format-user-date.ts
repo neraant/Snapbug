@@ -7,15 +7,12 @@ export function useFormatUserDate() {
   const { data: preference } = useFindUserPreference();
 
   return useCallback(
-    (createdAt: string) =>
+    (createdAt: string, options?: { relative?: boolean }) =>
       formatUserDate({
         createdAt,
-        preference: {
-          dateFormat: preference.dateFormat,
-          timeZone: preference.timeZone,
-          use24HourTime: preference.use24HourTime,
-        },
+        timeZone: preference.timeZone,
+        relative: options?.relative,
       }),
-    [preference.dateFormat, preference.timeZone, preference.use24HourTime],
+    [preference.timeZone],
   );
 }

@@ -4,9 +4,10 @@ import { interfaceLanguageSchema } from "@workspace/validation/modules/user/cons
 import { useRouter } from "next/navigation";
 import { useCallback, useState } from "react";
 
+import { texts } from "@/client/modules/preference/consts/texts.const";
+import { setInterfaceLanguage } from "@/client/modules/shared/locale/interface-language";
 import { useFindCurrentUser } from "@/client/modules/shared/queries/use-find-current-user";
 import { useUpdateInterfaceLanguage } from "@/client/modules/shared/queries/use-update-interface-language";
-import { texts } from "@/client/modules/user/consts/texts.const";
 
 export function useInterfaceLanguageForm() {
   const router = useRouter();
@@ -30,11 +31,12 @@ export function useInterfaceLanguageForm() {
         });
         setSavedVisible(true);
         if (updated.interfaceLanguage !== previous) {
+          setInterfaceLanguage(updated.interfaceLanguage);
           router.refresh();
         }
       } catch (error) {
         toast.add({
-          title: getAppErrorMessage(error, texts.toast.error),
+          title: getAppErrorMessage(error, texts.language.toast.error),
           type: "error",
         });
       }

@@ -3,10 +3,9 @@
 import { useQueryClient } from "@tanstack/react-query";
 import type { UserPreferenceModelType } from "@workspace/validation/modules/preference/dto/user-preference.model";
 import { useTheme } from "next-themes";
-import { type PropsWithChildren, Suspense, useEffect } from "react";
+import { type PropsWithChildren, Suspense, useEffect, useRef } from "react";
 
 import { useBootstrapUserTimeZone } from "@/client/modules/preference/hooks/use-bootstrap-user-time-zone";
-import { applyUserPreferenceDom } from "@/client/modules/preference/utils/apply-user-preference-dom.util";
 import { orpcQuery } from "@/client/modules/shared/orpc/query-utils";
 import { useFindUserPreference } from "@/client/modules/shared/queries/use-find-user-preference";
 
@@ -16,29 +15,21 @@ type UserPreferenceProviderProps = PropsWithChildren<{
 
 function UserPreferenceProviderInner({ children }: PropsWithChildren) {
   const { data: preference } = useFindUserPreference();
-  const { setTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
+  const hasAppliedServerTheme = useRef(false);
 
   useBootstrapUserTimeZone();
 
   useEffect(() => {
-    applyUserPreferenceDom({
-      preference: {
-        theme: preference.theme,
-        accent: preference.accent,
-        density: preference.density,
-        reduceMotion: preference.reduceMotion,
-        sidebarCollapsed: preference.sidebarCollapsed,
-      },
-      setTheme,
-    });
-  }, [
-    preference.accent,
-    preference.density,
-    preference.reduceMotion,
-    preference.sidebarCollapsed,
-    preference.theme,
-    setTheme,
-  ]);
+    if (hasAppliedServerTheme.current) return;
+    if (theme === undefined) return;
+
+    hasAppliedServerTheme.current = true;
+
+    if (preference.theme !== theme) {
+      setTheme(preference.theme);
+    }
+  }, [preference.theme, setTheme, theme]);
 
   return children;
 }

@@ -22,7 +22,6 @@ import { Typography } from "@workspace/design-system/components/ui/typography";
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 
 import { formatPersonInitials } from "@/client/modules/overview/utils/format-person-initials.util";
-import { InterfaceLanguageForm } from "@/client/modules/user/components/interface-language-form";
 import { texts } from "@/client/modules/user/consts/texts.const";
 import { useChangePasswordSection } from "@/client/modules/user/hooks/use-change-password-section";
 import { useProfileSettingsForm } from "@/client/modules/user/hooks/use-profile-settings-form";
@@ -140,8 +139,6 @@ export function ProfileSettingsForm() {
           ) : null}
         </SettingsSection>
       </SettingsSections>
-
-      <InterfaceLanguageForm />
 
       <SettingsSections>
         <SettingsSection

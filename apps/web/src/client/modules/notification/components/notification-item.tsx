@@ -66,7 +66,8 @@ export function NotificationItem({
   const metaProject = notification.payload.projectName?.trim();
   const metaTime = formatUserDate({
     createdAt: notification.createdAt,
-    preference: { dateFormat: "relative", timeZone: "UTC", use24HourTime: false },
+    timeZone: "UTC",
+    relative: true,
   });
   const metaLine = [metaProject, metaTime].filter(Boolean).join(" · ");
   const system = notification.actorUserId == null;

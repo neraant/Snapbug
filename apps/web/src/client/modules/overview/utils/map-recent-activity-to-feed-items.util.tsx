@@ -22,7 +22,7 @@ type MapRecentActivityToFeedItemsOptions = {
 
 export function mapRecentActivityToFeedItems(
   items: FindRecentOutputDtoType,
-  { formatDate = formatActivityDate }: MapRecentActivityToFeedItemsOptions = {},
+  { formatDate = (createdAt) => formatActivityDate(createdAt, "UTC") }: MapRecentActivityToFeedItemsOptions = {},
 ): FeedListItem[] {
   return items.map((item) => {
     const details = [item.projectName, item.browser].filter((part): part is string => Boolean(part));

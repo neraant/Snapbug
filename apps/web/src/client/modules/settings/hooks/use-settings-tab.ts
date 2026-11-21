@@ -13,12 +13,15 @@ import {
 function parseSettingsTab(value: string | null): SettingsTab {
   if (
     value === settingsTabs.profile ||
-    value === settingsTabs.appearance ||
+    value === settingsTabs.preferences ||
     value === settingsTabs.notifications ||
-    value === settingsTabs.organization ||
-    value === settingsTabs.tokens
+    value === settingsTabs.organization
   ) {
     return value;
+  }
+
+  if (value === "appearance" || value === "tokens") {
+    return defaultSettingsTab;
   }
 
   return defaultSettingsTab;

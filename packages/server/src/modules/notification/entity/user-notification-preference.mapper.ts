@@ -58,7 +58,6 @@ export abstract class UserNotificationPreferenceMapper {
     ) as NotificationPreferenceModelType["channels"];
 
     return {
-      emailDigest: persisted.emailDigest,
       channels: visibleChannels,
       mutedProjectIds,
       lockedGroups: notificationPreferenceGroups.filter(isNotificationPreferenceLockedGroup),

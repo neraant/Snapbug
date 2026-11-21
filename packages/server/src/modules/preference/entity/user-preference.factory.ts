@@ -8,13 +8,6 @@ export abstract class UserPreferenceFactory {
       userId,
       timeZone: userPreferenceDefaults.timeZone,
       theme: userPreferenceDefaults.theme,
-      accent: userPreferenceDefaults.accent,
-      density: userPreferenceDefaults.density,
-      dateFormat: userPreferenceDefaults.dateFormat,
-      use24HourTime: userPreferenceDefaults.use24HourTime,
-      reduceMotion: userPreferenceDefaults.reduceMotion,
-      defaultLandingPage: userPreferenceDefaults.defaultLandingPage,
-      sidebarCollapsed: userPreferenceDefaults.sidebarCollapsed,
       createdAt: now,
       updatedAt: now,
     });

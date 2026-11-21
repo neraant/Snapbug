@@ -1,41 +1,19 @@
 import type { ActivityLogType } from "@workspace/validation/modules/audit/dto/find-activity-logs.schema";
-import type { UserPreferenceModelType } from "@workspace/validation/modules/preference/dto/user-preference.model";
-import { userPreferenceDefaults } from "@workspace/validation/modules/preference/dto/user-preference.model";
 import { format, isToday, isYesterday } from "date-fns";
 
 import { texts } from "@/client/modules/activity-log/consts/texts.const";
 import { formatUserDate } from "@/client/modules/preference/utils/format-user-date.util";
 
-type ActivityDatePreference = Pick<UserPreferenceModelType, "dateFormat" | "timeZone" | "use24HourTime">;
-
-const defaultDatePreference: ActivityDatePreference = {
-  dateFormat: userPreferenceDefaults.dateFormat,
-  timeZone: userPreferenceDefaults.timeZone,
-  use24HourTime: userPreferenceDefaults.use24HourTime,
-};
-
-export function formatActivityWhen(
-  occurredAt: string,
-  preference: ActivityDatePreference = defaultDatePreference,
-): string {
-  return formatUserDate({ createdAt: occurredAt, preference });
+export function formatActivityWhen(occurredAt: string, timeZone: string): string {
+  return formatUserDate({ createdAt: occurredAt, timeZone, relative: true });
 }
 
-export function formatActivityRelativeWhen(occurredAt: string): string {
-  return formatUserDate({
-    createdAt: occurredAt,
-    preference: { ...defaultDatePreference, dateFormat: "relative" },
-  });
+export function formatActivityRelativeWhen(occurredAt: string, timeZone: string): string {
+  return formatUserDate({ createdAt: occurredAt, timeZone, relative: true });
 }
 
-export function formatActivityExactWhen(
-  occurredAt: string,
-  preference: ActivityDatePreference = defaultDatePreference,
-): string {
-  return formatUserDate({
-    createdAt: occurredAt,
-    preference: { ...preference, dateFormat: "absolute" },
-  });
+export function formatActivityExactWhen(occurredAt: string, timeZone: string): string {
+  return formatUserDate({ createdAt: occurredAt, timeZone });
 }
 
 export function formatActivityDayLabel(occurredAt: string): string {

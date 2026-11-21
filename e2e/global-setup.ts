@@ -69,13 +69,26 @@ function startPostgres(): void {
   throw lastError instanceof Error ? lastError : new Error("Could not start Postgres for e2e");
 }
 
+function runDatabaseMigrate(): void {
+  execFileSync("pnpm", ["--filter", "@workspace/database", "db:migrate"], {
+    cwd: repoRoot,
+    stdio: "pipe",
+    env: {
+      ...process.env,
+      DATABASE_URL: process.env.DATABASE_URL ?? defaultDatabaseUrl,
+    },
+  });
+}
+
 export default async function globalSetup(): Promise<void> {
   const { host, port } = databaseEndpoint();
   if (await accepts(host, port)) {
     await waitForPostgres(host, port, 5_000);
+    runDatabaseMigrate();
     return;
   }
 
   startPostgres();
   await waitForPostgres(host, port, 60_000);
+  runDatabaseMigrate();
 }

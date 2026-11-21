@@ -28,6 +28,10 @@ export function getInterfaceLanguage(): InterfaceLanguage {
   return activeInterfaceLanguage();
 }
 
+export function syncInterfaceLanguage(language: InterfaceLanguage): void {
+  current = language;
+}
+
 export function setInterfaceLanguage(language: InterfaceLanguage): void {
   if (current === language) return;
   current = language;

@@ -62,11 +62,7 @@ export function TicketDetailCommentThreadItem({
   });
   const { confirm, bind } = useConfirmDialog();
   const { data: preference } = useFindUserPreference();
-  const datePreference = {
-    dateFormat: preference.dateFormat,
-    timeZone: preference.timeZone,
-    use24HourTime: preference.use24HourTime,
-  };
+  const timeZone = preference.timeZone;
 
   const authorName = comment.authorName ?? comment.authorEmail ?? texts.comments.unknownAuthor;
   const isAgent = comment.authorSource === CommentAuthorSource.MCP;
@@ -120,11 +116,11 @@ export function TicketDetailCommentThreadItem({
                 <TooltipTrigger
                   render={
                     <Typography variant="text-xs" color="muted" className="shrink-0">
-                      {formatTicketDetailCommentWhen(comment.createdAt, datePreference)}
+                      {formatTicketDetailCommentWhen(comment.createdAt, timeZone)}
                     </Typography>
                   }
                 />
-                <TooltipContent>{formatTicketDetailCommentExactWhen(comment.createdAt, datePreference)}</TooltipContent>
+                <TooltipContent>{formatTicketDetailCommentExactWhen(comment.createdAt, timeZone)}</TooltipContent>
               </Tooltip>
               {isEdited ? (
                 <Typography variant="text-xs" color="muted" className="shrink-0">

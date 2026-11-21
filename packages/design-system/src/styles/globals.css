@@ -291,23 +291,6 @@
   .recharts-cartesian-axis-tick-value {
     @apply fill-muted-foreground;
   }
-
-  [data-density="compact"] [data-slot="table-cell"] {
-    @apply py-1.5;
-  }
-
-  [data-density="compact"] [data-slot="table-head"] {
-    @apply h-8 py-1.5;
-  }
-
-  [data-reduce-motion="true"] *,
-  [data-reduce-motion="true"] *::before,
-  [data-reduce-motion="true"] *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
 }
 
 @utility no-scrollbar {

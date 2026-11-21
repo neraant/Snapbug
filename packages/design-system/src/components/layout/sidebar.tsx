@@ -30,7 +30,6 @@ import {
 } from "@workspace/design-system/components/ui/sidebar";
 import { Typography } from "@workspace/design-system/components/ui/typography";
 import { BugIcon, EllipsisVerticalIcon, LogOutIcon, MonitorIcon, MoonIcon, SunIcon } from "lucide-react";
-import { useTheme } from "next-themes";
 import { createElement, type ElementType, type PropsWithChildren, type ReactNode } from "react";
 
 export type SidebarItem = {
@@ -55,6 +54,8 @@ type SidebarLayoutProps = PropsWithChildren<{
   onSignOut: VoidFunction;
   menuLabel?: string;
   themeLabel?: string;
+  theme?: string;
+  onThemeChange?: (value: string) => void;
   linkAs?: ElementType;
   scopeSelector?: ReactNode;
 }>;
@@ -86,21 +87,24 @@ function getInitials(name: string) {
   );
 }
 
-function SidebarAccountMenu({
+function SidebarUserMenu({
   user,
   menuLabel,
   themeLabel,
+  theme = "system",
+  onThemeChange,
   signOutLabel,
   onSignOut,
 }: {
   user: SidebarUser;
   menuLabel: string;
   themeLabel: string;
+  theme?: string;
+  onThemeChange?: (value: string) => void;
   signOutLabel: string;
   onSignOut: VoidFunction;
 }) {
   const { isMobile } = useSidebar();
-  const { theme, setTheme } = useTheme();
 
   return (
     <DropdownMenu>
@@ -127,7 +131,7 @@ function SidebarAccountMenu({
       <DropdownMenuContent side={isMobile ? "bottom" : "top"} align="start">
         <DropdownMenuGroup>
           <DropdownMenuLabel>{themeLabel}</DropdownMenuLabel>
-          <DropdownMenuRadioGroup value={theme ?? "system"} onValueChange={setTheme}>
+          <DropdownMenuRadioGroup value={theme} onValueChange={(value) => onThemeChange?.(value)}>
             {THEME_OPTION.map((option) => {
               const Icon = option.icon;
 
@@ -162,6 +166,8 @@ export function SidebarLayout({
   onSignOut,
   menuLabel = "More options",
   themeLabel = "Theme",
+  theme = "system",
+  onThemeChange,
   scopeSelector,
   children,
 }: SidebarLayoutProps) {
@@ -242,10 +248,12 @@ export function SidebarLayout({
         <SidebarFooter>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarAccountMenu
+              <SidebarUserMenu
                 user={user}
                 menuLabel={menuLabel}
                 themeLabel={themeLabel}
+                theme={theme}
+                onThemeChange={onThemeChange}
                 signOutLabel={signOutLabel}
                 onSignOut={onSignOut}
               />

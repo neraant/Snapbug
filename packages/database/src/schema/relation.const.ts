@@ -3,7 +3,6 @@ import { bugReportTable } from "@workspace/database/schema/bug-report.const";
 import { commentTable } from "@workspace/database/schema/comment.const";
 import { invitationTable } from "@workspace/database/schema/invitation.const";
 import { membershipTable } from "@workspace/database/schema/membership.const";
-import { notificationEmailPendingTable } from "@workspace/database/schema/notification-email-pending.const";
 import { notificationTable } from "@workspace/database/schema/notification.const";
 import { userNotificationPreferenceTable } from "@workspace/database/schema/user-notification-preference.const";
 import { userOrganizationNotificationPreferenceTable } from "@workspace/database/schema/user-organization-notification-preference.const";
@@ -22,7 +21,6 @@ const tables = {
   commentTable,
   invitationTable,
   membershipTable,
-  notificationEmailPendingTable,
   notificationTable,
   organizationTable,
   userNotificationPreferenceTable,
@@ -59,10 +57,6 @@ export const relations = defineRelations(tables, (relation) => ({
     notificationPreference: relation.one.userNotificationPreferenceTable({
       from: relation.userTable.id,
       to: relation.userNotificationPreferenceTable.userId,
-    }),
-    notificationEmailPending: relation.many.notificationEmailPendingTable({
-      from: relation.userTable.id,
-      to: relation.notificationEmailPendingTable.userId,
     }),
     organizationNotificationPreferences: relation.many.userOrganizationNotificationPreferenceTable({
       from: relation.userTable.id,
@@ -111,22 +105,6 @@ export const relations = defineRelations(tables, (relation) => ({
       from: relation.userOrganizationNotificationPreferenceTable.organizationId,
       to: relation.organizationTable.id,
       optional: false,
-    }),
-  },
-  notificationEmailPendingTable: {
-    user: relation.one.userTable({
-      from: relation.notificationEmailPendingTable.userId,
-      to: relation.userTable.id,
-      optional: false,
-    }),
-    organization: relation.one.organizationTable({
-      from: relation.notificationEmailPendingTable.organizationId,
-      to: relation.organizationTable.id,
-      optional: false,
-    }),
-    project: relation.one.projectTable({
-      from: relation.notificationEmailPendingTable.projectId,
-      to: relation.projectTable.id,
     }),
   },
   resetPasswordTokenTable: {

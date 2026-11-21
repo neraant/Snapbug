@@ -16,9 +16,7 @@ describe("UpdateNotificationPreferenceUseCase", () => {
   it("keeps locked security channels on", async () => {
     const existing = new UserNotificationPreference({
       userId,
-      emailDigest: "immediately",
       channels: {},
-      emailDigestSentAt: null,
       createdAt: new Date("2026-01-01T00:00:00.000Z"),
       updatedAt: new Date("2026-01-01T00:00:00.000Z"),
     });
@@ -63,9 +61,7 @@ describe("UpdateNotificationPreferenceUseCase", () => {
   it("stores muted project ids for the organization", async () => {
     const existing = new UserNotificationPreference({
       userId,
-      emailDigest: "daily",
       channels: {},
-      emailDigestSentAt: null,
       createdAt: new Date("2026-01-01T00:00:00.000Z"),
       updatedAt: new Date("2026-01-01T00:00:00.000Z"),
     });

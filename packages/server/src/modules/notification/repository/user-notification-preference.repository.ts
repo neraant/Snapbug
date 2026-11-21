@@ -34,9 +34,7 @@ export class UserNotificationPreferenceRepository {
         .onConflictDoUpdate({
           target: userNotificationPreferenceTable.userId,
           set: {
-            emailDigest: values.emailDigest,
             channels: values.channels,
-            emailDigestSentAt: values.emailDigestSentAt,
             updatedAt: values.updatedAt,
           },
         });

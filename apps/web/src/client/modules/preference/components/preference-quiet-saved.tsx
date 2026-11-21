@@ -5,11 +5,11 @@ import { CheckIcon } from "lucide-react";
 
 import { texts } from "@/client/modules/preference/consts/texts.const";
 
-type AppearanceQuietSavedProps = {
+type PreferenceQuietSavedProps = {
   visible: boolean;
 };
 
-export function AppearanceQuietSaved({ visible }: AppearanceQuietSavedProps) {
+export function PreferenceQuietSaved({ visible }: PreferenceQuietSavedProps) {
   if (!visible) return null;
 
   return (
