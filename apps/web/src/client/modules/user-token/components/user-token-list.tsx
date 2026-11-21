@@ -19,11 +19,13 @@ import { useConfirmDialog } from "@/client/modules/shared/hooks/use-confirm-dial
 import { CreateUserTokenDialog } from "@/client/modules/user-token/components/create-user-token-dialog";
 import { UserTokenScopeBadges } from "@/client/modules/user-token/components/user-token-scope-badges";
 import { texts } from "@/client/modules/user-token/consts/texts.const";
+import { useCreateUserTokenDialog } from "@/client/modules/user-token/hooks/use-create-user-token-dialog";
 import { useUserTokenList } from "@/client/modules/user-token/hooks/use-user-token-list";
 import { formatUserTokenCreatedAt } from "@/client/modules/user-token/utils/format-user-token-created-at.util";
 
 export function UserTokenList() {
   const { tokens, isPending, onRevoke, revokeSuccessMessage, revokeErrorMessage } = useUserTokenList();
+  const createDialog = useCreateUserTokenDialog();
   const { confirm, bind } = useConfirmDialog();
 
   const openRevokeConfirm = (tokenId: string, tokenName: string) => {
@@ -49,72 +51,77 @@ export function UserTokenList() {
   return (
     <>
       <Column gap="md" width="full">
+        <CreateUserTokenDialog {...createDialog} showTrigger={activeTokens.length > 0} />
         {activeTokens.length === 0 ? (
           <Table.Shell>
-            <Table.Empty message={texts.empty} action={<CreateUserTokenDialog />} />
+            <Table.Empty
+              message={texts.empty}
+              action={
+                <Button type="button" onClick={createDialog.onOpenCreate} className="max-w-fit">
+                  {texts.create.action}
+                </Button>
+              }
+            />
           </Table.Shell>
         ) : (
-          <>
-            <CreateUserTokenDialog />
-            <Table.Shell>
-              <Table>
-                <Table.Header>
-                  <Table.Row>
-                    <Table.Head>{texts.column.token}</Table.Head>
-                    <Table.Head>{texts.column.scopes}</Table.Head>
-                    <Table.Head>{texts.column.created}</Table.Head>
-                    <Table.Head>{texts.column.actions}</Table.Head>
-                  </Table.Row>
-                </Table.Header>
-                <Table.Body>
-                  {activeTokens.map((token) => (
-                    <Table.Row key={token.id}>
-                      <Table.Cell>
-                        <Typography variant="text-sm">{token.name}</Typography>
-                      </Table.Cell>
-                      <Table.Cell>
-                        <Row gap="xs" wrap>
-                          <UserTokenScopeBadges
-                            scopePreset={token.scopePreset}
-                            scopes={token.scopes}
-                            projectIds={token.projectIds}
-                          />
-                        </Row>
-                      </Table.Cell>
-                      <Table.Cell className="text-muted-foreground">
-                        <Typography variant="text-sm">{formatUserTokenCreatedAt(token.createdAt)}</Typography>
-                      </Table.Cell>
-                      <Table.Cell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger
-                            render={
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon-sm"
-                                disabled={isPending}
-                                aria-label={texts.actionsMenuLabel}
-                              />
-                            }
+          <Table.Shell>
+            <Table>
+              <Table.Header>
+                <Table.Row>
+                  <Table.Head>{texts.column.token}</Table.Head>
+                  <Table.Head>{texts.column.scopes}</Table.Head>
+                  <Table.Head>{texts.column.created}</Table.Head>
+                  <Table.Head>{texts.column.actions}</Table.Head>
+                </Table.Row>
+              </Table.Header>
+              <Table.Body>
+                {activeTokens.map((token) => (
+                  <Table.Row key={token.id}>
+                    <Table.Cell>
+                      <Typography variant="text-sm">{token.name}</Typography>
+                    </Table.Cell>
+                    <Table.Cell>
+                      <Row gap="xs" wrap>
+                        <UserTokenScopeBadges
+                          scopePreset={token.scopePreset}
+                          scopes={token.scopes}
+                          projectIds={token.projectIds}
+                        />
+                      </Row>
+                    </Table.Cell>
+                    <Table.Cell className="text-muted-foreground">
+                      <Typography variant="text-sm">{formatUserTokenCreatedAt(token.createdAt)}</Typography>
+                    </Table.Cell>
+                    <Table.Cell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger
+                          render={
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon-sm"
+                              disabled={isPending}
+                              aria-label={texts.actionsMenuLabel}
+                            />
+                          }
+                        >
+                          <EllipsisVerticalIcon />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            variant="destructive"
+                            onClick={() => openRevokeConfirm(token.id, token.name)}
                           >
-                            <EllipsisVerticalIcon />
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              variant="destructive"
-                              onClick={() => openRevokeConfirm(token.id, token.name)}
-                            >
-                              {texts.revoke.action}
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </Table.Cell>
-                    </Table.Row>
-                  ))}
-                </Table.Body>
-              </Table>
-            </Table.Shell>
-          </>
+                            {texts.revoke.action}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </Table.Cell>
+                  </Table.Row>
+                ))}
+              </Table.Body>
+            </Table>
+          </Table.Shell>
         )}
       </Column>
       <ConfirmDialog {...bind()} />
