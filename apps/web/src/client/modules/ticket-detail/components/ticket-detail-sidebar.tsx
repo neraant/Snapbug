@@ -7,6 +7,7 @@ import { StatusIndicator } from "@workspace/design-system/components/ui/status-i
 import { useFindBugReport } from "@/client/modules/shared/queries/use-find-bug-report";
 import { useFindProjects } from "@/client/modules/shared/queries/use-find-projects";
 import { useFindUserPreference } from "@/client/modules/shared/queries/use-find-user-preference";
+import { TicketDetailAssigneePicker } from "@/client/modules/ticket-detail/components/ticket-detail-assignee-picker";
 import { TicketDetailCopyableUrlValue } from "@/client/modules/ticket-detail/components/ticket-detail-copyable-url-value";
 import { TicketDetailPropertyRow } from "@/client/modules/ticket-detail/components/ticket-detail-property-row";
 import { bugReportSeverityBadgeVariant } from "@/client/modules/ticket-detail/consts/bug-report-severity-badge-variant.const";
@@ -24,7 +25,6 @@ export function TicketDetailSidebar({ shortId }: TicketDetailSidebarProps) {
   const timeZone = preference.timeZone;
 
   const projectName = projects.find((project) => project.id === ticket.projectId)?.name ?? "—";
-  const assigneeLabel = ticket.assignee?.name?.trim() || texts.sidebar.unassigned;
   const viewport =
     ticket.viewportWidth != null && ticket.viewportHeight != null
       ? `${ticket.viewportWidth} × ${ticket.viewportHeight}`
@@ -55,7 +55,7 @@ export function TicketDetailSidebar({ shortId }: TicketDetailSidebarProps) {
                 </Badge>
               }
             />
-            <TicketDetailPropertyRow label={texts.sidebar.assignee} value={assigneeLabel} />
+            <TicketDetailAssigneePicker shortId={shortId} />
             <TicketDetailPropertyRow label={texts.sidebar.project} value={projectName} />
             <TicketDetailPropertyRow label={texts.sidebar.reporter} value={ticket.reporterEmail ?? "—"} />
             <TicketDetailPropertyRow

@@ -42,6 +42,8 @@ test("a member can create a personal MCP token and see the secret once", async (
   const secretDialog = page.getByRole("dialog", { name: "Token created" });
   await expect(secretDialog).toBeVisible({ timeout: 30_000 });
   await expect(secretDialog.getByText("Copy it now. You won't be able to see it again.")).toBeVisible();
+  await expect(secretDialog.getByText("How to use")).toHaveCount(0);
+  await expect(secretDialog.getByRole("link", { name: "How to connect → MCP · Connect" })).toBeVisible();
   const secretField = secretDialog.getByRole("textbox", { name: "Token created" });
   await expect(secretField).toHaveValue(/^snb_ut_live_/);
 

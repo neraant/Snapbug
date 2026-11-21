@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "@workspace/design-system/components/ui/toast";
 import { getAppErrorMessage } from "@workspace/server/error/get-app-error-message";
+import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
 import {
   expandMcpScopes,
   type McpToolScopeType,
@@ -13,6 +14,7 @@ import { useForm } from "react-hook-form";
 import type { z } from "zod";
 
 import { useCreateUserToken } from "@/client/modules/shared/queries/use-create-user-token";
+import { useFindMembershipByUser } from "@/client/modules/shared/queries/use-find-membership-by-user";
 import { useFindProjects } from "@/client/modules/shared/queries/use-find-projects";
 import { texts } from "@/client/modules/user-token/consts/texts.const";
 import { countTokenTools } from "@/client/modules/user-token/utils/count-token-tools.util";
@@ -28,6 +30,8 @@ export function useCreateUserTokenDialog() {
   const [projectMode, setProjectMode] = useState<"all" | "selected">("all");
   const [selectedProjectIds, setSelectedProjectIds] = useState<string[]>([]);
   const { data: projects = [] } = useFindProjects();
+  const { data: membership } = useFindMembershipByUser();
+  const isOrgAdmin = membership?.role === UserRole.ADMIN;
   const { mutateAsync: createUserToken, isPending } = useCreateUserToken();
   const { control, handleSubmit, formState, reset } = useForm<CreateUserTokenFormSchemaType>({
     resolver: zodResolver(createUserTokenInputDtoSchema),
@@ -36,13 +40,13 @@ export function useCreateUserTokenDialog() {
 
   const effectiveScopes = useMemo(() => {
     if (preset === "custom") return expandMcpScopes(customScopes);
-    return expandMcpScopes(presetScopes(preset));
-  }, [customScopes, preset]);
+    return expandMcpScopes(presetScopes(preset, { includeActivityRead: isOrgAdmin }));
+  }, [customScopes, isOrgAdmin, preset]);
 
   const toolSummary = useMemo(() => {
-    const { allowed, total } = countTokenTools(effectiveScopes);
+    const { allowed, total } = countTokenTools(effectiveScopes, isOrgAdmin);
     return texts.create.dialog.toolSummary(allowed, total);
-  }, [effectiveScopes]);
+  }, [effectiveScopes, isOrgAdmin]);
 
   const onOpenCreate = () => {
     setOpen(true);
@@ -124,6 +128,7 @@ export function useCreateUserTokenDialog() {
     selectedProjectIds,
     projects,
     toolSummary,
+    isOrgAdmin,
     onPresetChange,
     onToggleScope,
     onProjectModeChange: setProjectMode,

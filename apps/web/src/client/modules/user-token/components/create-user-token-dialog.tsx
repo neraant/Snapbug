@@ -33,6 +33,7 @@ export function CreateUserTokenDialog() {
     selectedProjectIds,
     projects,
     toolSummary,
+    isOrgAdmin,
     onPresetChange,
     onToggleScope,
     onProjectModeChange,
@@ -51,7 +52,6 @@ export function CreateUserTokenDialog() {
               secret={secret}
               kind="userToken"
               metadataName={createdTokenName ?? undefined}
-              showUsageSnippet
               onDone={() => onOpenChange(false)}
             />
           ) : (
@@ -77,6 +77,7 @@ export function CreateUserTokenDialog() {
                   selectedProjectIds={selectedProjectIds}
                   projects={projects}
                   toolSummary={toolSummary}
+                  isOrgAdmin={isOrgAdmin}
                   isPending={isPending}
                   onPresetChange={onPresetChange}
                   onToggleScope={onToggleScope}

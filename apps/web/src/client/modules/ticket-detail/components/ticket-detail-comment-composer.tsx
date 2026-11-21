@@ -1,5 +1,6 @@
 import { Column } from "@workspace/design-system/components/layout/column";
 import { Row } from "@workspace/design-system/components/layout/row";
+import { Avatar, AvatarFallback } from "@workspace/design-system/components/ui/avatar";
 import { Button } from "@workspace/design-system/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@workspace/design-system/components/ui/field";
 import { Skeleton } from "@workspace/design-system/components/ui/skeleton";
@@ -8,6 +9,8 @@ import { Textarea } from "@workspace/design-system/components/ui/textarea";
 import { Typography } from "@workspace/design-system/components/ui/typography";
 import { cn } from "@workspace/design-system/lib/utils";
 
+import { getProjectMemberInitials } from "@/client/modules/project/utils/get-project-member-initials.util";
+import { useFindCurrentUser } from "@/client/modules/shared/queries/use-find-current-user";
 import { texts } from "@/client/modules/ticket-detail/consts/texts.const";
 import { useTicketDetailCommentComposer } from "@/client/modules/ticket-detail/hooks/use-ticket-detail-comment-composer";
 
@@ -17,6 +20,7 @@ type TicketDetailCommentComposerProps = {
 };
 
 export function TicketDetailCommentComposer({ bugReportId, onCommentAdded }: TicketDetailCommentComposerProps) {
+  const { data: currentUser } = useFindCurrentUser();
   const {
     draftBody,
     setDraftBody,
@@ -35,8 +39,12 @@ export function TicketDetailCommentComposer({ bugReportId, onCommentAdded }: Tic
 
   return (
     <Column as="form" gap="md" width="full" minWidth="0" noValidate onSubmit={onSubmit}>
-      <Row align="start" gap="md" width="full" minWidth="0">
-        <Column gap="xs" width="full" minWidth="0">
+      <Row align="start" gap="md" wrap={false} width="full" minWidth="0">
+        <Avatar size="lg" className="shrink-0">
+          <AvatarFallback>{getProjectMemberInitials(currentUser.name, currentUser.email)}</AvatarFallback>
+        </Avatar>
+
+        <Column gap="xs" width="full" minWidth="0" className="min-w-0 flex-1">
           <Field data-invalid={Boolean(fieldError)}>
             <FieldLabel htmlFor="commentBody">{texts.comments.fieldLabel}</FieldLabel>
             <Textarea
@@ -78,9 +86,9 @@ export function TicketDetailCommentComposer({ bugReportId, onCommentAdded }: Tic
 
 function TicketDetailCommentComposerFallback() {
   return (
-    <Row align="start" gap="md" width="full">
+    <Row align="start" gap="md" wrap={false} width="full">
       <Skeleton className="size-10 shrink-0 rounded-full" />
-      <Skeleton className="h-20 w-full" />
+      <Skeleton className="h-20 w-full min-w-0 flex-1" />
     </Row>
   );
 }

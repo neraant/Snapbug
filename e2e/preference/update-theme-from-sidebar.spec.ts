@@ -25,13 +25,24 @@ test("a member switches theme from the sidebar and it persists", async ({ page }
     await expect(preferences.getByText("Saved")).toBeVisible({ timeout: 15_000 });
   }
 
+  const moreOptions = page.getByRole("button", { name: "More options" });
+  await page.waitForFunction(() => {
+    const trigger = Array.from(document.querySelectorAll("button")).find(
+      (button) => button.getAttribute("aria-label") === "More options",
+    );
+    if (!trigger) return false;
+    return Object.getOwnPropertyNames(trigger).some((name) => name.startsWith("__reactProps$"));
+  });
+
   await expect(async () => {
-    await page.getByRole("button", { name: "More options" }).click();
+    await moreOptions.click();
     await expect(page.getByRole("menuitemradio", { name: "Dark" })).toBeVisible({ timeout: 2_000 });
   }).toPass({ timeout: 15_000 });
   await page.getByRole("menuitemradio", { name: "Dark" }).click();
 
-  await expect(page.locator("html")).toHaveClass(/dark/, { timeout: 15_000 });
+  await expect(async () => {
+    await expect(page.locator("html")).toHaveClass(/dark/);
+  }).toPass({ timeout: 15_000 });
 
   await page.reload();
   await expect(page.locator("html")).toHaveClass(/dark/, { timeout: 15_000 });

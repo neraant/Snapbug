@@ -2,7 +2,7 @@ import { toast } from "@workspace/design-system/components/ui/toast";
 import { getAppErrorMessage } from "@workspace/server/error/get-app-error-message";
 import type { UserPreferenceTheme } from "@workspace/validation/modules/preference/consts/user-preference-theme.const";
 import { useTheme } from "next-themes";
-import { useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { texts } from "@/client/modules/preference/consts/texts.const";
 import { useFindUserPreference } from "@/client/modules/shared/queries/use-find-user-preference";
@@ -12,8 +12,13 @@ export function useUserTheme() {
   const { theme: nextTheme, setTheme: setNextTheme } = useTheme();
   const { data: preference } = useFindUserPreference();
   const { mutateAsync: updateUserPreference, isPending } = useUpdateUserPreference();
+  const [mounted, setMounted] = useState(false);
 
-  const theme = nextTheme ?? preference.theme ?? "system";
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const theme = (mounted ? nextTheme : undefined) ?? preference.theme ?? "system";
 
   const setTheme = useCallback(
     async (value: string) => {

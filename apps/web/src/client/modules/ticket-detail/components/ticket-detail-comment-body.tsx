@@ -32,7 +32,9 @@ export function TicketDetailCommentBody({ body }: TicketDetailCommentBodyProps) 
           !expanded && collapsible && "max-h-48",
         )}
       >
-        <Markdown source={body} />
+        <div className="min-w-0 break-words">
+          <Markdown source={body} />
+        </div>
       </div>
       {collapsible ? (
         <Button

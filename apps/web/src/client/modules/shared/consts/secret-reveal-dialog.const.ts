@@ -3,6 +3,7 @@ import { localize } from "@/client/modules/shared/locale/interface-language";
 const en = {
   userToken: {
     title: "Token created",
+    connectLink: "How to connect → MCP · Connect",
   },
   apiKey: {
     title: "New API key",
@@ -14,15 +15,14 @@ const en = {
   createdJustNow: "Created just now",
   reveal: "Show secret",
   hide: "Hide secret",
-  howToUse: "How to use",
   done: "Done",
   doneNudge: "I've copied it",
-  usageSnippetTitle: "Cursor",
 } as const;
 
 const ru = {
   userToken: {
     title: "Токен создан",
+    connectLink: "Как подключить → MCP · Подключение",
   },
   apiKey: {
     title: "Новый API-ключ",
@@ -34,10 +34,8 @@ const ru = {
   createdJustNow: "Создан только что",
   reveal: "Показать секрет",
   hide: "Скрыть секрет",
-  howToUse: "Как использовать",
   done: "Готово",
   doneNudge: "Я скопировал",
-  usageSnippetTitle: "Cursor",
 } as const;
 
 export const secretRevealDialogTexts: typeof en = localize(en, ru as never);

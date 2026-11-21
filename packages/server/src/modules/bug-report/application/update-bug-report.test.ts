@@ -2,7 +2,9 @@ import { createNotificationPortMock } from "@workspace/server/modules/notificati
 import { UpdateBugReportUseCase } from "@workspace/server/modules/bug-report/application/update-bug-report.use-case";
 import { BugReport } from "@workspace/server/modules/bug-report/entity/bug-report.entity";
 import type { MembershipPort } from "@workspace/server/modules/bug-report/port/membership.port";
+import type { ProjectAccessPort } from "@workspace/server/modules/bug-report/port/project-access.port";
 import type { ProjectPort } from "@workspace/server/modules/bug-report/port/project.port";
+import type { UserPort } from "@workspace/server/modules/bug-report/port/user.port";
 import type { BugReportRepository } from "@workspace/server/modules/bug-report/repository/bug-report.repository";
 import type { BugReportService } from "@workspace/server/modules/bug-report/service/bug-report.service";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
@@ -12,6 +14,7 @@ import { UserRole } from "@workspace/validation/modules/user/consts/user-role.co
 import { describe, expect, it, vi } from "vitest";
 
 const userId = "0a8c69a1-1ab1-45a8-8497-eae1e506d9d4";
+const assigneeUserId = "1a8c69a1-1ab1-45a8-8497-eae1e506d9d4";
 const organizationId = "3a8c69a1-1ab1-45a8-8497-eae1e506d9d1";
 const projectId = "4a8c69a1-1ab1-45a8-8497-eae1e506d9d1";
 const bugReportId = "6a8c69a1-1ab1-45a8-8497-eae1e506d901";
@@ -77,6 +80,15 @@ function createBugReportService() {
   return { saveWithAudit, normalizeBoardOrder, bugReportService };
 }
 
+function createDefaultAccessPorts() {
+  return {
+    projectAccessPort: { userHasProjectAccess: vi.fn().mockResolvedValue(true) } as unknown as ProjectAccessPort,
+    userPort: {
+      findManyByIds: vi.fn().mockResolvedValue([{ id: assigneeUserId, name: "Alice", email: "alice@example.com" }]),
+    } as unknown as UserPort,
+  };
+}
+
 describe("UpdateBugReportUseCase", () => {
   it("updates status for a member", async () => {
     const updatedBugReport = bugReport.update({ status: BugReportStatus.IN_PROGRESS });
@@ -90,9 +102,12 @@ describe("UpdateBugReportUseCase", () => {
     };
     const { saveWithAudit, normalizeBoardOrder, bugReportService } = createBugReportService();
     const withTransaction = vi.fn(async (callback) => await callback({}));
+    const { projectAccessPort, userPort } = createDefaultAccessPorts();
     const useCase = new UpdateBugReportUseCase(
       membershipPort as unknown as MembershipPort,
       projectPort as unknown as ProjectPort,
+      projectAccessPort,
+      userPort,
       bugReportRepository as unknown as BugReportRepository,
       bugReportService as unknown as BugReportService,
       createNotificationPortMock(),
@@ -122,9 +137,12 @@ describe("UpdateBugReportUseCase", () => {
     };
     const { bugReportService } = createBugReportService();
     const withTransaction = vi.fn(async (callback) => await callback({}));
+    const { projectAccessPort, userPort } = createDefaultAccessPorts();
     const useCase = new UpdateBugReportUseCase(
       membershipPort as unknown as MembershipPort,
       projectPort as unknown as ProjectPort,
+      projectAccessPort,
+      userPort,
       bugReportRepository as unknown as BugReportRepository,
       bugReportService as unknown as BugReportService,
       createNotificationPortMock(),
@@ -154,9 +172,12 @@ describe("UpdateBugReportUseCase", () => {
     };
     const { bugReportService } = createBugReportService();
     const withTransaction = vi.fn(async (callback) => await callback({}));
+    const { projectAccessPort, userPort } = createDefaultAccessPorts();
     const useCase = new UpdateBugReportUseCase(
       membershipPort as unknown as MembershipPort,
       projectPort as unknown as ProjectPort,
+      projectAccessPort,
+      userPort,
       bugReportRepository as unknown as BugReportRepository,
       bugReportService as unknown as BugReportService,
       createNotificationPortMock(),
@@ -178,9 +199,12 @@ describe("UpdateBugReportUseCase", () => {
     const bugReportRepository = { findById: vi.fn().mockResolvedValue(null) };
     const bugReportService = { withTx: vi.fn() };
     const withTransaction = vi.fn();
+    const { projectAccessPort, userPort } = createDefaultAccessPorts();
     const useCase = new UpdateBugReportUseCase(
       membershipPort as unknown as MembershipPort,
       projectPort as unknown as ProjectPort,
+      projectAccessPort,
+      userPort,
       bugReportRepository as unknown as BugReportRepository,
       bugReportService as unknown as BugReportService,
       createNotificationPortMock(),
@@ -205,9 +229,12 @@ describe("UpdateBugReportUseCase", () => {
     const bugReportRepository = { findById: vi.fn().mockResolvedValue(bugReport) };
     const { saveWithAudit, bugReportService } = createBugReportService();
     const withTransaction = vi.fn(async (callback) => await callback({}));
+    const { projectAccessPort, userPort } = createDefaultAccessPorts();
     const useCase = new UpdateBugReportUseCase(
       membershipPort as unknown as MembershipPort,
       projectPort as unknown as ProjectPort,
+      projectAccessPort,
+      userPort,
       bugReportRepository as unknown as BugReportRepository,
       bugReportService as unknown as BugReportService,
       createNotificationPortMock(),
@@ -230,9 +257,12 @@ describe("UpdateBugReportUseCase", () => {
     const bugReportRepository = { findById: vi.fn().mockResolvedValue(bugReport) };
     const bugReportService = { withTx: vi.fn() };
     const withTransaction = vi.fn();
+    const { projectAccessPort, userPort } = createDefaultAccessPorts();
     const useCase = new UpdateBugReportUseCase(
       membershipPort as unknown as MembershipPort,
       projectPort as unknown as ProjectPort,
+      projectAccessPort,
+      userPort,
       bugReportRepository as unknown as BugReportRepository,
       bugReportService as unknown as BugReportService,
       createNotificationPortMock(),
@@ -264,9 +294,12 @@ describe("UpdateBugReportUseCase", () => {
     };
     const bugReportService = { withTx: vi.fn().mockReturnValue({ withActor }) };
     const withTransaction = vi.fn(async (callback) => await callback({}));
+    const { projectAccessPort, userPort } = createDefaultAccessPorts();
     const useCase = new UpdateBugReportUseCase(
       membershipPort as unknown as MembershipPort,
       projectPort as unknown as ProjectPort,
+      projectAccessPort,
+      userPort,
       bugReportRepository as unknown as BugReportRepository,
       bugReportService as unknown as BugReportService,
       createNotificationPortMock(),
@@ -288,9 +321,12 @@ describe("UpdateBugReportUseCase", () => {
     const bugReportRepository = { findById: vi.fn().mockResolvedValue(bugReport) };
     const bugReportService = { withTx: vi.fn() };
     const withTransaction = vi.fn();
+    const { projectAccessPort, userPort } = createDefaultAccessPorts();
     const useCase = new UpdateBugReportUseCase(
       membershipPort as unknown as MembershipPort,
       projectPort as unknown as ProjectPort,
+      projectAccessPort,
+      userPort,
       bugReportRepository as unknown as BugReportRepository,
       bugReportService as unknown as BugReportService,
       createNotificationPortMock(),
@@ -304,5 +340,75 @@ describe("UpdateBugReportUseCase", () => {
     });
 
     expect(withTransaction).not.toHaveBeenCalled();
+  });
+
+  it("unassigns a ticket", async () => {
+    const assignedBugReport = bugReport.update({ assignedTo: assigneeUserId });
+    const unassignedBugReport = assignedBugReport.update({ assignedTo: null });
+    const membershipPort = {
+      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
+      findByUserAndOrganization: vi.fn().mockResolvedValue(membership),
+    };
+    const projectPort = { findById: vi.fn().mockResolvedValue(project) };
+    const bugReportRepository = {
+      findById: vi.fn().mockResolvedValueOnce(assignedBugReport).mockResolvedValueOnce(unassignedBugReport),
+    };
+    const { saveWithAudit, bugReportService } = createBugReportService();
+    const withTransaction = vi.fn(async (callback) => await callback({}));
+    const notificationPort = createNotificationPortMock();
+    const { projectAccessPort, userPort } = createDefaultAccessPorts();
+    const useCase = new UpdateBugReportUseCase(
+      membershipPort as unknown as MembershipPort,
+      projectPort as unknown as ProjectPort,
+      projectAccessPort,
+      userPort,
+      bugReportRepository as unknown as BugReportRepository,
+      bugReportService as unknown as BugReportService,
+      notificationPort,
+      withTransaction,
+    );
+
+    const result = await useCase.execute({ id: bugReportId, assignedTo: null }, userId, actor);
+
+    expect(result.assignedTo).toBeNull();
+    expect(saveWithAudit).toHaveBeenCalled();
+    expect(notificationPort.ticketAssigned).not.toHaveBeenCalled();
+  });
+
+  it("throws when the assignee does not have project access", async () => {
+    const membershipPort = {
+      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
+      findByUserAndOrganization: vi.fn().mockResolvedValue(membership),
+    };
+    const projectPort = { findById: vi.fn().mockResolvedValue(project) };
+    const bugReportRepository = { findById: vi.fn().mockResolvedValue(bugReport) };
+    const bugReportService = { withTx: vi.fn() };
+    const withTransaction = vi.fn();
+    const notificationPort = createNotificationPortMock();
+    const projectAccessPort = {
+      userHasProjectAccess: vi.fn().mockResolvedValue(false),
+    } as unknown as ProjectAccessPort;
+    const userPort = {
+      findManyByIds: vi.fn().mockResolvedValue([{ id: assigneeUserId, name: "Alice", email: "alice@example.com" }]),
+    } as unknown as UserPort;
+    const useCase = new UpdateBugReportUseCase(
+      membershipPort as unknown as MembershipPort,
+      projectPort as unknown as ProjectPort,
+      projectAccessPort,
+      userPort,
+      bugReportRepository as unknown as BugReportRepository,
+      bugReportService as unknown as BugReportService,
+      notificationPort,
+      withTransaction,
+    );
+
+    await expect(useCase.execute({ id: bugReportId, assignedTo: assigneeUserId }, userId, actor)).rejects.toMatchObject(
+      {
+        errorCode: ERROR_CODES.INVALID_DEFAULT_ASSIGNEE,
+      },
+    );
+
+    expect(withTransaction).not.toHaveBeenCalled();
+    expect(notificationPort.ticketAssigned).not.toHaveBeenCalled();
   });
 });

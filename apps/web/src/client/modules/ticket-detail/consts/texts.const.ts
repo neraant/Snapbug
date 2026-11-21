@@ -79,6 +79,14 @@ const en = {
     copyUrl: "Copy URL",
     copiedUrl: "Copied",
   },
+  assignee: {
+    triggerAriaLabel: "Change assignee",
+    searchPlaceholder: "Search members…",
+    searchAriaLabel: "Search members",
+    listAriaLabel: "Project members",
+    assignToMe: "Assign to me",
+    updateFailed: "Could not update assignee.",
+  },
   header: {
     statusAriaLabel: "Ticket status",
     severityAriaLabel: "Ticket severity",
@@ -98,6 +106,7 @@ const en = {
   toast: {
     statusUpdated: "Ticket status updated",
     severityUpdated: "Ticket severity updated",
+    assigneeUpdated: "Assignee updated",
     updateFailed: "Could not update ticket",
   },
 } as const;
@@ -178,6 +187,14 @@ const ru = {
     copyUrl: "Копировать URL",
     copiedUrl: "Скопировано",
   },
+  assignee: {
+    triggerAriaLabel: "Изменить исполнителя",
+    searchPlaceholder: "Поиск участников…",
+    searchAriaLabel: "Поиск участников",
+    listAriaLabel: "Участники проекта",
+    assignToMe: "Назначить на меня",
+    updateFailed: "Не удалось обновить исполнителя.",
+  },
   header: {
     statusAriaLabel: "Статус тикета",
     severityAriaLabel: "Важность тикета",
@@ -197,6 +214,7 @@ const ru = {
   toast: {
     statusUpdated: "Статус тикета обновлён",
     severityUpdated: "Важность тикета обновлена",
+    assigneeUpdated: "Исполнитель обновлён",
     updateFailed: "Не удалось обновить тикет",
   },
 } as const;

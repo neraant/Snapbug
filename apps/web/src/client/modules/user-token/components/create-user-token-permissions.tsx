@@ -19,6 +19,7 @@ type CreateUserTokenPermissionsProps = {
   selectedProjectIds: string[];
   projects: { id: string; name: string }[];
   toolSummary: string;
+  isOrgAdmin: boolean;
   isPending: boolean;
   onPresetChange: (preset: UserTokenScopePresetType) => void;
   onToggleScope: (scope: McpToolScopeType, checked: boolean) => void;
@@ -40,6 +41,7 @@ export function CreateUserTokenPermissions({
   selectedProjectIds,
   projects,
   toolSummary,
+  isOrgAdmin,
   isPending,
   onPresetChange,
   onToggleScope,
@@ -61,7 +63,7 @@ export function CreateUserTokenPermissions({
         />
         {preset === "custom" ? (
           <Column gap="md" width="full">
-            {MCP_SCOPE_GROUPS.map((group) => {
+            {MCP_SCOPE_GROUPS.filter((group) => isOrgAdmin || group.id !== "activity").map((group) => {
               const groupText = texts.create.dialog.groups[group.id];
               const scopes: { scope: McpToolScopeType; label: string; isWrite?: boolean }[] = [
                 { scope: group.readScope, label: texts.scopes.read },

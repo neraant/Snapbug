@@ -457,6 +457,8 @@ const countOpenByAssignee = new CountOpenByAssigneeUseCase(membershipAdapter, pr
 const updateBugReport = new UpdateBugReportUseCase(
   membershipAdapter,
   projectAdapter,
+  projectAccessAdapter,
+  userAdapter,
   bugReportRepository,
   bugReportService,
   notificationDispatchAdapter,
