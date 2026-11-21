@@ -49,108 +49,107 @@ export function PendingInvitations() {
 
   if (openInvitations.length === 0) {
     return (
-      <Column align="center" gap="md" padding="lg" width="full">
-        <Typography variant="text-sm" color="muted">
-          {texts.pending.empty}
-        </Typography>
-        <InvitePeopleDialog />
-      </Column>
+      <Table.Shell>
+        <Table.Empty message={texts.pending.empty} action={<InvitePeopleDialog />} />
+      </Table.Shell>
     );
   }
 
   return (
     <Column gap="sm" width="full">
-      <Table>
-        <Table.Header>
-          <Table.Row>
-            <Table.Head>{texts.pending.column.email}</Table.Head>
-            <Table.Head>{texts.pending.column.sent}</Table.Head>
-            <Table.Head>{texts.pending.column.expires}</Table.Head>
-            <Table.Head>{texts.pending.column.status}</Table.Head>
-            <Table.Head>{texts.pending.column.actions}</Table.Head>
-          </Table.Row>
-        </Table.Header>
-        <Table.Body>
-          {openInvitations.map((invitation) => {
-            const expired = isInvitationExpired(invitation);
-            const pending = isInvitationPending(invitation);
+      <Table.Shell>
+        <Table>
+          <Table.Header>
+            <Table.Row>
+              <Table.Head>{texts.pending.column.email}</Table.Head>
+              <Table.Head>{texts.pending.column.sent}</Table.Head>
+              <Table.Head>{texts.pending.column.expires}</Table.Head>
+              <Table.Head>{texts.pending.column.status}</Table.Head>
+              <Table.Head>{texts.pending.column.actions}</Table.Head>
+            </Table.Row>
+          </Table.Header>
+          <Table.Body>
+            {openInvitations.map((invitation) => {
+              const expired = isInvitationExpired(invitation);
+              const pending = isInvitationPending(invitation);
 
-            return (
-              <Table.Row key={invitation.id}>
-                <Table.Cell>
-                  <Typography variant="text-sm">{invitation.email}</Typography>
-                </Table.Cell>
-                <Table.Cell>
-                  <Typography variant="text-sm" color="muted">
-                    {formatInvitationDate(invitation.createdAt)}
-                  </Typography>
-                </Table.Cell>
-                <Table.Cell>
-                  <Typography variant="text-sm" color="muted">
-                    {formatInvitationDate(invitation.expiresAt)}
-                  </Typography>
-                </Table.Cell>
-                <Table.Cell>
-                  {expired ? (
-                    <Badge variant="warning">{texts.pending.status.expired}</Badge>
-                  ) : pending ? (
-                    <Badge variant="secondary">{texts.pending.status.pending}</Badge>
-                  ) : null}
-                </Table.Cell>
-                <Table.Cell>
-                  <Row gap="xs" justify="end" wrap={false}>
+              return (
+                <Table.Row key={invitation.id}>
+                  <Table.Cell>
+                    <Typography variant="text-sm">{invitation.email}</Typography>
+                  </Table.Cell>
+                  <Table.Cell>
+                    <Typography variant="text-sm" color="muted">
+                      {formatInvitationDate(invitation.createdAt)}
+                    </Typography>
+                  </Table.Cell>
+                  <Table.Cell>
+                    <Typography variant="text-sm" color="muted">
+                      {formatInvitationDate(invitation.expiresAt)}
+                    </Typography>
+                  </Table.Cell>
+                  <Table.Cell>
                     {expired ? (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        disabled={isMutating}
-                        onClick={() => resend(invitation.id)}
-                      >
-                        <RefreshCwIcon />
-                        {texts.pending.resend}
-                      </Button>
+                      <Badge variant="warning">{texts.pending.status.expired}</Badge>
+                    ) : pending ? (
+                      <Badge variant="secondary">{texts.pending.status.pending}</Badge>
                     ) : null}
-                    <DropdownMenu>
-                      <DropdownMenuTrigger
-                        render={
-                          <Button
-                            variant="ghost"
-                            size="icon-sm"
-                            aria-label={texts.pending.menu(invitation.email)}
-                            disabled={isMutating}
-                          />
-                        }
-                      >
-                        <EllipsisVerticalIcon />
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        {!expired ? (
-                          <DropdownMenuItem onClick={() => resend(invitation.id)}>
-                            <RefreshCwIcon />
-                            {texts.pending.resend}
-                          </DropdownMenuItem>
-                        ) : null}
-                        <DropdownMenuItem onClick={() => copyLink(invitation.id)}>
-                          <CopyIcon />
-                          {texts.pending.copyLink}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          variant="destructive"
-                          onClick={() => openRevokeConfirm(invitation.id, invitation.email)}
+                  </Table.Cell>
+                  <Table.Cell>
+                    <Row gap="xs" justify="end" wrap={false}>
+                      {expired ? (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          disabled={isMutating}
+                          onClick={() => resend(invitation.id)}
                         >
-                          <XIcon />
-                          {texts.pending.revoke}
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </Row>
-                </Table.Cell>
-              </Table.Row>
-            );
-          })}
-        </Table.Body>
-      </Table>
+                          <RefreshCwIcon />
+                          {texts.pending.resend}
+                        </Button>
+                      ) : null}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger
+                          render={
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              aria-label={texts.pending.menu(invitation.email)}
+                              disabled={isMutating}
+                            />
+                          }
+                        >
+                          <EllipsisVerticalIcon />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          {!expired ? (
+                            <DropdownMenuItem onClick={() => resend(invitation.id)}>
+                              <RefreshCwIcon />
+                              {texts.pending.resend}
+                            </DropdownMenuItem>
+                          ) : null}
+                          <DropdownMenuItem onClick={() => copyLink(invitation.id)}>
+                            <CopyIcon />
+                            {texts.pending.copyLink}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            variant="destructive"
+                            onClick={() => openRevokeConfirm(invitation.id, invitation.email)}
+                          >
+                            <XIcon />
+                            {texts.pending.revoke}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </Row>
+                  </Table.Cell>
+                </Table.Row>
+              );
+            })}
+          </Table.Body>
+        </Table>
+      </Table.Shell>
       <ConfirmDialog {...bind()} />
     </Column>
   );

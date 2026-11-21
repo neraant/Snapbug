@@ -48,73 +48,72 @@ export function UserTokenList() {
 
   return (
     <>
-      <Column
-        align={activeTokens.length === 0 ? "center" : "stretch"}
-        gap="md"
-        padding={activeTokens.length === 0 ? "lg" : undefined}
-        width="full"
-      >
-        {activeTokens.length === 0 ? (
-          <Typography variant="text-sm" color="muted">
-            {texts.empty}
-          </Typography>
-        ) : null}
+      <Column gap="md" width="full">
         <CreateUserTokenDialog />
-        {activeTokens.length > 0 ? (
-          <Table>
-            <Table.Header>
-              <Table.Row>
-                <Table.Head>{texts.column.token}</Table.Head>
-                <Table.Head>{texts.column.scopes}</Table.Head>
-                <Table.Head>{texts.column.created}</Table.Head>
-                <Table.Head>{texts.column.actions}</Table.Head>
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              {activeTokens.map((token) => (
-                <Table.Row key={token.id}>
-                  <Table.Cell>
-                    <Typography variant="text-sm">{token.name}</Typography>
-                  </Table.Cell>
-                  <Table.Cell>
-                    <Row gap="xs" wrap>
-                      <UserTokenScopeBadges
-                        scopePreset={token.scopePreset}
-                        scopes={token.scopes}
-                        projectIds={token.projectIds}
-                      />
-                    </Row>
-                  </Table.Cell>
-                  <Table.Cell>
-                    <Typography variant="text-sm">{formatUserTokenCreatedAt(token.createdAt)}</Typography>
-                  </Table.Cell>
-                  <Table.Cell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger
-                        render={
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon-sm"
-                            disabled={isPending}
-                            aria-label={texts.actionsMenuLabel}
-                          />
-                        }
-                      >
-                        <EllipsisVerticalIcon />
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem variant="destructive" onClick={() => openRevokeConfirm(token.id, token.name)}>
-                          {texts.revoke.action}
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </Table.Cell>
+        {activeTokens.length === 0 ? (
+          <Table.Shell>
+            <Table.Empty message={texts.empty} mascot={false} />
+          </Table.Shell>
+        ) : (
+          <Table.Shell>
+            <Table>
+              <Table.Header>
+                <Table.Row>
+                  <Table.Head>{texts.column.token}</Table.Head>
+                  <Table.Head>{texts.column.scopes}</Table.Head>
+                  <Table.Head>{texts.column.created}</Table.Head>
+                  <Table.Head>{texts.column.actions}</Table.Head>
                 </Table.Row>
-              ))}
-            </Table.Body>
-          </Table>
-        ) : null}
+              </Table.Header>
+              <Table.Body>
+                {activeTokens.map((token) => (
+                  <Table.Row key={token.id}>
+                    <Table.Cell>
+                      <Typography variant="text-sm">{token.name}</Typography>
+                    </Table.Cell>
+                    <Table.Cell>
+                      <Row gap="xs" wrap>
+                        <UserTokenScopeBadges
+                          scopePreset={token.scopePreset}
+                          scopes={token.scopes}
+                          projectIds={token.projectIds}
+                        />
+                      </Row>
+                    </Table.Cell>
+                    <Table.Cell className="text-muted-foreground">
+                      <Typography variant="text-sm">{formatUserTokenCreatedAt(token.createdAt)}</Typography>
+                    </Table.Cell>
+                    <Table.Cell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger
+                          render={
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon-sm"
+                              disabled={isPending}
+                              aria-label={texts.actionsMenuLabel}
+                            />
+                          }
+                        >
+                          <EllipsisVerticalIcon />
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            variant="destructive"
+                            onClick={() => openRevokeConfirm(token.id, token.name)}
+                          >
+                            {texts.revoke.action}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </Table.Cell>
+                  </Table.Row>
+                ))}
+              </Table.Body>
+            </Table>
+          </Table.Shell>
+        )}
       </Column>
       <ConfirmDialog {...bind()} />
     </>

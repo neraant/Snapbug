@@ -10,7 +10,7 @@ type NotificationInboxBulkBarProps = {
   pending?: boolean;
   onMarkRead: VoidFunction;
   onArchive: VoidFunction;
-  onClear: VoidFunction;
+  onCancel: VoidFunction;
 };
 
 export function NotificationInboxBulkBar({
@@ -18,7 +18,7 @@ export function NotificationInboxBulkBar({
   pending = false,
   onMarkRead,
   onArchive,
-  onClear,
+  onCancel,
 }: NotificationInboxBulkBarProps) {
   return (
     <Row
@@ -29,18 +29,27 @@ export function NotificationInboxBulkBar({
       width="full"
       className="rounded-lg border border-border bg-muted/40 px-4 py-2"
     >
-      <Typography variant="text-sm" weight="medium">
-        {texts.inbox.bulkSelected(count)}
-      </Typography>
-      <Row align="center" gap="sm" wrap={false}>
-        <Button type="button" variant="secondary" size="sm" disabled={pending} onClick={onMarkRead}>
+      <Row align="center" gap="sm" wrap>
+        <Typography variant="text-sm" weight="medium">
+          {texts.inbox.bulkSelected(count)}
+        </Typography>
+        <Typography variant="text-sm" color="muted" aria-hidden>
+          ·
+        </Typography>
+        <Button type="button" variant="link" size="sm" className="h-auto px-0" disabled={pending} onClick={onMarkRead}>
           {pending ? <Spinner className="size-4" /> : texts.inbox.bulkMarkRead}
         </Button>
-        <Button type="button" variant="outline" size="sm" disabled={pending} onClick={onArchive}>
+        <Typography variant="text-sm" color="muted" aria-hidden>
+          ·
+        </Typography>
+        <Button type="button" variant="link" size="sm" className="h-auto px-0" disabled={pending} onClick={onArchive}>
           {texts.inbox.bulkArchive}
         </Button>
-        <Button type="button" variant="ghost" size="sm" onClick={onClear}>
-          {texts.inbox.bulkClear}
+        <Typography variant="text-sm" color="muted" aria-hidden>
+          ·
+        </Typography>
+        <Button type="button" variant="link" size="sm" className="h-auto px-0" onClick={onCancel}>
+          {texts.inbox.bulkCancel}
         </Button>
       </Row>
     </Row>

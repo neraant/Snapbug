@@ -184,34 +184,36 @@ export function ActivityLogDetailSheet({
                 {texts.detail.changes}
               </Typography>
               {hasStructuredChanges ? (
-                <Table>
-                  <Table.Header>
-                    <Table.Row>
-                      <Table.Head>{texts.change.field}</Table.Head>
-                      <Table.Head>{texts.change.before}</Table.Head>
-                      <Table.Head>{texts.change.after}</Table.Head>
-                    </Table.Row>
-                  </Table.Header>
-                  <Table.Body>
-                    {entry.changes.map((change) => (
-                      <Table.Row key={change.field}>
-                        <Table.Cell>
-                          <Typography variant="text-xs">{change.field}</Typography>
-                        </Table.Cell>
-                        <Table.Cell className="max-w-40 whitespace-normal">
-                          <Typography variant="text-xs" color="muted" className="line-through">
-                            {change.from ?? texts.change.empty}
-                          </Typography>
-                        </Table.Cell>
-                        <Table.Cell className="max-w-40 whitespace-normal">
-                          <Typography variant="text-xs" weight="medium">
-                            {change.to ?? texts.change.empty}
-                          </Typography>
-                        </Table.Cell>
+                <Table.Shell>
+                  <Table>
+                    <Table.Header>
+                      <Table.Row>
+                        <Table.Head>{texts.change.field}</Table.Head>
+                        <Table.Head>{texts.change.before}</Table.Head>
+                        <Table.Head>{texts.change.after}</Table.Head>
                       </Table.Row>
-                    ))}
-                  </Table.Body>
-                </Table>
+                    </Table.Header>
+                    <Table.Body>
+                      {entry.changes.map((change) => (
+                        <Table.Row key={change.field}>
+                          <Table.Cell>
+                            <Typography variant="text-xs">{change.field}</Typography>
+                          </Table.Cell>
+                          <Table.Cell className="max-w-40 whitespace-normal">
+                            <Typography variant="text-xs" color="muted" className="line-through">
+                              {change.from ?? texts.change.empty}
+                            </Typography>
+                          </Table.Cell>
+                          <Table.Cell className="max-w-40 whitespace-normal">
+                            <Typography variant="text-xs" weight="medium">
+                              {change.to ?? texts.change.empty}
+                            </Typography>
+                          </Table.Cell>
+                        </Table.Row>
+                      ))}
+                    </Table.Body>
+                  </Table>
+                </Table.Shell>
               ) : (
                 <Code code={JSON.stringify(entry.changes, null, 2)} showCopy={false} />
               )}

@@ -20,7 +20,7 @@ type NotificationListProps = {
   tab: NotificationListFilter;
   list: UseNotificationListReturn;
   compact?: boolean;
-  selectable?: boolean;
+  selectionMode?: boolean;
   selectedIds?: Set<string>;
   activeId?: string | null;
   onMarkRead?: (id: string) => void;
@@ -64,7 +64,7 @@ export function NotificationList({
   tab,
   list,
   compact = false,
-  selectable = false,
+  selectionMode = false,
   selectedIds,
   activeId,
   onMarkRead,
@@ -147,7 +147,7 @@ export function NotificationList({
                 key={row.key}
                 notification={row.notification}
                 compact={compact}
-                selectable={selectable}
+                selectionMode={selectionMode}
                 selected={selectedIds?.has(row.notification.id)}
                 active={activeId === row.notification.id}
                 onMarkRead={onMarkRead}

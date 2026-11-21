@@ -5,12 +5,19 @@ import { Row } from "@workspace/design-system/components/layout/row";
 import { Avatar, AvatarFallback } from "@workspace/design-system/components/ui/avatar";
 import { Button } from "@workspace/design-system/components/ui/button";
 import { Checkbox } from "@workspace/design-system/components/ui/checkbox";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@workspace/design-system/components/ui/dropdown-menu";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@workspace/design-system/components/ui/tooltip";
 import { Typography } from "@workspace/design-system/components/ui/typography";
 import { cn } from "@workspace/design-system/lib/utils";
 import type { NotificationModelType } from "@workspace/validation/modules/notification/dto/notification.model";
-import { ArchiveIcon, BotIcon, CheckIcon, MailIcon } from "lucide-react";
+import { ArchiveIcon, BotIcon, MoreHorizontalIcon } from "lucide-react";
 import Link from "next/link";
-import { type MouseEvent } from "react";
+import { type KeyboardEvent, type MouseEvent } from "react";
 
 import { NotificationMessage } from "@/client/modules/notification/components/notification-message";
 import { texts } from "@/client/modules/notification/consts/texts.const";
@@ -26,7 +33,7 @@ type NotificationItemProps = {
   notification: NotificationModelType;
   compact?: boolean;
   selected?: boolean;
-  selectable?: boolean;
+  selectionMode?: boolean;
   active?: boolean;
   onMarkRead?: (id: string) => void;
   onMarkUnread?: (id: string) => void;
@@ -44,11 +51,83 @@ function actorInitials(notification: NotificationModelType): string {
   return `${parts[0]?.[0] ?? ""}${parts[1]?.[0] ?? ""}`.toUpperCase();
 }
 
+function NotificationItemMenu({
+  notification,
+  isUnread,
+  onMarkRead,
+  onMarkUnread,
+  onArchive,
+}: {
+  notification: NotificationModelType;
+  isUnread: boolean;
+  onMarkRead?: (id: string) => void;
+  onMarkUnread?: (id: string) => void;
+  onArchive?: (id: string) => void;
+}) {
+  return (
+    <DropdownMenu>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <DropdownMenuTrigger
+              render={
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label={texts.item.menuLabel}
+                  className={cn(
+                    "shrink-0 opacity-100 max-sm:opacity-100 sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100",
+                  )}
+                  onClick={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                  }}
+                />
+              }
+            >
+              <MoreHorizontalIcon />
+            </DropdownMenuTrigger>
+          }
+        />
+        <TooltipContent>{texts.item.menuLabel}</TooltipContent>
+      </Tooltip>
+      <DropdownMenuContent align="end" onClick={(event) => event.stopPropagation()}>
+        {isUnread ? (
+          <DropdownMenuItem
+            onClick={() => {
+              onMarkRead?.(notification.id);
+            }}
+          >
+            {texts.item.markRead}
+          </DropdownMenuItem>
+        ) : (
+          <DropdownMenuItem
+            onClick={() => {
+              onMarkUnread?.(notification.id);
+            }}
+          >
+            {texts.item.markUnread}
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuItem
+          onClick={() => {
+            onArchive?.(notification.id);
+          }}
+        >
+          <ArchiveIcon />
+          {texts.item.archive}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 export function NotificationItem({
   notification,
   compact = false,
   selected = false,
-  selectable = false,
+  selectionMode = false,
   active = false,
   onMarkRead,
   onMarkUnread,
@@ -71,6 +150,7 @@ export function NotificationItem({
   });
   const metaLine = [metaProject, metaTime].filter(Boolean).join(" · ");
   const system = notification.actorUserId == null;
+  const canNavigate = Boolean(href && !unavailable);
 
   const handleOpen = () => {
     if (isUnread) onMarkRead?.(notification.id);
@@ -78,20 +158,52 @@ export function NotificationItem({
   };
 
   const handleRowClick = (event: MouseEvent) => {
+    if (selectionMode) {
+      event.preventDefault();
+      onToggleSelect?.(notification.id, !selected);
+      return;
+    }
     if (unavailable || !href) return;
     if (event.defaultPrevented) return;
     handleOpen();
+  };
+
+  const handleKeyDown = (event: KeyboardEvent) => {
+    if (selectionMode && (event.key === "Enter" || event.key === " ")) {
+      event.preventDefault();
+      onToggleSelect?.(notification.id, !selected);
+      return;
+    }
+    if (!selectionMode && event.key === "Enter" && canNavigate) {
+      event.preventDefault();
+      handleOpen();
+    }
   };
 
   const rowClassName = cn(
     "group relative flex gap-3 rounded-lg px-3 py-2.5 transition-colors outline-none",
     isUnread ? "bg-primary/5 hover:bg-primary/10" : "hover:bg-muted/50",
     active ? "ring-2 ring-ring ring-offset-1 ring-offset-background" : null,
-    href && !unavailable ? "cursor-pointer" : null,
+    canNavigate || selectionMode ? "cursor-pointer" : null,
   );
 
   const content = (
     <>
+      {selectionMode ? (
+        <div className="flex w-7 shrink-0 items-start pt-1">
+          <Checkbox
+            checked={selected}
+            aria-label={texts.item.select(notification.id)}
+            onCheckedChange={(checked) => onToggleSelect?.(notification.id, checked === true)}
+            onClick={(event) => event.stopPropagation()}
+          />
+        </div>
+      ) : null}
+
+      <div className="flex w-2 shrink-0 items-start justify-center pt-3">
+        {isUnread ? <span className="size-2 rounded-full bg-primary" aria-hidden /> : null}
+      </div>
+
       <div className="relative shrink-0">
         <Avatar size="md">
           {system ? (
@@ -124,63 +236,36 @@ export function NotificationItem({
         )}
       </Column>
 
-      <Row align="center" gap="xs" wrap={false} className="shrink-0 self-start pt-0.5">
-        {isUnread ? <span className="mt-1 size-2 rounded-full bg-primary" aria-hidden /> : null}
-        {selectable ? (
-          <Checkbox
-            checked={selected}
-            className={cn("opacity-0 transition-opacity group-hover:opacity-100", selected ? "opacity-100" : null)}
-            aria-label={texts.item.select(notification.id)}
-            onCheckedChange={(checked) => onToggleSelect?.(notification.id, checked === true)}
+      {!unavailable ? (
+        <Row align="start" gap="xs" wrap={false} className="shrink-0 self-start pt-0.5">
+          <NotificationItemMenu
+            notification={notification}
+            isUnread={isUnread}
+            onMarkRead={onMarkRead}
+            onMarkUnread={onMarkUnread}
+            onArchive={onArchive}
           />
-        ) : null}
-        <Row align="center" gap="xs" wrap={false} className="opacity-0 transition-opacity group-hover:opacity-100">
-          {isUnread ? (
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              aria-label={texts.item.markRead}
-              onClick={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                onMarkRead?.(notification.id);
-              }}
-            >
-              <CheckIcon />
-            </Button>
-          ) : (
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-sm"
-              aria-label={texts.item.markUnread}
-              onClick={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                onMarkUnread?.(notification.id);
-              }}
-            >
-              <MailIcon />
-            </Button>
-          )}
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            aria-label={texts.item.archive}
-            onClick={(event) => {
-              event.preventDefault();
-              event.stopPropagation();
-              onArchive?.(notification.id);
-            }}
-          >
-            <ArchiveIcon />
-          </Button>
         </Row>
-      </Row>
+      ) : null}
     </>
   );
+
+  if (selectionMode) {
+    return (
+      <div
+        role="option"
+        aria-selected={selected}
+        tabIndex={0}
+        className={rowClassName}
+        aria-label={texts.item.open(summary)}
+        onClick={handleRowClick}
+        onKeyDown={handleKeyDown}
+        onFocus={onFocus}
+      >
+        {content}
+      </div>
+    );
+  }
 
   if (unavailable || !href) {
     return (
@@ -196,6 +281,7 @@ export function NotificationItem({
       className={rowClassName}
       aria-label={texts.item.open(summary)}
       onClick={handleRowClick}
+      onKeyDown={handleKeyDown}
       onFocus={onFocus}
     >
       {content}
