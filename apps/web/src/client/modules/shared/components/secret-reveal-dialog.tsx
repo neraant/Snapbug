@@ -3,7 +3,6 @@
 import { Column } from "@workspace/design-system/components/layout/column";
 import { Row } from "@workspace/design-system/components/layout/row";
 import { Button } from "@workspace/design-system/components/ui/button";
-import { Code } from "@workspace/design-system/components/ui/code";
 import { CopyButton } from "@workspace/design-system/components/ui/copy-button";
 import {
   DialogClose,
@@ -14,14 +13,14 @@ import {
 } from "@workspace/design-system/components/ui/dialog";
 import { Input } from "@workspace/design-system/components/ui/input";
 import { Typography } from "@workspace/design-system/components/ui/typography";
-import { cn } from "@workspace/design-system/lib/utils";
-import { CheckIcon, ChevronDownIcon, EyeIcon, EyeOffIcon, KeyRoundIcon, TriangleAlertIcon } from "lucide-react";
-import { useMemo, useState } from "react";
+import { CheckIcon, EyeIcon, EyeOffIcon, KeyRoundIcon, TriangleAlertIcon } from "lucide-react";
+import Link from "next/link";
 
+import { mcpTabs } from "@/client/modules/mcp/consts/mcp-tab.const";
 import { secretRevealDialogTexts as texts } from "@/client/modules/shared/consts/secret-reveal-dialog.const";
 import { useSecretRevealField } from "@/client/modules/shared/hooks/use-secret-reveal-field";
-import { buildMcpClientConfig } from "@/client/modules/shared/utils/build-mcp-client-config.util";
 import { maskSecret } from "@/client/modules/shared/utils/mask-secret.util";
+import { url } from "@/shared/build-url.util";
 
 type SecretRevealDialogKind = "userToken" | "apiKey";
 
@@ -29,31 +28,16 @@ type SecretRevealDialogProps = {
   secret: string;
   kind: SecretRevealDialogKind;
   metadataName?: string;
-  showUsageSnippet?: boolean;
   onDone: VoidFunction;
 };
 
-export function SecretRevealDialog({
-  secret,
-  kind,
-  metadataName,
-  showUsageSnippet = false,
-  onDone,
-}: SecretRevealDialogProps) {
+export function SecretRevealDialog({ secret, kind, metadataName, onDone }: SecretRevealDialogProps) {
   const { copied, hasCopiedOnce, onCopy, onToggleReveal, revealed } = useSecretRevealField(secret);
-  const [usageOpen, setUsageOpen] = useState(false);
 
   const title = kind === "userToken" ? texts.userToken.title : texts.apiKey.title;
   const displayValue = revealed ? secret : maskSecret(secret);
   const doneLabel = hasCopiedOnce ? texts.done : texts.doneNudge;
-
-  const usageSnippet = useMemo(() => {
-    if (!showUsageSnippet || typeof window === "undefined") {
-      return null;
-    }
-
-    return buildMcpClientConfig(window.location.origin, secret);
-  }, [secret, showUsageSnippet]);
+  const connectHref = `${url.mcp()}?tab=${mcpTabs.connect}`;
 
   const metadataLine = [metadataName, texts.createdJustNow].filter(Boolean).join(" · ");
 
@@ -158,31 +142,12 @@ export function SecretRevealDialog({
         ) : null}
       </Column>
 
-      {usageSnippet ? (
-        <Column gap="xs" width="full">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="h-8 w-full justify-between px-0 text-muted-foreground hover:bg-transparent hover:text-foreground"
-            onClick={() => setUsageOpen((open) => !open)}
-            aria-expanded={usageOpen}
-          >
-            {texts.howToUse}
-            <ChevronDownIcon
-              className={cn("size-4 transition-transform", usageOpen ? "rotate-180" : undefined)}
-              aria-hidden="true"
-            />
-          </Button>
-          {usageOpen ? (
-            <Code
-              title={texts.usageSnippetTitle}
-              code={usageSnippet}
-              copyLabel={texts.copy}
-              copiedLabel={texts.copied}
-            />
-          ) : null}
-        </Column>
+      {kind === "userToken" ? (
+        <Typography variant="text-sm" color="muted">
+          <Link href={connectHref} className="text-foreground underline-offset-4 hover:underline" onClick={onDone}>
+            {texts.userToken.connectLink}
+          </Link>
+        </Typography>
       ) : null}
 
       <DialogFooter>

@@ -90,17 +90,18 @@ export function TicketDetailCommentThreadItem({
       <Row
         align="start"
         gap="md"
+        wrap={false}
         width="full"
         minWidth="0"
         className={cn("group/comment transition-opacity duration-200", isRemoving && "pointer-events-none opacity-0")}
       >
-        <Row gap="xs" width="full" minWidth="0">
-          <Avatar size="lg" className="shrink-0">
-            <AvatarFallback>{getTicketDetailCommentAuthorInitials(comment)}</AvatarFallback>
-          </Avatar>
+        <Avatar size="lg" className="shrink-0">
+          <AvatarFallback>{getTicketDetailCommentAuthorInitials(comment)}</AvatarFallback>
+        </Avatar>
 
+        <Column gap="xs" width="full" minWidth="0" className="min-w-0 flex-1">
           <Row align="center" justify="between" gap="sm" wrap={false} width="full" minWidth="0">
-            <Row align="center" gap="xs" wrap minWidth="0" className="min-w-0">
+            <Row align="center" gap="xs" wrap minWidth="0" className="min-w-0 flex-1">
               <Typography variant="label" truncate>
                 {authorName}
               </Typography>
@@ -172,7 +173,7 @@ export function TicketDetailCommentThreadItem({
           </Row>
 
           {isEditing ? (
-            <Column as="form" gap="sm" width="full" noValidate onSubmit={onSave}>
+            <Column as="form" gap="sm" width="full" minWidth="0" noValidate onSubmit={onSave}>
               <Field>
                 <Textarea
                   id={editCommentTextareaId}
@@ -197,7 +198,7 @@ export function TicketDetailCommentThreadItem({
           ) : (
             <TicketDetailCommentBody body={comment.body} />
           )}
-        </Row>
+        </Column>
       </Row>
       <ConfirmDialog {...bind()} />
     </div>

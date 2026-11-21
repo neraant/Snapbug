@@ -79,7 +79,13 @@ export class CreateUserTokenUseCase {
     const requested =
       preset === "custom"
         ? [...new Set(input.scopes ?? [])]
-        : [...new Set(presetScopes(preset as Exclude<UserTokenScopePresetType, "custom">))];
+        : [
+            ...new Set(
+              presetScopes(preset as Exclude<UserTokenScopePresetType, "custom">, {
+                includeActivityRead: userRole === UserRole.ADMIN,
+              }),
+            ),
+          ];
 
     if (requested.length === 0) {
       throw new BadRequestError(ERROR_CODES.USER_TOKEN_NOT_FOUND, "Choose at least one permission");

@@ -53,13 +53,25 @@ export const LEGACY_USER_TOKEN_SCOPES: McpToolScopeType[] = [
   "comments:write",
 ];
 
-export function presetScopes(preset: Exclude<UserTokenScopePresetType, "custom">): McpToolScopeType[] {
+type PresetScopesOptions = {
+  includeActivityRead?: boolean;
+};
+
+export function presetScopes(
+  preset: Exclude<UserTokenScopePresetType, "custom">,
+  options?: PresetScopesOptions,
+): McpToolScopeType[] {
+  const includeActivityRead = options?.includeActivityRead ?? true;
+  const readScopes = includeActivityRead
+    ? MCP_READ_SCOPES
+    : MCP_READ_SCOPES.filter((scope) => scope !== "activity:read");
+
   switch (preset) {
     case "readOnly":
-      return MCP_READ_SCOPES.filter((scope) => scope !== "activity:read");
+      return readScopes.filter((scope) => scope !== "activity:read");
     case "readAndComment":
-      return [...presetScopes("readOnly"), "comments:write"];
+      return [...presetScopes("readOnly", options), "comments:write"];
     case "fullAccess":
-      return [...MCP_READ_SCOPES, ...MCP_WRITE_SCOPES];
+      return [...readScopes, ...MCP_WRITE_SCOPES];
   }
 }

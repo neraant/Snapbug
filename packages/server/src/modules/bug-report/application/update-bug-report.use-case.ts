@@ -1,12 +1,14 @@
 import { BugReportMapper } from "@workspace/server/modules/bug-report/entity/bug-report.mapper";
 import type { MembershipPort } from "@workspace/server/modules/bug-report/port/membership.port";
 import type { BugReportNotificationPort } from "@workspace/server/modules/bug-report/port/notification.port";
+import type { ProjectAccessPort } from "@workspace/server/modules/bug-report/port/project-access.port";
 import type { ProjectPort } from "@workspace/server/modules/bug-report/port/project.port";
+import type { UserPort } from "@workspace/server/modules/bug-report/port/user.port";
 import type { BugReportRepository } from "@workspace/server/modules/bug-report/repository/bug-report.repository";
 import type { BugReportService } from "@workspace/server/modules/bug-report/service/bug-report.service";
 import type { AuditActor } from "@workspace/server/shared/audit/audit-log.types";
 import type { WithTransactionType } from "@workspace/server/shared/database/transaction.util";
-import { NotFoundError } from "@workspace/server/shared/error/app-errors";
+import { BadRequestError, NotFoundError } from "@workspace/server/shared/error/app-errors";
 import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import { assertMcpProjectAllowed } from "@workspace/server/shared/orpc/mcp/mcp-project-scope.util";
 import type {
@@ -18,6 +20,8 @@ export class UpdateBugReportUseCase {
   constructor(
     private readonly membershipPort: MembershipPort,
     private readonly projectPort: ProjectPort,
+    private readonly projectAccessPort: ProjectAccessPort,
+    private readonly userPort: UserPort,
     private readonly bugReportRepository: BugReportRepository,
     private readonly bugReportService: BugReportService,
     private readonly notificationPort: BugReportNotificationPort,
@@ -46,6 +50,18 @@ export class UpdateBugReportUseCase {
     if (allowedProjectIds.length === 0) throw new NotFoundError(ERROR_CODES.BUG_REPORT_NOT_FOUND);
 
     assertMcpProjectAllowed(bugReport.projectId, mcpProjectIds);
+
+    if (input.assignedTo !== undefined && input.assignedTo !== null) {
+      const [assignee] = await this.userPort.findManyByIds([input.assignedTo]);
+      if (!assignee) throw new BadRequestError(ERROR_CODES.INVALID_DEFAULT_ASSIGNEE);
+
+      const hasAccess = await this.projectAccessPort.userHasProjectAccess(
+        input.assignedTo,
+        bugReport.projectId,
+        project.organizationId,
+      );
+      if (!hasAccess) throw new BadRequestError(ERROR_CODES.INVALID_DEFAULT_ASSIGNEE);
+    }
 
     const { id: _id, ...patch } = input;
     const updatedBugReport = bugReport.update(patch);
