@@ -3,6 +3,11 @@ import { UserRole } from "@workspace/validation/modules/user/consts/user-role.co
 import { localize } from "@/client/modules/shared/locale/interface-language";
 
 const en = {
+  groups: {
+    work: "Work",
+    setup: "Setup",
+    organization: "Organization",
+  },
   overview: "Overview",
   tickets: "Tickets",
   sdkSetup: "SDK Setup",
@@ -35,6 +40,11 @@ const en = {
 } as const;
 
 const ru = {
+  groups: {
+    work: "Работа",
+    setup: "Настройка",
+    organization: "Организация",
+  },
   overview: "Обзор",
   tickets: "Тикеты",
   sdkSetup: "Настройка SDK",

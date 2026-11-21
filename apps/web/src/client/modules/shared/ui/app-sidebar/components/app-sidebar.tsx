@@ -16,7 +16,11 @@ import { orpcQuery } from "@/client/modules/shared/orpc/query-utils";
 import { AppSidebarHeader } from "@/client/modules/shared/ui/app-sidebar/components/app-sidebar-header";
 import { AppSidebarOrganizationSwitcher } from "@/client/modules/shared/ui/app-sidebar/components/app-sidebar-organization-switcher";
 import { AppSidebarProjectScope } from "@/client/modules/shared/ui/app-sidebar/components/app-sidebar-project-scope";
-import { appSidebarAdminItems, appSidebarItems } from "@/client/modules/shared/ui/app-sidebar/consts/app-sidebar.const";
+import {
+  appSidebarFooterItems,
+  appSidebarNavGroups,
+} from "@/client/modules/shared/ui/app-sidebar/consts/app-sidebar.const";
+import { texts as sidebarTexts } from "@/client/modules/shared/ui/app-sidebar/consts/texts.const";
 import { buildPathWithProjectScopeSearchParam } from "@/client/modules/shared/utils/parse-project-scope-search-param.util";
 import { signOutUser } from "@/client/modules/shared/utils/sign-out.util";
 import { texts as siteTexts } from "@/shared/consts/texts.const";
@@ -47,14 +51,28 @@ export function AppSidebar({
   const { projectId } = useProjectScopeSearchParam();
   const { data: projects = [] } = useQuery(orpcQuery.project.findProjects.queryOptions());
   const projectLookups = useMemo(() => projects.map((project) => ({ id: project.id, slug: project.slug })), [projects]);
-  const sidebarItems = useMemo(() => {
-    const items = isAdmin ? [...appSidebarItems, ...appSidebarAdminItems] : appSidebarItems;
-
-    return items.map((item) => ({
-      ...item,
-      href: buildPathWithProjectScopeSearchParam(item.href, projectId, projectLookups),
-    }));
+  const sidebarGroups = useMemo(() => {
+    return appSidebarNavGroups
+      .map((group) => ({
+        label: sidebarTexts.groups[group.groupKey],
+        items: group.items
+          .filter((item) => !item.adminOnly || isAdmin)
+          .map((item) => ({
+            ...item,
+            href: buildPathWithProjectScopeSearchParam(item.href, projectId, projectLookups),
+          })),
+      }))
+      .filter((group) => group.items.length > 0);
   }, [isAdmin, language, projectId, projectLookups]);
+
+  const sidebarFooterItems = useMemo(
+    () =>
+      appSidebarFooterItems.map((item) => ({
+        ...item,
+        href: buildPathWithProjectScopeSearchParam(item.href, projectId, projectLookups),
+      })),
+    [language, projectId, projectLookups],
+  );
 
   return (
     <ActiveOrganizationProvider organizationId={activeOrganizationId}>
@@ -62,7 +80,8 @@ export function AppSidebar({
         title={siteTexts.brand.name}
         description={siteTexts.brand.tagline}
         defaultOpen={defaultSidebarOpen}
-        items={sidebarItems}
+        groups={sidebarGroups}
+        footerItems={sidebarFooterItems}
         pathname={pathname}
         user={{ name: user?.name ?? user?.email ?? "User", image: user?.image }}
         linkAs={Link}

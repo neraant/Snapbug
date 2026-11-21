@@ -15,36 +15,41 @@ import { SubmitButton } from "@workspace/design-system/components/ui/submit-butt
 import { SecretRevealDialog } from "@/client/modules/shared/components/secret-reveal-dialog";
 import { CreateUserTokenPermissions } from "@/client/modules/user-token/components/create-user-token-permissions";
 import { texts } from "@/client/modules/user-token/consts/texts.const";
-import { useCreateUserTokenDialog } from "@/client/modules/user-token/hooks/use-create-user-token-dialog";
+import type { useCreateUserTokenDialog } from "@/client/modules/user-token/hooks/use-create-user-token-dialog";
 
-export function CreateUserTokenDialog() {
-  const {
-    control,
-    onSubmit,
-    open,
-    secret,
-    createdTokenName,
-    isPending,
-    onOpenChange,
-    onOpenCreate,
-    preset,
-    customScopes,
-    projectMode,
-    selectedProjectIds,
-    projects,
-    toolSummary,
-    isOrgAdmin,
-    onPresetChange,
-    onToggleScope,
-    onProjectModeChange,
-    onToggleProject,
-  } = useCreateUserTokenDialog();
+type CreateUserTokenDialogProps = ReturnType<typeof useCreateUserTokenDialog> & {
+  showTrigger?: boolean;
+};
 
+export function CreateUserTokenDialog({
+  showTrigger = true,
+  control,
+  onSubmit,
+  open,
+  secret,
+  createdTokenName,
+  isPending,
+  onOpenChange,
+  onOpenCreate,
+  preset,
+  customScopes,
+  projectMode,
+  selectedProjectIds,
+  projects,
+  toolSummary,
+  isOrgAdmin,
+  onPresetChange,
+  onToggleScope,
+  onProjectModeChange,
+  onToggleProject,
+}: CreateUserTokenDialogProps) {
   return (
     <>
-      <Button type="button" onClick={onOpenCreate} className="max-w-fit self-end">
-        {texts.create.action}
-      </Button>
+      {showTrigger ? (
+        <Button type="button" onClick={onOpenCreate} className="max-w-fit self-end">
+          {texts.create.action}
+        </Button>
+      ) : null}
       <Dialog open={open} onOpenChange={onOpenChange} disablePointerDismissal={secret != null}>
         <DialogContent showClose={secret == null} className="max-h-[90vh] max-w-lg">
           {secret ? (

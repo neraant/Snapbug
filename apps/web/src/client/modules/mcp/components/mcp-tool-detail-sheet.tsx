@@ -51,42 +51,44 @@ export function McpToolDetailSheet({ tool, open, onOpenChange }: McpToolDetailSh
                   {texts.tools.detail.noInputs}
                 </Typography>
               ) : (
-                <Table>
-                  <Table.Header>
-                    <Table.Row>
-                      <Table.Head>{texts.tools.detail.columnName}</Table.Head>
-                      <Table.Head>{texts.tools.detail.columnType}</Table.Head>
-                      <Table.Head>{texts.tools.detail.columnRequired}</Table.Head>
-                      <Table.Head>{texts.tools.detail.columnDescription}</Table.Head>
-                    </Table.Row>
-                  </Table.Header>
-                  <Table.Body>
-                    {tool.inputs.map((field) => (
-                      <Table.Row key={field.name}>
-                        <Table.Cell>
-                          <Typography variant="text-sm" font="mono">
-                            {field.name}
-                          </Typography>
-                        </Table.Cell>
-                        <Table.Cell>
-                          <Typography variant="text-sm" color="muted">
-                            {field.type}
-                          </Typography>
-                        </Table.Cell>
-                        <Table.Cell>
-                          <Typography variant="text-sm" color="muted">
-                            {field.required ? texts.tools.detail.requiredYes : texts.tools.detail.requiredNo}
-                          </Typography>
-                        </Table.Cell>
-                        <Table.Cell>
-                          <Typography variant="text-sm" color="muted">
-                            {field.description ?? "—"}
-                          </Typography>
-                        </Table.Cell>
+                <Table.Shell>
+                  <Table>
+                    <Table.Header>
+                      <Table.Row>
+                        <Table.Head>{texts.tools.detail.columnName}</Table.Head>
+                        <Table.Head>{texts.tools.detail.columnType}</Table.Head>
+                        <Table.Head>{texts.tools.detail.columnRequired}</Table.Head>
+                        <Table.Head>{texts.tools.detail.columnDescription}</Table.Head>
                       </Table.Row>
-                    ))}
-                  </Table.Body>
-                </Table>
+                    </Table.Header>
+                    <Table.Body>
+                      {tool.inputs.map((field) => (
+                        <Table.Row key={field.name}>
+                          <Table.Cell>
+                            <Typography variant="text-sm" font="mono">
+                              {field.name}
+                            </Typography>
+                          </Table.Cell>
+                          <Table.Cell>
+                            <Typography variant="text-sm" color="muted">
+                              {field.type}
+                            </Typography>
+                          </Table.Cell>
+                          <Table.Cell>
+                            <Typography variant="text-sm" color="muted">
+                              {field.required ? texts.tools.detail.requiredYes : texts.tools.detail.requiredNo}
+                            </Typography>
+                          </Table.Cell>
+                          <Table.Cell>
+                            <Typography variant="text-sm" color="muted">
+                              {field.description ?? "—"}
+                            </Typography>
+                          </Table.Cell>
+                        </Table.Row>
+                      ))}
+                    </Table.Body>
+                  </Table>
+                </Table.Shell>
               )}
             </Column>
 

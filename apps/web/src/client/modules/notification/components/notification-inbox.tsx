@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@workspace/design-system/components/ui/select";
 import type { NotificationListFilter } from "@workspace/validation/modules/notification/consts/notification-list-filter.const";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { NotificationInboxBulkBar } from "@/client/modules/notification/components/notification-inbox-bulk-bar";
 import { NotificationList } from "@/client/modules/notification/components/notification-list";
@@ -29,6 +29,7 @@ import { useNotificationUnreadCount } from "@/client/modules/shared/queries/use-
 export function NotificationInbox() {
   const [tab, setTab] = useState<NotificationListFilter>("unread");
   const [typeFilter, setTypeFilter] = useState<NotificationTypeFilter>(notificationTypeFilters.all);
+  const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
   const list = useNotificationList({ tab, typeFilter });
   const { data: unread } = useNotificationUnreadCount();
@@ -42,6 +43,11 @@ export function NotificationInbox() {
     [],
   );
 
+  const exitSelectionMode = useCallback(() => {
+    setSelectionMode(false);
+    setSelectedIds(new Set());
+  }, []);
+
   const toggleSelect = useCallback((id: string, checked: boolean) => {
     setSelectedIds((current) => {
       const next = new Set(current);
@@ -51,19 +57,31 @@ export function NotificationInbox() {
     });
   }, []);
 
-  const clearSelection = useCallback(() => setSelectedIds(new Set()), []);
-
   const bulkMarkRead = () => {
     const ids = [...selectedIds];
     if (ids.length === 0) return;
-    markRead.mutate(ids, { onSuccess: clearSelection });
+    markRead.mutate(ids, { onSuccess: exitSelectionMode });
   };
 
   const bulkArchive = () => {
     const ids = [...selectedIds];
     if (ids.length === 0) return;
-    archive.mutate(ids, { onSuccess: clearSelection });
+    archive.mutate(ids, { onSuccess: exitSelectionMode });
   };
+
+  useEffect(() => {
+    if (!selectionMode) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        exitSelectionMode();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [exitSelectionMode, selectionMode]);
 
   return (
     <PageContainer title={texts.inbox.title} description={texts.inbox.description}>
@@ -90,23 +108,36 @@ export function NotificationInbox() {
               </SelectContent>
             </Select>
           </Row>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={(unread?.count ?? 0) === 0 || markAllRead.isPending}
-            onClick={() => markAllRead.mutate()}
-          >
-            {texts.bell.markAllRead}
-          </Button>
+          <Row align="center" gap="sm" wrap={false}>
+            <Button
+              type="button"
+              variant={selectionMode ? "secondary" : "outline"}
+              size="sm"
+              onClick={() => {
+                if (selectionMode) exitSelectionMode();
+                else setSelectionMode(true);
+              }}
+            >
+              {selectionMode ? texts.inbox.selectCancel : texts.inbox.selectMode}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={(unread?.count ?? 0) === 0 || markAllRead.isPending}
+              onClick={() => markAllRead.mutate()}
+            >
+              {texts.bell.markAllRead}
+            </Button>
+          </Row>
         </Row>
 
-        {selectedIds.size > 0 ? (
+        {selectedIds.size > 0 && selectionMode ? (
           <NotificationInboxBulkBar
             count={selectedIds.size}
             onMarkRead={bulkMarkRead}
             onArchive={bulkArchive}
-            onClear={clearSelection}
+            onCancel={exitSelectionMode}
             pending={markRead.isPending || archive.isPending}
           />
         ) : null}
@@ -120,7 +151,7 @@ export function NotificationInbox() {
           <NotificationList
             tab={tab}
             list={list}
-            selectable
+            selectionMode={selectionMode}
             selectedIds={selectedIds}
             onMarkRead={(id) => markRead.mutate([id])}
             onMarkUnread={(id) => markUnread.mutate([id])}

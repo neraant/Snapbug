@@ -3,7 +3,6 @@
 import { Column } from "@workspace/design-system/components/layout/column";
 import { Row } from "@workspace/design-system/components/layout/row";
 import { Button } from "@workspace/design-system/components/ui/button";
-import { Mascot } from "@workspace/design-system/components/ui/mascot";
 import { Skeleton } from "@workspace/design-system/components/ui/skeleton";
 import { Table } from "@workspace/design-system/components/ui/table";
 import { Typography } from "@workspace/design-system/components/ui/typography";
@@ -36,19 +35,7 @@ function groupEntriesWithDayDividers(entries: ReturnType<typeof useActivityLog>[
   return rows;
 }
 
-function ActivityLogSkeletonRows() {
-  return (
-    <>
-      {Array.from({ length: 6 }).map((_, index) => (
-        <Table.Row key={index}>
-          <Table.Cell colSpan={4}>
-            <Skeleton className="h-8 w-full" />
-          </Table.Cell>
-        </Table.Row>
-      ))}
-    </>
-  );
-}
+const ACTIVITY_LOG_COLUMNS = 4;
 
 export function ActivityLog() {
   const {
@@ -97,107 +84,112 @@ export function ActivityLog() {
 
   return (
     <Column gap="lg" width="full" className="min-h-0 min-w-0 flex-1">
-      <ActivityLogToolbar
-        filters={filters}
-        onFiltersChange={setFilters}
-        onClearFilters={clearFilters}
-        hasActiveFilters={hasActiveFilters}
-        actorOptions={actorOptions}
-      />
+      <Table.Toolbar>
+        <ActivityLogToolbar
+          filters={filters}
+          onFiltersChange={setFilters}
+          onClearFilters={clearFilters}
+          hasActiveFilters={hasActiveFilters}
+          actorOptions={actorOptions}
+        />
+      </Table.Toolbar>
 
-      {isEmpty ? (
-        <Column align="center" justify="center" gap="md" width="full" className="py-16">
-          <Mascot mood="happy" size="lg" />
-          <Typography variant="text-sm" color="muted" align="center">
-            {hasActiveFilters ? texts.emptyFiltered : texts.empty}
-          </Typography>
-          {hasActiveFilters ? (
-            <Button type="button" variant="outline" onClick={clearFilters}>
-              {texts.clearFilters}
-            </Button>
-          ) : null}
-        </Column>
+      {query.isError && entries.length === 0 ? (
+        <Table.Shell>
+          <Table.Error
+            message={texts.loadMoreError}
+            retryLabel={texts.retry}
+            onRetry={() => {
+              query.refetch().catch(() => undefined);
+            }}
+          />
+        </Table.Shell>
+      ) : isEmpty ? (
+        <Table.Shell>
+          <Table.Empty
+            message={hasActiveFilters ? texts.emptyFiltered : texts.empty}
+            action={
+              hasActiveFilters ? (
+                <Button type="button" variant="outline" onClick={clearFilters}>
+                  {texts.clearFilters}
+                </Button>
+              ) : undefined
+            }
+          />
+        </Table.Shell>
       ) : (
-        <Column
-          gap="none"
-          width="full"
-          className="min-h-0 min-w-0 flex-1 overflow-y-auto rounded-lg border border-border bg-card"
-        >
-          <Table>
-            <Table.Header className="sticky top-0 z-10 bg-card">
-              <Table.Row>
-                <Table.Head className="w-28">{texts.column.when}</Table.Head>
-                <Table.Head className="w-44">{texts.column.actor}</Table.Head>
-                <Table.Head>{texts.column.event}</Table.Head>
-                <Table.Head className="w-32">{texts.column.object}</Table.Head>
-              </Table.Row>
-            </Table.Header>
-            <Table.Body>
-              {isInitialLoading ? <ActivityLogSkeletonRows /> : null}
-              {!isInitialLoading
-                ? rows.map((row) =>
-                    row.kind === "divider" ? (
-                      <Table.Row key={row.key} className="bg-muted/30 hover:bg-muted/30">
-                        <Table.Cell colSpan={4} className="sticky top-10 z-[5] bg-muted/30 py-2">
-                          <Typography variant="text-xs" color="muted" weight="medium">
-                            {row.label}
-                          </Typography>
-                        </Table.Cell>
-                      </Table.Row>
-                    ) : (
-                      <ActivityLogRow
-                        key={row.key}
-                        entry={row.entry}
-                        selected={selectedEventId === row.entry.id}
-                        onOpen={() => setSelectedEventId(row.entry.id)}
-                      />
-                    ),
-                  )
-                : null}
-
-              {query.isFetchingNextPage ? (
-                <>
-                  {Array.from({ length: 3 }).map((_, index) => (
-                    <Table.Row key={`next-skeleton-${index}`}>
-                      <Table.Cell colSpan={4}>
-                        <Skeleton className="h-8 w-full" />
-                      </Table.Cell>
-                    </Table.Row>
-                  ))}
-                </>
-              ) : null}
-
-              {query.isFetchNextPageError ? (
+        <Table.Shell className="flex min-h-0 min-w-0 flex-1 flex-col">
+          <Table.Scroll className="min-h-0 flex-1">
+            <Table className="border-0">
+              <Table.Header>
                 <Table.Row>
-                  <Table.Cell colSpan={4}>
-                    <Row align="center" justify="center" gap="sm" width="full" className="py-2">
-                      <Typography variant="text-sm" color="muted">
-                        {texts.loadMoreError}
-                      </Typography>
-                      <Typography variant="text-sm" color="muted">
-                        ·
-                      </Typography>
-                      <Button type="button" variant="link" onClick={() => query.fetchNextPage().catch(() => undefined)}>
-                        {texts.retry}
-                      </Button>
-                    </Row>
-                  </Table.Cell>
+                  <Table.Head className="w-28">{texts.column.when}</Table.Head>
+                  <Table.Head className="w-44">{texts.column.actor}</Table.Head>
+                  <Table.Head>{texts.column.event}</Table.Head>
+                  <Table.Head className="w-32">{texts.column.object}</Table.Head>
                 </Table.Row>
-              ) : null}
+              </Table.Header>
+              <Table.Body>
+                {isInitialLoading ? <Table.Loading colSpan={ACTIVITY_LOG_COLUMNS} /> : null}
+                {!isInitialLoading
+                  ? rows.map((row) =>
+                      row.kind === "divider" ? (
+                        <Table.Row key={row.key} className="bg-muted/30 hover:bg-muted/30">
+                          <Table.Cell colSpan={4} className="sticky top-10 z-[5] bg-muted/30 py-2">
+                            <Typography variant="text-xs" color="muted" weight="medium">
+                              {row.label}
+                            </Typography>
+                          </Table.Cell>
+                        </Table.Row>
+                      ) : (
+                        <ActivityLogRow
+                          key={row.key}
+                          entry={row.entry}
+                          selected={selectedEventId === row.entry.id}
+                          onOpen={() => setSelectedEventId(row.entry.id)}
+                        />
+                      ),
+                    )
+                  : null}
 
-              {!query.hasNextPage && entries.length > 0 && !isInitialLoading ? (
-                <Table.Row className="hover:bg-transparent">
-                  <Table.Cell colSpan={4}>
-                    <Typography variant="text-xs" color="muted" align="center" className="py-2">
-                      {texts.endOfList}
-                    </Typography>
-                  </Table.Cell>
-                </Table.Row>
-              ) : null}
-            </Table.Body>
-          </Table>
-          <div ref={sentinelRef} aria-hidden className="h-px w-full" />
-        </Column>
+                {query.isFetchingNextPage ? <Table.Loading colSpan={ACTIVITY_LOG_COLUMNS} rows={3} /> : null}
+
+                {query.isFetchNextPageError ? (
+                  <Table.Row>
+                    <Table.Cell colSpan={4}>
+                      <Row align="center" justify="center" gap="sm" width="full" className="py-2">
+                        <Typography variant="text-sm" color="muted">
+                          {texts.loadMoreError}
+                        </Typography>
+                        <Typography variant="text-sm" color="muted">
+                          ·
+                        </Typography>
+                        <Button
+                          type="button"
+                          variant="link"
+                          onClick={() => query.fetchNextPage().catch(() => undefined)}
+                        >
+                          {texts.retry}
+                        </Button>
+                      </Row>
+                    </Table.Cell>
+                  </Table.Row>
+                ) : null}
+
+                {!query.hasNextPage && entries.length > 0 && !isInitialLoading ? (
+                  <Table.Row className="hover:bg-transparent">
+                    <Table.Cell colSpan={4}>
+                      <Typography variant="text-xs" color="muted" align="center" className="py-2">
+                        {texts.endOfList}
+                      </Typography>
+                    </Table.Cell>
+                  </Table.Row>
+                ) : null}
+              </Table.Body>
+            </Table>
+            <div ref={sentinelRef} aria-hidden className="h-px w-full" />
+          </Table.Scroll>
+        </Table.Shell>
       )}
 
       <ActivityLogDetailSheet

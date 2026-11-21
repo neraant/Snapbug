@@ -30,83 +30,85 @@ export function NotificationSettingsForm() {
         title={texts.settings.matrix.sectionTitle}
         description={texts.settings.matrix.sectionDescription}
       >
-        <Table>
-          <Table.Header className="sticky top-0 z-10 bg-card">
-            <Table.Row>
-              <Table.Head className="w-[45%] min-w-[12rem]">{""}</Table.Head>
-              <Table.Head className="w-[1%] text-right">{texts.settings.matrix.inApp}</Table.Head>
-              <Table.Head className="w-[1%] text-right">{texts.settings.matrix.email}</Table.Head>
-            </Table.Row>
-          </Table.Header>
-          <Table.Body>
-            {visibleRows.map((row) => {
-              const copy = rowText(row.group);
-              const channels = preference.channels[row.group];
-              const rowId = `notification-row-${row.group}`;
+        <Table.Shell>
+          <Table>
+            <Table.Header>
+              <Table.Row>
+                <Table.Head className="w-[45%] min-w-[12rem]">{""}</Table.Head>
+                <Table.Head className="w-[1%] text-right">{texts.settings.matrix.inApp}</Table.Head>
+                <Table.Head className="w-[1%] text-right">{texts.settings.matrix.email}</Table.Head>
+              </Table.Row>
+            </Table.Header>
+            <Table.Body>
+              {visibleRows.map((row) => {
+                const copy = rowText(row.group);
+                const channels = preference.channels[row.group];
+                const rowId = `notification-row-${row.group}`;
 
-              return (
-                <Table.Row key={row.group}>
-                  <Table.Cell className="align-top whitespace-normal">
-                    <Column gap="xs" minWidth="0">
-                      <Typography id={rowId} variant="text-sm" weight="medium">
-                        {copy.title}
-                      </Typography>
-                      <Typography variant="text-sm" color="muted">
-                        {copy.description}
-                      </Typography>
-                    </Column>
-                  </Table.Cell>
-                  <Table.Cell className="text-right align-middle">
-                    {row.locked ? (
-                      <Row gap="xs" align="center" justify="end">
-                        <Tooltip>
-                          <TooltipTrigger
-                            render={
-                              <span className="inline-flex size-9 items-center justify-center text-muted-foreground">
-                                <LockIcon className="size-4" aria-hidden="true" />
-                              </span>
-                            }
-                          />
-                          <TooltipContent>{texts.settings.matrix.lockedTooltip}</TooltipContent>
-                        </Tooltip>
-                      </Row>
-                    ) : (
-                      <Switch
-                        aria-label={texts.settings.switch.inApp(copy.title)}
-                        checked={channels?.inApp ?? false}
-                        disabled={saving}
-                        onCheckedChange={(checked) => onChannelChange(row.group, "inApp", checked)}
-                      />
-                    )}
-                  </Table.Cell>
-                  <Table.Cell className="text-right align-middle">
-                    {row.locked ? (
-                      <Row gap="xs" align="center" justify="end">
-                        <Tooltip>
-                          <TooltipTrigger
-                            render={
-                              <span className="inline-flex size-9 items-center justify-center text-muted-foreground">
-                                <LockIcon className="size-4" aria-hidden="true" />
-                              </span>
-                            }
-                          />
-                          <TooltipContent>{texts.settings.matrix.lockedTooltip}</TooltipContent>
-                        </Tooltip>
-                      </Row>
-                    ) : (
-                      <Switch
-                        aria-label={texts.settings.switch.email(copy.title)}
-                        checked={channels?.email ?? false}
-                        disabled={saving}
-                        onCheckedChange={(checked) => onChannelChange(row.group, "email", checked)}
-                      />
-                    )}
-                  </Table.Cell>
-                </Table.Row>
-              );
-            })}
-          </Table.Body>
-        </Table>
+                return (
+                  <Table.Row key={row.group}>
+                    <Table.Cell className="align-top whitespace-normal">
+                      <Column gap="xs" minWidth="0">
+                        <Typography id={rowId} variant="text-sm" weight="medium">
+                          {copy.title}
+                        </Typography>
+                        <Typography variant="text-sm" color="muted">
+                          {copy.description}
+                        </Typography>
+                      </Column>
+                    </Table.Cell>
+                    <Table.Cell className="text-right align-middle">
+                      {row.locked ? (
+                        <Row gap="xs" align="center" justify="end">
+                          <Tooltip>
+                            <TooltipTrigger
+                              render={
+                                <span className="inline-flex size-9 items-center justify-center text-muted-foreground">
+                                  <LockIcon className="size-4" aria-hidden="true" />
+                                </span>
+                              }
+                            />
+                            <TooltipContent>{texts.settings.matrix.lockedTooltip}</TooltipContent>
+                          </Tooltip>
+                        </Row>
+                      ) : (
+                        <Switch
+                          aria-label={texts.settings.switch.inApp(copy.title)}
+                          checked={channels?.inApp ?? false}
+                          disabled={saving}
+                          onCheckedChange={(checked) => onChannelChange(row.group, "inApp", checked)}
+                        />
+                      )}
+                    </Table.Cell>
+                    <Table.Cell className="text-right align-middle">
+                      {row.locked ? (
+                        <Row gap="xs" align="center" justify="end">
+                          <Tooltip>
+                            <TooltipTrigger
+                              render={
+                                <span className="inline-flex size-9 items-center justify-center text-muted-foreground">
+                                  <LockIcon className="size-4" aria-hidden="true" />
+                                </span>
+                              }
+                            />
+                            <TooltipContent>{texts.settings.matrix.lockedTooltip}</TooltipContent>
+                          </Tooltip>
+                        </Row>
+                      ) : (
+                        <Switch
+                          aria-label={texts.settings.switch.email(copy.title)}
+                          checked={channels?.email ?? false}
+                          disabled={saving}
+                          onCheckedChange={(checked) => onChannelChange(row.group, "email", checked)}
+                        />
+                      )}
+                    </Table.Cell>
+                  </Table.Row>
+                );
+              })}
+            </Table.Body>
+          </Table>
+        </Table.Shell>
         <NotificationQuietSaved visible={isSaved("matrix")} />
       </SettingsSection>
 

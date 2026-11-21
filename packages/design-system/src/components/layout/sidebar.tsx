@@ -19,6 +19,7 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarInset,
   SidebarMenu,
@@ -26,6 +27,7 @@ import {
   SidebarMenuItem,
   SidebarProvider,
   SidebarRail,
+  SidebarSeparator,
   useSidebar,
 } from "@workspace/design-system/components/ui/sidebar";
 import { Typography } from "@workspace/design-system/components/ui/typography";
@@ -38,6 +40,11 @@ export type SidebarItem = {
   icon: ElementType;
 };
 
+export type SidebarNavGroup = {
+  label?: string;
+  items: SidebarItem[];
+};
+
 export type SidebarUser = {
   name: string;
   image?: string | null;
@@ -47,7 +54,10 @@ type SidebarLayoutProps = PropsWithChildren<{
   title: string;
   description: string;
   defaultOpen?: boolean;
-  items: SidebarItem[];
+  /** @deprecated Use `groups` and `footerItems` instead. */
+  items?: SidebarItem[];
+  groups?: SidebarNavGroup[];
+  footerItems?: SidebarItem[];
   pathname: string;
   user: SidebarUser;
   signOutLabel: string;
@@ -84,6 +94,50 @@ function getInitials(name: string) {
       .slice(0, 2)
       .map((part) => part[0]?.toUpperCase() ?? "")
       .join("") || "?"
+  );
+}
+
+function SidebarNavItems({
+  items,
+  pathname,
+  LinkComponent,
+}: {
+  items: SidebarItem[];
+  pathname: string;
+  LinkComponent: ElementType;
+}) {
+  return (
+    <>
+      {items.map((item) => {
+        const Icon = item.icon;
+        const isActive = isActivePath(pathname, item.href);
+
+        return (
+          <SidebarMenuItem key={item.href}>
+            <SidebarMenuButton
+              render={createElement(LinkComponent, {
+                href: item.href,
+                "aria-current": isActive ? "page" : undefined,
+              })}
+              isActive={isActive}
+              tooltip={item.label}
+              aria-label={item.label}
+            >
+              <Icon />
+              <Typography
+                as="span"
+                variant="text-sm"
+                color="inherit"
+                data-sidebar="menu-label"
+                className="group-data-[collapsible=icon]:hidden"
+              >
+                {item.label}
+              </Typography>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        );
+      })}
+    </>
   );
 }
 
@@ -159,6 +213,8 @@ export function SidebarLayout({
   description,
   defaultOpen = false,
   items,
+  groups,
+  footerItems = [],
   pathname,
   user,
   linkAs,
@@ -172,6 +228,15 @@ export function SidebarLayout({
   children,
 }: SidebarLayoutProps) {
   const LinkComponent = linkAs ?? "a";
+  const navGroups: SidebarNavGroup[] =
+    groups ??
+    (items
+      ? [
+          {
+            items,
+          },
+        ]
+      : []);
 
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
@@ -209,41 +274,33 @@ export function SidebarLayout({
           </Column>
         ) : null}
         <SidebarContent role="navigation" aria-label="Main">
-          <SidebarGroup>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {items.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = isActivePath(pathname, item.href);
-
-                  return (
-                    <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton
-                        render={createElement(LinkComponent, {
-                          href: item.href,
-                          "aria-current": isActive ? "page" : undefined,
-                        })}
-                        isActive={isActive}
-                        tooltip={item.label}
-                        aria-label={item.label}
-                      >
-                        <Icon />
-                        <Typography
-                          as="span"
-                          variant="text-sm"
-                          color="inherit"
-                          data-sidebar="menu-label"
-                          className="group-data-[collapsible=icon]:hidden"
-                        >
-                          {item.label}
-                        </Typography>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+          {navGroups.map((group, groupIndex) => (
+            <SidebarGroup key={group.label ?? `group-${groupIndex}`}>
+              {group.label ? (
+                <>
+                  <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+                  <SidebarSeparator className="hidden group-data-[collapsible=icon]:block" />
+                </>
+              ) : groupIndex > 0 ? (
+                <SidebarSeparator className="group-data-[collapsible=icon]:my-1 group-data-[collapsible=icon]:block" />
+              ) : null}
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <SidebarNavItems items={group.items} pathname={pathname} LinkComponent={LinkComponent} />
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          ))}
+          {footerItems.length > 0 ? (
+            <SidebarGroup className="mt-auto">
+              <SidebarSeparator />
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <SidebarNavItems items={footerItems} pathname={pathname} LinkComponent={LinkComponent} />
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          ) : null}
         </SidebarContent>
         <SidebarFooter>
           <SidebarMenu>

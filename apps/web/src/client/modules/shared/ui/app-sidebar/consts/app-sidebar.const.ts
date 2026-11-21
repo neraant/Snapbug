@@ -14,71 +14,93 @@ import {
 import { texts } from "@/client/modules/shared/ui/app-sidebar/consts/texts.const";
 import { url } from "@/shared/build-url.util";
 
-export const appSidebarItems: SidebarItem[] = [
+export type AppSidebarNavItem = SidebarItem & { adminOnly?: boolean };
+
+export type AppSidebarNavGroupKey = keyof typeof texts.groups;
+
+export const appSidebarNavGroups: { groupKey: AppSidebarNavGroupKey; items: AppSidebarNavItem[] }[] = [
   {
-    href: url.overview(),
-    get label() {
-      return texts.overview;
-    },
-    icon: LayoutDashboardIcon,
+    groupKey: "work",
+    items: [
+      {
+        href: url.overview(),
+        get label() {
+          return texts.overview;
+        },
+        icon: LayoutDashboardIcon,
+      },
+      {
+        href: url.ticketsBoard(),
+        get label() {
+          return texts.tickets;
+        },
+        icon: TicketIcon,
+      },
+      {
+        href: url.playground(),
+        get label() {
+          return texts.playground;
+        },
+        icon: BugPlayIcon,
+      },
+    ],
   },
   {
-    href: url.ticketsBoard(),
-    get label() {
-      return texts.tickets;
-    },
-    icon: TicketIcon,
+    groupKey: "setup",
+    items: [
+      {
+        href: url.projects(),
+        get label() {
+          return texts.projects;
+        },
+        icon: FolderKanbanIcon,
+        adminOnly: true,
+      },
+      {
+        href: url.sdk(),
+        get label() {
+          return texts.sdkSetup;
+        },
+        icon: Code2Icon,
+      },
+      {
+        href: url.mcp(),
+        get label() {
+          return texts.mcp;
+        },
+        icon: KeyRoundIcon,
+      },
+    ],
   },
   {
-    href: url.sdk(),
-    get label() {
-      return texts.sdkSetup;
-    },
-    icon: Code2Icon,
+    groupKey: "organization",
+    items: [
+      {
+        href: url.team(),
+        get label() {
+          return texts.team;
+        },
+        icon: UsersIcon,
+        adminOnly: true,
+      },
+      {
+        href: url.activity(),
+        get label() {
+          return texts.activity;
+        },
+        icon: ScrollTextIcon,
+        adminOnly: true,
+      },
+    ],
   },
-  {
-    href: url.mcp(),
-    get label() {
-      return texts.mcp;
-    },
-    icon: KeyRoundIcon,
-  },
-  {
-    href: url.playground(),
-    get label() {
-      return texts.playground;
-    },
-    icon: BugPlayIcon,
-  },
+];
+
+export const appSidebarFooterItems: AppSidebarNavItem[] = [
   {
     href: url.settings(),
     get label() {
       return texts.settings;
     },
     icon: SettingsIcon,
-  },
-];
-
-export const appSidebarAdminItems: SidebarItem[] = [
-  {
-    href: url.projects(),
-    get label() {
-      return texts.projects;
-    },
-    icon: FolderKanbanIcon,
-  },
-  {
-    href: url.team(),
-    get label() {
-      return texts.team;
-    },
-    icon: UsersIcon,
-  },
-  {
-    href: url.activity(),
-    get label() {
-      return texts.activity;
-    },
-    icon: ScrollTextIcon,
   },
 ];
