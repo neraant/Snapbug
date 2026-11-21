@@ -3,7 +3,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import type { UserPreferenceModelType } from "@workspace/validation/modules/preference/dto/user-preference.model";
 import { useTheme } from "next-themes";
-import { type PropsWithChildren, Suspense, useEffect, useRef } from "react";
+import { type PropsWithChildren, Suspense, useEffect } from "react";
 
 import { useBootstrapUserTimeZone } from "@/client/modules/preference/hooks/use-bootstrap-user-time-zone";
 import { orpcQuery } from "@/client/modules/shared/orpc/query-utils";
@@ -13,34 +13,35 @@ type UserPreferenceProviderProps = PropsWithChildren<{
   initialPreference?: UserPreferenceModelType | null;
 }>;
 
+let didSyncServerTheme = false;
+
 function UserPreferenceProviderInner({ children }: PropsWithChildren) {
-  const { data: preference } = useFindUserPreference();
-  const { theme, setTheme } = useTheme();
-  const hasAppliedServerTheme = useRef(false);
-
+  useFindUserPreference();
   useBootstrapUserTimeZone();
-
-  useEffect(() => {
-    if (hasAppliedServerTheme.current) return;
-    if (theme === undefined) return;
-
-    hasAppliedServerTheme.current = true;
-
-    if (preference.theme !== theme) {
-      setTheme(preference.theme);
-    }
-  }, [preference.theme, setTheme, theme]);
 
   return children;
 }
 
 export function UserPreferenceProvider({ initialPreference, children }: UserPreferenceProviderProps) {
   const queryClient = useQueryClient();
+  const { theme, setTheme } = useTheme();
+  const preferenceQueryKey = orpcQuery.preference.findUserPreference.queryOptions().queryKey;
+
+  if (initialPreference && queryClient.getQueryData(preferenceQueryKey) === undefined) {
+    queryClient.setQueryData(preferenceQueryKey, initialPreference);
+  }
 
   useEffect(() => {
+    if (didSyncServerTheme) return;
     if (!initialPreference) return;
-    queryClient.setQueryData(orpcQuery.preference.findUserPreference.queryOptions().queryKey, initialPreference);
-  }, [initialPreference, queryClient]);
+    if (theme === undefined) return;
+
+    didSyncServerTheme = true;
+
+    if (initialPreference.theme !== theme) {
+      setTheme(initialPreference.theme);
+    }
+  }, [initialPreference, setTheme, theme]);
 
   return (
     <Suspense fallback={children}>
