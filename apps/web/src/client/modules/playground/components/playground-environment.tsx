@@ -20,7 +20,9 @@ export function PlaygroundEnvironmentContent({ capture }: PlaygroundEnvironmentP
 
   return (
     <Column gap="sm" width="full">
-      {parsed.browser ? <PlaygroundEnvironmentPropertyRow label={texts.capture.browser} value={parsed.browser} /> : null}
+      {parsed.browser ? (
+        <PlaygroundEnvironmentPropertyRow label={texts.capture.browser} value={parsed.browser} />
+      ) : null}
       {parsed.os ? <PlaygroundEnvironmentPropertyRow label={texts.capture.os} value={parsed.os} /> : null}
       {parsed.device ? <PlaygroundEnvironmentPropertyRow label={texts.capture.device} value={parsed.device} /> : null}
       {viewport ? <PlaygroundEnvironmentPropertyRow label={texts.capture.viewport} value={viewport} /> : null}

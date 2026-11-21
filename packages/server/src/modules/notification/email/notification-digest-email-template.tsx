@@ -2,7 +2,10 @@ import {
   formatNotificationEmailLine,
   notificationEmailLanguage,
 } from "@workspace/server/modules/notification/email/notification-email-copy.const";
-import { notificationObjectUrl, notificationSettingsUrl } from "@workspace/server/modules/notification/email/notification-email-url.util";
+import {
+  notificationObjectUrl,
+  notificationSettingsUrl,
+} from "@workspace/server/modules/notification/email/notification-email-url.util";
 import type { NotificationDigestProjectGroup } from "@workspace/server/modules/notification/email/group-digest.util";
 import type { InterfaceLanguage } from "@workspace/validation/modules/user/consts/interface-language.const";
 
@@ -49,14 +52,18 @@ export function NotificationDigestEmailTemplate({ groups, language }: Notificati
                 padding: "32px 28px 24px",
               }}
             >
-              <p style={{ margin: "0 0 8px", color: color.muted, fontSize: 12, fontWeight: 600 }}>{texts.immediateEyebrow}</p>
+              <p style={{ margin: "0 0 8px", color: color.muted, fontSize: 12, fontWeight: 600 }}>
+                {texts.immediateEyebrow}
+              </p>
               <p style={{ margin: "0 0 8px", color: color.ink, fontSize: 22, lineHeight: "28px", fontWeight: 700 }}>
                 {texts.digestTitle}
               </p>
               <p style={{ margin: "0 0 24px", color: color.muted, fontSize: 14 }}>{texts.digestIntro(count)}</p>
               {groups.map((group) => (
                 <div key={group.projectKey} style={{ marginBottom: 20 }}>
-                  <p style={{ margin: "0 0 8px", color: color.ink, fontSize: 15, fontWeight: 600 }}>{group.projectName}</p>
+                  <p style={{ margin: "0 0 8px", color: color.ink, fontSize: 15, fontWeight: 600 }}>
+                    {group.projectName}
+                  </p>
                   <ul style={{ margin: 0, paddingLeft: 18, color: color.muted, fontSize: 14, lineHeight: "22px" }}>
                     {group.items.map((item) => {
                       const line = formatNotificationEmailLine(item.type, item.payload, language);

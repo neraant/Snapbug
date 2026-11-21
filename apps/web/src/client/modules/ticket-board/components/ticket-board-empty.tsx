@@ -10,7 +10,7 @@ import { url } from "@/shared/build-url.util";
 type TicketBoardEmptyProps = {
   variant: "no-reports" | "filtered";
   projectId: string | null;
-  onClearFilters: () => void;
+  onClearFilters: VoidFunction;
 };
 
 export function TicketBoardEmpty({ variant, projectId, onClearFilters }: TicketBoardEmptyProps) {

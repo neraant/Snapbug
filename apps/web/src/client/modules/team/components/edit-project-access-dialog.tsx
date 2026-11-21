@@ -42,7 +42,7 @@ export function EditProjectAccessDialog({ membershipId, onOpenChange }: EditProj
 
 type EditProjectAccessFormProps = {
   membershipId: string;
-  onClose: () => void;
+  onClose: VoidFunction;
 };
 
 function EditProjectAccessForm({ membershipId, onClose }: EditProjectAccessFormProps) {

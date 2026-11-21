@@ -12,7 +12,7 @@ export const editCommentTextareaId = "ticket-detail-comment-edit";
 type UseTicketDetailCommentItemInput = {
   commentId: string;
   body: string;
-  onDeleted: () => void;
+  onDeleted: VoidFunction;
 };
 
 export function useTicketDetailCommentItem({ commentId, body, onDeleted }: UseTicketDetailCommentItemInput) {

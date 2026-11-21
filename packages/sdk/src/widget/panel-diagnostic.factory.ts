@@ -9,7 +9,7 @@ export type DiagnosticValues = Record<DiagnosticKey, boolean>;
 export type DiagnosticControl = {
   root: HTMLDivElement;
   getValues: () => DiagnosticValues;
-  reset: () => void;
+  reset: VoidFunction;
 };
 
 const ROWS: { key: DiagnosticKey; title: string; description: string; tooltip: string }[] = [

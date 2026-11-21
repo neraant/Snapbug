@@ -29,9 +29,7 @@ describe("UpdateUserPreferenceUseCase", () => {
       findByUserId: vi.fn().mockResolvedValue(existingPreference),
       save: vi.fn().mockResolvedValue(undefined),
     };
-    const useCase = new UpdateUserPreferenceUseCase(
-      userPreferenceRepository as unknown as UserPreferenceRepository,
-    );
+    const useCase = new UpdateUserPreferenceUseCase(userPreferenceRepository as unknown as UserPreferenceRepository);
 
     const result = await useCase.execute(userId, { theme: "dark" });
 
@@ -48,9 +46,7 @@ describe("UpdateUserPreferenceUseCase", () => {
       findByUserId: vi.fn().mockResolvedValue(null),
       save: vi.fn().mockResolvedValue(undefined),
     };
-    const useCase = new UpdateUserPreferenceUseCase(
-      userPreferenceRepository as unknown as UserPreferenceRepository,
-    );
+    const useCase = new UpdateUserPreferenceUseCase(userPreferenceRepository as unknown as UserPreferenceRepository);
 
     const result = await useCase.execute(userId, { sidebarCollapsed: true });
 

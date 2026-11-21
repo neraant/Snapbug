@@ -2,10 +2,7 @@
 
 import { useCallback } from "react";
 
-import {
-  type SettingsTab,
-  settingsTabs,
-} from "@/client/modules/settings/consts/settings-tab.const";
+import { type SettingsTab, settingsTabs } from "@/client/modules/settings/consts/settings-tab.const";
 import { texts } from "@/client/modules/settings/consts/texts.const";
 import { useSettingsTab } from "@/client/modules/settings/hooks/use-settings-tab";
 
@@ -14,7 +11,7 @@ type ConfirmDiscard = (request: {
   description: string;
   confirmLabel: string;
   variant: "destructive";
-  onConfirm: () => void;
+  onConfirm: VoidFunction;
 }) => void;
 
 type UseSettingsTabChangeInput = {
@@ -23,11 +20,7 @@ type UseSettingsTabChangeInput = {
   confirm: ConfirmDiscard;
 };
 
-export function useSettingsTabChange({
-  organizationDirty,
-  resetOrganization,
-  confirm,
-}: UseSettingsTabChangeInput) {
+export function useSettingsTabChange({ organizationDirty, resetOrganization, confirm }: UseSettingsTabChangeInput) {
   const { tab, setTab: setTabRaw } = useSettingsTab();
 
   const setTab = useCallback(

@@ -65,9 +65,7 @@ export function McpToolCard({ tool, onOpen }: McpToolCardProps) {
           {tool.shortDescription}
         </Typography>
         <Tooltip>
-          <TooltipTrigger render={<Badge variant="outline" className="w-fit" />}>
-            {tool.scope}
-          </TooltipTrigger>
+          <TooltipTrigger render={<Badge variant="outline" className="w-fit" />}>{tool.scope}</TooltipTrigger>
           <TooltipContent>{texts.tools.scopeTooltips[tool.scope as McpToolScopeType]}</TooltipContent>
         </Tooltip>
       </Column>

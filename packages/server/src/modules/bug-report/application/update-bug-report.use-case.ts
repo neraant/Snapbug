@@ -73,7 +73,11 @@ export class UpdateBugReportUseCase {
         projectSlug: project.slug,
       };
 
-      if (patch.assignedTo !== undefined && updatedBugReport.assignedTo !== bugReport.assignedTo && updatedBugReport.assignedTo) {
+      if (
+        patch.assignedTo !== undefined &&
+        updatedBugReport.assignedTo !== bugReport.assignedTo &&
+        updatedBugReport.assignedTo
+      ) {
         await notificationPort.ticketAssigned({
           organizationId: project.organizationId,
           actorUserId,

@@ -17,7 +17,7 @@ import { url } from "@/shared/build-url.util";
 
 type ErrorScreenProps = {
   error: Error & { digest?: string };
-  reset: () => void;
+  reset: VoidFunction;
 };
 
 export function ErrorScreen({ error, reset }: ErrorScreenProps) {

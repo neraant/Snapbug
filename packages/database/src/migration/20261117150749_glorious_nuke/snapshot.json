@@ -2,10 +2,7 @@
   "version": "8",
   "dialect": "postgres",
   "id": "45e381da-62bd-400c-9d04-96c8f5f25906",
-  "prevIds": [
-    "7f9e0559-b5d5-4016-be14-fc76248fd12b",
-    "e370595c-7313-4671-befc-fff02113094d"
-  ],
+  "prevIds": ["7f9e0559-b5d5-4016-be14-fc76248fd12b", "e370595c-7313-4671-befc-fff02113094d"],
   "ddl": [
     {
       "isRlsEnabled": false,
@@ -2363,14 +2360,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "project_id"
-      ],
+      "columns": ["project_id"],
       "schemaTo": "public",
       "tableTo": "projects",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "api_keys_project_id_projects_id_fkey",
@@ -2380,14 +2373,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "organization_id"
-      ],
+      "columns": ["organization_id"],
       "schemaTo": "public",
       "tableTo": "organizations",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "audit_logs_organization_id_organizations_id_fkey",
@@ -2397,14 +2386,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "project_id"
-      ],
+      "columns": ["project_id"],
       "schemaTo": "public",
       "tableTo": "projects",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "SET NULL",
       "name": "audit_logs_project_id_projects_id_fkey",
@@ -2414,14 +2399,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "project_id"
-      ],
+      "columns": ["project_id"],
       "schemaTo": "public",
       "tableTo": "projects",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "bug_reports_project_id_projects_id_fkey",
@@ -2431,14 +2412,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "assigned_to"
-      ],
+      "columns": ["assigned_to"],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "SET NULL",
       "name": "bug_reports_assigned_to_users_id_fkey",
@@ -2448,14 +2425,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "bug_report_id"
-      ],
+      "columns": ["bug_report_id"],
       "schemaTo": "public",
       "tableTo": "bug_reports",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "comments_bug_report_id_bug_reports_id_fkey",
@@ -2465,14 +2438,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "author_user_id"
-      ],
+      "columns": ["author_user_id"],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "comments_author_user_id_users_id_fkey",
@@ -2482,14 +2451,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "organization_id"
-      ],
+      "columns": ["organization_id"],
       "schemaTo": "public",
       "tableTo": "organizations",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "invitations_organization_id_organizations_id_fkey",
@@ -2499,14 +2464,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "invited_by_user_id"
-      ],
+      "columns": ["invited_by_user_id"],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "invitations_invited_by_user_id_users_id_fkey",
@@ -2516,14 +2477,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "memberships_user_id_users_id_fkey",
@@ -2533,14 +2490,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "organization_id"
-      ],
+      "columns": ["organization_id"],
       "schemaTo": "public",
       "tableTo": "organizations",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "memberships_organization_id_organizations_id_fkey",
@@ -2550,14 +2503,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "organization_id"
-      ],
+      "columns": ["organization_id"],
       "schemaTo": "public",
       "tableTo": "organizations",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "notifications_organization_id_organizations_id_fkey",
@@ -2567,14 +2516,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "recipient_user_id"
-      ],
+      "columns": ["recipient_user_id"],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "notifications_recipient_user_id_users_id_fkey",
@@ -2584,14 +2529,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "actor_user_id"
-      ],
+      "columns": ["actor_user_id"],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "notifications_actor_user_id_users_id_fkey",
@@ -2601,14 +2542,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "project_id"
-      ],
+      "columns": ["project_id"],
       "schemaTo": "public",
       "tableTo": "projects",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "SET NULL",
       "name": "notifications_project_id_projects_id_fkey",
@@ -2618,14 +2555,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "notification_email_pending_user_id_users_id_fkey",
@@ -2635,14 +2568,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "organization_id"
-      ],
+      "columns": ["organization_id"],
       "schemaTo": "public",
       "tableTo": "organizations",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "notification_email_pending_vxGPa4W8kTIX_fkey",
@@ -2652,14 +2581,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "actor_user_id"
-      ],
+      "columns": ["actor_user_id"],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "notification_email_pending_actor_user_id_users_id_fkey",
@@ -2669,14 +2594,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "project_id"
-      ],
+      "columns": ["project_id"],
       "schemaTo": "public",
       "tableTo": "projects",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "SET NULL",
       "name": "notification_email_pending_project_id_projects_id_fkey",
@@ -2686,14 +2607,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "user_notification_preferences_user_id_users_id_fkey",
@@ -2703,14 +2620,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "user_organization_notification_preferences_8TDOKfp9przB_fkey",
@@ -2720,14 +2633,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "organization_id"
-      ],
+      "columns": ["organization_id"],
       "schemaTo": "public",
       "tableTo": "organizations",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "user_organization_notification_preferences_voFQje60sgdh_fkey",
@@ -2737,14 +2646,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "organization_id"
-      ],
+      "columns": ["organization_id"],
       "schemaTo": "public",
       "tableTo": "organizations",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "projects_organization_id_organizations_id_fkey",
@@ -2754,14 +2659,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "default_assignee_id"
-      ],
+      "columns": ["default_assignee_id"],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "SET NULL",
       "name": "projects_default_assignee_id_users_id_fkey",
@@ -2771,14 +2672,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "membership_id"
-      ],
+      "columns": ["membership_id"],
       "schemaTo": "public",
       "tableTo": "memberships",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "project_accesses_membership_id_memberships_id_fkey",
@@ -2788,14 +2685,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "project_id"
-      ],
+      "columns": ["project_id"],
       "schemaTo": "public",
       "tableTo": "projects",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "project_accesses_project_id_projects_id_fkey",
@@ -2805,14 +2698,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "reset_password_tokens_user_id_users_id_fkey",
@@ -2822,14 +2711,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "user_preferences_user_id_users_id_fkey",
@@ -2839,14 +2724,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "public",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "NO ACTION",
       "name": "user_tokens_user_id_users_id_fkey",
@@ -2855,10 +2736,7 @@
       "table": "user_tokens"
     },
     {
-      "columns": [
-        "user_id",
-        "organization_id"
-      ],
+      "columns": ["user_id", "organization_id"],
       "nameExplicit": false,
       "name": "user_organization_notification_preferences_pkey",
       "entityType": "pks",
@@ -2866,9 +2744,7 @@
       "table": "user_organization_notification_preferences"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "api_keys_pkey",
       "schema": "public",
@@ -2876,9 +2752,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "audit_logs_pkey",
       "schema": "public",
@@ -2886,9 +2760,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "bug_reports_pkey",
       "schema": "public",
@@ -2896,9 +2768,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "comments_pkey",
       "schema": "public",
@@ -2906,9 +2776,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "invitations_pkey",
       "schema": "public",
@@ -2916,9 +2784,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "memberships_pkey",
       "schema": "public",
@@ -2926,9 +2792,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "notifications_pkey",
       "schema": "public",
@@ -2936,9 +2800,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "notification_email_pending_pkey",
       "schema": "public",
@@ -2946,9 +2808,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "nameExplicit": false,
       "name": "user_notification_preferences_pkey",
       "schema": "public",
@@ -2956,9 +2816,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "organizations_pkey",
       "schema": "public",
@@ -2966,9 +2824,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "projects_pkey",
       "schema": "public",
@@ -2976,9 +2832,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "project_accesses_pkey",
       "schema": "public",
@@ -2986,9 +2840,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "reset_password_tokens_pkey",
       "schema": "public",
@@ -2996,9 +2848,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "users_pkey",
       "schema": "public",
@@ -3006,9 +2856,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "nameExplicit": false,
       "name": "user_preferences_pkey",
       "schema": "public",
@@ -3016,9 +2864,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "user_tokens_pkey",
       "schema": "public",
@@ -3027,9 +2873,7 @@
     },
     {
       "nameExplicit": true,
-      "columns": [
-        "key"
-      ],
+      "columns": ["key"],
       "nullsNotDistinct": false,
       "name": "key_unique",
       "entityType": "uniques",
@@ -3038,10 +2882,7 @@
     },
     {
       "nameExplicit": true,
-      "columns": [
-        "organization_id",
-        "email"
-      ],
+      "columns": ["organization_id", "email"],
       "nullsNotDistinct": false,
       "name": "invitation_organization_email_unique",
       "entityType": "uniques",
@@ -3050,9 +2891,7 @@
     },
     {
       "nameExplicit": true,
-      "columns": [
-        "token_hash"
-      ],
+      "columns": ["token_hash"],
       "nullsNotDistinct": false,
       "name": "invitation_token_hash_unique",
       "entityType": "uniques",
@@ -3061,10 +2900,7 @@
     },
     {
       "nameExplicit": true,
-      "columns": [
-        "user_id",
-        "organization_id"
-      ],
+      "columns": ["user_id", "organization_id"],
       "nullsNotDistinct": false,
       "name": "membership_user_organization_unique",
       "entityType": "uniques",
@@ -3073,10 +2909,7 @@
     },
     {
       "nameExplicit": true,
-      "columns": [
-        "organization_id",
-        "slug"
-      ],
+      "columns": ["organization_id", "slug"],
       "nullsNotDistinct": false,
       "name": "projects_organization_slug_unique",
       "entityType": "uniques",
@@ -3085,9 +2918,7 @@
     },
     {
       "nameExplicit": true,
-      "columns": [
-        "email"
-      ],
+      "columns": ["email"],
       "nullsNotDistinct": false,
       "name": "email_unique",
       "entityType": "uniques",
@@ -3096,9 +2927,7 @@
     },
     {
       "nameExplicit": true,
-      "columns": [
-        "token_hash"
-      ],
+      "columns": ["token_hash"],
       "nullsNotDistinct": false,
       "name": "user_token_hash_unique",
       "entityType": "uniques",

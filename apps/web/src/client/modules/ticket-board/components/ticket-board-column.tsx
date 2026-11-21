@@ -23,7 +23,7 @@ type TicketBoardColumnProps = {
   projectNameById: Map<string, string>;
   showProjectName: boolean;
   projectId: string | null;
-  onLoadMore: () => void;
+  onLoadMore: VoidFunction;
   insertionIndex: number | null;
   isDraggingTicket: boolean;
   dragEnabled: boolean;

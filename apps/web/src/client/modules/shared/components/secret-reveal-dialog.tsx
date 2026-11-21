@@ -30,7 +30,7 @@ type SecretRevealDialogProps = {
   kind: SecretRevealDialogKind;
   metadataName?: string;
   showUsageSnippet?: boolean;
-  onDone: () => void;
+  onDone: VoidFunction;
 };
 
 export function SecretRevealDialog({

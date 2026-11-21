@@ -20,9 +20,7 @@ describe("CountOpenByProjectUseCase", () => {
     };
     const lastTicketAt = new Date("2025-01-15T12:00:00.000Z");
     const bugReportRepository = {
-      summarizeTicketsByProject: vi
-        .fn()
-        .mockResolvedValue([{ projectId, openCount: 4, totalCount: 10, lastTicketAt }]),
+      summarizeTicketsByProject: vi.fn().mockResolvedValue([{ projectId, openCount: 4, totalCount: 10, lastTicketAt }]),
     };
     const useCase = new CountOpenByProjectUseCase(
       membershipPort as unknown as MembershipPort,
@@ -34,9 +32,7 @@ describe("CountOpenByProjectUseCase", () => {
 
     expect(projectPort.findManyByOrganizationId).toHaveBeenCalledWith({ organizationId });
     expect(bugReportRepository.summarizeTicketsByProject).toHaveBeenCalledWith([projectId]);
-    expect(result).toEqual([
-      { projectId, openCount: 4, totalCount: 10, lastTicketAt: lastTicketAt.toISOString() },
-    ]);
+    expect(result).toEqual([{ projectId, openCount: 4, totalCount: 10, lastTicketAt: lastTicketAt.toISOString() }]);
   });
 
   it("rejects users without an organization before counting reports", async () => {

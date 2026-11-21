@@ -22,17 +22,8 @@ export function InterfaceLanguageForm() {
 
   return (
     <SettingsSections>
-      <SettingsSection
-        showSeparator={false}
-        title={texts.sectionTitle}
-        description={texts.sectionDescription}
-      >
-        <SegmentedControl
-          value={value}
-          onValueChange={onValueChange}
-          items={items}
-          aria-label={texts.sectionTitle}
-        />
+      <SettingsSection showSeparator={false} title={texts.sectionTitle} description={texts.sectionDescription}>
+        <SegmentedControl value={value} onValueChange={onValueChange} items={items} aria-label={texts.sectionTitle} />
         {savedVisible ? (
           <SettingsSectionFormFooter>
             <Row gap="xs" align="center">

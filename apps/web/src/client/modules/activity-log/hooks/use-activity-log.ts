@@ -20,10 +20,7 @@ export function useActivityLog() {
 
   const { data: teamMembers = [] } = useQuery(orpcQuery.membership.findTeamMembers.queryOptions());
 
-  const entries = useMemo(
-    () => query.data?.pages.flatMap((page) => page.items) ?? [],
-    [query.data?.pages],
-  );
+  const entries = useMemo(() => query.data?.pages.flatMap((page) => page.items) ?? [], [query.data?.pages]);
 
   const selectedEntry = useMemo(() => {
     if (!selectedEventId) return null;

@@ -57,12 +57,11 @@ export function ProjectSettingsSheet({ project, open, onOpenChange }: ProjectSet
     confirm: confirmClose,
   });
 
-  const { onArchive, onRestore, onDelete, isArchiving, isRestoring, isDeleting, isArchived } =
-    useProjectDangerActions({
-      project,
-      onProjectChanged: () => onOpenChange(false),
-      onProjectDeleted: () => onOpenChange(false),
-    });
+  const { onArchive, onRestore, onDelete, isArchiving, isRestoring, isDeleting, isArchived } = useProjectDangerActions({
+    project,
+    onProjectChanged: () => onOpenChange(false),
+    onProjectDeleted: () => onOpenChange(false),
+  });
 
   const openArchiveConfirm = () => {
     confirmAction({
@@ -213,12 +212,7 @@ export function ProjectSettingsSheet({ project, open, onOpenChange }: ProjectSet
                               {texts.settingsSheet.danger.archive.description}
                             </Typography>
                           </Column>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            disabled={isRestoring}
-                            onClick={openRestoreConfirm}
-                          >
+                          <Button type="button" variant="outline" disabled={isRestoring} onClick={openRestoreConfirm}>
                             {texts.settingsSheet.danger.archive.actionRestore}
                           </Button>
                         </Row>

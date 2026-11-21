@@ -14,7 +14,7 @@ const createOrganizationFormSchema = createOrganizationInputDtoSchema.pick({ nam
 type CreateOrganizationFormSchemaType = z.infer<typeof createOrganizationFormSchema>;
 
 type UseAppSidebarCreateOrganizationInput = {
-  onCreated: () => void;
+  onCreated: VoidFunction;
 };
 
 export function useAppSidebarCreateOrganization({ onCreated }: UseAppSidebarCreateOrganizationInput) {

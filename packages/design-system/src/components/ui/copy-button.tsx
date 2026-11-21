@@ -17,7 +17,7 @@ const copyButtonCheckIconVariants = cva("", {
 
 type CopyButtonProps = Omit<ComponentProps<typeof Button>, "children" | "onClick"> & {
   copied: boolean;
-  onCopy: () => void;
+  onCopy: VoidFunction;
   copyLabel: string;
   copiedLabel: string;
 };

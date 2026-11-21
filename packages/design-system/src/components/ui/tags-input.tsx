@@ -11,7 +11,7 @@ type TagAnnotation = {
   label: string;
   action?: {
     label: string;
-    onAction: () => void;
+    onAction: VoidFunction;
   };
 };
 

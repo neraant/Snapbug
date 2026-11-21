@@ -17,7 +17,7 @@ type TicketDetailCommentThreadProps = {
   bugReportId: string;
   sort: TicketDetailCommentSortType;
   scrollCommentId: string | null;
-  onDeleted: () => void;
+  onDeleted: VoidFunction;
 };
 
 export function TicketDetailCommentThread({

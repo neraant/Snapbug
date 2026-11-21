@@ -1,7 +1,7 @@
 import { snapbug, type WidgetPreviewCapture } from "@neraant/snapbug";
 import { type RefObject, useCallback, useEffect, useRef, useState } from "react";
 
-import { type PlaygroundStep,playgroundSteps } from "@/client/modules/playground/consts/playground-step.const";
+import { type PlaygroundStep, playgroundSteps } from "@/client/modules/playground/consts/playground-step.const";
 import type { SnapbugWidgetInitOptions } from "@/client/modules/sdk-setup/utils/build-snapbug-widget-init-options.util";
 
 const playgroundLocalApiKey = "sb_playground_local";
@@ -18,9 +18,9 @@ export type PlaygroundWidgetState = {
   isPending: boolean;
   error: string | null;
   step: PlaygroundStep;
-  reset: () => void;
-  openWidget: () => void;
-  retry: () => void;
+  reset: VoidFunction;
+  openWidget: VoidFunction;
+  retry: VoidFunction;
 };
 
 export function usePlaygroundWidget({ widgetOptions, frameRef }: UsePlaygroundWidgetOptions): PlaygroundWidgetState {
@@ -85,14 +85,16 @@ export function usePlaygroundWidget({ widgetOptions, frameRef }: UsePlaygroundWi
       }
     };
 
-    snapbug.init({
-      apiKey: playgroundLocalApiKey,
-      host: window.location.origin,
-      ...widgetOptions,
-      preview,
-    }).catch(() => {
-      setError("capture-failed");
-    });
+    snapbug
+      .init({
+        apiKey: playgroundLocalApiKey,
+        host: window.location.origin,
+        ...widgetOptions,
+        preview,
+      })
+      .catch(() => {
+        setError("capture-failed");
+      });
 
     const frameTimer = window.setTimeout(attachWidgetToFrame, 0);
 

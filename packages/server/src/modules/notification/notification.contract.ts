@@ -8,11 +8,15 @@ import {
   listNotificationInputDtoSchema,
   listNotificationOutputDtoSchema,
 } from "@workspace/validation/modules/notification/dto/list-notification.schema";
+import { markAllReadOutputDtoSchema } from "@workspace/validation/modules/notification/dto/mark-all-read.schema";
 import {
-  markAllReadOutputDtoSchema,
-} from "@workspace/validation/modules/notification/dto/mark-all-read.schema";
-import { markReadInputDtoSchema, markReadOutputDtoSchema } from "@workspace/validation/modules/notification/dto/mark-read.schema";
-import { markUnreadInputDtoSchema, markUnreadOutputDtoSchema } from "@workspace/validation/modules/notification/dto/mark-unread.schema";
+  markReadInputDtoSchema,
+  markReadOutputDtoSchema,
+} from "@workspace/validation/modules/notification/dto/mark-read.schema";
+import {
+  markUnreadInputDtoSchema,
+  markUnreadOutputDtoSchema,
+} from "@workspace/validation/modules/notification/dto/mark-unread.schema";
 import { findNotificationPreferenceOutputDtoSchema } from "@workspace/validation/modules/notification/dto/find-notification-preference.schema";
 import {
   updateNotificationPreferenceInputDtoSchema,
@@ -31,15 +35,13 @@ export const notificationContract = {
       summary: "List notifications for the current user",
       spec: sessionAuthSpec,
     }),
-  unreadCount: oc
-    .output(unreadCountOutputDtoSchema)
-    .route({
-      method: "GET",
-      path: "/notifications/unread-count",
-      tags: ["notification"],
-      summary: "Unread notification count",
-      spec: sessionAuthSpec,
-    }),
+  unreadCount: oc.output(unreadCountOutputDtoSchema).route({
+    method: "GET",
+    path: "/notifications/unread-count",
+    tags: ["notification"],
+    summary: "Unread notification count",
+    spec: sessionAuthSpec,
+  }),
   markRead: oc
     .input(markReadInputDtoSchema)
     .output(markReadOutputDtoSchema)
@@ -60,15 +62,13 @@ export const notificationContract = {
       summary: "Mark notifications as unread",
       spec: sessionAuthSpec,
     }),
-  markAllRead: oc
-    .output(markAllReadOutputDtoSchema)
-    .route({
-      method: "POST",
-      path: "/notifications/mark-all-read",
-      tags: ["notification"],
-      summary: "Mark all notifications as read",
-      spec: sessionAuthSpec,
-    }),
+  markAllRead: oc.output(markAllReadOutputDtoSchema).route({
+    method: "POST",
+    path: "/notifications/mark-all-read",
+    tags: ["notification"],
+    summary: "Mark all notifications as read",
+    spec: sessionAuthSpec,
+  }),
   archive: oc
     .input(archiveNotificationInputDtoSchema)
     .output(archiveNotificationOutputDtoSchema)

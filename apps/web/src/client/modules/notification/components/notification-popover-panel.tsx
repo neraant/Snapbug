@@ -21,7 +21,7 @@ import { useNotificationUnreadCount } from "@/client/modules/shared/queries/use-
 import { url } from "@/shared/build-url.util";
 
 type NotificationPopoverPanelProps = {
-  onClose: () => void;
+  onClose: VoidFunction;
 };
 
 export function NotificationPopoverPanel({ onClose }: NotificationPopoverPanelProps) {

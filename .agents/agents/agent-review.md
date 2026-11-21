@@ -38,18 +38,23 @@ Your final answer is one JSON object and nothing else. The only keys are `decisi
 `summary` is the review body in English. It is this markdown and nothing else:
 
 ## Verdict
+
 approve or request changes
 
 ## Why
+
 one or two sentences, the actual reason
 
 ## What changed
+
 short bullets of the real diff, or "No file changes."
 
 ## Spec
+
 one line: which product rules the diff touches, or "Product rules not touched." Mention TBD tasks P-08, P-18, and P-23 only if the diff starts them.
 
 ## Human
+
 "No." if the bot may approve, or "Yes. Protected path: <paths>." if a person must approve.
 
 Write `request changes` under Verdict when `decision` is `request_changes`. A person must approve only when the diff touches a protected path; list those paths. Do not add a preamble, another heading, or a list of rules the diff does not touch.

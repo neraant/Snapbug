@@ -4,7 +4,7 @@ import { COPY } from "./widget-copy.const";
 export type SeverityControl = {
   root: HTMLDivElement;
   getValue: () => ReportSeverity;
-  reset: () => void;
+  reset: VoidFunction;
 };
 
 const DEFAULT_SEVERITY: ReportSeverity = "low";

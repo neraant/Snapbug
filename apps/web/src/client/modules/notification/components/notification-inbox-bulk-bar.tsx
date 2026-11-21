@@ -8,9 +8,9 @@ import { texts } from "@/client/modules/notification/consts/texts.const";
 type NotificationInboxBulkBarProps = {
   count: number;
   pending?: boolean;
-  onMarkRead: () => void;
-  onArchive: () => void;
-  onClear: () => void;
+  onMarkRead: VoidFunction;
+  onArchive: VoidFunction;
+  onClear: VoidFunction;
 };
 
 export function NotificationInboxBulkBar({

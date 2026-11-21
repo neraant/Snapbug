@@ -24,7 +24,7 @@ Do not start tasks marked TBD: an implementer agent must not take them.
 - A playground screen exists (`apps/web/src/app/(app)/playground`) and stays in the product.
 - Audit of some changes to a project, a key, a ticket, and project access: `packages/server/src/shared/audit`.
 - Postgres in `docker-compose.yaml`. Drizzle migrations in `packages/database/src/migration`. Seed of text tickets: `packages/database/src/seed`.
-- Retention is one organization column, `reports_retention_days`. There is no project-level retention.
+- Retention is one organization column, `reports_retention_days`. There is no project-level retention. Nothing is deleted by age, and the setting is being removed (P-52).
 - P-01 a session must not return the password hash or a membership in another organization.
 - P-02 administrator-only invitations, domains, masking, and key rotation. Rotation issues a new key, stops the previous key immediately, and shows the new secret once.
 - P-03 MCP through a normal client and a user token. A project key is not accepted. Tools are `list_tickets`, `get_ticket`, `get_screenshot`, and `update_ticket`. The secret is shown once and can be revoked.
@@ -71,16 +71,20 @@ Do not start tasks marked TBD: an implementer agent must not take them.
 
 - P-24 error responses that return the real status, including 400, 401, 403, 404, 500, and any other real code. The error screen always shows 500.
 - P-48 Refactor: unit tests stay only for application use-cases; tests of utils, services, adapters, wiring, and anything in `apps/web` and `packages/design-system` are removed, with business rules moved into the owning use-case test. Brief: `docs/tasks/P-48.md`. Read it first; shared rules are in `docs/tasks/README.md`.
+- P-49 Settings simplification, theme and language fix: tabs Profile, Preferences (language and theme together), Notifications, Organization; accent, density, date and time, reduce motion, landing page, sidebar, email digest, and the settings Access tokens tab are removed; one theme source of truth that works from the sidebar and has no flicker; the language switch is fixed (a store update during render in `InterfaceLanguageProvider`). Brief: `docs/tasks/P-49.md`. Read it first; shared rules are in `docs/tasks/README.md`.
+- P-50 Ticket assignee picker, two-column comment item, and the MCP token dialog (honest tool count, no "How to use" in Token created). Brief: `docs/tasks/P-50.md`. Read it first; shared rules are in `docs/tasks/README.md`.
+- P-51 Sidebar grouped in a logical order, one table style across the app, and a notification item with one click target and one menu. Brief: `docs/tasks/P-51.md`. Read it first; shared rules are in `docs/tasks/README.md`.
+- P-52 Remove the retention setting: no data is deleted by age for now; the `reports_retention_days` column, DTO fields, and the Retention section of Organization settings are removed. Brief: `docs/tasks/P-52.md`. Read it first; shared rules are in `docs/tasks/README.md`.
+- P-53 E2E coverage: add the missing Playwright smoke specs (sign-up, onboarding, reset password, sign-out, ticket status and filters, ticket open, delete comment, project create, update and delete, team invitations, role and removal, token revoke, organization switch, notification archive, profile, not-found, a member's view) and shared seed and sign-in helpers. Brief: `docs/tasks/P-53.md`. Read it first; shared rules are in `docs/tasks/README.md`.
 
 ## TBD
 
 Do not start tasks marked TBD: an implementer agent must not take them.
 
-- P-08 TBD. Cleanup by the organization retention period, including the screenshot and the replay. Not in the current implementation scope. An implementer must not start this task.
 - P-18 TBD. A Jira connection is in the product. The detailed behavior is not specified. An implementer must not start this task.
 - P-23 TBD. Require 2FA, one invite email domain, GDPR mode, and delete workspace. Parked; an implementer must not start this task.
 
-Retired id; do not reuse: P-05.
+Retired ids; do not reuse: P-05, P-08.
 
 ## Waiting for an answer
 

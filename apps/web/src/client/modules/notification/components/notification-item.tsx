@@ -33,7 +33,7 @@ type NotificationItemProps = {
   onArchive?: (id: string) => void;
   onOpen?: (id: string) => void;
   onToggleSelect?: (id: string, checked: boolean) => void;
-  onFocus?: () => void;
+  onFocus?: VoidFunction;
 };
 
 function actorInitials(notification: NotificationModelType): string {

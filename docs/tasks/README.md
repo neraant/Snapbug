@@ -1,4 +1,4 @@
-# Task briefs (P-30 … P-48)
+# Task briefs (P-30 … P-53)
 
 A brief is the detailed result description for one task in `docs/STATUS.md`. The STATUS line names the file: `docs/tasks/P-NN.md`. **Read the brief before you write code.** The brief says what the user sees and how it behaves. The brief wins over the one-line PLAN row when they differ in UI detail. A brief does not override `docs/SPEC.md` or `docs/decisions/`.
 
@@ -27,19 +27,24 @@ Shared building blocks come first; later tasks reuse them.
 17. P-46 notifications: bell and inbox
 18. P-47 notifications: preferences and email
 19. P-48 refactor: unit tests only for use-cases (independent, may run first or last)
+20. P-49 settings simplification and theme fix (after P-44, P-47)
+21. P-50 ticket assignee, comments, token dialog
+22. P-51 sidebar order, one table style, notification item (after P-49)
+23. P-52 remove the retention setting (independent)
+24. P-53 e2e coverage (last, after P-49 to P-51)
 
 ## Reference products
 
 The target is the feel of **PostHog** and **Sentry** (data-dense tables, side panels, restrained chrome) and **Jira** (ticket thread). Do not copy their look. Copy the patterns:
 
-| Pattern | Reference |
-| --- | --- |
-| Table with minimal columns; click a row to open a detail side panel | Sentry Issues / Audit Log, PostHog Activity |
-| Infinite list that loads on scroll with an end-of-list marker | PostHog Activity log, Sentry Issues |
-| Settings split into tabs / left section nav, one card-less section per topic | PostHog Project settings, Sentry Settings |
+| Pattern                                                                                | Reference                                         |
+| -------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| Table with minimal columns; click a row to open a detail side panel                    | Sentry Issues / Audit Log, PostHog Activity       |
+| Infinite list that loads on scroll with an end-of-list marker                          | PostHog Activity log, Sentry Issues               |
+| Settings split into tabs / left section nav, one card-less section per topic           | PostHog Project settings, Sentry Settings         |
 | Danger zone at the bottom, separated, with typed confirmation for irreversible actions | Sentry project settings (Remove Project), PostHog |
-| Secret shown once in a dialog with copy button and a warning | Sentry Auth Tokens, GitHub tokens |
-| Comment thread with avatar, author, relative time, hover actions, inline editing | Jira issue comments |
+| Secret shown once in a dialog with copy button and a warning                           | Sentry Auth Tokens, GitHub tokens                 |
+| Comment thread with avatar, author, relative time, hover actions, inline editing       | Jira issue comments                               |
 
 ## Rules for every UI task
 

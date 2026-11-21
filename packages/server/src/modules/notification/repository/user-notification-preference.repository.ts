@@ -63,7 +63,10 @@ export class UserNotificationPreferenceRepository {
         .insert(userOrganizationNotificationPreferenceTable)
         .values(values)
         .onConflictDoUpdate({
-          target: [userOrganizationNotificationPreferenceTable.userId, userOrganizationNotificationPreferenceTable.organizationId],
+          target: [
+            userOrganizationNotificationPreferenceTable.userId,
+            userOrganizationNotificationPreferenceTable.organizationId,
+          ],
           set: {
             mutedProjectIds: values.mutedProjectIds,
             updatedAt: values.updatedAt,

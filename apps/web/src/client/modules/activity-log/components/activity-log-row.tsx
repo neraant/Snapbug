@@ -24,7 +24,7 @@ import { useFindUserPreference } from "@/client/modules/shared/queries/use-find-
 type ActivityLogRowProps = {
   entry: ActivityLogType;
   selected: boolean;
-  onOpen: () => void;
+  onOpen: VoidFunction;
 };
 
 export function ActivityLogRow({ entry, selected, onOpen }: ActivityLogRowProps) {

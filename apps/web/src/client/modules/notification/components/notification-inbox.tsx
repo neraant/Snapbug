@@ -5,7 +5,13 @@ import { PageContainer } from "@workspace/design-system/components/layout/page";
 import { Row } from "@workspace/design-system/components/layout/row";
 import { Button } from "@workspace/design-system/components/ui/button";
 import { SegmentedControl, type SegmentedControlItem } from "@workspace/design-system/components/ui/segmented-control";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@workspace/design-system/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/design-system/components/ui/select";
 import type { NotificationListFilter } from "@workspace/validation/modules/notification/consts/notification-list-filter.const";
 import { useCallback, useMemo, useState } from "react";
 
@@ -71,10 +77,7 @@ export function NotificationInbox() {
               value={tab}
               onValueChange={(value) => setTab(value as NotificationListFilter)}
             />
-            <Select
-              value={typeFilter}
-              onValueChange={(value) => setTypeFilter(value as NotificationTypeFilter)}
-            >
+            <Select value={typeFilter} onValueChange={(value) => setTypeFilter(value as NotificationTypeFilter)}>
               <SelectTrigger className="w-44" aria-label={texts.inbox.typeFilterLabel}>
                 <SelectValue />
               </SelectTrigger>

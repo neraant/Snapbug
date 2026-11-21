@@ -14,9 +14,9 @@ type PlaygroundResultPanelProps = {
   capture: WidgetPreviewCapture | null;
   isPending: boolean;
   error: string | null;
-  onReset: () => void;
-  onOpenWidget: () => void;
-  onRetry: () => void;
+  onReset: VoidFunction;
+  onOpenWidget: VoidFunction;
+  onRetry: VoidFunction;
 };
 
 export function PlaygroundResultPanel({
@@ -48,7 +48,7 @@ export function PlaygroundResultPanel({
 }
 
 type PlaygroundResultEmptyProps = {
-  onOpenWidget: () => void;
+  onOpenWidget: VoidFunction;
 };
 
 function PlaygroundResultEmpty({ onOpenWidget }: PlaygroundResultEmptyProps) {
@@ -85,7 +85,7 @@ function PlaygroundResultPending() {
 }
 
 type PlaygroundResultErrorProps = {
-  onRetry: () => void;
+  onRetry: VoidFunction;
 };
 
 function PlaygroundResultError({ onRetry }: PlaygroundResultErrorProps) {

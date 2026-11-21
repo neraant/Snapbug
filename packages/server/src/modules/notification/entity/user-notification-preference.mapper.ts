@@ -16,7 +16,9 @@ export abstract class UserNotificationPreferenceMapper {
     return new UserNotificationPreference(row);
   }
 
-  static toPersistence(userNotificationPreference: UserNotificationPreference): UserNotificationPreferencePersistedType {
+  static toPersistence(
+    userNotificationPreference: UserNotificationPreference,
+  ): UserNotificationPreferencePersistedType {
     return userNotificationPreference.toObject();
   }
 
@@ -80,10 +82,7 @@ export abstract class UserNotificationPreferenceMapper {
       if (isNotificationPreferenceLockedGroup(group)) {
         continue;
       }
-      if (
-        role !== UserRole.ADMIN &&
-        (notificationPreferenceAdminOnlyGroups as readonly string[]).includes(group)
-      ) {
+      if (role !== UserRole.ADMIN && (notificationPreferenceAdminOnlyGroups as readonly string[]).includes(group)) {
         continue;
       }
       const base = resolved[group];

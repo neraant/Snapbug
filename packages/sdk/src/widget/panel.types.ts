@@ -57,7 +57,7 @@ export type PanelSession = {
   screenshotDeclined: boolean;
   screenshotPreviewUrl: string | null;
   annotation: ScreenshotAnnotationController | null;
-  openPanel: () => void;
-  closePanel: () => void;
+  openPanel: VoidFunction;
+  closePanel: VoidFunction;
   triggerAboveSheetObserver?: ResizeObserver;
 };

@@ -33,7 +33,7 @@ type TicketDetailCommentThreadItemProps = {
   comment: CommentModelType;
   canManage: boolean;
   scrollRef?: (element: HTMLElement | null) => void;
-  onDeleted: () => void;
+  onDeleted: VoidFunction;
 };
 
 export function TicketDetailCommentThreadItem({
@@ -98,10 +98,11 @@ export function TicketDetailCommentThreadItem({
         minWidth="0"
         className={cn("group/comment transition-opacity duration-200", isRemoving && "pointer-events-none opacity-0")}
       >
-        <Avatar size="lg" className="shrink-0">
-          <AvatarFallback>{getTicketDetailCommentAuthorInitials(comment)}</AvatarFallback>
-        </Avatar>
-        <Column gap="xs" width="full" minWidth="0">
+        <Row gap="xs" width="full" minWidth="0">
+          <Avatar size="lg" className="shrink-0">
+            <AvatarFallback>{getTicketDetailCommentAuthorInitials(comment)}</AvatarFallback>
+          </Avatar>
+
           <Row align="center" justify="between" gap="sm" wrap={false} width="full" minWidth="0">
             <Row align="center" gap="xs" wrap minWidth="0" className="min-w-0">
               <Typography variant="label" truncate>
@@ -173,6 +174,7 @@ export function TicketDetailCommentThreadItem({
               </Row>
             ) : null}
           </Row>
+
           {isEditing ? (
             <Column as="form" gap="sm" width="full" noValidate onSubmit={onSave}>
               <Field>
@@ -199,7 +201,7 @@ export function TicketDetailCommentThreadItem({
           ) : (
             <TicketDetailCommentBody body={comment.body} />
           )}
-        </Column>
+        </Row>
       </Row>
       <ConfirmDialog {...bind()} />
     </div>

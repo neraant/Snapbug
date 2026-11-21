@@ -8,14 +8,8 @@ const overviewCountSchema = z.object({
 });
 
 export const getOverviewStatsInputDtoSchema = z.object({
-  projectId: z
-    .uuid()
-    .optional()
-    .describe("Count within one project; omit to aggregate all accessible projects."),
-  organizationId: z
-    .uuid()
-    .optional()
-    .describe("Organization scope when the caller belongs to several teams."),
+  projectId: z.uuid().optional().describe("Count within one project; omit to aggregate all accessible projects."),
+  organizationId: z.uuid().optional().describe("Organization scope when the caller belongs to several teams."),
 });
 
 export type GetOverviewStatsInputDtoType = z.infer<typeof getOverviewStatsInputDtoSchema>;

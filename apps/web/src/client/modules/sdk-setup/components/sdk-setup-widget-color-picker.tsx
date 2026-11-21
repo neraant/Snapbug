@@ -25,7 +25,7 @@ type SdkSetupWidgetColorPickerProps = {
   committed: string | undefined;
   invalid?: boolean;
   onPick: (hex: string) => void;
-  onClear: () => void;
+  onClear: VoidFunction;
 };
 
 export function SdkSetupWidgetColorPicker({

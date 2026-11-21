@@ -71,9 +71,9 @@ function SheetContent({
         className={cn(
           "fixed z-50 flex flex-col bg-popover bg-clip-padding text-xs/relaxed text-popover-foreground shadow-lg transition ease-in-out data-open:animate-in data-open:duration-500 data-closed:animate-out data-closed:duration-300",
           side === "right" &&
-            "inset-y-0 right-0 h-full w-3/4 border-l sm:max-w-sm data-open:slide-in-from-right data-closed:slide-out-to-right",
+            "inset-y-0 right-0 h-full w-3/4 border-l sm:max-w-lg data-open:slide-in-from-right data-closed:slide-out-to-right",
           side === "left" &&
-            "inset-y-0 left-0 h-full w-3/4 border-r sm:max-w-sm data-open:slide-in-from-left data-closed:slide-out-to-left",
+            "inset-y-0 left-0 h-full w-3/4 border-r sm:max-w-lg data-open:slide-in-from-left data-closed:slide-out-to-left",
           side === "top" && "inset-x-0 top-0 h-auto border-b data-open:slide-in-from-top data-closed:slide-out-to-top",
           side === "bottom" &&
             "inset-x-0 bottom-0 h-auto border-t data-open:slide-in-from-bottom data-closed:slide-out-to-bottom",

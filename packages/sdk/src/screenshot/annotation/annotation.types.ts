@@ -29,8 +29,8 @@ export type MountScreenshotAnnotationOptions = {
 };
 
 export type ScreenshotAnnotationController = {
-  unmount: () => void;
-  open: () => void;
+  unmount: VoidFunction;
+  open: VoidFunction;
   flush: () => Promise<void>;
 };
 
@@ -52,7 +52,7 @@ export type AnnotationRuntime = {
   enlarged: HTMLImageElement;
   originalBlob: Blob | null;
   resizeObserver: ResizeObserver;
-  onResize: () => void;
+  onResize: VoidFunction;
   onEscape: (event: KeyboardEvent) => void;
   surface: HTMLImageElement;
   tool: Tool;

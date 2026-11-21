@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 
 type UseGlobalSearchShortcutOptions = {
-  onOpen: () => void;
+  onOpen: VoidFunction;
 };
 
 function isTypingTarget(target: EventTarget | null): boolean {

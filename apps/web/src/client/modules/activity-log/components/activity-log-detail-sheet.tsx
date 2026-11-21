@@ -35,8 +35,8 @@ type ActivityLogDetailSheetProps = {
   onOpenChange: (open: boolean) => void;
   canMovePrevious: boolean;
   canMoveNext: boolean;
-  onPrevious: () => void;
-  onNext: () => void;
+  onPrevious: VoidFunction;
+  onNext: VoidFunction;
 };
 
 export function ActivityLogDetailSheet({

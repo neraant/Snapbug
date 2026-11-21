@@ -11,11 +11,6 @@ const authed = os.use(authedMiddleware);
 export const searchRouter = os.router({
   search: authed.search.handler(
     async ({ input, context }) =>
-      await container.search.search.execute(
-        input,
-        context.user.id,
-        context.organizationId,
-        context.mcp?.projectIds,
-      ),
+      await container.search.search.execute(input, context.user.id, context.organizationId, context.mcp?.projectIds),
   ),
 });

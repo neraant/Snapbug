@@ -41,11 +41,11 @@ export function CreateUserTokenDialog() {
 
   return (
     <>
-      <Button type="button" onClick={onOpenCreate}>
+      <Button type="button" onClick={onOpenCreate} className="max-w-fit self-end">
         {texts.create.action}
       </Button>
       <Dialog open={open} onOpenChange={onOpenChange} disablePointerDismissal={secret != null}>
-        <DialogContent showClose={secret == null} className="max-w-lg">
+        <DialogContent showClose={secret == null} className="max-h-[90vh] max-w-lg">
           {secret ? (
             <SecretRevealDialog
               secret={secret}
@@ -60,7 +60,7 @@ export function CreateUserTokenDialog() {
                 <DialogTitle>{texts.create.dialog.title}</DialogTitle>
                 <DialogDescription>{texts.create.dialog.description}</DialogDescription>
               </DialogHeader>
-              <Column as="form" gap="md" width="full" onSubmit={onSubmit}>
+              <Column as="form" gap="md" width="full" onSubmit={onSubmit} className="overflow-y-auto px-1">
                 <FieldGroup>
                   <TextField
                     control={control}
@@ -83,13 +83,15 @@ export function CreateUserTokenDialog() {
                   onProjectModeChange={onProjectModeChange}
                   onToggleProject={onToggleProject}
                 />
-                <DialogFooter>
-                  <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                    {texts.create.dialog.cancel}
-                  </Button>
-                  <SubmitButton loading={isPending}>{texts.create.dialog.submit}</SubmitButton>
-                </DialogFooter>
               </Column>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                  {texts.create.dialog.cancel}
+                </Button>
+                <SubmitButton loading={isPending} onClick={onSubmit}>
+                  {texts.create.dialog.submit}
+                </SubmitButton>
+              </DialogFooter>
             </>
           )}
         </DialogContent>

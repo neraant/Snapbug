@@ -2,7 +2,10 @@ import {
   formatNotificationEmailLine,
   notificationEmailLanguage,
 } from "@workspace/server/modules/notification/email/notification-email-copy.const";
-import { notificationObjectUrl, notificationSettingsUrl } from "@workspace/server/modules/notification/email/notification-email-url.util";
+import {
+  notificationObjectUrl,
+  notificationSettingsUrl,
+} from "@workspace/server/modules/notification/email/notification-email-url.util";
 import type { NotificationObjectType } from "@workspace/validation/modules/notification/consts/notification-object-type.const";
 import type { NotificationType } from "@workspace/validation/modules/notification/consts/notification-type.const";
 import type { NotificationPayloadType } from "@workspace/validation/modules/notification/dto/notification-payload.schema";
@@ -59,8 +62,12 @@ export function NotificationImmediateEmailTemplate({
                 padding: "32px 28px 24px",
               }}
             >
-              <p style={{ margin: "0 0 8px", color: color.muted, fontSize: 12, fontWeight: 600 }}>{texts.immediateEyebrow}</p>
-              <p style={{ margin: "0 0 20px", color: color.ink, fontSize: 22, lineHeight: "28px", fontWeight: 700 }}>{line.text}</p>
+              <p style={{ margin: "0 0 8px", color: color.muted, fontSize: 12, fontWeight: 600 }}>
+                {texts.immediateEyebrow}
+              </p>
+              <p style={{ margin: "0 0 20px", color: color.ink, fontSize: 22, lineHeight: "28px", fontWeight: 700 }}>
+                {line.text}
+              </p>
               {line.projectName ? (
                 <p style={{ margin: "0 0 20px", color: color.muted, fontSize: 14 }}>{line.projectName}</p>
               ) : null}

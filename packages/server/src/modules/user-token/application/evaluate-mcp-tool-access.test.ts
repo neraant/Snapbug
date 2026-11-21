@@ -1,5 +1,8 @@
 import { EvaluateMcpToolAccessUseCase } from "@workspace/server/modules/user-token/application/evaluate-mcp-tool-access.use-case";
-import { LEGACY_USER_TOKEN_SCOPES, MCP_READ_SCOPES } from "@workspace/validation/modules/user-token/consts/mcp-scope.const";
+import {
+  LEGACY_USER_TOKEN_SCOPES,
+  MCP_READ_SCOPES,
+} from "@workspace/validation/modules/user-token/consts/mcp-scope.const";
 import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
 import { describe, expect, it } from "vitest";
 

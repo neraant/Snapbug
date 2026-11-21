@@ -4,7 +4,7 @@ import { ErrorScreen } from "@/client/modules/error/components/error-screen";
 
 type ErrorProps = {
   error: Error & { digest?: string };
-  reset: () => void;
+  reset: VoidFunction;
 };
 
 export default function Error({ error, reset }: ErrorProps) {

@@ -4,7 +4,10 @@ import { randomUUID } from "crypto";
 
 export class NotificationFactory {
   static create(
-    input: Omit<NotificationPersistedType, "id" | "readAt" | "archivedAt" | "createdAt"> & { id?: string; createdAt?: Date },
+    input: Omit<NotificationPersistedType, "id" | "readAt" | "archivedAt" | "createdAt"> & {
+      id?: string;
+      createdAt?: Date;
+    },
   ): Notification {
     const now = input.createdAt ?? new Date();
     return new Notification({

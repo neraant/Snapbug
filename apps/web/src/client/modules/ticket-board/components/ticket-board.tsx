@@ -36,7 +36,7 @@ import { url } from "@/shared/build-url.util";
 
 type TicketBoardProps = {
   projectId: string | null;
-  onClearFilters: () => void;
+  onClearFilters: VoidFunction;
   board: ReturnType<typeof useTicketBoard>;
 };
 

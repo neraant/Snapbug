@@ -62,8 +62,7 @@ export const url = {
   signIn: (query?: { invitation?: string }) => buildUrl(routePattern.signIn, {}, query),
   signUp: (query?: { invitation?: string }) => buildUrl(routePattern.signUp, {}, query),
   forgotPassword: (query?: { invitation?: string }) => buildUrl(routePattern.forgotPassword, {}, query),
-  resetPassword: (query?: { token?: string; invitation?: string }) =>
-    buildUrl(routePattern.resetPassword, {}, query),
+  resetPassword: (query?: { token?: string; invitation?: string }) => buildUrl(routePattern.resetPassword, {}, query),
   onboarding: () => routePattern.onboarding,
   invite: (token: string) => buildUrl(routePattern.invite, { token }),
   report: () => routePattern.report,

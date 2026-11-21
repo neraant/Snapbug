@@ -412,7 +412,7 @@ type GlobalSearchTicketRowProps = {
   ticket: SearchTicketResult;
   query: string;
   active: boolean;
-  onHover: () => void;
+  onHover: VoidFunction;
   onOpen: (openInNewTab: boolean) => void;
 };
 
@@ -464,7 +464,7 @@ type GlobalSearchProjectRowProps = {
   project: SearchProjectResult;
   query: string;
   active: boolean;
-  onHover: () => void;
+  onHover: VoidFunction;
   onOpen: (openInNewTab: boolean) => void;
 };
 
@@ -509,7 +509,7 @@ function GlobalSearchProjectRow({ project, query, active, onHover, onOpen }: Glo
 type GlobalSearchShowAllRowProps = {
   label: string;
   active: boolean;
-  onHover: () => void;
+  onHover: VoidFunction;
   onOpen: (openInNewTab: boolean) => void;
 };
 

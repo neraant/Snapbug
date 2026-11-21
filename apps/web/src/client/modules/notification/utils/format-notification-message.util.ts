@@ -1,9 +1,6 @@
 import type { NotificationModelType } from "@workspace/validation/modules/notification/dto/notification.model";
 
-import {
-  type NotificationMessageContent,
-  texts,
-} from "@/client/modules/notification/consts/texts.const";
+import { type NotificationMessageContent, texts } from "@/client/modules/notification/consts/texts.const";
 
 const systemActorLabel = "Snapbug";
 
@@ -51,5 +48,7 @@ export function formatNotificationMessage(notification: NotificationModelType): 
 }
 
 export function notificationMessagePlainText(notification: NotificationModelType): string {
-  return formatNotificationMessage(notification).parts.map((part) => part.text).join("");
+  return formatNotificationMessage(notification)
+    .parts.map((part) => part.text)
+    .join("");
 }

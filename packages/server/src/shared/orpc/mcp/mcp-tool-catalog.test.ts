@@ -1,5 +1,8 @@
 import { router } from "@workspace/server/shared/router.const";
-import { MCP_EXCLUDED_MODULE_PREFIXES, MCP_TOOL_CATALOG } from "@workspace/server/shared/orpc/mcp/mcp-tool-catalog.const";
+import {
+  MCP_EXCLUDED_MODULE_PREFIXES,
+  MCP_TOOL_CATALOG,
+} from "@workspace/server/shared/orpc/mcp/mcp-tool-catalog.const";
 import { assertZodObjectFieldsDescribed } from "@workspace/server/shared/orpc/mcp/mcp-schema.util";
 import { listMcpTools } from "@workspace/server/shared/orpc/mcp/walk-mcp-tools";
 import { describe, expect, it } from "vitest";

@@ -2,7 +2,7 @@ import { Row } from "@workspace/design-system/components/layout/row";
 import { Typography } from "@workspace/design-system/components/ui/typography";
 import { cn } from "@workspace/design-system/lib/utils";
 
-import { type PlaygroundStep,playgroundSteps } from "@/client/modules/playground/consts/playground-step.const";
+import { type PlaygroundStep, playgroundSteps } from "@/client/modules/playground/consts/playground-step.const";
 import { texts } from "@/client/modules/playground/consts/texts.const";
 
 type PlaygroundStepStripProps = {
@@ -17,15 +17,7 @@ const stepItems = [
 
 export function PlaygroundStepStrip({ step }: PlaygroundStepStripProps) {
   return (
-    <Row
-      align="center"
-      gap="sm"
-      wrap
-      width="full"
-      role="list"
-      aria-label={texts.steps.ariaLabel}
-      className="text-sm"
-    >
+    <Row align="center" gap="sm" wrap width="full" role="list" aria-label={texts.steps.ariaLabel} className="text-sm">
       {stepItems.map((item, index) => (
         <Row key={item.value} align="center" gap="xs" wrap={false} role="listitem">
           {index > 0 ? (

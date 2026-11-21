@@ -19,7 +19,10 @@ test("a member can search for an accessible ticket from the header", async ({ pa
 
   await page.getByRole("button", { name: "Open global search" }).click();
   await expect(page.getByRole("dialog", { name: "Search" })).toBeVisible();
-  await page.getByRole("dialog", { name: "Search" }).getByRole("searchbox", { name: "Search tickets and projects…" }).fill("Pay button");
+  await page
+    .getByRole("dialog", { name: "Search" })
+    .getByRole("searchbox", { name: "Search tickets and projects…" })
+    .fill("Pay button");
 
   await expect(page.getByText("Pay button throws when the cart is empty")).toBeVisible();
 });

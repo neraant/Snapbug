@@ -1,13 +1,6 @@
 import type { NotificationType } from "@workspace/validation/modules/notification/consts/notification-type.const";
 import type { LucideIcon } from "lucide-react";
-import {
-  BellIcon,
-  KeyRoundIcon,
-  MessageSquareIcon,
-  ShieldAlertIcon,
-  TicketIcon,
-  UserRoundIcon,
-} from "lucide-react";
+import { BellIcon, KeyRoundIcon, MessageSquareIcon, ShieldAlertIcon, TicketIcon, UserRoundIcon } from "lucide-react";
 
 export function notificationTypeIcon(type: NotificationType): LucideIcon {
   if (type.startsWith("ticket.")) return TicketIcon;

@@ -22,13 +22,7 @@ type SettingsSectionProps = PropsWithChildren<{
   showSeparator?: boolean;
 }>;
 
-export function SettingsSection({
-  title,
-  description,
-  leading,
-  children,
-  showSeparator = true,
-}: SettingsSectionProps) {
+export function SettingsSection({ title, description, leading, children, showSeparator = true }: SettingsSectionProps) {
   return (
     <>
       {showSeparator ? <Separator className="mb-8" /> : null}

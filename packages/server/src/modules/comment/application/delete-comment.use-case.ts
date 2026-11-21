@@ -40,7 +40,10 @@ export class DeleteCommentUseCase {
     }
 
     await this.withTransaction(async (tx) => {
-      await this.commentService.withTx(tx).withActor(actor).deleteWithAudit(comment, ticket.projectId, "Delete comment");
+      await this.commentService
+        .withTx(tx)
+        .withActor(actor)
+        .deleteWithAudit(comment, ticket.projectId, "Delete comment");
     });
   }
 

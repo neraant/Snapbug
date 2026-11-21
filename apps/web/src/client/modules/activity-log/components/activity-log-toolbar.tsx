@@ -28,7 +28,7 @@ const rangeOptions: ActivityLogDateRangeType[] = ["24h", "7d", "30d", "all"];
 type ActivityLogToolbarProps = {
   filters: ActivityLogFilters;
   onFiltersChange: (filters: ActivityLogFilters) => void;
-  onClearFilters: () => void;
+  onClearFilters: VoidFunction;
   hasActiveFilters: boolean;
   actorOptions: Array<{ value: string; label: string }>;
 };

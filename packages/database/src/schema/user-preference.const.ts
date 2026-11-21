@@ -20,10 +20,7 @@ export const userPreferenceTable = pgTable("user_preferences", {
   dateFormat: text("date_format").$type<UserPreferenceDateFormat>().notNull().default("relative"),
   use24HourTime: boolean("use_24_hour_time").notNull().default(true),
   reduceMotion: boolean("reduce_motion"),
-  defaultLandingPage: text("default_landing_page")
-    .$type<UserPreferenceLandingPage>()
-    .notNull()
-    .default("overview"),
+  defaultLandingPage: text("default_landing_page").$type<UserPreferenceLandingPage>().notNull().default("overview"),
   sidebarCollapsed: boolean("sidebar_collapsed").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull(),

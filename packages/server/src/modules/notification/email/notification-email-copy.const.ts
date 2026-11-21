@@ -60,7 +60,11 @@ export function formatNotificationEmailLine(
   if (language === "ru") {
     switch (type) {
       case "ticket.assigned":
-        return { text: `${actor} назначил(а) вас на ${ticketId} ${title}`.trim(), ticketShortId: ticketId, projectName: project };
+        return {
+          text: `${actor} назначил(а) вас на ${ticketId} ${title}`.trim(),
+          ticketShortId: ticketId,
+          projectName: project,
+        };
       case "ticket.created":
         return { text: `Новый тикет ${ticketId} ${title}`.trim(), ticketShortId: ticketId, projectName: project };
       case "ticket.status_changed":
@@ -102,13 +106,16 @@ export function formatNotificationEmailLine(
 
   switch (type) {
     case "ticket.assigned":
-      return { text: `${actor} assigned you ${ticketId} ${title}`.trim(), ticketShortId: ticketId, projectName: project };
+      return {
+        text: `${actor} assigned you ${ticketId} ${title}`.trim(),
+        ticketShortId: ticketId,
+        projectName: project,
+      };
     case "ticket.created":
       return { text: `New ticket ${ticketId} ${title}`.trim(), ticketShortId: ticketId, projectName: project };
     case "ticket.status_changed":
       return {
-        text:
-          count > 1 ? `${count} status updates on ${ticketId}` : `${actor} changed ${ticketId} to ${status}`,
+        text: count > 1 ? `${count} status updates on ${ticketId}` : `${actor} changed ${ticketId} to ${status}`,
         ticketShortId: ticketId,
         projectName: project,
       };

@@ -7,10 +7,7 @@ import type { UpdateUserPreferenceOutputDtoType } from "@workspace/validation/mo
 export class UpdateUserPreferenceUseCase {
   constructor(private readonly userPreferenceRepository: UserPreferenceRepository) {}
 
-  async execute(
-    userId: string,
-    input: UpdateUserPreferenceInputDtoType,
-  ): Promise<UpdateUserPreferenceOutputDtoType> {
+  async execute(userId: string, input: UpdateUserPreferenceInputDtoType): Promise<UpdateUserPreferenceOutputDtoType> {
     let userPreference = await this.userPreferenceRepository.findByUserId(userId);
     if (!userPreference) {
       userPreference = UserPreferenceFactory.create(userId);

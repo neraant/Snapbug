@@ -7,8 +7,8 @@ export type EmailControl = {
   input: HTMLInputElement;
   error: HTMLParagraphElement;
   /** Prefills from identify() without overwriting what the user typed. */
-  prefill: () => void;
-  reset: () => void;
+  prefill: VoidFunction;
+  reset: VoidFunction;
 };
 
 export function createEmailControl(): EmailControl {

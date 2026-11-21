@@ -14,7 +14,7 @@ import { hasActiveTicketBoardFilters } from "@/client/modules/ticket-board/utils
 type TicketBoardFiltersProps = {
   filters: TicketBoardFilters;
   onFiltersChange: (filters: TicketBoardFilters) => void;
-  onClearFilters: () => void;
+  onClearFilters: VoidFunction;
 };
 
 const periodOptions = [

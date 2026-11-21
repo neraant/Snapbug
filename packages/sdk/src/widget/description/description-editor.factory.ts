@@ -15,7 +15,7 @@ export type DescriptionEditorControl = {
   root: HTMLElement;
   editable: HTMLTextAreaElement;
   getValue: () => string;
-  clear: () => void;
+  clear: VoidFunction;
 };
 
 type ToolbarButton = HTMLButtonElement & { format: ToolbarFormat };

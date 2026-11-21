@@ -7,7 +7,7 @@ type ConfirmClose = (request: {
   description: string;
   confirmLabel: string;
   variant: "destructive";
-  onConfirm: () => void;
+  onConfirm: VoidFunction;
 }) => void;
 
 type UseProjectSettingsSheetCloseInput = {

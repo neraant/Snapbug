@@ -1,6 +1,5 @@
 import { Column } from "@workspace/design-system/components/layout/column";
 import { Row } from "@workspace/design-system/components/layout/row";
-import { Avatar, AvatarFallback } from "@workspace/design-system/components/ui/avatar";
 import { Button } from "@workspace/design-system/components/ui/button";
 import { Field, FieldError, FieldLabel } from "@workspace/design-system/components/ui/field";
 import { Skeleton } from "@workspace/design-system/components/ui/skeleton";
@@ -9,7 +8,6 @@ import { Textarea } from "@workspace/design-system/components/ui/textarea";
 import { Typography } from "@workspace/design-system/components/ui/typography";
 import { cn } from "@workspace/design-system/lib/utils";
 
-import { useFindCurrentUser } from "@/client/modules/shared/queries/use-find-current-user";
 import { texts } from "@/client/modules/ticket-detail/consts/texts.const";
 import { useTicketDetailCommentComposer } from "@/client/modules/ticket-detail/hooks/use-ticket-detail-comment-composer";
 
@@ -18,14 +16,7 @@ type TicketDetailCommentComposerProps = {
   onCommentAdded: (commentId: string) => void;
 };
 
-function getCurrentUserInitials(name: string | null, email: string): string {
-  const source = name?.trim() || email.trim();
-  const [first] = source;
-  return (first ?? "?").toUpperCase();
-}
-
 export function TicketDetailCommentComposer({ bugReportId, onCommentAdded }: TicketDetailCommentComposerProps) {
-  const { data: currentUser } = useFindCurrentUser();
   const {
     draftBody,
     setDraftBody,
@@ -45,9 +36,6 @@ export function TicketDetailCommentComposer({ bugReportId, onCommentAdded }: Tic
   return (
     <Column as="form" gap="md" width="full" minWidth="0" noValidate onSubmit={onSubmit}>
       <Row align="start" gap="md" width="full" minWidth="0">
-        <Avatar size="lg" className="shrink-0">
-          <AvatarFallback>{getCurrentUserInitials(currentUser.name, currentUser.email)}</AvatarFallback>
-        </Avatar>
         <Column gap="xs" width="full" minWidth="0">
           <Field data-invalid={Boolean(fieldError)}>
             <FieldLabel htmlFor="commentBody">{texts.comments.fieldLabel}</FieldLabel>

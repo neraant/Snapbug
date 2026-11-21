@@ -2,13 +2,7 @@ import type { WidgetPreviewCapture } from "@neraant/snapbug";
 import { Column } from "@workspace/design-system/components/layout/column";
 import { LogViewer } from "@workspace/design-system/components/ui/log-viewer";
 import { Markdown } from "@workspace/design-system/components/ui/markdown";
-import {
-  Tabs,
-  TabsIndicator,
-  TabsList,
-  TabsPanel,
-  TabsTab,
-} from "@workspace/design-system/components/ui/tabs";
+import { Tabs, TabsIndicator, TabsList, TabsPanel, TabsTab } from "@workspace/design-system/components/ui/tabs";
 import { Typography } from "@workspace/design-system/components/ui/typography";
 import Image from "next/image";
 import { useState } from "react";
