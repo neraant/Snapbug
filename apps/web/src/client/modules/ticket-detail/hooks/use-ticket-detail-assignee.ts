@@ -22,9 +22,12 @@ export function useTicketDetailAssignee({ shortId }: UseTicketDetailAssigneeInpu
   const { data: currentUser } = useFindCurrentUser();
   const { data: membership } = useFindMembershipByUser();
   const { mutateAsync: updateBugReport, isPending } = useUpdateBugReport();
-  const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [inlineError, setInlineError] = useState<string | null>(null);
+
+  const resetPicker = useCallback(() => {
+    setQuery("");
+  }, []);
 
   const currentMember = useMemo(
     () => members.find((member) => member.userId === currentUser.id),
@@ -45,7 +48,7 @@ export function useTicketDetailAssignee({ shortId }: UseTicketDetailAssigneeInpu
   const assign = useCallback(
     async (assignedTo: string | null, member?: (typeof members)[number] | null) => {
       if (assignedTo === (ticket.assignedTo ?? null)) {
-        setOpen(false);
+        resetPicker();
         return;
       }
 
@@ -69,19 +72,17 @@ export function useTicketDetailAssignee({ shortId }: UseTicketDetailAssigneeInpu
       try {
         await updateBugReport({ id: ticket.id, assignedTo });
         toast.add({ title: texts.toast.assigneeUpdated, type: "success" });
-        setOpen(false);
-        setQuery("");
+        resetPicker();
       } catch {
         queryClient.setQueryData(findOneKey, previous);
         setInlineError(texts.assignee.updateFailed);
         toast.add({ title: texts.toast.updateFailed, type: "error" });
       }
     },
-    [queryClient, shortId, ticket.assignedTo, ticket.assignee, ticket.id, updateBugReport],
+    [queryClient, resetPicker, shortId, ticket.assignedTo, ticket.assignee, ticket.id, updateBugReport],
   );
 
   const onOpenChange = useCallback((nextOpen: boolean) => {
-    setOpen(nextOpen);
     if (!nextOpen) {
       setQuery("");
       setInlineError(null);
@@ -95,7 +96,6 @@ export function useTicketDetailAssignee({ shortId }: UseTicketDetailAssigneeInpu
     currentUser,
     currentMember,
     membership,
-    open,
     onOpenChange,
     query,
     setQuery,

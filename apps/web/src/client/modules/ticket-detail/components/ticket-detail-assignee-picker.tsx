@@ -2,13 +2,18 @@ import { Column } from "@workspace/design-system/components/layout/column";
 import { Row } from "@workspace/design-system/components/layout/row";
 import { Avatar, AvatarFallback } from "@workspace/design-system/components/ui/avatar";
 import { Button } from "@workspace/design-system/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@workspace/design-system/components/ui/dropdown-menu";
 import { Input } from "@workspace/design-system/components/ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "@workspace/design-system/components/ui/popover";
 import { Skeleton } from "@workspace/design-system/components/ui/skeleton";
 import { Typography } from "@workspace/design-system/components/ui/typography";
 import { cn } from "@workspace/design-system/lib/utils";
 import { CheckIcon, ChevronDownIcon, UserRoundIcon } from "lucide-react";
-import { type ReactNode, Suspense, useId } from "react";
+import { type ReactNode, Suspense } from "react";
 
 import { getProjectMemberInitials } from "@/client/modules/project/utils/get-project-member-initials.util";
 import { TicketDetailPropertyRow } from "@/client/modules/ticket-detail/components/ticket-detail-property-row";
@@ -22,13 +27,10 @@ type TicketDetailAssigneePickerProps = {
 const unassignedOptionKey = "__unassigned__";
 
 function TicketDetailAssigneePickerContent({ shortId }: TicketDetailAssigneePickerProps) {
-  const listId = useId();
-  const searchId = useId();
   const {
     ticket,
     filteredMembers,
     currentMember,
-    open,
     onOpenChange,
     query,
     setQuery,
@@ -68,16 +70,14 @@ function TicketDetailAssigneePickerContent({ shortId }: TicketDetailAssigneePick
       label={texts.sidebar.assignee}
       value={
         <Column gap="xs" align="end" width="full" minWidth="0" className="min-w-0">
-          <Popover open={open} onOpenChange={onOpenChange}>
-            <PopoverTrigger
+          <DropdownMenu onOpenChange={onOpenChange}>
+            <DropdownMenuTrigger
+              disabled={isPending}
               render={
                 <Button
                   type="button"
                   variant="ghost"
-                  disabled={isPending}
                   aria-label={texts.assignee.triggerAriaLabel}
-                  aria-expanded={open}
-                  aria-controls={listId}
                   className="h-auto max-w-full min-w-0 justify-end gap-2 px-2 py-1"
                 />
               }
@@ -102,34 +102,27 @@ function TicketDetailAssigneePickerContent({ shortId }: TicketDetailAssigneePick
                 </Column>
               </Row>
               <ChevronDownIcon className="size-3.5 shrink-0 text-muted-foreground" />
-            </PopoverTrigger>
-            <PopoverContent align="end" className="w-72 gap-2 p-2">
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-72 gap-2 p-2">
               <Input
-                id={searchId}
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
+                onKeyDown={(event) => event.stopPropagation()}
                 placeholder={texts.assignee.searchPlaceholder}
                 aria-label={texts.assignee.searchAriaLabel}
                 autoComplete="off"
               />
-              <Column
-                id={listId}
-                role="listbox"
-                gap="none"
-                width="full"
-                className="max-h-64 overflow-y-auto"
-                aria-label={texts.assignee.listAriaLabel}
-              >
+              <Column gap="none" width="full" className="max-h-64 overflow-y-auto">
                 {options.map((option) => {
                   const selected =
                     option.kind === "unassigned" ? ticket.assignedTo == null : ticket.assignedTo === option.userId;
 
                   if (option.kind === "assignToMe") {
                     return (
-                      <MemberOptionButton
+                      <MemberOptionItem
                         key={option.key}
                         selected={selected}
-                        onClick={() => onSelect(option.userId, option.member)}
+                        onSelect={() => onSelect(option.userId, option.member)}
                         leading={<UserRoundIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />}
                         title={texts.assignee.assignToMe}
                       />
@@ -138,10 +131,10 @@ function TicketDetailAssigneePickerContent({ shortId }: TicketDetailAssigneePick
 
                   if (option.kind === "unassigned") {
                     return (
-                      <MemberOptionButton
+                      <MemberOptionItem
                         key={option.key}
                         selected={selected}
-                        onClick={() => onSelect(null, null)}
+                        onSelect={() => onSelect(null, null)}
                         leading={
                           <Avatar size="sm" className="shrink-0">
                             <AvatarFallback>—</AvatarFallback>
@@ -156,10 +149,10 @@ function TicketDetailAssigneePickerContent({ shortId }: TicketDetailAssigneePick
                   const name = member.name?.trim() || member.email;
 
                   return (
-                    <MemberOptionButton
+                    <MemberOptionItem
                       key={option.key}
                       selected={selected}
-                      onClick={() => onSelect(member.userId, member)}
+                      onSelect={() => onSelect(member.userId, member)}
                       leading={
                         <Avatar size="sm" className="shrink-0">
                           <AvatarFallback>{getProjectMemberInitials(member.name, member.email)}</AvatarFallback>
@@ -171,8 +164,8 @@ function TicketDetailAssigneePickerContent({ shortId }: TicketDetailAssigneePick
                   );
                 })}
               </Column>
-            </PopoverContent>
-          </Popover>
+            </DropdownMenuContent>
+          </DropdownMenu>
           {inlineError ? (
             <Typography variant="text-xs" color="destructive" align="right">
               {inlineError}
@@ -184,26 +177,17 @@ function TicketDetailAssigneePickerContent({ shortId }: TicketDetailAssigneePick
   );
 }
 
-type MemberOptionButtonProps = {
+type MemberOptionItemProps = {
   selected: boolean;
-  onClick: VoidFunction;
+  onSelect: VoidFunction;
   leading: ReactNode;
   title: string;
   subtitle?: string;
 };
 
-function MemberOptionButton({ selected, onClick, leading, title, subtitle }: MemberOptionButtonProps) {
+function MemberOptionItem({ selected, onSelect, leading, title, subtitle }: MemberOptionItemProps) {
   return (
-    <button
-      type="button"
-      role="option"
-      aria-selected={selected}
-      className={cn(
-        "relative flex w-full cursor-default items-center gap-2 rounded-md px-2 py-2 text-left text-sm outline-hidden select-none hover:bg-accent hover:text-accent-foreground",
-        selected && "bg-accent/60",
-      )}
-      onClick={onClick}
-    >
+    <DropdownMenuItem aria-selected={selected} className="gap-2 px-2 py-2" onClick={onSelect}>
       {leading}
       <Column gap="none" minWidth="0" className="min-w-0 flex-1">
         <Typography variant="text-sm" truncate>
@@ -215,8 +199,8 @@ function MemberOptionButton({ selected, onClick, leading, title, subtitle }: Mem
           </Typography>
         ) : null}
       </Column>
-      {selected ? <CheckIcon className="size-4 shrink-0 text-foreground" aria-hidden="true" /> : null}
-    </button>
+      {selected ? <CheckIcon className="ml-auto size-4 shrink-0 text-foreground" aria-hidden="true" /> : null}
+    </DropdownMenuItem>
   );
 }
 

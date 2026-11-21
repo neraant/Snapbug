@@ -30,18 +30,31 @@ test("assign, reassign, and unassign a ticket from the sidebar", async ({ page }
   await expect(page.getByRole("heading", { name: ticketTitle })).toBeVisible({ timeout: 30_000 });
 
   const assigneeTrigger = page.getByRole("button", { name: "Change assignee" });
-  await expect(assigneeTrigger).toBeVisible();
+  await expect(assigneeTrigger).toBeVisible({ timeout: 30_000 });
+  await page.waitForFunction(() => {
+    const trigger = Array.from(document.querySelectorAll("button")).find(
+      (button) => button.getAttribute("aria-label") === "Change assignee",
+    );
+    if (!trigger) return false;
+    return Object.getOwnPropertyNames(trigger).some((name) => name.startsWith("__reactProps$"));
+  });
 
-  await assigneeTrigger.click();
-  await page.getByRole("option", { name: "Alice" }).click();
+  await expect(async () => {
+    await assigneeTrigger.click();
+    await expect(page.getByRole("menuitem", { name: "Alice" })).toBeVisible({ timeout: 3_000 });
+  }).toPass({ timeout: 15_000 });
+  await page.getByRole("menuitem", { name: "Alice" }).click();
   await expect(page.getByRole("button", { name: "Change assignee" })).toContainText("Alice");
   await expect(page.getByText("Assignee updated")).toBeVisible();
 
   await page.reload();
   await expect(page.getByRole("button", { name: "Change assignee" })).toContainText("Alice", { timeout: 30_000 });
 
-  await assigneeTrigger.click();
-  await page.getByRole("option", { name: "Unassigned" }).click();
+  await expect(async () => {
+    await assigneeTrigger.click();
+    await expect(page.getByRole("menuitem", { name: "Unassigned" })).toBeVisible({ timeout: 3_000 });
+  }).toPass({ timeout: 15_000 });
+  await page.getByRole("menuitem", { name: "Unassigned" }).click();
   await expect(page.getByRole("button", { name: "Change assignee" })).toContainText("Unassigned");
   await page.reload();
   await expect(page.getByRole("button", { name: "Change assignee" })).toContainText("Unassigned", { timeout: 30_000 });

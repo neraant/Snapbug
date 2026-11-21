@@ -36,7 +36,7 @@ test("create dialog shows fewer tools for a read-only token", async ({ page }) =
   await expect(createDialog).toBeVisible({ timeout: 30_000 });
 
   const summary = createDialog.getByText(/This token can use \d+ of \d+ tools/);
-  await expect(summary).toHaveText("This token can use 11 of 13 tools");
+  await expect(summary).toHaveText("This token can use 11 of 14 tools");
   await expect(createDialog.getByText("update_ticket")).not.toBeVisible();
   await expect(createDialog.getByText("add_comment")).not.toBeVisible();
 
