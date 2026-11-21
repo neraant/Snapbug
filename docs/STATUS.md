@@ -6,8 +6,6 @@ Do not start tasks marked TBD: an implementer agent must not take them.
 
 ## Done
 
-- P-49 Settings simplification, theme and language fix: tabs Profile, Preferences (language and theme together), Notifications, Organization; accent, density, date and time, reduce motion, landing page, sidebar, email digest, and the settings Access tokens tab are removed; one theme source of truth that works from the sidebar and has no flicker; the language switch is fixed (a store update during render in `InterfaceLanguageProvider`). Brief: `docs/tasks/P-49.md`. Read it first; shared rules are in `docs/tasks/README.md`.
-
 - A pnpm and Turborepo monorepo, one app `apps/web`, the server in `packages/server`, schemas in `packages/database`, DTOs in `packages/validation`, the widget in `packages/sdk`.
 - Registration, password check, bcrypt hash: `packages/server/src/modules/auth`. Tests `sign-up.test.ts`, `verify-credentials.test.ts`. Auth.js sessions: `apps/web/src/app/api/auth/[...nextauth]/route.ts`.
 - Onboarding creates the organization and the project: `complete-onboarding.use-case.ts`, test `complete-onboarding.test.ts`. Several organizations and the switcher already exist.
@@ -68,6 +66,7 @@ Do not start tasks marked TBD: an implementer agent must not take them.
 - P-45 Notifications part 1: an in-app notification model with defined types and recipient rules, written in the same transaction as the event, with list, unread count, mark read, and archive endpoints. Brief with the expected UI/UX: `docs/tasks/P-45.md`. Read it first; shared rules are in `docs/tasks/README.md`.
 - P-46 Notifications part 2: a bell with an unread badge in the header, a popover with Unread and All tabs, infinite scroll, per-item read state, and a full inbox page. Brief with the expected UI/UX: `docs/tasks/P-46.md`. Read it first; shared rules are in `docs/tasks/README.md`.
 - P-47 Notifications part 3: a Settings tab with per-type in-app and email switches, muted projects, an email digest option, and email delivery; security notifications are always on. Brief with the expected UI/UX: `docs/tasks/P-47.md`. Read it first; shared rules are in `docs/tasks/README.md`.
+- P-49 Settings simplification, theme and language fix: tabs Profile, Preferences (language and theme together), Notifications, Organization; accent, density, date and time, reduce motion, landing page, sidebar, email digest, and the settings Access tokens tab are removed; one theme source of truth that works from the sidebar and has no flicker; the language switch is fixed (a store update during render in `InterfaceLanguageProvider`). Brief: `docs/tasks/P-49.md`. Read it first; shared rules are in `docs/tasks/README.md`.
 
 ## Open
 
