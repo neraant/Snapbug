@@ -86,108 +86,105 @@ export function Team() {
       <Table.Toolbar>
         <TeamFiltersBar filters={filters} onFiltersChange={setFilters} />
       </Table.Toolbar>
-      <Table.Shell>
-        <Table>
-          <Table.Header>
-            <Table.Row>
-              <Table.Head>{texts.column.member}</Table.Head>
-              <Table.Head>{texts.column.role}</Table.Head>
-              <Table.Head className="text-right">{texts.column.assignedOpenTickets}</Table.Head>
-              <Table.Head className="text-right">{texts.column.actions}</Table.Head>
-            </Table.Row>
-          </Table.Header>
-          <Table.Body>
-            {filteredMembers.map((member) => {
-              const isCurrentUser = member.userId === currentUserId;
-              const displayName = member.name ?? member.email;
-
-              return (
-                <Table.Row key={member.id}>
-                  <Table.Cell>
-                    <Row gap="sm" wrap={false}>
-                      <Avatar>
-                        <AvatarFallback>{getTeamMemberInitials(member.name, member.email)}</AvatarFallback>
-                      </Avatar>
-                      <Column gap="none" minWidth="0">
-                        <Typography variant="text-sm" weight="medium">
-                          {displayName}
-                        </Typography>
-                        <Typography variant="text-xs" color="muted">
-                          {member.email}
-                        </Typography>
-                      </Column>
-                    </Row>
-                  </Table.Cell>
-                  <Table.Cell>
-                    <Select
-                      value={member.role}
-                      onValueChange={(role) => {
-                        if (!role || role === member.role) return;
-                        openRoleConfirm(member.id, displayName, role as UserRole);
-                      }}
-                      disabled={isCurrentUser || isMutating}
-                    >
-                      <SelectTrigger aria-label={texts.role.changeLabel(displayName)}>
-                        <SelectValue>{(role) => (role ? texts.role.label[role as UserRole] : null)}</SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {userRoles.map((role) => (
-                          <SelectItem key={role} value={role}>
-                            {texts.role.label[role]}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </Table.Cell>
-                  <Table.Cell className="text-right tabular-nums">
-                    <Typography variant="text-sm">{openCountByUserId.get(member.userId) ?? 0}</Typography>
-                  </Table.Cell>
-                  <Table.Cell className="text-right">
-                    {isCurrentUser ? null : (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger
-                          render={
-                            <Button
-                              variant="ghost"
-                              size="icon-sm"
-                              aria-label={texts.action.menu(displayName)}
-                              disabled={isMutating}
-                            />
-                          }
-                        >
-                          <EllipsisVerticalIcon />
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => openProjectAccess(member.id)}>
-                            <FolderIcon />
-                            {texts.action.editProjectAccess}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            variant="destructive"
-                            onClick={() => openRemoveConfirm(member.id, displayName)}
-                          >
-                            <Trash2Icon />
-                            {texts.action.remove}
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    )}
-                  </Table.Cell>
-                </Table.Row>
-              );
-            })}
-            {filteredMembers.length === 0 ? (
+      {filteredMembers.length === 0 ? (
+        <Table.Shell>
+          <Table.Empty message={texts.empty} />
+        </Table.Shell>
+      ) : (
+        <Table.Shell>
+          <Table>
+            <Table.Header>
               <Table.Row>
-                <Table.Cell colSpan={4}>
-                  <Typography variant="text-sm" color="muted" align="center">
-                    {texts.empty}
-                  </Typography>
-                </Table.Cell>
+                <Table.Head>{texts.column.member}</Table.Head>
+                <Table.Head>{texts.column.role}</Table.Head>
+                <Table.Head className="text-right">{texts.column.assignedOpenTickets}</Table.Head>
+                <Table.Head className="text-right">{texts.column.actions}</Table.Head>
               </Table.Row>
-            ) : null}
-          </Table.Body>
-        </Table>
-      </Table.Shell>
+            </Table.Header>
+            <Table.Body>
+              {filteredMembers.map((member) => {
+                const isCurrentUser = member.userId === currentUserId;
+                const displayName = member.name ?? member.email;
+
+                return (
+                  <Table.Row key={member.id}>
+                    <Table.Cell>
+                      <Row gap="sm" wrap={false}>
+                        <Avatar>
+                          <AvatarFallback>{getTeamMemberInitials(member.name, member.email)}</AvatarFallback>
+                        </Avatar>
+                        <Column gap="none" minWidth="0">
+                          <Typography variant="text-sm" weight="medium">
+                            {displayName}
+                          </Typography>
+                          <Typography variant="text-xs" color="muted">
+                            {member.email}
+                          </Typography>
+                        </Column>
+                      </Row>
+                    </Table.Cell>
+                    <Table.Cell>
+                      <Select
+                        value={member.role}
+                        onValueChange={(role) => {
+                          if (!role || role === member.role) return;
+                          openRoleConfirm(member.id, displayName, role as UserRole);
+                        }}
+                        disabled={isCurrentUser || isMutating}
+                      >
+                        <SelectTrigger aria-label={texts.role.changeLabel(displayName)}>
+                          <SelectValue>{(role) => (role ? texts.role.label[role as UserRole] : null)}</SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {userRoles.map((role) => (
+                            <SelectItem key={role} value={role}>
+                              {texts.role.label[role]}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </Table.Cell>
+                    <Table.Cell className="text-right tabular-nums">
+                      <Typography variant="text-sm">{openCountByUserId.get(member.userId) ?? 0}</Typography>
+                    </Table.Cell>
+                    <Table.Cell className="text-right">
+                      {isCurrentUser ? null : (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger
+                            render={
+                              <Button
+                                variant="ghost"
+                                size="icon-sm"
+                                aria-label={texts.action.menu(displayName)}
+                                disabled={isMutating}
+                              />
+                            }
+                          >
+                            <EllipsisVerticalIcon />
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => openProjectAccess(member.id)}>
+                              <FolderIcon />
+                              {texts.action.editProjectAccess}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              variant="destructive"
+                              onClick={() => openRemoveConfirm(member.id, displayName)}
+                            >
+                              <Trash2Icon />
+                              {texts.action.remove}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
+                    </Table.Cell>
+                  </Table.Row>
+                );
+              })}
+            </Table.Body>
+          </Table>
+        </Table.Shell>
+      )}
       <EditProjectAccessDialog
         membershipId={projectAccessMembershipId}
         onOpenChange={(open) => {

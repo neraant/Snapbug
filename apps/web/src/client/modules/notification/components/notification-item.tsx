@@ -17,7 +17,7 @@ import { cn } from "@workspace/design-system/lib/utils";
 import type { NotificationModelType } from "@workspace/validation/modules/notification/dto/notification.model";
 import { ArchiveIcon, BotIcon, MoreHorizontalIcon } from "lucide-react";
 import Link from "next/link";
-import { type KeyboardEvent, type MouseEvent } from "react";
+import { type KeyboardEvent, type MouseEvent, useState } from "react";
 
 import { NotificationMessage } from "@/client/modules/notification/components/notification-message";
 import { texts } from "@/client/modules/notification/consts/texts.const";
@@ -54,18 +54,22 @@ function actorInitials(notification: NotificationModelType): string {
 function NotificationItemMenu({
   notification,
   isUnread,
+  open,
+  onOpenChange,
   onMarkRead,
   onMarkUnread,
   onArchive,
 }: {
   notification: NotificationModelType;
   isUnread: boolean;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   onMarkRead?: (id: string) => void;
   onMarkUnread?: (id: string) => void;
   onArchive?: (id: string) => void;
 }) {
   return (
-    <DropdownMenu>
+    <DropdownMenu open={open} onOpenChange={onOpenChange}>
       <Tooltip>
         <TooltipTrigger
           render={
@@ -136,6 +140,7 @@ export function NotificationItem({
   onToggleSelect,
   onFocus,
 }: NotificationItemProps) {
+  const [menuOpen, setMenuOpen] = useState(false);
   const isUnread = !notification.readAt;
   const href = resolveNotificationHref(notification);
   const unavailable = !notification.accessible;
@@ -168,16 +173,32 @@ export function NotificationItem({
     handleOpen();
   };
 
+  const openActionsMenu = () => {
+    if (unavailable) return;
+    setMenuOpen(true);
+  };
+
   const handleKeyDown = (event: KeyboardEvent) => {
     if (selectionMode && (event.key === "Enter" || event.key === " ")) {
       event.preventDefault();
       onToggleSelect?.(notification.id, !selected);
       return;
     }
+    if (!selectionMode && (event.key === "ContextMenu" || (event.key === "F10" && event.shiftKey))) {
+      event.preventDefault();
+      openActionsMenu();
+      return;
+    }
     if (!selectionMode && event.key === "Enter" && canNavigate) {
       event.preventDefault();
       handleOpen();
     }
+  };
+
+  const handleContextMenu = (event: MouseEvent) => {
+    if (unavailable) return;
+    event.preventDefault();
+    openActionsMenu();
   };
 
   const rowClassName = cn(
@@ -241,6 +262,8 @@ export function NotificationItem({
           <NotificationItemMenu
             notification={notification}
             isUnread={isUnread}
+            open={menuOpen}
+            onOpenChange={setMenuOpen}
             onMarkRead={onMarkRead}
             onMarkUnread={onMarkUnread}
             onArchive={onArchive}
@@ -260,6 +283,7 @@ export function NotificationItem({
         aria-label={texts.item.open(summary)}
         onClick={handleRowClick}
         onKeyDown={handleKeyDown}
+        onContextMenu={handleContextMenu}
         onFocus={onFocus}
       >
         {content}
@@ -269,7 +293,15 @@ export function NotificationItem({
 
   if (unavailable || !href) {
     return (
-      <div role="group" tabIndex={0} className={rowClassName} aria-label={texts.item.open(summary)} onFocus={onFocus}>
+      <div
+        role="group"
+        tabIndex={0}
+        className={rowClassName}
+        aria-label={texts.item.open(summary)}
+        onKeyDown={handleKeyDown}
+        onContextMenu={handleContextMenu}
+        onFocus={onFocus}
+      >
         {content}
       </div>
     );
@@ -282,6 +314,7 @@ export function NotificationItem({
       aria-label={texts.item.open(summary)}
       onClick={handleRowClick}
       onKeyDown={handleKeyDown}
+      onContextMenu={handleContextMenu}
       onFocus={onFocus}
     >
       {content}
