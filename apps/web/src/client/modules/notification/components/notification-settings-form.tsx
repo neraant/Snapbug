@@ -15,19 +15,12 @@ import { Switch } from "@workspace/design-system/components/ui/switch";
 import { Table } from "@workspace/design-system/components/ui/table";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@workspace/design-system/components/ui/tooltip";
 import { Typography } from "@workspace/design-system/components/ui/typography";
-import { notificationEmailDigests } from "@workspace/validation/modules/notification/consts/notification-email-digest.const";
 import type { NotificationPreferenceGroup } from "@workspace/validation/modules/notification/consts/notification-preference-group.const";
 import { LockIcon } from "lucide-react";
 
 import { NotificationQuietSaved } from "@/client/modules/notification/components/notification-quiet-saved";
 import { texts } from "@/client/modules/notification/consts/texts.const";
 import { useNotificationSettingsForm } from "@/client/modules/notification/hooks/use-notification-settings-form";
-
-const digestLabels: Record<(typeof notificationEmailDigests)[number], string> = {
-  immediately: texts.settings.digest.immediate,
-  hourly: texts.settings.digest.hourly,
-  daily: texts.settings.digest.daily,
-};
 
 function rowText(group: NotificationPreferenceGroup) {
   return texts.settings.rows[group];
@@ -43,7 +36,6 @@ export function NotificationSettingsForm() {
     isSaved,
     onChannelChange,
     onToggleMutedProject,
-    onEmailDigestChange,
   } = useNotificationSettingsForm();
 
   return (
@@ -155,31 +147,6 @@ export function NotificationSettingsForm() {
         <NotificationQuietSaved visible={isSaved("mute")} />
       </SettingsSection>
 
-      <SettingsSection
-        title={texts.settings.digest.sectionTitle}
-        description={texts.settings.digest.sectionDescription}
-      >
-        <Field>
-          <FieldLabel htmlFor="email-digest">{texts.settings.digest.label}</FieldLabel>
-          <Select
-            value={preference.emailDigest}
-            onValueChange={(value) => onEmailDigestChange(value as (typeof notificationEmailDigests)[number])}
-            disabled={saving}
-          >
-            <SelectTrigger id="email-digest" aria-label={texts.settings.digest.label}>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {notificationEmailDigests.map((digest) => (
-                <SelectItem key={digest} value={digest}>
-                  {digestLabels[digest]}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </Field>
-        <NotificationQuietSaved visible={isSaved("digest")} />
-      </SettingsSection>
     </SettingsSections>
   );
 }

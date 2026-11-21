@@ -207,13 +207,6 @@ JSON_SCHEMA_REGISTRY.add(userPreferenceModelSchema, {
     {
       timeZone: "UTC",
       theme: "system",
-      accent: "#F97316",
-      density: "comfortable",
-      dateFormat: "relative",
-      use24HourTime: true,
-      reduceMotion: null,
-      defaultLandingPage: "overview",
-      sidebarCollapsed: false,
       createdAt: "2026-10-03T09:00:00.000Z",
       updatedAt: "2026-10-03T09:00:00.000Z",
     },
@@ -223,7 +216,7 @@ JSON_SCHEMA_REGISTRY.add(userPreferenceModelSchema, {
 JSON_SCHEMA_REGISTRY.add(updateUserPreferenceInputDtoSchema, {
   title: "Update user preference",
   description: "Patch personal appearance and display preferences",
-  examples: [{ theme: "dark", accent: "#3B82F6" }],
+  examples: [{ theme: "dark" }],
 });
 
 JSON_SCHEMA_REGISTRY.add(notificationPreferenceModelSchema, {
@@ -231,7 +224,6 @@ JSON_SCHEMA_REGISTRY.add(notificationPreferenceModelSchema, {
   description: "Per-type in-app and email delivery preferences",
   examples: [
     {
-      emailDigest: "immediately",
       channels: {
         assigned_to_me: { inApp: true, email: true },
         security: { inApp: true, email: true },
@@ -247,7 +239,7 @@ JSON_SCHEMA_REGISTRY.add(notificationPreferenceModelSchema, {
 JSON_SCHEMA_REGISTRY.add(updateNotificationPreferenceInputDtoSchema, {
   title: "Update notification preference",
   description: "Patch notification delivery and mute settings",
-  examples: [{ emailDigest: "daily", mutedProjectIds: [] }],
+  examples: [{ mutedProjectIds: [] }],
 });
 
 JSON_SCHEMA_REGISTRY.add(membershipModelSchema, {

@@ -49,7 +49,6 @@ export class UpdateNotificationPreferenceUseCase {
       : userNotificationPreference.channels;
 
     const updatedUserPreference = userNotificationPreference.update({
-      emailDigest: input.emailDigest ?? userNotificationPreference.emailDigest,
       channels: nextChannels,
     });
 

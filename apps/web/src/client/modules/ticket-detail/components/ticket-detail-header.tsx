@@ -34,12 +34,8 @@ export function TicketDetailHeader({ shortId }: TicketDetailHeaderProps) {
   const { data: preference } = useFindUserPreference();
   const formatDate = useFormatUserDate();
   const projectName = projects.find((project) => project.id === ticket.projectId)?.name ?? "—";
-  const createdLabel = formatDate(ticket.createdAt);
-  const createdExact = formatTicketDetailExactWhen(ticket.createdAt, {
-    dateFormat: preference.dateFormat,
-    timeZone: preference.timeZone,
-    use24HourTime: preference.use24HourTime,
-  });
+  const createdLabel = formatDate(ticket.createdAt, { relative: true });
+  const createdExact = formatTicketDetailExactWhen(ticket.createdAt, preference.timeZone);
 
   return (
     <Column gap="md" width="full" minWidth="0">

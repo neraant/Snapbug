@@ -12,13 +12,6 @@ const existingPreference = new UserPreference({
   userId,
   timeZone: userPreferenceDefaults.timeZone,
   theme: userPreferenceDefaults.theme,
-  accent: userPreferenceDefaults.accent,
-  density: userPreferenceDefaults.density,
-  dateFormat: userPreferenceDefaults.dateFormat,
-  use24HourTime: userPreferenceDefaults.use24HourTime,
-  reduceMotion: userPreferenceDefaults.reduceMotion,
-  defaultLandingPage: userPreferenceDefaults.defaultLandingPage,
-  sidebarCollapsed: userPreferenceDefaults.sidebarCollapsed,
   createdAt: persistedAt,
   updatedAt: persistedAt,
 });
@@ -48,12 +41,12 @@ describe("UpdateUserPreferenceUseCase", () => {
     };
     const useCase = new UpdateUserPreferenceUseCase(userPreferenceRepository as unknown as UserPreferenceRepository);
 
-    const result = await useCase.execute(userId, { sidebarCollapsed: true });
+    const result = await useCase.execute(userId, { timeZone: "America/New_York" });
 
     expect(userPreferenceRepository.save).toHaveBeenCalledOnce();
     const saved = userPreferenceRepository.save.mock.calls[0]?.[0];
     expect(saved.userId).toBe(userId);
-    expect(saved.sidebarCollapsed).toBe(true);
-    expect(result.sidebarCollapsed).toBe(true);
+    expect(saved.timeZone).toBe("America/New_York");
+    expect(result.timeZone).toBe("America/New_York");
   });
 });

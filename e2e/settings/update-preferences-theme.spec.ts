@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 import { seedDatabase } from "../shared/seed/seed-database";
 
-test("a member switches the appearance theme to dark", async ({ page }) => {
+test("a member switches the preferences theme to dark", async ({ page }) => {
   test.setTimeout(90_000);
   await seedDatabase();
 
@@ -17,18 +17,18 @@ test("a member switches the appearance theme to dark", async ({ page }) => {
   await page.getByRole("button", { name: "Log in" }).click();
   await expect(page).toHaveURL(/\/overview/, { timeout: 30_000 });
 
-  await page.goto("/settings?tab=appearance");
-  await expect(page).toHaveURL(/tab=appearance/);
+  await page.goto("/settings?tab=preferences");
+  await expect(page).toHaveURL(/tab=preferences/);
 
-  const appearance = page.getByRole("tabpanel", { name: "Appearance" });
-  await expect(appearance.getByRole("heading", { name: "Theme" })).toBeVisible();
+  const preferences = page.getByRole("tabpanel", { name: "Preferences" });
+  await expect(preferences.getByRole("heading", { name: "Theme" })).toBeVisible();
 
-  const dark = appearance.getByRole("button", { name: "Dark", exact: true });
+  const dark = preferences.getByRole("button", { name: "Dark", exact: true });
   if ((await dark.getAttribute("aria-pressed")) === "true") {
-    await appearance.getByRole("button", { name: "Light", exact: true }).click();
-    await expect(appearance.getByText("Saved")).toBeVisible({ timeout: 15_000 });
+    await preferences.getByRole("button", { name: "Light", exact: true }).click();
+    await expect(preferences.getByText("Saved")).toBeVisible({ timeout: 15_000 });
   }
 
   await dark.click();
-  await expect(appearance.getByText("Saved")).toBeVisible({ timeout: 15_000 });
+  await expect(preferences.getByText("Saved")).toBeVisible({ timeout: 15_000 });
 });

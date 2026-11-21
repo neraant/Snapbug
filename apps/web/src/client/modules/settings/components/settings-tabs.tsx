@@ -1,23 +1,19 @@
-import { SettingsSection, SettingsSections } from "@workspace/design-system/components/layout/settings-section";
-import { Button } from "@workspace/design-system/components/ui/button";
 import { ConfirmDialog } from "@workspace/design-system/components/ui/confirm-dialog";
 import { Tabs, TabsIndicator, TabsList, TabsPanel, TabsTab } from "@workspace/design-system/components/ui/tabs";
 import { Typography } from "@workspace/design-system/components/ui/typography";
 import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
-import Link from "next/link";
 import { Suspense, useCallback, useRef, useState } from "react";
 
 import { OrganizationSettingsForm } from "@/client/modules/organization/components/organization-settings-form";
 import { texts as organizationTexts } from "@/client/modules/organization/consts/texts.const";
 import { NotificationSettingsForm } from "@/client/modules/notification/components/notification-settings-form";
-import { AppearanceSettingsForm } from "@/client/modules/preference/components/appearance-settings-form";
+import { PreferencesSettingsForm } from "@/client/modules/preference/components/preferences-settings-form";
 import { settingsTabs } from "@/client/modules/settings/consts/settings-tab.const";
 import { texts } from "@/client/modules/settings/consts/texts.const";
 import { useSettingsTabChange } from "@/client/modules/settings/hooks/use-settings-tab-change";
 import { useConfirmDialog } from "@/client/modules/shared/hooks/use-confirm-dialog";
 import { useFindMembershipByUser } from "@/client/modules/shared/queries/use-find-membership-by-user";
 import { ProfileSettingsForm } from "@/client/modules/user/components/profile-settings-form";
-import { url } from "@/shared/build-url.util";
 
 export function SettingsTabs() {
   const { data: membership } = useFindMembershipByUser();
@@ -38,10 +34,9 @@ export function SettingsTabs() {
 
   const allowedTabs = new Set<string>([
     settingsTabs.profile,
-    settingsTabs.appearance,
+    settingsTabs.preferences,
     settingsTabs.notifications,
     settingsTabs.organization,
-    settingsTabs.tokens,
   ]);
 
   return (
@@ -56,10 +51,9 @@ export function SettingsTabs() {
       >
         <TabsList aria-label={texts.tabs.ariaLabel}>
           <TabsTab value={settingsTabs.profile}>{texts.tabs.profile}</TabsTab>
-          <TabsTab value={settingsTabs.appearance}>{texts.tabs.appearance}</TabsTab>
+          <TabsTab value={settingsTabs.preferences}>{texts.tabs.preferences}</TabsTab>
           <TabsTab value={settingsTabs.notifications}>{texts.tabs.notifications}</TabsTab>
           <TabsTab value={settingsTabs.organization}>{texts.tabs.organization}</TabsTab>
-          <TabsTab value={settingsTabs.tokens}>{texts.tabs.tokens}</TabsTab>
           <TabsIndicator />
         </TabsList>
         <TabsPanel value={settingsTabs.profile} keepMounted>
@@ -67,9 +61,9 @@ export function SettingsTabs() {
             <ProfileSettingsForm />
           </Suspense>
         </TabsPanel>
-        <TabsPanel value={settingsTabs.appearance} keepMounted>
-          <Suspense fallback={<AppearanceSettingsForm.Fallback />}>
-            <AppearanceSettingsForm />
+        <TabsPanel value={settingsTabs.preferences} keepMounted>
+          <Suspense fallback={<PreferencesSettingsForm.Fallback />}>
+            <PreferencesSettingsForm />
           </Suspense>
         </TabsPanel>
         <TabsPanel value={settingsTabs.notifications} keepMounted>
@@ -91,19 +85,6 @@ export function SettingsTabs() {
             />
           </Suspense>
         </TabsPanel>
-        <TabsPanel value={settingsTabs.tokens} keepMounted>
-          <SettingsSections>
-            <SettingsSection
-              showSeparator={false}
-              title={texts.tokens.section.title}
-              description={texts.tokens.section.description}
-            >
-              <Button nativeButton={false} render={<Link href={`${url.mcp()}?tab=tokens`} />}>
-                {texts.tokens.section.manageLink}
-              </Button>
-            </SettingsSection>
-          </SettingsSections>
-        </TabsPanel>
       </Tabs>
       <ConfirmDialog {...bind()} />
     </>
@@ -115,10 +96,9 @@ SettingsTabs.Fallback = function SettingsTabsFallback() {
     <Tabs value={settingsTabs.profile}>
       <TabsList aria-label={texts.tabs.ariaLabel}>
         <TabsTab value={settingsTabs.profile}>{texts.tabs.profile}</TabsTab>
-        <TabsTab value={settingsTabs.appearance}>{texts.tabs.appearance}</TabsTab>
+        <TabsTab value={settingsTabs.preferences}>{texts.tabs.preferences}</TabsTab>
         <TabsTab value={settingsTabs.notifications}>{texts.tabs.notifications}</TabsTab>
         <TabsTab value={settingsTabs.organization}>{texts.tabs.organization}</TabsTab>
-        <TabsTab value={settingsTabs.tokens}>{texts.tabs.tokens}</TabsTab>
         <TabsIndicator />
       </TabsList>
       <TabsPanel value={settingsTabs.profile}>

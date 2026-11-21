@@ -14,9 +14,7 @@ describe("FindNotificationPreferenceUseCase", () => {
   it("hides admin-only rows for members", async () => {
     const userNotificationPreference = new UserNotificationPreference({
       userId,
-      emailDigest: "hourly",
       channels: {},
-      emailDigestSentAt: null,
       createdAt: new Date("2026-01-01T00:00:00.000Z"),
       updatedAt: new Date("2026-01-01T00:00:00.000Z"),
     });

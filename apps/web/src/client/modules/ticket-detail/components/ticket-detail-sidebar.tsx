@@ -21,11 +21,7 @@ export function TicketDetailSidebar({ shortId }: TicketDetailSidebarProps) {
   const { data: ticket } = useFindBugReport({ shortId });
   const { data: projects } = useFindProjects();
   const { data: preference } = useFindUserPreference();
-  const datePreference = {
-    dateFormat: preference.dateFormat,
-    timeZone: preference.timeZone,
-    use24HourTime: preference.use24HourTime,
-  };
+  const timeZone = preference.timeZone;
 
   const projectName = projects.find((project) => project.id === ticket.projectId)?.name ?? "—";
   const assigneeLabel = ticket.assignee?.name?.trim() || texts.sidebar.unassigned;
@@ -64,11 +60,11 @@ export function TicketDetailSidebar({ shortId }: TicketDetailSidebarProps) {
             <TicketDetailPropertyRow label={texts.sidebar.reporter} value={ticket.reporterEmail ?? "—"} />
             <TicketDetailPropertyRow
               label={texts.sidebar.created}
-              value={formatTicketDetailExactWhen(ticket.createdAt, datePreference)}
+              value={formatTicketDetailExactWhen(ticket.createdAt, timeZone)}
             />
             <TicketDetailPropertyRow
               label={texts.sidebar.updated}
-              value={formatTicketDetailExactWhen(ticket.updatedAt, datePreference)}
+              value={formatTicketDetailExactWhen(ticket.updatedAt, timeZone)}
             />
           </Column>
         </Panel.Content>

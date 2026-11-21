@@ -4,6 +4,9 @@ const en = {
   signOut: {
     label: "Sign out",
   },
+  sidebarUserMenu: {
+    themeLabel: "Theme",
+  },
   header: {
     search: "Search tickets, URLs, stack traces...",
     searchShortcut: "⌘K",
@@ -31,6 +34,9 @@ const en = {
 const ru = {
   signOut: {
     label: "Выйти",
+  },
+  sidebarUserMenu: {
+    themeLabel: "Тема",
   },
   header: {
     search: "Поиск тикетов, URL и стектрейсов...",

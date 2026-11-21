@@ -2,14 +2,13 @@ import { localize } from "@/client/modules/shared/locale/interface-language";
 
 const en = {
   title: "Settings",
-  description: "Profile, appearance, notifications, organization, and personal access tokens.",
+  description: "Profile, preferences, notifications, and organization.",
   tabs: {
     ariaLabel: "Settings sections",
     profile: "Profile",
-    appearance: "Appearance",
+    preferences: "Preferences",
     notifications: "Notifications",
     organization: "Organization",
-    tokens: "Access tokens",
   },
   unsavedTabChange: {
     title: "Discard unsaved changes?",
@@ -17,26 +16,17 @@ const en = {
     confirm: "Discard",
   },
   saved: "Saved",
-  tokens: {
-    section: {
-      title: "Personal access tokens",
-      description:
-        "Connect an MCP client with a personal token. Send it as a Bearer token to /api/mcp. A project key is not accepted.",
-      manageLink: "Manage tokens →",
-    },
-  },
 } as const;
 
 const ru = {
   title: "Настройки",
-  description: "Профиль, внешний вид, уведомления, организация и личные токены доступа.",
+  description: "Профиль, предпочтения, уведомления и организация.",
   tabs: {
     ariaLabel: "Разделы настроек",
     profile: "Профиль",
-    appearance: "Внешний вид",
+    preferences: "Предпочтения",
     notifications: "Уведомления",
     organization: "Организация",
-    tokens: "Токены доступа",
   },
   unsavedTabChange: {
     title: "Отменить несохранённые изменения?",
@@ -44,14 +34,6 @@ const ru = {
     confirm: "Отменить",
   },
   saved: "Сохранено",
-  tokens: {
-    section: {
-      title: "Личные токены доступа",
-      description:
-        "Подключите MCP-клиент личным токеном. Передавайте его как Bearer-токен на /api/mcp. Ключ проекта не подойдёт.",
-      manageLink: "Управление токенами →",
-    },
-  },
 } as const;
 
 export const texts: typeof en = localize(en, ru as never);

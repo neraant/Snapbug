@@ -96,7 +96,6 @@ import { ListNotificationsUseCase } from "@workspace/server/modules/notification
 import { UpdateNotificationPreferenceUseCase } from "@workspace/server/modules/notification/application/update-notification-preference.use-case";
 import { NotificationEmailDispatchService } from "@workspace/server/modules/notification/service/notification-email-dispatch.service";
 import { NotificationPreferenceService } from "@workspace/server/modules/notification/service/notification-preference.service";
-import { NotificationEmailPendingRepository } from "@workspace/server/modules/notification/repository/notification-email-pending.repository";
 import { UserNotificationPreferenceRepository } from "@workspace/server/modules/notification/repository/user-notification-preference.repository";
 import { MarkAllReadUseCase } from "@workspace/server/modules/notification/application/mark-all-read.use-case";
 import { MarkReadUseCase } from "@workspace/server/modules/notification/application/mark-read.use-case";
@@ -174,7 +173,6 @@ const membershipService = new MembershipService(membershipRepository, auditLogSe
 const invitationService = new InvitationService(invitationRepository, auditLogService);
 const notificationRepository = new NotificationRepository();
 const userNotificationPreferenceRepository = new UserNotificationPreferenceRepository();
-const notificationEmailPendingRepository = new NotificationEmailPendingRepository();
 const notificationPreferenceService = new NotificationPreferenceService(userNotificationPreferenceRepository);
 const commentService = new CommentService(commentRepository, auditLogService);
 const bugReportService = new BugReportService(bugReportRepository, auditLogService);
@@ -205,13 +203,7 @@ const commentAdapter = new CommentAdapter(commentRepository);
 const notificationCommentAdapter = new NotificationCommentAdapter(commentAdapter);
 const notificationUserAdapter = new NotificationUserAdapter(userAdapter);
 const userPreferenceRepository = new UserPreferenceRepository();
-const notificationEmailDispatchService = new NotificationEmailDispatchService(
-  emailService,
-  notificationEmailPendingRepository,
-  userNotificationPreferenceRepository,
-  userPreferenceRepository,
-  notificationUserAdapter,
-);
+const notificationEmailDispatchService = new NotificationEmailDispatchService(emailService, notificationUserAdapter);
 const notificationService = new NotificationService(
   notificationRepository,
   notificationPreferenceService,

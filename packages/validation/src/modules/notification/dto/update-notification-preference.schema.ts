@@ -1,4 +1,3 @@
-import { notificationEmailDigestSchema } from "@workspace/validation/modules/notification/consts/notification-email-digest.const";
 import { notificationPreferenceGroups } from "@workspace/validation/modules/notification/consts/notification-preference-group.const";
 import { notificationPreferenceModelSchema } from "@workspace/validation/modules/notification/dto/notification-preference.model";
 import { notificationPreferenceChannelSchema } from "@workspace/validation/modules/notification/dto/notification-preference-channel.schema";
@@ -10,14 +9,12 @@ const channelPatchSchema = notificationPreferenceChannelSchema.partial();
 
 export const updateNotificationPreferenceInputDtoSchema = z
   .object({
-    emailDigest: notificationEmailDigestSchema.optional(),
     channels: z.partialRecord(notificationPreferenceGroupSchema, channelPatchSchema).optional(),
     mutedProjectIds: z.array(z.uuid()).optional(),
   })
-  .refine(
-    (value) => value.emailDigest !== undefined || value.channels !== undefined || value.mutedProjectIds !== undefined,
-    { message: "At least one field must be provided" },
-  );
+  .refine((value) => value.channels !== undefined || value.mutedProjectIds !== undefined, {
+    message: "At least one field must be provided",
+  });
 
 export type UpdateNotificationPreferenceInputDtoType = z.infer<typeof updateNotificationPreferenceInputDtoSchema>;
 

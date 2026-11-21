@@ -32,13 +32,6 @@ export class UserPreferenceRepository {
           set: {
             timeZone: values.timeZone,
             theme: values.theme,
-            accent: values.accent,
-            density: values.density,
-            dateFormat: values.dateFormat,
-            use24HourTime: values.use24HourTime,
-            reduceMotion: values.reduceMotion,
-            defaultLandingPage: values.defaultLandingPage,
-            sidebarCollapsed: values.sidebarCollapsed,
             updatedAt: values.updatedAt,
           },
         });

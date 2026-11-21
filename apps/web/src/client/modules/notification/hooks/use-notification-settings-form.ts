@@ -1,6 +1,5 @@
 import { toast } from "@workspace/design-system/components/ui/toast";
 import { getAppErrorMessage } from "@workspace/server/error/get-app-error-message";
-import type { NotificationEmailDigest } from "@workspace/validation/modules/notification/consts/notification-email-digest.const";
 import type { NotificationPreferenceGroup } from "@workspace/validation/modules/notification/consts/notification-preference-group.const";
 import type { UpdateNotificationPreferenceInputDtoType } from "@workspace/validation/modules/notification/dto/update-notification-preference.schema";
 import { useCallback, useMemo } from "react";
@@ -80,14 +79,6 @@ export function useNotificationSettingsForm() {
     [patch, preference.mutedProjectIds],
   );
 
-  const onEmailDigestChange = useCallback(
-    (emailDigest: NotificationEmailDigest) => {
-      if (emailDigest === preference.emailDigest) return;
-      patch({ emailDigest }, "digest");
-    },
-    [patch, preference.emailDigest],
-  );
-
   return {
     preference,
     projects,
@@ -97,6 +88,5 @@ export function useNotificationSettingsForm() {
     isSaved,
     onChannelChange,
     onToggleMutedProject,
-    onEmailDigestChange,
   };
 }

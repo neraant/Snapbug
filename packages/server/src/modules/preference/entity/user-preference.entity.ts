@@ -7,13 +7,6 @@ export class UserPreference {
   readonly userId: UserPreferencePersistedType["userId"];
   readonly timeZone: UserPreferencePersistedType["timeZone"];
   readonly theme: UserPreferencePersistedType["theme"];
-  readonly accent: UserPreferencePersistedType["accent"];
-  readonly density: UserPreferencePersistedType["density"];
-  readonly dateFormat: UserPreferencePersistedType["dateFormat"];
-  readonly use24HourTime: UserPreferencePersistedType["use24HourTime"];
-  readonly reduceMotion: UserPreferencePersistedType["reduceMotion"];
-  readonly defaultLandingPage: UserPreferencePersistedType["defaultLandingPage"];
-  readonly sidebarCollapsed: UserPreferencePersistedType["sidebarCollapsed"];
   readonly createdAt: UserPreferencePersistedType["createdAt"];
   readonly updatedAt: UserPreferencePersistedType["updatedAt"];
 
@@ -21,13 +14,6 @@ export class UserPreference {
     this.userId = userPreference.userId;
     this.timeZone = userPreference.timeZone;
     this.theme = userPreference.theme;
-    this.accent = userPreference.accent;
-    this.density = userPreference.density;
-    this.dateFormat = userPreference.dateFormat;
-    this.use24HourTime = userPreference.use24HourTime;
-    this.reduceMotion = userPreference.reduceMotion;
-    this.defaultLandingPage = userPreference.defaultLandingPage;
-    this.sidebarCollapsed = userPreference.sidebarCollapsed;
     this.createdAt = userPreference.createdAt;
     this.updatedAt = userPreference.updatedAt;
   }
@@ -47,13 +33,6 @@ export class UserPreference {
       userId: this.userId,
       timeZone: this.timeZone,
       theme: this.theme,
-      accent: this.accent,
-      density: this.density,
-      dateFormat: this.dateFormat,
-      use24HourTime: this.use24HourTime,
-      reduceMotion: this.reduceMotion,
-      defaultLandingPage: this.defaultLandingPage,
-      sidebarCollapsed: this.sidebarCollapsed,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
     };

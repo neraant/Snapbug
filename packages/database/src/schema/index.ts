@@ -5,7 +5,6 @@ export * from "@workspace/database/schema/comment.const";
 export * from "@workspace/database/schema/invitation.const";
 export * from "@workspace/database/schema/membership.const";
 export * from "@workspace/database/schema/notification.const";
-export * from "@workspace/database/schema/notification-email-pending.const";
 export * from "@workspace/database/schema/user-notification-preference.const";
 export * from "@workspace/database/schema/user-organization-notification-preference.const";
 export * from "@workspace/database/schema/organization.const";

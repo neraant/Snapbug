@@ -6,6 +6,8 @@ Do not start tasks marked TBD: an implementer agent must not take them.
 
 ## Done
 
+- P-49 Settings simplification, theme and language fix: tabs Profile, Preferences (language and theme together), Notifications, Organization; accent, density, date and time, reduce motion, landing page, sidebar, email digest, and the settings Access tokens tab are removed; one theme source of truth that works from the sidebar and has no flicker; the language switch is fixed (a store update during render in `InterfaceLanguageProvider`). Brief: `docs/tasks/P-49.md`. Read it first; shared rules are in `docs/tasks/README.md`.
+
 - A pnpm and Turborepo monorepo, one app `apps/web`, the server in `packages/server`, schemas in `packages/database`, DTOs in `packages/validation`, the widget in `packages/sdk`.
 - Registration, password check, bcrypt hash: `packages/server/src/modules/auth`. Tests `sign-up.test.ts`, `verify-credentials.test.ts`. Auth.js sessions: `apps/web/src/app/api/auth/[...nextauth]/route.ts`.
 - Onboarding creates the organization and the project: `complete-onboarding.use-case.ts`, test `complete-onboarding.test.ts`. Several organizations and the switcher already exist.
@@ -71,7 +73,6 @@ Do not start tasks marked TBD: an implementer agent must not take them.
 
 - P-24 error responses that return the real status, including 400, 401, 403, 404, 500, and any other real code. The error screen always shows 500.
 - P-48 Refactor: unit tests stay only for application use-cases; tests of utils, services, adapters, wiring, and anything in `apps/web` and `packages/design-system` are removed, with business rules moved into the owning use-case test. Brief: `docs/tasks/P-48.md`. Read it first; shared rules are in `docs/tasks/README.md`.
-- P-49 Settings simplification, theme and language fix: tabs Profile, Preferences (language and theme together), Notifications, Organization; accent, density, date and time, reduce motion, landing page, sidebar, email digest, and the settings Access tokens tab are removed; one theme source of truth that works from the sidebar and has no flicker; the language switch is fixed (a store update during render in `InterfaceLanguageProvider`). Brief: `docs/tasks/P-49.md`. Read it first; shared rules are in `docs/tasks/README.md`.
 - P-50 Ticket assignee picker, two-column comment item, and the MCP token dialog (honest tool count, no "How to use" in Token created). Brief: `docs/tasks/P-50.md`. Read it first; shared rules are in `docs/tasks/README.md`.
 - P-51 Sidebar grouped in a logical order, one table style across the app, and a notification item with one click target and one menu. Brief: `docs/tasks/P-51.md`. Read it first; shared rules are in `docs/tasks/README.md`.
 - P-52 Remove the retention setting: no data is deleted by age for now; the `reports_retention_days` column, DTO fields, and the Retention section of Organization settings are removed. Brief: `docs/tasks/P-52.md`. Read it first; shared rules are in `docs/tasks/README.md`.

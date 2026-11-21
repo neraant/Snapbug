@@ -2,7 +2,6 @@ import type { DbClient } from "@workspace/database";
 import { UserNotificationPreferenceFactory } from "@workspace/server/modules/notification/entity/user-notification-preference.factory";
 import { UserNotificationPreferenceMapper } from "@workspace/server/modules/notification/entity/user-notification-preference.mapper";
 import type { UserNotificationPreferenceRepository } from "@workspace/server/modules/notification/repository/user-notification-preference.repository";
-import type { NotificationEmailDigest } from "@workspace/validation/modules/notification/consts/notification-email-digest.const";
 import { notificationMuteTicketTypes } from "@workspace/validation/modules/notification/consts/notification-mute-ticket-type.const";
 import type { NotificationType } from "@workspace/validation/modules/notification/consts/notification-type.const";
 import {
@@ -52,13 +51,6 @@ export class NotificationPreferenceService {
       inApp: channel.inApp,
       email: channel.email,
     };
-  }
-
-  async getEmailDigest(userId: string): Promise<NotificationEmailDigest> {
-    const preference =
-      (await this.userNotificationPreferenceRepository.findByUserId(userId)) ??
-      UserNotificationPreferenceFactory.create(userId);
-    return preference.emailDigest;
   }
 
   private async isProjectMuted(userId: string, organizationId: string, projectId: string): Promise<boolean> {

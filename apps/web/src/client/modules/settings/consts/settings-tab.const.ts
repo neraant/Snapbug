@@ -2,10 +2,9 @@ export const settingsTabSearchParamKey = "tab";
 
 export const settingsTabs = {
   profile: "profile",
-  appearance: "appearance",
+  preferences: "preferences",
   notifications: "notifications",
   organization: "organization",
-  tokens: "tokens",
 } as const;
 
 export type SettingsTab = (typeof settingsTabs)[keyof typeof settingsTabs];

@@ -7,6 +7,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { type PropsWithChildren, type ReactNode, Suspense, useMemo } from "react";
 
+import { useUserTheme } from "@/client/modules/preference/hooks/use-user-theme";
 import { ActiveOrganizationProvider } from "@/client/modules/shared/components/active-organization-provider";
 import { texts as sharedTexts } from "@/client/modules/shared/consts/texts.const";
 import { useProjectScopeSearchParam } from "@/client/modules/shared/hooks/use-project-scope-search-param";
@@ -41,6 +42,7 @@ export function AppSidebar({
   children,
 }: AppSidebarProps) {
   const pathname = usePathname();
+  const { theme, setTheme } = useUserTheme();
   const language = useInterfaceLanguage();
   const { projectId } = useProjectScopeSearchParam();
   const { data: projects = [] } = useQuery(orpcQuery.project.findProjects.queryOptions());
@@ -66,6 +68,9 @@ export function AppSidebar({
         linkAs={Link}
         signOutLabel={sharedTexts.signOut.label}
         onSignOut={signOutUser}
+        theme={theme}
+        onThemeChange={setTheme}
+        themeLabel={sharedTexts.sidebarUserMenu.themeLabel}
         scopeSelector={
           <Column gap="sm" width="full">
             <Suspense fallback={<AppSidebarOrganizationSwitcher.Fallback />}>

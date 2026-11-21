@@ -32,11 +32,7 @@ export function ActivityLogRow({ entry, selected, onOpen }: ActivityLogRowProps)
   const sentence = formatActivityEventSentence(entry);
   const actorName = formatActivityActorName(entry);
   const isSystem = !entry.actorId;
-  const datePreference = {
-    dateFormat: preference.dateFormat,
-    timeZone: preference.timeZone,
-    use24HourTime: preference.use24HourTime,
-  };
+  const timeZone = preference.timeZone;
 
   const onKeyDown = (event: KeyboardEvent<HTMLTableRowElement>) => {
     if (event.key === "Enter" || event.key === " ") {
@@ -59,11 +55,11 @@ export function ActivityLogRow({ entry, selected, onOpen }: ActivityLogRowProps)
           <TooltipTrigger
             render={
               <Typography variant="text-sm" color="muted" className="truncate">
-                {formatActivityWhen(entry.occurredAt, datePreference)}
+                {formatActivityWhen(entry.occurredAt, timeZone)}
               </Typography>
             }
           />
-          <TooltipContent>{formatActivityExactWhen(entry.occurredAt, datePreference)}</TooltipContent>
+          <TooltipContent>{formatActivityExactWhen(entry.occurredAt, timeZone)}</TooltipContent>
         </Tooltip>
       </Table.Cell>
       <Table.Cell className="w-44">

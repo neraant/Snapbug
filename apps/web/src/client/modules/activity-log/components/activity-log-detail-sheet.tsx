@@ -28,6 +28,7 @@ import {
   formatActivityRelativeWhen,
 } from "@/client/modules/activity-log/utils/format-activity-log.util";
 import { orpcQuery } from "@/client/modules/shared/orpc/query-utils";
+import { useFindUserPreference } from "@/client/modules/shared/queries/use-find-user-preference";
 
 type ActivityLogDetailSheetProps = {
   entry: ActivityLogType | null;
@@ -50,8 +51,11 @@ export function ActivityLogDetailSheet({
 }: ActivityLogDetailSheetProps) {
   const { copied, copy } = useCopyText();
   const { data: projects = [] } = useQuery(orpcQuery.project.findProjects.queryOptions());
+  const { data: preference } = useFindUserPreference();
 
   if (!entry) return null;
+
+  const timeZone = preference.timeZone;
 
   const sentence = formatActivityEventSentence(entry);
   const objectHref = resolveActivityObjectHref(
@@ -135,7 +139,7 @@ export function ActivityLogDetailSheet({
               />
               <ActivityLogPropertyRow
                 label={texts.detail.when}
-                value={`${formatActivityExactWhen(entry.occurredAt)} (${formatActivityRelativeWhen(entry.occurredAt)})`}
+                value={`${formatActivityExactWhen(entry.occurredAt, timeZone)} (${formatActivityRelativeWhen(entry.occurredAt, timeZone)})`}
               />
               <ActivityLogPropertyRow
                 label={texts.detail.object}

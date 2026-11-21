@@ -6,7 +6,7 @@ import type { UserPreferenceTheme } from "@workspace/validation/modules/preferen
 import { MonitorIcon, MoonIcon, SunIcon } from "lucide-react";
 import type { ComponentType } from "react";
 
-type AppearanceThemeOptionProps = {
+type ThemeOptionProps = {
   value: UserPreferenceTheme;
   label: string;
   selected: boolean;
@@ -42,7 +42,7 @@ function ThemeMiniPreview({ theme }: { theme: UserPreferenceTheme }) {
   );
 }
 
-export function AppearanceThemeOption({ value, label, selected, disabled, onSelect }: AppearanceThemeOptionProps) {
+export function ThemeOption({ value, label, selected, disabled, onSelect }: ThemeOptionProps) {
   const Icon = themeIcons[value];
 
   return (

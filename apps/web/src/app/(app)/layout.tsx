@@ -30,10 +30,7 @@ export default async function Layout({ children }: PropsWithChildren) {
   const cookieStore = await cookies();
   const userPreference = userId ? await container.preference.findUserPreference.execute(userId) : null;
   const sidebarCookie = cookieStore.get(SIDEBAR_OPEN_STATE_COOKIE)?.value;
-  const defaultSidebarOpen = parseSidebarOpenState(
-    sidebarCookie,
-    userPreference ? !userPreference.sidebarCollapsed : false,
-  );
+  const defaultSidebarOpen = parseSidebarOpenState(sidebarCookie, true);
   const language: InterfaceLanguage = currentUser?.interfaceLanguage === "ru" ? "ru" : "en";
   enterInterfaceLanguage(language);
 
