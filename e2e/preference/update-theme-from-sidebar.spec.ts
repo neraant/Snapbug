@@ -25,7 +25,10 @@ test("a member switches theme from the sidebar and it persists", async ({ page }
     await expect(preferences.getByText("Saved")).toBeVisible({ timeout: 15_000 });
   }
 
-  await page.getByRole("button", { name: "More options" }).click();
+  await expect(async () => {
+    await page.getByRole("button", { name: "More options" }).click();
+    await expect(page.getByRole("menuitemradio", { name: "Dark" })).toBeVisible({ timeout: 2_000 });
+  }).toPass({ timeout: 15_000 });
   await page.getByRole("menuitemradio", { name: "Dark" }).click();
 
   await expect(page.locator("html")).toHaveClass(/dark/, { timeout: 15_000 });
@@ -34,5 +37,9 @@ test("a member switches theme from the sidebar and it persists", async ({ page }
   await expect(page.locator("html")).toHaveClass(/dark/, { timeout: 15_000 });
 
   await page.goto("/settings?tab=preferences");
-  await expect(preferences.getByRole("button", { name: "Dark", exact: true })).toHaveAttribute("aria-pressed", "true");
+  const preferencesAfterReload = page.getByRole("tabpanel", { name: "Preferences" });
+  await expect(preferencesAfterReload.getByRole("button", { name: "Dark", exact: true })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
 });

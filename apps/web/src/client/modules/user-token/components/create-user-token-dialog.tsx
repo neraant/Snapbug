@@ -83,15 +83,13 @@ export function CreateUserTokenDialog() {
                   onProjectModeChange={onProjectModeChange}
                   onToggleProject={onToggleProject}
                 />
+                <DialogFooter>
+                  <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                    {texts.create.dialog.cancel}
+                  </Button>
+                  <SubmitButton loading={isPending}>{texts.create.dialog.submit}</SubmitButton>
+                </DialogFooter>
               </Column>
-              <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                  {texts.create.dialog.cancel}
-                </Button>
-                <SubmitButton loading={isPending} onClick={onSubmit}>
-                  {texts.create.dialog.submit}
-                </SubmitButton>
-              </DialogFooter>
             </>
           )}
         </DialogContent>

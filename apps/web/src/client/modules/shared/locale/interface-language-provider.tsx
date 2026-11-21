@@ -20,7 +20,9 @@ export function InterfaceLanguageProvider({ language, children }: InterfaceLangu
   }
 
   useLayoutEffect(() => {
-    setInterfaceLanguage(language);
+    if (getInterfaceLanguage() !== language) {
+      setInterfaceLanguage(language);
+    }
   }, [language]);
 
   const active = useInterfaceLanguage();

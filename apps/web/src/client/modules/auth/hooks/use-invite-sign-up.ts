@@ -70,7 +70,6 @@ export function useInviteSignUp({ token, email, organizationName }: UseInviteSig
       return;
     }
 
-    router.refresh();
     const accepted = await acceptInvitationAfterAuth(token, acceptInvitation);
     if (!accepted) {
       return;
