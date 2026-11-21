@@ -26,8 +26,8 @@ test("settings shows profile, preferences, notifications, and organization tabs"
   await expect(page.getByRole("tab", { name: "Appearance" })).toHaveCount(0);
 
   await page.goto("/settings?tab=tokens");
-  await expect(page.getByRole("tab", { name: "Profile" })).toHaveAttribute("data-state", "active");
+  await expect(page.getByRole("tab", { name: "Profile", selected: true })).toBeVisible();
 
   await page.goto("/settings?tab=appearance");
-  await expect(page.getByRole("tab", { name: "Profile" })).toHaveAttribute("data-state", "active");
+  await expect(page.getByRole("tab", { name: "Profile", selected: true })).toBeVisible();
 });

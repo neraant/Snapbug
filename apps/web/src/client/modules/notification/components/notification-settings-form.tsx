@@ -3,13 +3,6 @@ import { Row } from "@workspace/design-system/components/layout/row";
 import { SettingsSection, SettingsSections } from "@workspace/design-system/components/layout/settings-section";
 import { Checkbox } from "@workspace/design-system/components/ui/checkbox";
 import { Field, FieldDescription, FieldLabel } from "@workspace/design-system/components/ui/field";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@workspace/design-system/components/ui/select";
 import { Skeleton } from "@workspace/design-system/components/ui/skeleton";
 import { Switch } from "@workspace/design-system/components/ui/switch";
 import { Table } from "@workspace/design-system/components/ui/table";
@@ -27,16 +20,8 @@ function rowText(group: NotificationPreferenceGroup) {
 }
 
 export function NotificationSettingsForm() {
-  const {
-    preference,
-    projects,
-    visibleRows,
-    mutedProjectIds,
-    saving,
-    isSaved,
-    onChannelChange,
-    onToggleMutedProject,
-  } = useNotificationSettingsForm();
+  const { preference, projects, visibleRows, mutedProjectIds, saving, isSaved, onChannelChange, onToggleMutedProject } =
+    useNotificationSettingsForm();
 
   return (
     <SettingsSections>
@@ -146,7 +131,6 @@ export function NotificationSettingsForm() {
         )}
         <NotificationQuietSaved visible={isSaved("mute")} />
       </SettingsSection>
-
     </SettingsSections>
   );
 }

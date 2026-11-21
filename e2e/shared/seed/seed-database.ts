@@ -3,7 +3,7 @@ import path from "node:path";
 
 const root = path.resolve(__dirname, "../../..");
 
-function runDatabaseScript(script: "db:migrate" | "db:seed"): Promise<void> {
+function runDatabaseScript(script: "db:seed"): Promise<void> {
   return new Promise((resolve, reject) => {
     execFile(
       "pnpm",
@@ -28,6 +28,5 @@ function runDatabaseScript(script: "db:migrate" | "db:seed"): Promise<void> {
 }
 
 export async function seedDatabase(): Promise<void> {
-  await runDatabaseScript("db:migrate");
   await runDatabaseScript("db:seed");
 }

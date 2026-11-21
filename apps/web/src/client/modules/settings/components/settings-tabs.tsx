@@ -4,9 +4,9 @@ import { Typography } from "@workspace/design-system/components/ui/typography";
 import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
 import { Suspense, useCallback, useRef, useState } from "react";
 
+import { NotificationSettingsForm } from "@/client/modules/notification/components/notification-settings-form";
 import { OrganizationSettingsForm } from "@/client/modules/organization/components/organization-settings-form";
 import { texts as organizationTexts } from "@/client/modules/organization/consts/texts.const";
-import { NotificationSettingsForm } from "@/client/modules/notification/components/notification-settings-form";
 import { PreferencesSettingsForm } from "@/client/modules/preference/components/preferences-settings-form";
 import { settingsTabs } from "@/client/modules/settings/consts/settings-tab.const";
 import { texts } from "@/client/modules/settings/consts/texts.const";

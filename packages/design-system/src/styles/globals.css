@@ -291,7 +291,6 @@
   .recharts-cartesian-axis-tick-value {
     @apply fill-muted-foreground;
   }
-
 }
 
 @utility no-scrollbar {

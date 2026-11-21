@@ -1,6 +1,4 @@
-import {
-  notificationEmailSubject,
-} from "@workspace/server/modules/notification/email/notification-email-copy.const";
+import { notificationEmailSubject } from "@workspace/server/modules/notification/email/notification-email-copy.const";
 import { NotificationImmediateEmailTemplate } from "@workspace/server/modules/notification/email/notification-immediate-email-template";
 import type { NotificationUserPort } from "@workspace/server/modules/notification/port/user.port";
 import type { EmailService } from "@workspace/server/shared/email/service/email.service";

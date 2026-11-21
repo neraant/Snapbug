@@ -1,5 +1,6 @@
-import { getInterfaceLanguage } from "@/client/modules/shared/locale/interface-language";
 import { formatDistanceToNow } from "date-fns";
+
+import { getInterfaceLanguage } from "@/client/modules/shared/locale/interface-language";
 
 type FormatUserDateInput = {
   createdAt: string;
