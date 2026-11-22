@@ -111,7 +111,7 @@ describe("FindCommentsUseCase", () => {
     expect(result).toEqual([CommentMapper.toDto(comment, teammate)]);
   });
 
-  it("hides internal comments from the report author", async () => {
+  it("returns comments to the report author", async () => {
     const bugReportPort = { findById: vi.fn().mockResolvedValue(bugReport("sam@shopper.test")) };
     const projectPort = { findById: vi.fn().mockResolvedValue(project) };
     const membershipPort = {
@@ -119,7 +119,7 @@ describe("FindCommentsUseCase", () => {
       filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
     };
     const userPort = { findManyByIds: vi.fn().mockResolvedValue([reporter]) };
-    const commentRepository = { findManyByBugReportId: vi.fn() };
+    const commentRepository = { findManyByBugReportId: vi.fn().mockResolvedValue([comment]) };
     const useCase = new FindCommentsUseCase(
       bugReportPort as unknown as BugReportPort,
       projectPort as unknown as ProjectPort,
@@ -130,8 +130,7 @@ describe("FindCommentsUseCase", () => {
 
     const result = await useCase.execute({ bugReportId }, userId);
 
-    expect(result).toEqual([]);
-    expect(commentRepository.findManyByBugReportId).not.toHaveBeenCalled();
+    expect(result).toEqual([CommentMapper.toDto(comment, reporter)]);
   });
 
   it("does not return comments for a ticket the member cannot access", async () => {

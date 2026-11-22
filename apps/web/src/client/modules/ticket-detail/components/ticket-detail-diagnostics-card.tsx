@@ -4,6 +4,7 @@ import { SegmentedControl } from "@workspace/design-system/components/ui/segment
 import { ActivityIcon, BracesIcon, GlobeIcon, TerminalIcon } from "lucide-react";
 import { useState } from "react";
 
+import { useFindUserPreference } from "@/client/modules/shared/queries/use-find-user-preference";
 import { useFindBugReport } from "@/client/modules/shared/queries/use-find-bug-report";
 import { texts } from "@/client/modules/ticket-detail/consts/texts.const";
 import {
@@ -46,9 +47,10 @@ type TicketDetailDiagnosticsCardProps = {
 
 export function TicketDetailDiagnosticsCard({ shortId }: TicketDetailDiagnosticsCardProps) {
   const { data: ticket } = useFindBugReport({ shortId });
+  const { data: preference } = useFindUserPreference();
   const [activeTab, setActiveTab] = useState<TicketDetailDiagnosticsTab>(ticketDetailDiagnosticsTabs.console);
 
-  const consoleEntries = formatTicketDetailConsoleLogs(ticket.consoleLogs);
+  const consoleEntries = formatTicketDetailConsoleLogs(ticket.consoleLogs, preference.timeZone);
   const networkEntries = formatTicketDetailNetworkLogs(ticket.networkLogs);
   const customContextEntries = formatTicketDetailCustomContext(ticket.customContext);
 

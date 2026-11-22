@@ -31,10 +31,6 @@ export class DeleteCommentUseCase {
 
     const ticket = await this.loadTicket(comment.bugReportId, userId);
 
-    if (isReportAuthor(ticket.caller.email, ticket.bugReport.reporterEmail)) {
-      throw new NotFoundError(ERROR_CODES.BUG_REPORT_NOT_FOUND);
-    }
-
     if (comment.authorUserId !== userId) {
       throw new ForbiddenError(ERROR_CODES.CANNOT_MANAGE_COMMENT, "You can only delete your own comment.");
     }
@@ -75,8 +71,3 @@ type AccessibleTicket = {
   projectId: string;
   caller: UserModelType;
 };
-
-function isReportAuthor(callerEmail: string, reporterEmail: string | null): boolean {
-  if (!reporterEmail) return false;
-  return callerEmail.toLowerCase() === reporterEmail.toLowerCase();
-}

@@ -26,7 +26,6 @@ type NotificationPortMock = {
     projectId: string;
     ticketId: string;
     assigneeUserId: string | null;
-    reporterEmail: string | null;
     payload: NotificationPayloadType;
   }): Promise<void>;
   commentCreated(params: {

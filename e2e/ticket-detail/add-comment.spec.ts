@@ -46,5 +46,5 @@ test("a teammate adds an internal comment on the ticket", async ({ page }) => {
 
   await expect(commentsPanel.getByText(commentBody, { exact: true })).toBeVisible({ timeout: 30_000 });
   await expect(commentsPanel.getByRole("textbox", { name: "Comment" })).toHaveValue("");
-  await expect(page.getByText("Internal notes for the team. The report author does not see them.")).toBeVisible();
+  await expect(page.getByText("Internal notes for the team.")).toBeVisible();
 });

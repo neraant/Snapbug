@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 
 import { useFormatUserDate } from "@/client/modules/preference/hooks/use-format-user-date";
+import { useFindProjectMembers } from "@/client/modules/shared/queries/use-find-project-members";
 import { bugReportSeverityBadgeVariant } from "@/client/modules/ticket-board/consts/bug-report-severity-badge-variant.const";
 import { texts } from "@/client/modules/ticket-board/consts/texts.const";
 import { ticketBoardCardHeightClass } from "@/client/modules/ticket-board/consts/ticket-board.const";
@@ -117,7 +118,9 @@ type TicketBoardCardContentProps = {
 
 function TicketBoardCardContent({ report, projectName }: TicketBoardCardContentProps) {
   const formatDate = useFormatUserDate();
-  const assigneeLabel = texts.card.unassigned;
+  const { data: members } = useFindProjectMembers(report.projectId);
+  const assignee = report.assignedTo ? members.find((member) => member.userId === report.assignedTo) : undefined;
+  const assigneeLabel = assignee ? assignee.name?.trim() || assignee.email : texts.card.unassigned;
 
   return (
     <Card

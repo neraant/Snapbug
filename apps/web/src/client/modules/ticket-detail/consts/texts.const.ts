@@ -11,7 +11,7 @@ const en = {
   comments: {
     title: "Comments",
     count: (count: number) => `(${count})`,
-    description: "Internal notes for the team. The report author does not see them.",
+    description: "Internal notes for the team.",
     empty: "No comments yet. Start the conversation.",
     placeholder: "Add a comment…",
     fieldLabel: "Comment",

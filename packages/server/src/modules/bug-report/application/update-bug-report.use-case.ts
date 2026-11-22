@@ -111,7 +111,6 @@ export class UpdateBugReportUseCase {
           projectId: project.id,
           ticketId: updatedBugReport.id,
           assigneeUserId: updatedBugReport.assignedTo,
-          reporterEmail: updatedBugReport.reporterEmail,
           payload: {
             ...payload,
             oldValue: bugReport.status,

@@ -36,13 +36,6 @@ const teammate = {
   onboardingCompletedAt: null,
 };
 
-const reporter = {
-  id: userId,
-  name: "Sam Shopper",
-  email: "sam@shopper.test",
-  onboardingCompletedAt: null,
-};
-
 function bugReport(reporterEmail: string | null) {
   return {
     id: bugReportId,
@@ -118,36 +111,6 @@ describe("AddCommentUseCase", () => {
       projectId,
       "Add comment",
     );
-  });
-
-  it("does not store a comment for the report author", async () => {
-    const bugReportPort = { findById: vi.fn().mockResolvedValue(bugReport("Sam@Shopper.test")) };
-    const projectPort = { findById: vi.fn().mockResolvedValue(project) };
-    const membershipPort = {
-      findByUserAndOrganization: vi.fn().mockResolvedValue(membership),
-      filterProjectIds: vi.fn(async (_membership: unknown, projectIds: string[]) => projectIds),
-    };
-    const userPort = { findManyByIds: vi.fn().mockResolvedValue([reporter]) };
-    const { saveWithAudit, commentService } = createCommentService();
-    const withTransaction = vi.fn();
-    const useCase = new AddCommentUseCase(
-      bugReportPort as unknown as BugReportPort,
-      projectPort as unknown as ProjectPort,
-      membershipPort as unknown as MembershipPort,
-      userPort as unknown as UserPort,
-      commentService as unknown as CommentService,
-      createNotificationPortMock(),
-      withTransaction,
-    );
-
-    await expect(
-      useCase.execute({ bugReportId, body: "I can see this." }, userId, { type: "user", id: userId }),
-    ).rejects.toMatchObject({
-      errorCode: ERROR_CODES.BUG_REPORT_NOT_FOUND,
-    });
-
-    expect(withTransaction).not.toHaveBeenCalled();
-    expect(saveWithAudit).not.toHaveBeenCalled();
   });
 
   it("does not store a comment on a ticket the member cannot access", async () => {

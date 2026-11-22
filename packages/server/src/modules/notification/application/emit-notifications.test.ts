@@ -254,7 +254,6 @@ describe("EmitNotificationsUseCase", () => {
       projectId,
       ticketId,
       assigneeUserId,
-      reporterEmail: null,
       payload: { ticketShortId: "SB-7", ticketTitle: "Status", oldValue: "new", newValue: "in_progress" },
     });
 
@@ -276,7 +275,6 @@ describe("EmitNotificationsUseCase", () => {
       projectId,
       ticketId,
       assigneeUserId: null,
-      reporterEmail: null,
       payload: { ticketShortId: "SB-7a", ticketTitle: "Status", oldValue: "new", newValue: "fixed" },
     });
 

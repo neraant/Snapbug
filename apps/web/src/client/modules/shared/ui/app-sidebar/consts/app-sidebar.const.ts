@@ -93,14 +93,16 @@ export const appSidebarNavGroups: { groupKey: AppSidebarNavGroupKey; items: AppS
       },
     ],
   },
-];
-
-export const appSidebarFooterItems: AppSidebarNavItem[] = [
   {
-    href: url.settings(),
-    get label() {
-      return texts.settings;
-    },
-    icon: SettingsIcon,
+    groupKey: "settings",
+    items: [
+      {
+        href: url.settings(),
+        get label() {
+          return texts.settings;
+        },
+        icon: SettingsIcon,
+      },
+    ],
   },
 ];

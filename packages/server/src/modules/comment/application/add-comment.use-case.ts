@@ -41,10 +41,6 @@ export class AddCommentUseCase {
   ): Promise<AddCommentOutputDtoType> {
     const ticket = await this.loadTicket(input.bugReportId, userId, mcpProjectIds);
 
-    if (isReportAuthor(ticket.caller.email, ticket.bugReport.reporterEmail)) {
-      throw new NotFoundError(ERROR_CODES.BUG_REPORT_NOT_FOUND);
-    }
-
     const project = await this.projectPort.findById(ticket.projectId);
     if (!project) throw new NotFoundError(ERROR_CODES.PROJECT_NOT_FOUND);
 
@@ -111,11 +107,6 @@ type AccessibleTicket = {
   projectId: string;
   caller: UserModelType;
 };
-
-function isReportAuthor(callerEmail: string, reporterEmail: string | null): boolean {
-  if (!reporterEmail) return false;
-  return callerEmail.toLowerCase() === reporterEmail.toLowerCase();
-}
 
 function resolveAuthorSource(actor: AuditActor): CommentAuthorSourceType {
   return actor.type === "mcp" ? CommentAuthorSource.MCP : CommentAuthorSource.WEB;

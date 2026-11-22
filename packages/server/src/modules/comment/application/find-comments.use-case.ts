@@ -12,7 +12,6 @@ import type {
   FindCommentsInputDtoType,
   FindCommentsOutputDtoType,
 } from "@workspace/validation/modules/comment/dto/find-comments.schema";
-import type { UserModelType } from "@workspace/validation/modules/user/dto/user.model";
 
 export class FindCommentsUseCase {
   constructor(
@@ -28,13 +27,9 @@ export class FindCommentsUseCase {
     userId: string,
     mcpProjectIds?: string[] | null,
   ): Promise<FindCommentsOutputDtoType> {
-    const ticket = await this.loadTicket(input.bugReportId, userId, mcpProjectIds);
+    const bugReport = await this.loadTicket(input.bugReportId, userId, mcpProjectIds);
 
-    if (isReportAuthor(ticket.caller.email, ticket.bugReport.reporterEmail)) {
-      return [];
-    }
-
-    const comments = await this.commentRepository.findManyByBugReportId(ticket.bugReport.id);
+    const comments = await this.commentRepository.findManyByBugReportId(bugReport.id);
     if (comments.length === 0) return [];
 
     const authors = await this.userPort.findManyByIds(comments.map((comment) => comment.authorUserId));
@@ -47,7 +42,7 @@ export class FindCommentsUseCase {
     bugReportId: string,
     userId: string,
     mcpProjectIds?: string[] | null,
-  ): Promise<AccessibleTicket> {
+  ): Promise<BugReportModelType> {
     const bugReport = await this.bugReportPort.findById(bugReportId);
     if (!bugReport) throw new NotFoundError(ERROR_CODES.BUG_REPORT_NOT_FOUND);
 
@@ -65,19 +60,6 @@ export class FindCommentsUseCase {
 
     assertMcpProjectAllowed(bugReport.projectId, mcpProjectIds);
 
-    const caller = (await this.userPort.findManyByIds([userId]))[0];
-    if (!caller) throw new NotFoundError(ERROR_CODES.USER_NOT_FOUND);
-
-    return { bugReport, caller };
+    return bugReport;
   }
-}
-
-type AccessibleTicket = {
-  bugReport: BugReportModelType;
-  caller: UserModelType;
-};
-
-function isReportAuthor(callerEmail: string, reporterEmail: string | null): boolean {
-  if (!reporterEmail) return false;
-  return callerEmail.toLowerCase() === reporterEmail.toLowerCase();
 }

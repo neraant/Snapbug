@@ -12,11 +12,15 @@ export type TicketDetailLogEntry = {
   meta?: string;
 };
 
-const logClockFormat = new Intl.DateTimeFormat(undefined, {
-  hour: "2-digit",
-  minute: "2-digit",
-  second: "2-digit",
-});
+function createLogClockFormat(timeZone: string) {
+  return new Intl.DateTimeFormat("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23",
+    timeZone,
+  });
+}
 
 function isConsoleLogEntry(value: unknown): value is BugReportConsoleLogEntryType {
   if (!value || typeof value !== "object") return false;
@@ -35,8 +39,10 @@ function isNetworkLogEntry(value: unknown): value is BugReportNetworkLogEntryTyp
   );
 }
 
-export function formatTicketDetailConsoleLogs(logs: unknown[] | null): TicketDetailLogEntry[] {
+export function formatTicketDetailConsoleLogs(logs: unknown[] | null, timeZone: string): TicketDetailLogEntry[] {
   if (!logs || logs.length === 0) return [];
+
+  const logClockFormat = createLogClockFormat(timeZone);
 
   return logs.map((entry, index) => {
     if (!isConsoleLogEntry(entry)) {
@@ -53,7 +59,7 @@ export function formatTicketDetailConsoleLogs(logs: unknown[] | null): TicketDet
       tone: consoleTone(entry.level),
       label: entry.level,
       message: entry.message,
-      meta: formatLogClock(entry.timestamp),
+      meta: formatLogClock(logClockFormat, entry.timestamp),
     };
   });
 }
@@ -132,7 +138,7 @@ function networkTone(status: number): TicketDetailLogTone {
   return "info";
 }
 
-function formatLogClock(isoDate: string): string {
+function formatLogClock(logClockFormat: Intl.DateTimeFormat, isoDate: string): string {
   const date = new Date(isoDate);
   if (Number.isNaN(date.getTime())) return "";
   return logClockFormat.format(date);

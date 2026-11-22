@@ -26,7 +26,6 @@ type NotificationDispatchPort = {
     projectId: string;
     ticketId: string;
     assigneeUserId: string | null;
-    reporterEmail: string | null;
     payload: NotificationPayloadType;
   }): Promise<void>;
   commentCreated(params: {
@@ -125,7 +124,6 @@ export class NotificationDispatchAdapter implements NotificationDispatchPort {
     projectId: string;
     ticketId: string;
     assigneeUserId: string | null;
-    reporterEmail: string | null;
     payload: NotificationPayloadType;
   }): Promise<void> {
     await this.emitNotifications.ticketStatusChanged(params);

@@ -97,20 +97,15 @@ export class EmitNotificationsUseCase {
     projectId: string;
     ticketId: string;
     assigneeUserId: string | null;
-    reporterEmail: string | null;
     payload: NotificationPayloadType;
   }): Promise<void> {
     await this.emit("ticket.status_changed", async () => {
       const participantIds = await this.commentPort.findAuthorUserIdsByBugReportId(input.ticketId);
       const candidateIds = [...(input.assigneeUserId ? [input.assigneeUserId] : []), ...participantIds];
-      const reporterUserId = await this.resolveReporterUserId(input.reporterEmail, candidateIds);
-      const withoutReporter = reporterUserId
-        ? candidateIds.filter((userId) => userId !== reporterUserId)
-        : candidateIds;
       const recipients = await this.filterProjectAccess(
         input.organizationId,
         input.projectId,
-        withoutReporter,
+        candidateIds,
         input.actorUserId,
       );
 
@@ -366,16 +361,5 @@ export class EmitNotificationsUseCase {
     }
 
     return this.excludeActor(allowed, actorUserId);
-  }
-
-  private async resolveReporterUserId(
-    reporterEmail: string | null,
-    candidateUserIds: string[],
-  ): Promise<string | null> {
-    if (!reporterEmail || candidateUserIds.length === 0) return null;
-    const users = await this.userPort.findManyByIds(candidateUserIds);
-    const normalized = reporterEmail.toLowerCase();
-    const match = users.find((user) => user.email.toLowerCase() === normalized);
-    return match?.id ?? null;
   }
 }
