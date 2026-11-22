@@ -11,7 +11,6 @@ import {
 import { Input } from "@workspace/design-system/components/ui/input";
 import { Skeleton } from "@workspace/design-system/components/ui/skeleton";
 import { Typography } from "@workspace/design-system/components/ui/typography";
-import { cn } from "@workspace/design-system/lib/utils";
 import { CheckIcon, ChevronDownIcon, UserRoundIcon } from "lucide-react";
 import { type ReactNode, Suspense } from "react";
 

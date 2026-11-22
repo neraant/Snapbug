@@ -4,8 +4,8 @@ import { SegmentedControl } from "@workspace/design-system/components/ui/segment
 import { ActivityIcon, BracesIcon, GlobeIcon, TerminalIcon } from "lucide-react";
 import { useState } from "react";
 
-import { useFindUserPreference } from "@/client/modules/shared/queries/use-find-user-preference";
 import { useFindBugReport } from "@/client/modules/shared/queries/use-find-bug-report";
+import { useFindUserPreference } from "@/client/modules/shared/queries/use-find-user-preference";
 import { texts } from "@/client/modules/ticket-detail/consts/texts.const";
 import {
   type TicketDetailDiagnosticsTab,
