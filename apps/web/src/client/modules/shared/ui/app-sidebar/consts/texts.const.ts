@@ -7,6 +7,7 @@ const en = {
     work: "Work",
     setup: "Setup",
     organization: "Organization",
+    settings: "Settings",
   },
   overview: "Overview",
   tickets: "Tickets",

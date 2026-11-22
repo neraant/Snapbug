@@ -16,10 +16,7 @@ import { orpcQuery } from "@/client/modules/shared/orpc/query-utils";
 import { AppSidebarHeader } from "@/client/modules/shared/ui/app-sidebar/components/app-sidebar-header";
 import { AppSidebarOrganizationSwitcher } from "@/client/modules/shared/ui/app-sidebar/components/app-sidebar-organization-switcher";
 import { AppSidebarProjectScope } from "@/client/modules/shared/ui/app-sidebar/components/app-sidebar-project-scope";
-import {
-  appSidebarFooterItems,
-  appSidebarNavGroups,
-} from "@/client/modules/shared/ui/app-sidebar/consts/app-sidebar.const";
+import { appSidebarNavGroups } from "@/client/modules/shared/ui/app-sidebar/consts/app-sidebar.const";
 import { texts as sidebarTexts } from "@/client/modules/shared/ui/app-sidebar/consts/texts.const";
 import { buildPathWithProjectScopeSearchParam } from "@/client/modules/shared/utils/parse-project-scope-search-param.util";
 import { signOutUser } from "@/client/modules/shared/utils/sign-out.util";
@@ -65,15 +62,6 @@ export function AppSidebar({
       .filter((group) => group.items.length > 0);
   }, [isAdmin, language, projectId, projectLookups]);
 
-  const sidebarFooterItems = useMemo(
-    () =>
-      appSidebarFooterItems.map((item) => ({
-        ...item,
-        href: buildPathWithProjectScopeSearchParam(item.href, projectId, projectLookups),
-      })),
-    [language, projectId, projectLookups],
-  );
-
   return (
     <ActiveOrganizationProvider organizationId={activeOrganizationId}>
       <SidebarLayout
@@ -81,7 +69,6 @@ export function AppSidebar({
         description={siteTexts.brand.tagline}
         defaultOpen={defaultSidebarOpen}
         groups={sidebarGroups}
-        footerItems={sidebarFooterItems}
         pathname={pathname}
         user={{ name: user?.name ?? user?.email ?? "User", image: user?.image }}
         linkAs={Link}

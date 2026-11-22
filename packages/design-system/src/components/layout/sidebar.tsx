@@ -293,7 +293,6 @@ export function SidebarLayout({
           ))}
           {footerItems.length > 0 ? (
             <SidebarGroup className="mt-auto">
-              <SidebarSeparator />
               <SidebarGroupContent>
                 <SidebarMenu>
                   <SidebarNavItems items={footerItems} pathname={pathname} LinkComponent={LinkComponent} />
