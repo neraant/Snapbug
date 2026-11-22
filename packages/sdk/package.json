@@ -1,6 +1,6 @@
 {
   "name": "@neraant/snapbug",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Embeddable bug report widget with screenshot, console and network capture",
   "type": "module",
   "license": "MIT",
