@@ -6,7 +6,7 @@ import { UserRole } from "@workspace/validation/modules/user/consts/user-role.co
 export const dynamic = "force-dynamic";
 
 async function handleRequest(request: Request) {
-  const token = readBearerToken(request);
+  const token = readApiKeyToken(request);
   if (!token) {
     return Response.json({ message: "You need to sign in to continue" }, { status: 401 });
   }
@@ -43,13 +43,16 @@ async function handleRequest(request: Request) {
   }
 }
 
-function readBearerToken(request: Request): string | null {
+function readApiKeyToken(request: Request): string | null {
+  const apiKey = request.headers.get("x-api-key")?.trim();
+  if (apiKey) return apiKey;
+
   const authorization = request.headers.get("authorization");
   const prefix = "Bearer ";
   if (!authorization?.startsWith(prefix)) return null;
 
-  const token = authorization.slice(prefix.length).trim();
-  return token.length > 0 ? token : null;
+  const bearer = authorization.slice(prefix.length).trim();
+  return bearer ? bearer : null;
 }
 
 function readClientIp(request: Request): string {

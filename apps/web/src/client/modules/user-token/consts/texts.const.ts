@@ -5,7 +5,7 @@ const en = {
   description: "Personal access tokens are managed in Settings under Access tokens.",
   manageInSettings: "Open settings",
   redirectDescription:
-    "Connect a normal MCP client with a personal token. Send it as a Bearer token to /api/mcp. A project key is not accepted.",
+    "Connect a normal MCP client with a personal token. Send it in the x-api-key header to /api/mcp. A project key is not accepted.",
   create: {
     action: "Create token",
     error: "Could not create the token. Try again.",
@@ -81,7 +81,7 @@ const ru = {
   description: "Личные токены доступа настраиваются в разделе «Настройки» → «Токены доступа».",
   manageInSettings: "Открыть настройки",
   redirectDescription:
-    "Подключите обычный MCP-клиент личным токеном. Передавайте его как Bearer-токен на /api/mcp. Ключ проекта не подойдёт.",
+    "Подключите обычный MCP-клиент личным токеном. Передавайте его в заголовке x-api-key на /api/mcp. Ключ проекта не подойдёт.",
   create: {
     action: "Создать токен",
     error: "Не удалось создать токен. Попробуйте ещё раз.",

@@ -4,7 +4,7 @@ export function buildMcpClientConfig(origin: string, token: string): string {
       snapbug: {
         url: `${origin}/api/mcp`,
         headers: {
-          Authorization: `Bearer ${token}`,
+          "x-api-key": token,
         },
       },
     },

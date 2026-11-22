@@ -6,7 +6,7 @@ export function buildMcpConnectConfig(origin: string, client: McpConnectClient):
   const url = `${origin}/api/mcp`;
 
   if (client === "claude-code") {
-    return `claude mcp add snapbug --transport http --url ${url} --header "Authorization: Bearer ${tokenPlaceholder}"`;
+    return `claude mcp add snapbug --transport http --url ${url} --header "x-api-key: ${tokenPlaceholder}"`;
   }
 
   const config = {
@@ -14,7 +14,7 @@ export function buildMcpConnectConfig(origin: string, client: McpConnectClient):
       snapbug: {
         url,
         headers: {
-          Authorization: `Bearer ${tokenPlaceholder}`,
+          "x-api-key": tokenPlaceholder,
         },
       },
     },
