@@ -24,12 +24,12 @@ export function formatErrorMessage(event: ErrorEvent): string {
 
 export function formatRejectionReason(reason: unknown): string {
   if (reason instanceof Error) {
-    return reason.stack ?? reason.message;
+    return formatConsoleArgs([reason.stack ?? reason.message]);
   }
-  if (typeof reason === "string") return reason;
+  if (typeof reason === "string") return formatConsoleArgs([reason]);
   try {
-    return JSON.stringify(reason);
+    return formatConsoleArgs([JSON.stringify(reason)]);
   } catch {
-    return String(reason);
+    return formatConsoleArgs([String(reason)]);
   }
 }

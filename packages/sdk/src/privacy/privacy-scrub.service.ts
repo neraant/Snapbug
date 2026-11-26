@@ -20,9 +20,6 @@ export function scrubAutomaticData(
   if (privacy.maskText) {
     url = scrubUrlQueryValues(url);
   }
-  if (fragments.length > 0) {
-    url = redactFragments(url, fragments);
-  }
 
   const consoleLogs = data.consoleLogs.map((entry) => ({
     ...entry,
