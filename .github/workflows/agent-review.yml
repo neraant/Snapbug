@@ -17,6 +17,8 @@ permissions:
 jobs:
   agent-review:
     name: agent-review
+    # Temporarily disabled. Remove this `if` to re-enable agent review.
+    if: false
     runs-on: ubuntu-latest
     environment: reviewer
     timeout-minutes: 30

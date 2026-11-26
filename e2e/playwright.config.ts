@@ -257,6 +257,7 @@ export default defineConfig({
       NEXT_PUBLIC_APP_URL: baseURL,
       RESEND_API_KEY: process.env.RESEND_API_KEY ?? "your-resend-api-key-here",
       EMAIL_FROM: process.env.EMAIL_FROM ?? "noreply@snapbug.com",
+      EMAIL_TRANSPORT: "log",
       ...(process.env.SNAPBUG_TEST_API_KEY?.trim() ? { SNAPBUG_TEST_API_KEY: process.env.SNAPBUG_TEST_API_KEY } : {}),
     },
   },
