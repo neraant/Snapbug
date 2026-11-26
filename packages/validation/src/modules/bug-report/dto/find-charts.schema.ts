@@ -2,7 +2,9 @@ import { bugReportModelSchema } from "@workspace/validation/modules/bug-report/d
 import { findStatsInputDtoSchema } from "@workspace/validation/modules/bug-report/dto/find-stats.schema";
 import { z } from "zod";
 
-export const findChartsInputDtoSchema = findStatsInputDtoSchema;
+export const findChartsInputDtoSchema = findStatsInputDtoSchema.extend({
+  timeZone: z.string().trim().min(1).max(100).optional(),
+});
 
 export type FindChartsInputDtoType = z.infer<typeof findChartsInputDtoSchema>;
 

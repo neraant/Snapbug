@@ -15,18 +15,17 @@ import { Typography } from "@workspace/design-system/components/ui/typography";
 import { getAppErrorMessage } from "@workspace/server/error/get-app-error-message";
 import { CopyIcon, EllipsisVerticalIcon, RefreshCwIcon, XIcon } from "lucide-react";
 
+import { useFormatUserDate } from "@/client/modules/preference/hooks/use-format-user-date";
 import { useConfirmDialog } from "@/client/modules/shared/hooks/use-confirm-dialog";
 import { InvitePeopleDialog } from "@/client/modules/team/components/invite-people-dialog";
 import { texts } from "@/client/modules/team/consts/texts.const";
 import { usePendingInvitations } from "@/client/modules/team/hooks/use-pending-invitations";
 import { isInvitationExpired, isInvitationPending } from "@/client/modules/team/utils/count-pending-invitations.util";
 
-function formatInvitationDate(value: string): string {
-  return new Date(value).toLocaleDateString();
-}
-
 export function PendingInvitations() {
   const { invitations, resend, revoke, copyLink, isMutating } = usePendingInvitations();
+  const formatDate = useFormatUserDate();
+  const formatInvitationDate = (value: string) => formatDate(value, { dateOnly: true });
   const { confirm, bind } = useConfirmDialog();
   const openInvitations = invitations.filter((invitation) => invitation.revokedAt === null);
 

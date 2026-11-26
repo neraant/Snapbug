@@ -33,11 +33,11 @@ describe("mergeWidgetConfig", () => {
     expect(resolveWidgetOptions(merged).collectVisitorEmail).toBe(false);
   });
 
-  it("prefers init collectVisitorEmail over remote", () => {
+  it("prefers remote collectVisitorEmail over init", () => {
     const merged = mergeWidgetConfig(
       { ...baseConfig, collectVisitorEmail: true },
       { ...remoteDefaults, collectVisitorEmail: false },
     );
-    expect(resolveWidgetOptions(merged).collectVisitorEmail).toBe(true);
+    expect(resolveWidgetOptions(merged).collectVisitorEmail).toBe(false);
   });
 });

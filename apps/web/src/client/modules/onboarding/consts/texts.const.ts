@@ -1,6 +1,10 @@
 import { localize } from "@/client/modules/shared/locale/interface-language";
 
 const en = {
+  progress: {
+    label: "Onboarding progress",
+    value: (percent: number) => `${percent} percent`,
+  },
   step: {
     of: (current: number, total: number) => `Step ${current} of ${total}`,
     organization: "Organization",
@@ -72,6 +76,10 @@ const en = {
 } as const;
 
 const ru = {
+  progress: {
+    label: "Прогресс онбординга",
+    value: (percent: number) => `${percent} процентов`,
+  },
   step: {
     of: (current: number, total: number) => `Шаг ${current} из ${total}`,
     organization: "Организация",

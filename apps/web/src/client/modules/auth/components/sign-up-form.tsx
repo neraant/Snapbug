@@ -70,7 +70,7 @@ function SignUpFormFields({ invitationToken, defaultEmail = "", organizationName
   }
 
   return (
-    <Column as="form" gap="none" width="full" onSubmit={onSubmit}>
+    <Column as="form" gap="none" width="full" noValidate onSubmit={onSubmit}>
       <FieldGroup>
         <TextField
           control={control}

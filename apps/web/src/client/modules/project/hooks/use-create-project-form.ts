@@ -26,9 +26,11 @@ export function useCreateProjectForm({ onCreated }: UseCreateProjectFormInput) {
   const { data: projects } = useFindProjects();
   const { mutateAsync: createProject, isPending } = useCreateProject();
 
+  const defaultName = texts.createSheet.field.name.placeholder;
+
   const { control, handleSubmit, reset, formState } = useForm<ProjectCreateSchemaType>({
     resolver: zodResolver(projectCreateSchema),
-    defaultValues: { name: "", color: projectColorDefault },
+    defaultValues: { name: defaultName, color: projectColorDefault },
   });
 
   const resolveOrganizationId = useCallback(() => {
@@ -51,7 +53,7 @@ export function useCreateProjectForm({ onCreated }: UseCreateProjectFormInput) {
         queryClient.invalidateQueries({ queryKey: orpcQuery.project.findProjects.key() }),
         queryClient.invalidateQueries({ queryKey: orpcQuery.bugReport.countOpenByProject.key() }),
       ]);
-      reset({ name: "", color: projectColorDefault });
+      reset({ name: defaultName, color: projectColorDefault });
       onCreated();
     } catch (error) {
       toast.add({

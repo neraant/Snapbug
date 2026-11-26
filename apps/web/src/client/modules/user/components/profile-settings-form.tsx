@@ -73,8 +73,10 @@ export function ProfileSettingsForm() {
             title={texts.profile.email.sectionTitle}
             description={texts.profile.email.sectionDescription}
           >
-            <Column gap="xs" align="start">
-              <Typography variant="text-sm">{user.email}</Typography>
+            <Column gap="xs" align="start" minWidth="0" width="full">
+              <Typography variant="text-sm" title={user.email} className="max-w-full break-all">
+                {user.email}
+              </Typography>
               <Typography variant="text-sm" color="muted">
                 {texts.profile.email.hint}
               </Typography>
@@ -89,7 +91,9 @@ export function ProfileSettingsForm() {
               <Avatar size="lg" aria-label={displayName}>
                 <AvatarFallback>{initials}</AvatarFallback>
               </Avatar>
-              <Typography variant="text-sm">{displayName}</Typography>
+              <Typography variant="text-sm" title={displayName} className="min-w-0 break-all">
+                {displayName}
+              </Typography>
             </Row>
           </SettingsSection>
         </SettingsSections>

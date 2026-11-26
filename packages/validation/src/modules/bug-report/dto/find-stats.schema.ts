@@ -13,7 +13,7 @@ const bugReportStatSparklinePointSchema = z.object({
 export const bugReportStatItemSchema = z.object({
   id: z.enum(bugReportStatIds),
   value: z.string(),
-  changePercent: z.number(),
+  changePercent: z.number().nullable(),
   sparkline: z.array(bugReportStatSparklinePointSchema).length(7),
 });
 

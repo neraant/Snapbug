@@ -6,6 +6,7 @@ import { cn } from "@workspace/design-system/lib/utils";
 import { texts } from "@/client/modules/overview/consts/texts.const";
 import type { OverviewStatFilters } from "@/client/modules/overview/types/overview-stat-filter.type";
 import { mapChartHoursToHeatmapRows } from "@/client/modules/overview/utils/map-chart-hours-to-heatmap-rows.util";
+import { useFindUserPreference } from "@/client/modules/shared/queries/use-find-user-preference";
 import { useFindBugReportCharts } from "@/client/modules/shared/queries/use-find-bug-report-charts";
 
 type OverviewBusiestHoursCardProps = {
@@ -14,9 +15,11 @@ type OverviewBusiestHoursCardProps = {
 };
 
 export function OverviewBusiestHoursCard({ filters, className }: OverviewBusiestHoursCardProps) {
+  const { data: preference } = useFindUserPreference();
   const { data: charts } = useFindBugReportCharts({
     projectId: filters.projectId ?? undefined,
     periodDays: filters.periodDays,
+    timeZone: preference.timeZone,
   });
 
   const rows = mapChartHoursToHeatmapRows(charts.hours);

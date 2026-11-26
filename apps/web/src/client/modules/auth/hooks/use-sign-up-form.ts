@@ -62,11 +62,6 @@ export function useSignUpForm({ invitationToken, defaultEmail = "" }: UseSignUpF
       return;
     }
 
-    toast.add({
-      title: texts.signUp.toast.success,
-      type: "success",
-    });
-
     await acceptInvitationAfterAuth(invitationToken, acceptInvitation);
     router.replace(url.overview());
   };

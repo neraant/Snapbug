@@ -10,6 +10,17 @@ import type {
 } from "@workspace/validation/modules/bug-report/dto/find-charts.schema";
 import type { MembershipModelType } from "@workspace/validation/modules/membership/dto/membership.model";
 
+function resolveChartTimeZone(timeZone: string | undefined): string {
+  if (!timeZone) return "UTC";
+
+  try {
+    Intl.DateTimeFormat(undefined, { timeZone });
+    return timeZone;
+  } catch {
+    return "UTC";
+  }
+}
+
 export class FindChartsUseCase {
   constructor(
     private readonly membershipPort: MembershipPort,
@@ -39,7 +50,12 @@ export class FindChartsUseCase {
       this.bugReportRepository.countCreatedByDay(projectIds, windows.queryFrom, windows.queryTo),
       this.bugReportRepository.countResolvedByDay(projectIds, windows.queryFrom, windows.queryTo),
       this.bugReportRepository.countCreatedBySeverity(projectIds, windows.queryFrom, windows.queryTo),
-      this.bugReportRepository.countCreatedByWeekdayHour(projectIds, windows.queryFrom, windows.queryTo),
+      this.bugReportRepository.countCreatedByWeekdayHour(
+        projectIds,
+        windows.queryFrom,
+        windows.queryTo,
+        resolveChartTimeZone(input.timeZone),
+      ),
     ]);
 
     return this.bugReportStatService.buildChartsFromAggregates({

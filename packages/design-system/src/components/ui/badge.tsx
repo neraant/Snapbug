@@ -40,12 +40,20 @@ function Badge({ className, variant = "default", ...props }: BadgeProps) {
 }
 
 type TrendBadgeProps = {
-  changePercent: number;
+  changePercent: number | null;
   polarity: StatTrendPolarity;
   className?: string;
 };
 
 function TrendBadge({ changePercent, polarity, className }: TrendBadgeProps) {
+  if (changePercent == null) {
+    return (
+      <Badge variant="secondary" className={cn("font-mono", className)}>
+        —
+      </Badge>
+    );
+  }
+
   const tone = resolveStatTrendTone(changePercent, polarity);
   const variant = tone === "positive" ? "success" : tone === "negative" ? "warning" : "secondary";
   const TrendIcon = changePercent < 0 ? TrendingDownIcon : TrendingUpIcon;

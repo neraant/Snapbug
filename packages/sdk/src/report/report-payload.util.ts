@@ -63,6 +63,8 @@ export function buildReportPayload(apiKey: string, input: SubmitReportInput): Re
 
 /** Form value wins over identify(); invalid form values fall back to the identified email. */
 function resolveReporterEmail(formEmail: string) {
+  if (!widgetState.collectVisitorEmail) return null;
+
   const trimmed = formEmail.trim();
   if (trimmed.length > 0 && isValidReporterEmail(trimmed)) return trimmed;
   return widgetState.identifiedEmail;
