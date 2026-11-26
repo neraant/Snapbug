@@ -81,7 +81,7 @@ function StatCardFooter({ className, ...props }: ComponentProps<typeof Column>) 
 }
 
 type StatCardDeltaProps = {
-  changePercent: number;
+  changePercent: number | null;
   polarity: StatTrendPolarity;
   comparisonLabel: string;
   trailing?: ReactNode;

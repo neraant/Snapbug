@@ -156,9 +156,9 @@ describe("FindStatsUseCase", () => {
     const openIssue = result.items.find((item) => item.id === BugReportStatId.OPEN_ISSUE);
     const criticalHigh = result.items.find((item) => item.id === BugReportStatId.CRITICAL_HIGH_OPEN);
 
-    expect(openIssue?.changePercent).toBe(100);
+    expect(openIssue?.changePercent).toBeNull();
     expect(openIssue?.sparkline).toEqual([...Array.from({ length: 6 }, () => ({ value: 0 })), { value: 9 }]);
-    expect(criticalHigh?.changePercent).toBe(100);
+    expect(criticalHigh?.changePercent).toBeNull();
     expect(criticalHigh?.sparkline).toEqual([...Array.from({ length: 6 }, () => ({ value: 0 })), { value: 3 }]);
   });
 });

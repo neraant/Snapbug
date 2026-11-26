@@ -1,5 +1,6 @@
 "use client";
 
+import { Column } from "@workspace/design-system/components/layout/column";
 import { Row } from "@workspace/design-system/components/layout/row";
 import { Avatar, AvatarFallback } from "@workspace/design-system/components/ui/avatar";
 import { Button } from "@workspace/design-system/components/ui/button";
@@ -24,12 +25,12 @@ import { useProjectScopeSearchParam } from "@/client/modules/shared/hooks/use-pr
 import { useFindProjects } from "@/client/modules/shared/queries/use-find-projects";
 import { useRestoreProjectScopeSearchParam } from "@/client/modules/shared/ui/app-sidebar/hooks/use-restore-project-scope-search-param";
 
-function getProjectScopeLabel(projectId: string | null, projectNameById: Map<string, string>) {
+function getProjectScopeLabel(projectId: string | null, projectLabelById: Map<string, string>) {
   if (projectId == null) {
     return overviewTexts.filter.project.allProjects;
   }
 
-  return projectNameById.get(projectId) ?? overviewTexts.filter.project.allProjects;
+  return projectLabelById.get(projectId) ?? overviewTexts.filter.project.allProjects;
 }
 
 function getProjectScopeInitial(projectId: string | null, projectNameById: Map<string, string>) {
@@ -47,14 +48,14 @@ type AppSidebarProjectScopeTriggerProps = {
   isIconMode: boolean;
   label: string;
   projectId: string | null;
-  projectNameById: Map<string, string>;
+  projectLabelById: Map<string, string>;
 };
 
 function AppSidebarProjectScopeTrigger({
   isIconMode,
   label,
   projectId,
-  projectNameById,
+  projectLabelById,
 }: AppSidebarProjectScopeTriggerProps) {
   const triggerButton = (
     <DropdownMenuTrigger
@@ -73,7 +74,7 @@ function AppSidebarProjectScopeTrigger({
       {isIconMode ? (
         <Avatar variant="brand" size="xs" className="rounded-md">
           <AvatarFallback className="font-mono text-[10px] font-bold">
-            {getProjectScopeInitial(projectId, projectNameById)}
+            {getProjectScopeInitial(projectId, projectLabelById)}
           </AvatarFallback>
         </Avatar>
       ) : (
@@ -81,7 +82,7 @@ function AppSidebarProjectScopeTrigger({
           <Row align="center" gap="sm" wrap={false} className="min-w-0 flex-1">
             <Avatar variant="brand" size="xs" className="rounded-md">
               <AvatarFallback className="font-mono text-[10px] font-bold">
-                {getProjectScopeInitial(projectId, projectNameById)}
+                {getProjectScopeInitial(projectId, projectLabelById)}
               </AvatarFallback>
             </Avatar>
             <Typography as="span" variant="text-xs" weight="semibold" truncate className="min-w-0">
@@ -119,13 +120,13 @@ export function AppSidebarProjectScope() {
     [projects],
   );
 
-  const projectNameById = useMemo(
-    () => new Map(sortedProjects.map((project) => [project.id, project.name])),
+  const projectLabelById = useMemo(
+    () => new Map(sortedProjects.map((project) => [project.id, `${project.name} · ${project.slug}`])),
     [sortedProjects],
   );
 
   const selectedValue = projectId ?? overviewStatAllProjectsValue;
-  const label = getProjectScopeLabel(projectId, projectNameById);
+  const label = getProjectScopeLabel(projectId, projectLabelById);
 
   return (
     <DropdownMenu>
@@ -133,7 +134,7 @@ export function AppSidebarProjectScope() {
         isIconMode={isIconMode}
         label={label}
         projectId={projectId}
-        projectNameById={projectNameById}
+        projectLabelById={projectLabelById}
       />
       <DropdownMenuContent align="start" className="max-h-80">
         <DropdownMenuRadioGroup
@@ -147,7 +148,14 @@ export function AppSidebarProjectScope() {
           </DropdownMenuRadioItem>
           {sortedProjects.map((project) => (
             <DropdownMenuRadioItem key={project.id} value={project.id}>
-              {project.name}
+              <Column gap="none" minWidth="0">
+                <Typography as="span" variant="text-sm" truncate>
+                  {project.name}
+                </Typography>
+                <Typography as="span" variant="text-xs" color="muted" truncate>
+                  {project.slug}
+                </Typography>
+              </Column>
             </DropdownMenuRadioItem>
           ))}
         </DropdownMenuRadioGroup>

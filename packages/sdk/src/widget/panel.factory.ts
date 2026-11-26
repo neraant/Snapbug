@@ -25,8 +25,8 @@ function appendPanelContent(session: ReturnType<typeof createPanelElements>) {
   session.intro.append(session.heading, session.subtitle);
   session.header.append(session.intro, session.closeButton);
 
-  const titleField = createField(COPY.titleLabel, session.title);
-  titleField.append(session.titleError);
+  const titleField = createTitleField(session);
+  titleField.append(session.titleHint, session.titleError);
   const descriptionField = createDescriptionField(session);
   const stepsField = createField(COPY.stepsLabel, session.steps);
   const severityField = createSeverityField(session);
@@ -41,6 +41,22 @@ function appendPanelContent(session: ReturnType<typeof createPanelElements>) {
   session.success.append(session.successHeading, session.successShortId, session.successMessage, session.done);
   session.error.append(session.errorHeading, session.errorMessage, session.tryAgain);
   session.panel.append(session.form, session.success, session.error);
+}
+
+function createTitleField(session: ReturnType<typeof createPanelElements>) {
+  const field = document.createElement("div");
+  const label = document.createElement("span");
+  const mark = document.createElement("span");
+
+  field.className = "snapbug-field";
+  label.className = "snapbug-label";
+  label.textContent = COPY.titleLabel;
+  mark.className = "snapbug-required";
+  mark.textContent = COPY.descriptionRequiredMark;
+  mark.setAttribute("aria-hidden", "true");
+  label.append(" ", mark);
+  field.append(label, session.title);
+  return field;
 }
 
 function createDescriptionField(session: ReturnType<typeof createPanelElements>) {

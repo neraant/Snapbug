@@ -20,13 +20,15 @@ import {
 export function useRestoreProjectScopeSearchParam() {
   const searchParams = useSearchParams();
   const { setProjectId } = useProjectScopeSearchParam();
-  const { data: projects = [] } = useQuery(orpcQuery.project.findProjects.queryOptions());
+  const { data: projects = [], isPending } = useQuery(orpcQuery.project.findProjects.queryOptions());
   const restoredRef = useRef(false);
 
   const projectLookups = useMemo(() => projects.map((project) => ({ id: project.id, slug: project.slug })), [projects]);
   const projectIds = useMemo(() => new Set(projects.map((project) => project.id)), [projects]);
 
   useEffect(() => {
+    if (isPending) return;
+
     const token = parseProjectScopeSearchParam(searchParams.get(projectScopeSearchParamKey));
     if (!token) return;
 
@@ -34,10 +36,10 @@ export function useRestoreProjectScopeSearchParam() {
     if (resolvedProjectId == null || !projectIds.has(resolvedProjectId)) {
       setProjectId(null);
     }
-  }, [projectIds, projectLookups, searchParams, setProjectId]);
+  }, [isPending, projectIds, projectLookups, searchParams, setProjectId]);
 
   useEffect(() => {
-    if (restoredRef.current) {
+    if (isPending || restoredRef.current) {
       return;
     }
 
@@ -64,5 +66,5 @@ export function useRestoreProjectScopeSearchParam() {
     }
 
     setProjectId(storedValue);
-  }, [projectIds, searchParams, setProjectId]);
+  }, [isPending, projectIds, searchParams, setProjectId]);
 }

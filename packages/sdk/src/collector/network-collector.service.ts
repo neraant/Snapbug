@@ -28,6 +28,7 @@ export function stopNetworkCollector() {
 
 function recordNetwork(method: string, url: string, status: number, durationMs: number) {
   if (!url || /^blob:|^data:/i.test(url)) return;
+  if (status !== 0 && status < 400) return;
   pushNetworkEntry({
     method: method.toUpperCase(),
     url,

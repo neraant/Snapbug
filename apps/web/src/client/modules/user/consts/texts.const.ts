@@ -7,6 +7,7 @@ const en = {
       sectionTitle: "Display name",
       sectionDescription: "How your name appears across the workspace.",
       label: "Display name",
+      tooLong: "Display name must be at most 80 characters",
       save: "Save",
       toast: {
         error: "Could not save your display name. Try again.",
@@ -60,6 +61,7 @@ const ru = {
       sectionTitle: "Отображаемое имя",
       sectionDescription: "Как ваше имя показывается в рабочем пространстве.",
       label: "Отображаемое имя",
+      tooLong: "Отображаемое имя: не больше 80 символов",
       save: "Сохранить",
       toast: {
         error: "Не удалось сохранить имя. Попробуйте ещё раз.",

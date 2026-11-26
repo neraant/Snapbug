@@ -19,6 +19,7 @@ export function syncPanelSubmitState(session: PanelSession) {
   const length = descriptionPlainLength(session.description.getValue());
   session.descriptionCounter.textContent = COPY.descriptionCounter(length, PANEL_DESCRIPTION_MIN_LENGTH);
   session.descriptionCounter.classList.toggle("snapbug-counter-met", length >= PANEL_DESCRIPTION_MIN_LENGTH);
+  session.titleHint.hidden = session.title.value.trim().length > 0;
   session.submit.disabled =
     session.title.value.trim().length === 0 || length < PANEL_DESCRIPTION_MIN_LENGTH || session.sending;
 }

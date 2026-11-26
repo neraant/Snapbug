@@ -1,7 +1,11 @@
 import { Progress as ProgressPrimitive } from "@base-ui/react/progress";
 import { cn } from "@workspace/design-system/lib/utils";
 
-function Progress({ className, value, ...props }: ProgressPrimitive.Root.Props) {
+type ProgressProps = ProgressPrimitive.Root.Props & {
+  label?: string;
+};
+
+function Progress({ className, value, label, ...props }: ProgressProps) {
   return (
     <ProgressPrimitive.Root
       data-slot="progress"
@@ -9,6 +13,7 @@ function Progress({ className, value, ...props }: ProgressPrimitive.Root.Props) 
       value={value}
       {...props}
     >
+      {label ? <ProgressPrimitive.Label className="sr-only">{label}</ProgressPrimitive.Label> : null}
       <ProgressPrimitive.Track
         data-slot="progress-track"
         className="relative h-2 w-full overflow-hidden rounded-full bg-muted"

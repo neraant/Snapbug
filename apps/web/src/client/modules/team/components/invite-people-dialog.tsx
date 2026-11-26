@@ -13,7 +13,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@workspace/design-system/components/ui/dialog";
-import { Field, FieldDescription, FieldLabel } from "@workspace/design-system/components/ui/field";
+import { Field, FieldDescription, FieldError, FieldLabel } from "@workspace/design-system/components/ui/field";
 import {
   Select,
   SelectContent,
@@ -40,6 +40,7 @@ export function InvitePeopleDialog() {
     projects,
     selectedProjectIds,
     projectsLocked,
+    hasInvalidEmail,
     isPending,
     onOpenChange,
     onEmailsChange,
@@ -81,6 +82,7 @@ export function InvitePeopleDialog() {
               tagAnnotation={tagAnnotation}
             />
             <FieldDescription>{texts.invite.hint}</FieldDescription>
+            {error ? <FieldError errors={[{ message: error }]} /> : null}
           </Field>
           <Field>
             <FieldLabel htmlFor="team-invite-role">{texts.invite.roleLabel}</FieldLabel>
@@ -130,7 +132,9 @@ export function InvitePeopleDialog() {
           </Field>
           <DialogFooter>
             <DialogClose render={<Button type="button" variant="outline" />}>{texts.invite.cancel}</DialogClose>
-            <SubmitButton loading={isPending}>{texts.invite.submit}</SubmitButton>
+            <SubmitButton loading={isPending} disabled={hasInvalidEmail}>
+              {texts.invite.submit}
+            </SubmitButton>
           </DialogFooter>
         </Column>
       </DialogContent>

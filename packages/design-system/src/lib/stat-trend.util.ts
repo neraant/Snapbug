@@ -2,7 +2,10 @@ export type StatTrendPolarity = "higher-is-better" | "lower-is-better";
 
 export type StatTrendTone = "positive" | "negative" | "neutral";
 
-export function resolveStatTrendTone(changePercent: number, polarity: StatTrendPolarity): StatTrendTone {
+export function resolveStatTrendTone(changePercent: number | null, polarity: StatTrendPolarity): StatTrendTone {
+  if (changePercent == null) {
+    return "neutral";
+  }
   if (changePercent === 0) {
     return "neutral";
   }

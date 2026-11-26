@@ -1,6 +1,6 @@
 import { toast } from "@workspace/design-system/components/ui/toast";
 import { getAppErrorMessage } from "@workspace/server/error/get-app-error-message";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { timeZoneUserSetStorageKey } from "@/client/modules/preference/consts/time-zone-user-set.storage-key.const";
 import { useQuietSavedIndicator } from "@/client/modules/preference/hooks/use-quiet-saved-indicator";
@@ -15,7 +15,11 @@ export function useProfileTimeZone() {
   const { data: preference } = useFindUserPreference();
   const { mutateAsync: updateUserPreference, isPending } = useUpdateUserPreference();
   const { markSaved, isSaved } = useQuietSavedIndicator();
-  const [detectedTimeZone] = useState(() => detectBrowserTimeZone());
+  const [detectedTimeZone, setDetectedTimeZone] = useState(preference.timeZone);
+
+  useEffect(() => {
+    setDetectedTimeZone(detectBrowserTimeZone());
+  }, []);
 
   const options = useMemo(() => {
     const zones =

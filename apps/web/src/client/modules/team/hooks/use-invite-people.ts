@@ -1,5 +1,6 @@
 import { toast } from "@workspace/design-system/components/ui/toast";
 import { getAppErrorMessage } from "@workspace/server/error/get-app-error-message";
+import { emailSchema } from "@workspace/validation/shared/email.schema";
 import { sendInvitationsInputDtoSchema } from "@workspace/validation/modules/invitation/dto/send-invitation.schema";
 import { UserRole, userRoles } from "@workspace/validation/modules/user/consts/user-role.const";
 import { type FormEvent, useCallback, useEffect, useMemo, useState } from "react";
@@ -18,6 +19,11 @@ import {
   inviteEmailChipStatus,
   normalizeInviteEmail,
 } from "@/client/modules/team/utils/invite-email-chip.util";
+
+function invalidInviteEmailMessage(emails: string[]): string | undefined {
+  const hasInvalidEmail = emails.some((email) => !emailSchema.safeParse(email).success);
+  return hasInvalidEmail ? texts.invite.invalidEmail : undefined;
+}
 
 export function useInvitePeople() {
   const [open, setOpen] = useState(false);
@@ -57,7 +63,7 @@ export function useInvitePeople() {
 
   const onEmailsChange = (nextEmails: string[]) => {
     setEmails(nextEmails);
-    setError(undefined);
+    setError(invalidInviteEmailMessage(nextEmails));
   };
 
   const onRoleChange = (nextRole: UserRole) => {
@@ -119,6 +125,12 @@ export function useInvitePeople() {
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
+    const invalidEmailMessage = invalidInviteEmailMessage(emails);
+    if (invalidEmailMessage) {
+      setError(invalidEmailMessage);
+      return;
+    }
+
     const normalizedEmails = [...new Set(emails.map((email) => normalizeInviteEmail(email)).filter(Boolean))];
     const projectIds = role === UserRole.ADMIN ? projects.map((project) => project.id) : selectedProjectIds;
     const result = sendInvitationsInputDtoSchema.safeParse({
@@ -136,9 +148,10 @@ export function useInvitePeople() {
     try {
       const summary = await sendInvitations(result.data);
       const sentFromMembersTab = tab === teamTabs.members;
+      const delivered = summary.sent > 0 || summary.resent > 0;
       toast.add({
         title: texts.invite.successSummary(summary),
-        type: "success",
+        type: delivered ? "success" : "info",
         ...(sentFromMembersTab
           ? {
               actionProps: {
@@ -166,6 +179,7 @@ export function useInvitePeople() {
     projects,
     selectedProjectIds,
     projectsLocked,
+    hasInvalidEmail: Boolean(invalidInviteEmailMessage(emails)),
     isPending: isPending || isResending,
     onOpenChange,
     onEmailsChange,
