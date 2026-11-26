@@ -134,7 +134,7 @@ export function loadSeedObjectPut(): SeedObjectPut | undefined {
   };
   const client = new S3Client({
     region: "auto",
-    endpoint: `https://${config.accountId}.r2.cloudflarestorage.com`,
+    endpoint: `https://${config.accountId}.eu.r2.cloudflarestorage.com`,
     credentials: {
       accessKeyId: config.accessKeyId,
       secretAccessKey: config.secretAccessKey,
