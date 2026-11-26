@@ -1,0 +1,77 @@
+name: e2e
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  e2e:
+    name: e2e
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      # Dummy values from packages/database/.env.example and apps/web/.env.example.
+      # Playwright starts a local Blob stub when BLOB_READ_WRITE_TOKEN is this placeholder
+      # (e2e/playwright.config.ts). EMAIL_TRANSPORT=log so the app does not call Resend.
+      # SNAPBUG_TEST_API_KEY is intentionally unset: the report page falls back to the
+      # seed key sb_test_store_active. The .env.example placeholder would break that.
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/snapbug
+      AUTH_SECRET: your-secret-auth-secret
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      RESEND_API_KEY: your-resend-api-key-here
+      EMAIL_FROM: noreply@snapbug.com
+      EMAIL_TRANSPORT: log
+      BLOB_STORE_ID: your-blob-store-id-here
+      BLOB_READ_WRITE_TOKEN: your-blob-read-write-token-here
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: snapbug
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d snapbug"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      # Same as e2e/global-setup.ts: migrate only. Specs that need data call
+      # seedDatabase() / seedUnreadNotification() / seedAccess() themselves.
+      - name: Migrate
+        run: pnpm db:migrate
+
+      - name: E2E tests
+        run: pnpm test:e2e
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: e2e/playwright-report
+          retention-days: 7
