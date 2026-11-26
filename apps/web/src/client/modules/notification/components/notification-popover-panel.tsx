@@ -57,16 +57,26 @@ export function NotificationPopoverPanel({ onClose }: NotificationPopoverPanelPr
     [activeId, list],
   );
 
+  const openNotification = useCallback(
+    (id: string) => {
+      const notification = list.items.find((item) => item.id === id);
+      if (!notification?.accessible) return;
+      const href = resolveNotificationHref(notification);
+      if (!href) return;
+      onClose();
+      if (!notification.readAt) markReadById(notification.id);
+      window.location.assign(href);
+    },
+    [list.items, markReadById, onClose, router],
+  );
+
   const openActiveItem = useCallback(() => {
     if (!activeId) return;
-    const notification = list.items.find((item) => item.id === activeId);
-    if (!notification?.accessible) return;
-    const href = resolveNotificationHref(notification);
-    if (!href) return;
-    if (!notification.readAt) markReadById(notification.id);
-    onClose();
-    router.push(href);
-  }, [activeId, list.items, markReadById, onClose, router]);
+    if (!list.items.find((item) => item.id === activeId)?.readAt) {
+      markReadById(activeId);
+    }
+    openNotification(activeId);
+  }, [activeId, list.items, markReadById, openNotification]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -136,6 +146,7 @@ export function NotificationPopoverPanel({ onClose }: NotificationPopoverPanelPr
         onMarkUnread={(id) => markUnread.mutate([id])}
         onArchive={(id) => archive.mutate([id])}
         onItemFocus={setActiveId}
+        onOpen={openNotification}
       />
       <Separator />
       <Row justify="center" width="full" className="shrink-0 px-3 py-2">

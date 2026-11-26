@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 
+import { pageHeading } from "../shared/page-heading";
 import { seedDatabase } from "../shared/seed/seed-database";
 
 test("an administrator reads the activity log after changing the organization", async ({ page }) => {
@@ -27,7 +28,7 @@ test("an administrator reads the activity log after changing the organization", 
   await expect(page.getByText("Saved")).toBeVisible({ timeout: 30_000 });
 
   await page.getByRole("link", { name: "Activity" }).click();
-  await expect(page.getByRole("heading", { name: "Activity log" })).toBeVisible();
+  await expect(pageHeading(page, "Activity log")).toBeVisible({ timeout: 30_000 });
   await expect(page.getByRole("columnheader", { name: "Event" })).toBeVisible();
 
   const change = page.getByRole("button", { name: /Updated organization/i }).first();

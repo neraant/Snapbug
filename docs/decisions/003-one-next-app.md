@@ -22,4 +22,4 @@ One app, `apps/web`. The administrator role is the `(admin)` route group and `ad
 
 ## Consequences
 
-The README does not match the tree: one app, `apps/web`. Cleanup by retention period is a product gap (P-08). Ticket files are stored in Vercel Blob (P-09).
+The README does not match the tree: one app, `apps/web`. Cleanup by retention period is a product gap (P-08). Ticket files are stored in Cloudflare R2 (P-09). E2E writes them to disk.

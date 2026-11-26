@@ -12,6 +12,8 @@ function runDatabaseScript(script: "db:seed"): Promise<void> {
         cwd: root,
         env: {
           ...process.env,
+          SNAPBUG_E2E: process.env.SNAPBUG_E2E ?? "1",
+          SNAPBUG_E2E_BLOB_DIR: process.env.SNAPBUG_E2E_BLOB_DIR,
           DATABASE_URL: process.env.DATABASE_URL ?? "postgres://postgres:postgres@localhost:5432/snapbug",
         },
       },

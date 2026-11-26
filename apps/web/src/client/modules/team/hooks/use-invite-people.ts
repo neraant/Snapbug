@@ -1,8 +1,8 @@
 import { toast } from "@workspace/design-system/components/ui/toast";
 import { getAppErrorMessage } from "@workspace/server/error/get-app-error-message";
-import { emailSchema } from "@workspace/validation/shared/email.schema";
 import { sendInvitationsInputDtoSchema } from "@workspace/validation/modules/invitation/dto/send-invitation.schema";
 import { UserRole, userRoles } from "@workspace/validation/modules/user/consts/user-role.const";
+import { emailSchema } from "@workspace/validation/shared/email.schema";
 import { type FormEvent, useCallback, useEffect, useMemo, useState } from "react";
 
 import { useFindInvitations } from "@/client/modules/shared/queries/use-find-invitations";

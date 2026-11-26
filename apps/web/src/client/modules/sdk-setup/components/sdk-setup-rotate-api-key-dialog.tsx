@@ -6,8 +6,10 @@ import { RefreshCwIcon } from "lucide-react";
 
 import { texts } from "@/client/modules/sdk-setup/consts/texts.const";
 import { useRotateProjectApiKey } from "@/client/modules/sdk-setup/hooks/use-rotate-project-api-key";
+import { buildPlaygroundHref } from "@/client/modules/sdk-setup/utils/build-playground-href.util";
 import { SecretRevealDialog } from "@/client/modules/shared/components/secret-reveal-dialog";
 import { useConfirmDialog } from "@/client/modules/shared/hooks/use-confirm-dialog";
+import { publicEnv } from "@/shared/env.public.schema";
 
 type SdkSetupRotateApiKeyDialogProps = {
   projectId: string;
@@ -44,7 +46,15 @@ export function SdkSetupRotateApiKeyDialog({ projectId }: SdkSetupRotateApiKeyDi
       <Dialog open={open} onOpenChange={onOpenChange} disablePointerDismissal={revealedKey != null}>
         <DialogContent showClose={false}>
           {revealedKey ? (
-            <SecretRevealDialog secret={revealedKey} kind="apiKey" onDone={() => onOpenChange(false)} />
+            <SecretRevealDialog
+              secret={revealedKey}
+              kind="apiKey"
+              followLink={{
+                href: buildPlaygroundHref(publicEnv.NEXT_PUBLIC_PLAYGROUND_URL, revealedKey),
+                label: texts.playground.openWithKey,
+              }}
+              onDone={() => onOpenChange(false)}
+            />
           ) : null}
         </DialogContent>
       </Dialog>

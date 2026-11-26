@@ -18,8 +18,8 @@ Do not start tasks marked TBD: an implementer agent must not take them.
 - SDK: button, Alt+S, console, network, rrweb for 30 s, gzip, a `modern-screenshot` screenshot, annotations. Tests in `packages/sdk/src/**/*.test.ts`. The widget always shows the optional email field.
 - Overview, kanban with columns New, In progress, Fixed, and Closed, in-browser filters, a card with screenshot, logs, environment, and rrweb-player, and changes of status, severity, and assignee. An SDK page with the snippet and the ingest status. Screens in `apps/web/src/app/(app)`.
 - Isolation of someone else's ticket and project in the ticket procedures: `find-bug-reports.test.ts`, `find-one.use-case.test.ts`, `find-screenshot.use-case.test.ts`, `find-replay.use-case.test.ts`.
-- A Vercel Blob adapter exists. Without `BLOB_READ_WRITE_TOKEN` nothing is written to Blob.
-- P-09 ticket files in Vercel Blob.
+- Ticket files go to Cloudflare R2. Without the R2 credentials nothing is written to R2. E2E writes those files to disk.
+- P-09 ticket files in Cloudflare R2.
 - Password reset, analytics (`packages/analytics`), and the widget theme are already in the code and stay in the product.
 - A playground screen exists (`apps/web/src/app/(app)/playground`) and stays in the product.
 - Audit of some changes to a project, a key, a ticket, and project access: `packages/server/src/shared/audit`.

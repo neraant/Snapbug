@@ -7,12 +7,14 @@ type ReportWidgetProps = {
 
 export function ReportWidget({ apiKey }: ReportWidgetProps) {
   useEffect(() => {
-    snapbug.init({
+    void snapbug.init({
       apiKey,
       host: window.location.origin,
     });
 
-    return () => snapbug.destroy();
+    return () => {
+      snapbug.destroy();
+    };
   }, [apiKey]);
 
   return null;

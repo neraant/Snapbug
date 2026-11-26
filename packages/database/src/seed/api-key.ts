@@ -37,6 +37,9 @@ export async function seedApiKey(projects: ProjectRow[]) {
 
   if (apiKeyData.length === 0) return [];
 
+  const seededProjectIds = [...new Set(apiKeyData.map((apiKey) => apiKey.projectId).filter(Boolean))];
+  await db.delete(apiKeyTable).where(inArray(apiKeyTable.projectId, seededProjectIds));
+
   for (const apiKey of apiKeyData) {
     await db
       .insert(apiKeyTable)

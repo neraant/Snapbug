@@ -14,7 +14,12 @@ function resolveLocale(): string {
   return getInterfaceLanguage() === "ru" ? "ru-RU" : "en-US";
 }
 
-export function formatUserDate({ createdAt, timeZone, relative = false, dateOnly = false }: FormatUserDateInput): string {
+export function formatUserDate({
+  createdAt,
+  timeZone,
+  relative = false,
+  dateOnly = false,
+}: FormatUserDateInput): string {
   const date = new Date(createdAt);
 
   if (relative) {

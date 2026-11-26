@@ -324,8 +324,8 @@ export class BugReportRepository {
           lt(bugReportTable.createdAt, to),
         ),
       )
-      .groupBy(weekdayBucket, hourBucket)
-      .orderBy(weekdayBucket, hourBucket);
+      .groupBy(sql`1`, sql`2`)
+      .orderBy(sql`1`, sql`2`);
 
     return rows.map((row) => ({
       weekday: Number(row.weekday),

@@ -114,7 +114,9 @@ export function ActivityLogToolbar({
       >
         <SelectTrigger aria-label={texts.range.label} className="w-[150px]">
           <SelectValue placeholder={texts.range.all}>
-            {(value) => (value && value in texts.range ? texts.range[value as ActivityLogDateRangeType] : texts.range.all)}
+            {(value) =>
+              value && value in texts.range ? texts.range[value as ActivityLogDateRangeType] : texts.range.all
+            }
           </SelectValue>
         </SelectTrigger>
         <SelectContent>

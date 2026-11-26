@@ -1,4 +1,4 @@
-import { execFileSync, spawn } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, statSync, unlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -8,8 +8,6 @@ import { defineConfig, devices } from "@playwright/test";
 
 const here = __dirname;
 const repoRoot = path.join(here, "..");
-
-const placeholderBlobToken = "your-blob-read-write-token-here";
 
 function readEnvFile(filePath: string): Record<string, string> {
   if (!existsSync(filePath)) return {};
@@ -44,50 +42,9 @@ function applyEnvFileVars(filePath: string): void {
 applyEnvFileVars(path.join(repoRoot, ".env.local"));
 applyEnvFileVars(path.join(repoRoot, "apps/web/.env.local"));
 
-function configureBlobForE2e(): void {
-  const configuredToken = process.env.BLOB_READ_WRITE_TOKEN?.trim();
-  if (configuredToken && configuredToken !== placeholderBlobToken) {
-    return;
-  }
-
-  const readyPath = path.join(tmpdir(), `snapbug-blob-stub-${process.pid}.json`);
-  try {
-    unlinkSync(readyPath);
-  } catch {
-    // The stub may not have written a file yet.
-  }
-
-  const runnerPath = path.join(here, "shared/blob/vercel-blob-api-stub-runner.mjs");
-  const child = spawn(process.execPath, [runnerPath], {
-    stdio: ["ignore", "ignore", "inherit"],
-    env: {
-      ...process.env,
-      NODE_OPTIONS: undefined,
-      SNAPBUG_BLOB_STUB_READY_PATH: readyPath,
-    },
-  });
-
-  const deadline = Date.now() + 5_000;
-  while (!existsSync(readyPath) && Date.now() < deadline) {
-    sleepSync(20);
-  }
-  if (!existsSync(readyPath)) {
-    child.kill();
-    throw new Error("The Vercel Blob API stub did not start");
-  }
-
-  const stub = JSON.parse(readFileSync(readyPath, "utf8")) as { baseUrl: string; token: string };
-  process.env.BLOB_READ_WRITE_TOKEN = stub.token;
-  process.env.VERCEL_BLOB_API_URL = stub.baseUrl;
-  process.env.VERCEL_BLOB_USE_X_CONTENT_LENGTH = "1";
-
-  child.unref();
-  process.on("exit", () => {
-    child.kill();
-  });
-}
-
-configureBlobForE2e();
+const e2eBlobDir = path.join(tmpdir(), "snapbug-e2e-blob");
+process.env.SNAPBUG_E2E = "1";
+process.env.SNAPBUG_E2E_BLOB_DIR = e2eBlobDir;
 
 // The dev server may take the whole webServer timeout to boot. Workers load this
 // file again after that, and must keep the port the server already bound.
@@ -252,6 +209,8 @@ export default defineConfig({
     timeout: 120_000,
     env: {
       ...process.env,
+      SNAPBUG_E2E: "1",
+      SNAPBUG_E2E_BLOB_DIR: e2eBlobDir,
       DATABASE_URL: process.env.DATABASE_URL ?? "postgres://postgres:postgres@localhost:5432/snapbug",
       AUTH_SECRET: process.env.AUTH_SECRET ?? "your-secret-auth-secret",
       NEXT_PUBLIC_APP_URL: baseURL,

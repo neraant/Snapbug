@@ -28,6 +28,7 @@ type NotificationListProps = {
   onArchive?: (id: string) => void;
   onToggleSelect?: (id: string, checked: boolean) => void;
   onItemFocus?: (id: string) => void;
+  onOpen?: (id: string) => void;
 };
 
 type ListRow =
@@ -72,6 +73,7 @@ export function NotificationList({
   onArchive,
   onToggleSelect,
   onItemFocus,
+  onOpen,
 }: NotificationListProps) {
   const { items, query } = list;
   const rows = useMemo(() => groupRows(items), [items]);
@@ -155,6 +157,7 @@ export function NotificationList({
                 onArchive={onArchive}
                 onToggleSelect={onToggleSelect}
                 onFocus={() => onItemFocus?.(row.notification.id)}
+                onOpen={onOpen}
               />
             ),
           )
