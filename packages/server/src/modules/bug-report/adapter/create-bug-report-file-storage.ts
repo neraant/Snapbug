@@ -1,15 +1,29 @@
-import { VercelBlobFileStorageAdapter } from "@workspace/server/modules/bug-report/adapter/vercel-blob-file-storage.adapter";
+import {
+  E2eFileStorageAdapter,
+  resolveE2eBlobStorageDir,
+} from "@workspace/server/modules/bug-report/adapter/e2e-file-storage.adapter";
+import {
+  R2FileStorageAdapter,
+  type R2FileStorageConfig,
+} from "@workspace/server/modules/bug-report/adapter/r2-file-storage.adapter";
 import type { FileStoragePort } from "@workspace/server/modules/bug-report/port/file-storage.port";
+import { env } from "@workspace/server/shared/env/env.schema";
 
-const PLACEHOLDER_BLOB_TOKEN = "your-blob-read-write-token-here";
-
-function resolvedBlobToken(tokenFromEnvFile: string | undefined): string | undefined {
-  const token = tokenFromEnvFile?.trim() || process.env.BLOB_READ_WRITE_TOKEN?.trim();
-  if (!token || token === PLACEHOLDER_BLOB_TOKEN) return undefined;
-  return token;
+function r2FileStorageConfig(): R2FileStorageConfig | undefined {
+  const { ACCESS_KEY_ID, SECRET_ACCESS_KEY, ACCOUNT_ID, BUCKET_NAME } = env;
+  if (!ACCESS_KEY_ID || !SECRET_ACCESS_KEY || !ACCOUNT_ID || !BUCKET_NAME) return undefined;
+  return {
+    accessKeyId: ACCESS_KEY_ID,
+    secretAccessKey: SECRET_ACCESS_KEY,
+    accountId: ACCOUNT_ID,
+    bucketName: BUCKET_NAME,
+  };
 }
 
-export function createBugReportFileStorage(tokenFromEnvFile: string | undefined): FileStoragePort {
-  const token = resolvedBlobToken(tokenFromEnvFile);
-  return new VercelBlobFileStorageAdapter(token);
+export function createBugReportFileStorage(): FileStoragePort {
+  if (env.SNAPBUG_E2E === "1" || env.SNAPBUG_E2E === "true") {
+    return new E2eFileStorageAdapter(resolveE2eBlobStorageDir());
+  }
+
+  return new R2FileStorageAdapter(r2FileStorageConfig());
 }

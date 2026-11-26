@@ -93,16 +93,16 @@ import { ArchiveNotificationUseCase } from "@workspace/server/modules/notificati
 import { EmitNotificationsUseCase } from "@workspace/server/modules/notification/application/emit-notifications.use-case";
 import { FindNotificationPreferenceUseCase } from "@workspace/server/modules/notification/application/find-notification-preference.use-case";
 import { ListNotificationsUseCase } from "@workspace/server/modules/notification/application/list-notifications.use-case";
-import { UpdateNotificationPreferenceUseCase } from "@workspace/server/modules/notification/application/update-notification-preference.use-case";
-import { NotificationEmailDispatchService } from "@workspace/server/modules/notification/service/notification-email-dispatch.service";
-import { NotificationPreferenceService } from "@workspace/server/modules/notification/service/notification-preference.service";
-import { UserNotificationPreferenceRepository } from "@workspace/server/modules/notification/repository/user-notification-preference.repository";
 import { MarkAllReadUseCase } from "@workspace/server/modules/notification/application/mark-all-read.use-case";
 import { MarkReadUseCase } from "@workspace/server/modules/notification/application/mark-read.use-case";
 import { MarkUnreadUseCase } from "@workspace/server/modules/notification/application/mark-unread.use-case";
 import { UnreadCountUseCase } from "@workspace/server/modules/notification/application/unread-count.use-case";
+import { UpdateNotificationPreferenceUseCase } from "@workspace/server/modules/notification/application/update-notification-preference.use-case";
 import { NotificationRepository } from "@workspace/server/modules/notification/repository/notification.repository";
+import { UserNotificationPreferenceRepository } from "@workspace/server/modules/notification/repository/user-notification-preference.repository";
 import { NotificationService } from "@workspace/server/modules/notification/service/notification.service";
+import { NotificationEmailDispatchService } from "@workspace/server/modules/notification/service/notification-email-dispatch.service";
+import { NotificationPreferenceService } from "@workspace/server/modules/notification/service/notification-preference.service";
 import { OrganizationAdapter } from "@workspace/server/modules/organization/adapter/organization.adapter";
 import { CompleteOnboardingUseCase } from "@workspace/server/modules/organization/application/complete-onboarding.use-case";
 import { CreateOrganizationUseCase } from "@workspace/server/modules/organization/application/create-organization.use-case";
@@ -145,7 +145,6 @@ import { AuditLogService } from "@workspace/server/shared/audit/audit-log.servic
 import { withTransactionFactory } from "@workspace/server/shared/database/transaction.util";
 import { resendClient } from "@workspace/server/shared/email/email.client";
 import { EmailService } from "@workspace/server/shared/email/service/email.service";
-import { env } from "@workspace/server/shared/env/env.schema";
 import { McpToolListingService } from "@workspace/server/shared/orpc/mcp/mcp-tool-listing.service";
 
 const withTransaction = withTransactionFactory(db);
@@ -181,7 +180,7 @@ const apiKeyService = new ApiKeyService(apiKeyRepository, auditLogService);
 const widgetIngestOriginService = new WidgetIngestOriginService();
 const widgetIngestRateLimitService = new WidgetIngestRateLimitService();
 const widgetUserAgentService = new WidgetUserAgentService();
-const bugReportFileStorage = createBugReportFileStorage(env.BLOB_READ_WRITE_TOKEN);
+const bugReportFileStorage = createBugReportFileStorage();
 
 const projectAccessService = new ProjectAccessService(projectAccessRepository, auditLogService);
 const membershipAdapter = new MembershipAdapter(

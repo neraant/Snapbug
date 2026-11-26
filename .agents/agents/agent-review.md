@@ -21,7 +21,7 @@ Product rules that the diff must keep:
 - Key rotation is one action.
 - The board is kanban only.
 - The interface languages are English and Russian only.
-- Ticket files belong in Vercel Blob.
+- Ticket files belong in Cloudflare R2. E2E writes them to disk.
 - P-08 is age-based deletion of reports. Do not approve that. Existing retention fields and screens are allowed.
 - P-18 is new Jira sync behavior. Do not approve that. Existing Jira mentions that are not a new integration are allowed.
 

@@ -28,10 +28,11 @@ type SecretRevealDialogProps = {
   secret: string;
   kind: SecretRevealDialogKind;
   metadataName?: string;
+  followLink?: { href: string; label: string };
   onDone: VoidFunction;
 };
 
-export function SecretRevealDialog({ secret, kind, metadataName, onDone }: SecretRevealDialogProps) {
+export function SecretRevealDialog({ secret, kind, metadataName, followLink, onDone }: SecretRevealDialogProps) {
   const { copied, hasCopiedOnce, onCopy, onToggleReveal, revealed } = useSecretRevealField(secret);
 
   const title = kind === "userToken" ? texts.userToken.title : texts.apiKey.title;
@@ -147,6 +148,19 @@ export function SecretRevealDialog({ secret, kind, metadataName, onDone }: Secre
           <Link href={connectHref} className="text-foreground underline-offset-4 hover:underline" onClick={onDone}>
             {texts.userToken.connectLink}
           </Link>
+        </Typography>
+      ) : null}
+
+      {followLink ? (
+        <Typography variant="text-sm" color="muted">
+          <a
+            href={followLink.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-foreground underline-offset-4 hover:underline"
+          >
+            {followLink.label}
+          </a>
         </Typography>
       ) : null}
 

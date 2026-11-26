@@ -11,21 +11,29 @@ test("a visitor report shows on the dashboard with screenshot, environment, logs
   test.setTimeout(120_000);
   await seedDatabase();
 
+  const widgetReady = page.waitForResponse(
+    (response) => response.url().includes("/api/widget-config") && response.ok(),
+  );
   await page.goto("/report");
+  await widgetReady;
   await expect(page.getByRole("heading", { name: "Store checkout" })).toBeVisible();
   const reportButton = page.getByRole("button", { name: "Report a bug" });
   await expect(reportButton).toBeVisible({ timeout: 30_000 });
+
+  const widget = page.getByRole("dialog", { name: "Found a bug?" });
+  await expect(async () => {
+    await page.keyboard.press("Alt+KeyS");
+    await expect(page.locator("[data-snapbug-panel]")).toHaveClass(/snapbug-open/, { timeout: 3_000 });
+    await expect(widget).toBeVisible({ timeout: 1_000 });
+  }).toPass({ timeout: 30_000 });
   await page.evaluate((message) => {
     console.info(message);
   }, logMarker);
   await page.evaluate(() => {
     void fetch("/sign-in", { method: "HEAD" });
   });
-
-  await reportButton.click();
-  await expect(page.getByRole("heading", { name: "Found a bug?" })).toBeVisible();
-  await page.getByRole("textbox", { name: "Title" }).fill(title);
-  await page.getByRole("textbox", { name: "What happened?" }).fill(description);
+  await widget.getByRole("textbox", { name: /Checkout button fails/i }).fill(title);
+  await widget.getByRole("textbox", { name: "What happened?" }).fill(description);
   await expect(page.getByText("Visual capture attached")).toBeVisible({ timeout: 30_000 });
   await page.getByRole("button", { name: "Send report" }).click();
   await expect(page.getByRole("heading", { name: "Report Received!" })).toBeVisible({ timeout: 30_000 });

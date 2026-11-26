@@ -20,12 +20,7 @@ test("an invalid email shows one format error and does not create an account", a
   await expect(page.getByText("Work Email is required")).toHaveCount(0);
   await expect(page.getByText("Signed up successfully")).toHaveCount(0);
 
-  const email = page.getByRole("textbox", { name: "Work Email" });
-  const validationMessage = await email.evaluate((element) => (element as HTMLInputElement).validationMessage);
-  const formatCopy = page.getByText(/valid email|include an '@'|include an ‘@’/i);
-  const formatCopyCount = await formatCopy.count();
-  expect(validationMessage.length > 0 || formatCopyCount === 1).toBe(true);
-  expect((validationMessage.length > 0 ? 1 : 0) + formatCopyCount).toBeLessThanOrEqual(1);
+  await expect(page.getByText("Enter a valid email")).toHaveCount(1);
 });
 
 test("empty sign-up fields are rejected", async ({ page }) => {

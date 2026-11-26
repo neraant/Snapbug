@@ -1,5 +1,6 @@
 import type { NotificationModelType } from "@workspace/validation/modules/notification/dto/notification.model";
 
+import { buildPathWithProjectScopeSearchParam } from "@/client/modules/shared/utils/parse-project-scope-search-param.util";
 import { url } from "@/shared/build-url.util";
 
 export function resolveNotificationHref(notification: NotificationModelType): string | null {
@@ -8,7 +9,10 @@ export function resolveNotificationHref(notification: NotificationModelType): st
   switch (notification.objectType) {
     case "bug-report":
       if (!notification.payload.ticketShortId) return url.ticketsBoard();
-      return url.ticket(notification.payload.ticketShortId);
+      return buildPathWithProjectScopeSearchParam(
+        url.ticket(notification.payload.ticketShortId),
+        notification.projectId,
+      );
     case "project":
       return url.projects();
     case "membership":

@@ -119,6 +119,18 @@ const en = {
       },
     },
   },
+  playground: {
+    title: "Try the playground",
+    description:
+      "Open the sample app and paste this project's API key there. The full key is shown only when you rotate it.",
+    openWithKey: "Open playground with this key",
+    hostLabel: "Playground host",
+    hostHint: "Add this host to allowed domains before sending a report from the playground.",
+    allow: "Allow playground host",
+    allowed: "This host can send reports.",
+    allowAny: "Allowed domains is empty, so any origin can send reports, including the playground.",
+    open: "Open playground",
+  },
   testReport: {
     title: "3. Test report",
     description: "Send a sample report from your app to confirm the widget reaches Snapbug.",
@@ -249,6 +261,18 @@ const ru = {
         removeTag: (selector: string) => `Удалить ${selector}`,
       },
     },
+  },
+  playground: {
+    title: "Открыть песочницу",
+    description:
+      "Откройте пример приложения и вставьте туда API-ключ проекта. Полный ключ показывается только при ротации.",
+    openWithKey: "Открыть песочницу с этим ключом",
+    hostLabel: "Хост песочницы",
+    hostHint: "Добавьте этот хост в разрешённые домены, прежде чем отправлять отчёт из песочницы.",
+    allow: "Разрешить хост песочницы",
+    allowed: "Этот хост может отправлять отчёты.",
+    allowAny: "Список разрешённых доменов пуст, поэтому отчёты принимаются с любого origin, включая песочницу.",
+    open: "Открыть песочницу",
   },
   testReport: {
     title: "3. Тестовый отчёт",

@@ -1,4 +1,5 @@
 import { container } from "@workspace/server/container";
+import { UserRole } from "@workspace/validation/modules/user/consts/user-role.const";
 
 import { auth } from "@/auth";
 import { url } from "@/shared/build-url.util";
@@ -56,6 +57,18 @@ export default auth(async (req) => {
 
   if (!completed && !isOnboardingPage && !isInvitePage) {
     return Response.redirect(new URL(url.onboarding(), req.nextUrl));
+  }
+
+  if (pathname === "/") {
+    const target = req.nextUrl.clone();
+    target.pathname = url.overview();
+    return Response.redirect(target);
+  }
+
+  const isAdminRoute =
+    pathname.startsWith(url.projects()) || pathname.startsWith(url.team()) || pathname.startsWith(url.activity());
+  if (isAdminRoute && activeMembership?.role !== UserRole.ADMIN) {
+    return Response.redirect(new URL(url.overview(), req.nextUrl));
   }
 });
 

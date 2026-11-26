@@ -1,4 +1,7 @@
+"use client";
+
 import { redirect } from "next/navigation";
+import { use } from "react";
 
 import { url } from "@/shared/build-url.util";
 
@@ -6,8 +9,8 @@ type PageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
-export default async function Page({ searchParams }: PageProps) {
-  const params = await searchParams;
+export default function Page({ searchParams }: PageProps) {
+  const params = use(searchParams);
   const query = new URLSearchParams();
 
   for (const [key, value] of Object.entries(params)) {

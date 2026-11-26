@@ -1,4 +1,6 @@
+import { mkdir, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
+import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { gzipSync } from "node:zlib";
@@ -8,15 +10,14 @@ export type SeedBugReportFile = {
   replayKey: string | null;
 };
 
-export type SeedBlobPutOptions = {
-  access: "private";
-  contentType: string;
-  addRandomSuffix: false;
-  allowOverwrite: true;
-  token: string;
-};
+export type SeedObjectPut = (key: string, body: Buffer, contentType: string) => Promise<void>;
 
-export type SeedBlobPut = (pathname: string, body: Buffer, options: SeedBlobPutOptions) => Promise<unknown>;
+type R2SeedConfig = {
+  accessKeyId: string;
+  secretAccessKey: string;
+  accountId: string;
+  bucketName: string;
+};
 
 const SEED_SCREENSHOT_PNG = Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
@@ -69,42 +70,115 @@ export function seedReplayBytes(): Buffer {
   return gzipSync(Buffer.from(JSON.stringify(SEED_REPLAY_EVENTS)));
 }
 
+const R2_PLACEHOLDERS = new Set([
+  "your-access-key-id-here",
+  "your-secret-access-key-here",
+  "your-account-id-here",
+  "your-bucket-name-here",
+]);
+
+function readR2Env(name: string): string | undefined {
+  const value = process.env[name]?.trim();
+  if (!value || R2_PLACEHOLDERS.has(value)) return undefined;
+  return value;
+}
+
+function r2SeedConfigFromEnv(): R2SeedConfig | undefined {
+  const accessKeyId = readR2Env("ACCESS_KEY_ID");
+  const secretAccessKey = readR2Env("SECRET_ACCESS_KEY");
+  const accountId = readR2Env("ACCOUNT_ID");
+  const bucketName = readR2Env("BUCKET_NAME");
+  if (!accessKeyId && !secretAccessKey && !accountId && !bucketName) return undefined;
+  if (!accessKeyId || !secretAccessKey || !accountId || !bucketName) {
+    throw new Error("R2 storage requires ACCESS_KEY_ID, SECRET_ACCESS_KEY, ACCOUNT_ID, and BUCKET_NAME.");
+  }
+  return { accessKeyId, secretAccessKey, accountId, bucketName };
+}
+
 export async function uploadSeedBugReportFiles(
   reports: SeedBugReportFile[],
-  options: { token: string | undefined; put: SeedBlobPut },
+  put: SeedObjectPut | undefined,
 ): Promise<void> {
-  const token = options.token?.trim();
-  if (!token) return;
+  if (!put) return;
 
   const screenshot = seedScreenshotBytes();
   const replay = seedReplayBytes();
 
   for (const report of reports) {
     if (report.screenshotKey) {
-      await options.put(report.screenshotKey, screenshot, {
-        access: "private",
-        contentType: "image/png",
-        addRandomSuffix: false,
-        allowOverwrite: true,
-        token,
-      });
+      await put(report.screenshotKey, screenshot, "image/png");
     }
 
     if (report.replayKey) {
-      await options.put(report.replayKey, replay, {
-        access: "private",
-        contentType: "application/gzip",
-        addRandomSuffix: false,
-        allowOverwrite: true,
-        token,
-      });
+      await put(report.replayKey, replay, "application/gzip");
     }
   }
 }
 
-export function loadSeedBlobPut(): SeedBlobPut {
+export function loadSeedObjectPut(): SeedObjectPut | undefined {
+  const config = r2SeedConfigFromEnv();
+  if (!config) return undefined;
+
   const serverPackageJson = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../server/package.json");
   const require = createRequire(serverPackageJson);
-  const blob = require("@vercel/blob") as { put: SeedBlobPut };
-  return blob.put.bind(blob);
+  const { PutObjectCommand, S3Client } = require("@aws-sdk/client-s3") as {
+    S3Client: new (config: {
+      region: string;
+      endpoint: string;
+      credentials: { accessKeyId: string; secretAccessKey: string };
+      forcePathStyle: boolean;
+      requestChecksumCalculation: "WHEN_REQUIRED";
+      responseChecksumValidation: "WHEN_REQUIRED";
+    }) => { send: (command: unknown) => Promise<unknown> };
+    PutObjectCommand: new (input: { Bucket: string; Key: string; Body: Buffer; ContentType: string }) => unknown;
+  };
+  const client = new S3Client({
+    region: "auto",
+    endpoint: `https://${config.accountId}.r2.cloudflarestorage.com`,
+    credentials: {
+      accessKeyId: config.accessKeyId,
+      secretAccessKey: config.secretAccessKey,
+    },
+    forcePathStyle: true,
+    requestChecksumCalculation: "WHEN_REQUIRED",
+    responseChecksumValidation: "WHEN_REQUIRED",
+  });
+
+  return async (key, body, contentType) => {
+    await client.send(
+      new PutObjectCommand({
+        Bucket: config.bucketName,
+        Key: key,
+        Body: body,
+        ContentType: contentType,
+      }),
+    );
+  };
+}
+
+function snapbugE2eEnabled(): boolean {
+  const value = process.env.SNAPBUG_E2E?.trim().toLowerCase();
+  return value === "1" || value === "true";
+}
+
+function resolveE2eBlobStorageDir(): string {
+  const fromEnv = process.env.SNAPBUG_E2E_BLOB_DIR?.trim();
+  if (fromEnv) return fromEnv;
+  return path.join(tmpdir(), "snapbug-e2e-blob");
+}
+
+export function createE2eSeedObjectPut(): SeedObjectPut {
+  const rootDir = resolveE2eBlobStorageDir();
+  return async (key, body) => {
+    const filePath = path.join(rootDir, key);
+    await mkdir(path.dirname(filePath), { recursive: true });
+    await writeFile(filePath, body);
+  };
+}
+
+export function loadSeedObjectPutForCurrentEnv(): SeedObjectPut | undefined {
+  if (snapbugE2eEnabled()) {
+    return createE2eSeedObjectPut();
+  }
+  return loadSeedObjectPut();
 }

@@ -40,10 +40,10 @@ import {
   formatProjectLastTicketRelative,
   formatProjectLastTicketStable,
 } from "@/client/modules/project/utils/format-project-last-ticket.util";
-import { useIsClient } from "@/client/modules/shared/hooks/use-is-client";
 import { formatProjectSlugLabel } from "@/client/modules/project/utils/format-project-slug-label.util";
 import { getProjectInitials } from "@/client/modules/project/utils/get-project-initials.util";
 import { useConfirmDialog } from "@/client/modules/shared/hooks/use-confirm-dialog";
+import { useIsClient } from "@/client/modules/shared/hooks/use-is-client";
 import { useFindMembershipByUser } from "@/client/modules/shared/queries/use-find-membership-by-user";
 import { buildPathWithProjectScopeSearchParam } from "@/client/modules/shared/utils/parse-project-scope-search-param.util";
 import { url } from "@/shared/build-url.util";

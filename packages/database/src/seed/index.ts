@@ -3,7 +3,7 @@ import "@workspace/database/env/load-root-env";
 import { pool } from "@workspace/database";
 import { seedApiKey } from "@workspace/database/seed/api-key";
 import { seedBugReport } from "@workspace/database/seed/bug-report";
-import { loadSeedBlobPut, uploadSeedBugReportFiles } from "@workspace/database/seed/bug-report-file";
+import { loadSeedObjectPutForCurrentEnv, uploadSeedBugReportFiles } from "@workspace/database/seed/bug-report-file";
 import { seedMembership } from "@workspace/database/seed/membership";
 import { seedOrganization } from "@workspace/database/seed/organization";
 import { seedProject } from "@workspace/database/seed/project";
@@ -20,10 +20,7 @@ async function main() {
   }
   await seedApiKey(projects);
   const bugReports = await seedBugReport(projects, users);
-  const blobToken = process.env.BLOB_READ_WRITE_TOKEN?.trim();
-  if (blobToken && blobToken !== "your-blob-read-write-token-here") {
-    await uploadSeedBugReportFiles(bugReports, { token: blobToken, put: loadSeedBlobPut() });
-  }
+  await uploadSeedBugReportFiles(bugReports, loadSeedObjectPutForCurrentEnv());
 }
 
 main()

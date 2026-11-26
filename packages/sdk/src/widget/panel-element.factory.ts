@@ -39,7 +39,17 @@ export function createPanelElements(trigger: HTMLButtonElement, options: Resolve
 
   configurePanelShell(panel, options);
   configureFormIntro(form, header, intro, closeButton, body, heading, subtitle);
-  configureFormFields(title, titleHint, titleError, descriptionError, descriptionCounter, steps, actions, submit, cancel);
+  configureFormFields(
+    title,
+    titleHint,
+    titleError,
+    descriptionError,
+    descriptionCounter,
+    steps,
+    actions,
+    submit,
+    cancel,
+  );
 
   const success = createSuccessBlock();
   const error = createErrorBlock();

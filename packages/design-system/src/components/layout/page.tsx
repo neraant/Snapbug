@@ -1,3 +1,5 @@
+"use client";
+
 import { Column } from "@workspace/design-system/components/layout/column";
 import { Row } from "@workspace/design-system/components/layout/row";
 import { ToolbarRow } from "@workspace/design-system/components/layout/toolbar-row";

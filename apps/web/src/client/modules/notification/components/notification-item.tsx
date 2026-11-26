@@ -170,7 +170,12 @@ export function NotificationItem({
     }
     if (unavailable || !href) return;
     if (event.defaultPrevented) return;
-    handleOpen();
+    if (onOpen) {
+      event.preventDefault();
+      handleOpen();
+      return;
+    }
+    if (isUnread) onMarkRead?.(notification.id);
   };
 
   const openActionsMenu = () => {
@@ -310,7 +315,7 @@ export function NotificationItem({
   return (
     <Link
       href={href}
-      className={rowClassName}
+      className={cn(rowClassName, "m-1")}
       aria-label={texts.item.open(summary)}
       onClick={handleRowClick}
       onKeyDown={handleKeyDown}

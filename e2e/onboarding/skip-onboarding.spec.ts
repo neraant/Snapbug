@@ -19,7 +19,8 @@ test("skipping onboarding still lands in a usable organization", async ({ page }
   await page.getByRole("button", { name: "Skip onboarding" }).click();
   await expect(page).toHaveURL(/\/overview/, { timeout: 30_000 });
   await expect(pageHeading(page, "Overview")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Project" })).toContainText("Default project", { timeout: 30_000 });
+  await page.getByRole("button", { name: "Project" }).click();
+  await expect(page.getByRole("menuitemradio", { name: /Default project/ })).toBeVisible({ timeout: 30_000 });
 
   await page.goto("/tickets");
   await expect(pageHeading(page, "Tickets")).toBeVisible();

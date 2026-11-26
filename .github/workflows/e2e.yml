@@ -18,8 +18,8 @@ jobs:
     timeout-minutes: 45
     env:
       # Dummy values from packages/database/.env.example and apps/web/.env.example.
-      # Playwright starts a local Blob stub when BLOB_READ_WRITE_TOKEN is this placeholder
-      # (e2e/playwright.config.ts). EMAIL_TRANSPORT=log so the app does not call Resend.
+      # SNAPBUG_E2E=1 writes bug-report files to disk (create-bug-report-file-storage.ts).
+      # EMAIL_TRANSPORT=log so the app does not call Resend.
       # SNAPBUG_TEST_API_KEY is intentionally unset: the report page falls back to the
       # seed key sb_test_store_active. The .env.example placeholder would break that.
       DATABASE_URL: postgres://postgres:postgres@localhost:5432/snapbug
@@ -28,8 +28,7 @@ jobs:
       RESEND_API_KEY: your-resend-api-key-here
       EMAIL_FROM: noreply@snapbug.com
       EMAIL_TRANSPORT: log
-      BLOB_STORE_ID: your-blob-store-id-here
-      BLOB_READ_WRITE_TOKEN: your-blob-read-write-token-here
+      SNAPBUG_E2E: "1"
     services:
       postgres:
         image: postgres:17

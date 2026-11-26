@@ -34,7 +34,7 @@ export function TicketDetailIssueSection({ shortId }: TicketDetailIssueSectionPr
         <Panel width="full" minWidth="0">
           <Panel.Header title={texts.issue.stepsTitle} icon={FileTextIcon} />
           <Panel.Content>
-            <Typography variant="text-sm" className="whitespace-pre-wrap [overflow-wrap:anywhere]">
+            <Typography variant="text-sm" className="[overflow-wrap:anywhere] whitespace-pre-wrap">
               {steps}
             </Typography>
           </Panel.Content>

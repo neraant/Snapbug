@@ -11,6 +11,7 @@ export const env = envSchema.parse({
   AUTH_SECRET: process.env.AUTH_SECRET,
   NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
   NEXT_PUBLIC_SNAPBUG_API_KEY: process.env.NEXT_PUBLIC_SNAPBUG_API_KEY,
+  NEXT_PUBLIC_PLAYGROUND_URL: process.env.NEXT_PUBLIC_PLAYGROUND_URL || undefined,
 
   // @disabled posthog
   // NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN: process.env.NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN,

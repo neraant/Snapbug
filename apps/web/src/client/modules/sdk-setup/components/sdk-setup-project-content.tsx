@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { SdkSetupApiKeyCard } from "@/client/modules/sdk-setup/components/sdk-setup-api-key-card";
 import { SdkSetupInitCard } from "@/client/modules/sdk-setup/components/sdk-setup-init-card";
 import { SdkSetupInstallCard } from "@/client/modules/sdk-setup/components/sdk-setup-install-card";
+import { SdkSetupPlaygroundCard } from "@/client/modules/sdk-setup/components/sdk-setup-playground-card";
 import { SdkSetupTestReportCard } from "@/client/modules/sdk-setup/components/sdk-setup-test-report-card";
 import { SdkSetupWidgetSettingsCard } from "@/client/modules/sdk-setup/components/sdk-setup-widget-settings-card";
 
@@ -30,6 +31,9 @@ export function SdkSetupProjectContent({ projectId }: SdkSetupProjectContentProp
       <Column gap="lg" minWidth="0" width="full">
         <Suspense fallback={<SdkSetupApiKeyCard.Fallback />}>
           <SdkSetupApiKeyCard projectId={projectId} />
+        </Suspense>
+        <Suspense fallback={<SdkSetupPlaygroundCard.Fallback />}>
+          <SdkSetupPlaygroundCard projectId={projectId} />
         </Suspense>
         <Suspense fallback={<SdkSetupWidgetSettingsCard.Fallback />}>
           <SdkSetupWidgetSettingsCard projectId={projectId} />

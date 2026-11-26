@@ -16,16 +16,17 @@ src/
 ## Run
 
 1. Start Snapbug (`pnpm --filter @workspace/web dev`, http://localhost:3000).
-2. In Snapbug, open SDK setup (`/sdk`) for a project, copy its API key, and add `localhost:3001` to "Allowed domains".
-3. Copy `.env.example` to `.env.local` and set `NEXT_PUBLIC_SNAPBUG_API_KEY`.
-4. `pnpm --filter @workspace/playground dev` and open http://localhost:3001.
+2. `pnpm --filter @workspace/playground dev` and open http://localhost:3001.
+3. Paste a project API key into the playground, or open the playground from Snapbug SDK setup (`/sdk`). The key stays in this browser (`localStorage`). If the project’s allowed domains list is not empty, add the playground host (`localhost:3001`) before sending a report.
+4. Copy `.env.local` from `.env.example` only when Snapbug is not at `http://localhost:3000`.
 
 ## Environment variables
 
-| Variable                      | Default                                        |
-| ----------------------------- | ---------------------------------------------- |
-| `NEXT_PUBLIC_SNAPBUG_HOST`    | `http://localhost:3000`, the Snapbug instance  |
-| `NEXT_PUBLIC_SNAPBUG_API_KEY` | empty. Without a key the widget does not start |
+| Variable                   | Default                                       |
+| -------------------------- | --------------------------------------------- |
+| `NEXT_PUBLIC_SNAPBUG_HOST` | `http://localhost:3000`, the Snapbug instance |
+
+The project API key is not an environment variable. Pass it in the page, or open `http://localhost:3001/#apiKey=...`. The playground reads that fragment in the browser, stores the key, and removes the hash from the address bar.
 
 ## Backend
 

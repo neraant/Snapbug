@@ -32,9 +32,11 @@ test("changing a ticket status keeps it in the new column after reload", async (
   await expect(page.getByRole("heading", { name: payTitle })).toBeVisible({ timeout: 30_000 });
   const status = page.getByRole("combobox", { name: "Ticket status" });
   await expect(status).toContainText("New");
-  await status.click();
-  await page.keyboard.press("ArrowDown");
-  await page.getByRole("option", { name: "In progress" }).click();
+  await expect(async () => {
+    await status.click();
+    await expect(page.getByRole("listbox")).toBeVisible({ timeout: 3_000 });
+    await page.getByRole("listbox").getByRole("option", { name: "In progress" }).click();
+  }).toPass({ timeout: 15_000 });
   await expect(page.getByText("Ticket status updated")).toBeVisible();
 
   await page.goto("/tickets?projectId=acme-store");
