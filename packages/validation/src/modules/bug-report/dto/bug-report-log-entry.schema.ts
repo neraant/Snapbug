@@ -7,7 +7,10 @@ export const BUG_REPORT_LOG_MESSAGE_MAX_LENGTH = 2_000;
 
 export const bugReportConsoleLogEntrySchema = z.object({
   level: z.enum(["log", "info", "warn", "error"]),
-  message: z.string().max(BUG_REPORT_LOG_MESSAGE_MAX_LENGTH),
+  message: z.string().transform((value) => {
+    if (value.length <= BUG_REPORT_LOG_MESSAGE_MAX_LENGTH) return value;
+    return `${value.slice(0, BUG_REPORT_LOG_MESSAGE_MAX_LENGTH - 1)}…`;
+  }),
   timestamp: z.iso.datetime(),
 });
 

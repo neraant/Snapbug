@@ -37,4 +37,11 @@ describe("formatRejectionReason", () => {
     expect(formatRejectionReason(new Error("e"))).toContain("e");
     expect(formatRejectionReason({ code: 1 })).toBe('{"code":1}');
   });
+
+  it("truncates long error stacks like formatConsoleArgs", () => {
+    const long = "x".repeat(BUG_REPORT_LOG_MESSAGE_MAX_LENGTH + 10);
+    const formatted = formatRejectionReason(new Error(long));
+    expect(formatted.length).toBe(BUG_REPORT_LOG_MESSAGE_MAX_LENGTH);
+    expect(formatted.endsWith("…")).toBe(true);
+  });
 });
