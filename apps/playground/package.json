@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "5.7.1",
-    "@neraant/snapbug": "npm:@neraant/snapbug@0.2.0",
+    "@neraant/snapbug": "npm:@neraant/snapbug@0.2.2",
     "@workspace/design-system": "workspace:*",
     "lucide-react": "1.40.0",
     "next": "16.2.6",

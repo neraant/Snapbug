@@ -36,8 +36,8 @@ importers:
         specifier: 5.7.1
         version: 5.7.1(@standard-schema/spec@1.1.0)(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(react-hook-form@7.87.0(react@19.2.4))(zod@4.4.3)
       '@neraant/snapbug':
-        specifier: npm:@neraant/snapbug@0.2.0
-        version: 0.2.0
+        specifier: npm:@neraant/snapbug@0.2.2
+        version: 0.2.2
       '@workspace/design-system':
         specifier: workspace:*
         version: link:../../packages/design-system
@@ -1695,8 +1695,8 @@ packages:
     os: [linux]
     libc: [glibc]
 
-  '@neraant/snapbug@0.2.0':
-    resolution: {integrity: sha512-kc+1BJ+3fSIWyjg6nnihU7GJIoIX8SVp9UtaCHCCvzJUGanQog2Cc76QXRiF72ErnEJZcGm2y46EvNNOB8Bdsg==}
+  '@neraant/snapbug@0.2.2':
+    resolution: {integrity: sha512-Xzc3ukCplrPPc5C989fgpykXz50vU+ssvX7RPO9zbwJA8NtPu7iZhmtYbRLmd3/4lcIN48T0F2Ij7uGTBAvYag==}
 
   '@next/env@16.2.6':
     resolution: {integrity: sha512-gd8HoHN4ufj73WmR3JmVolrpJR47ILK6LouP5xElPglaVxir6e1a7VzvTvDWkOoPXT9rkkTzyCxBu4yeZfZwcw==}
@@ -6574,7 +6574,7 @@ snapshots:
   '@napi-rs/lzma-linux-x64-gnu@1.5.1':
     optional: true
 
-  '@neraant/snapbug@0.2.0':
+  '@neraant/snapbug@0.2.2':
     dependencies:
       '@rrweb/record': 2.2.0
       '@rrweb/types': 2.2.0

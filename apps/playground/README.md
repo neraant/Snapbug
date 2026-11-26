@@ -1,6 +1,6 @@
 # @workspace/playground
 
-A standalone test stand: a signup form with the `@neraant/snapbug@0.2.0` SDK installed from npm (not the workspace version). The widget sends reports to a real Snapbug instance, so they are saved as tickets in its database. The form contains intentional bugs.
+A standalone test stand: a signup form with the `@neraant/snapbug@0.2.2` SDK installed from npm (not the workspace version). The widget sends reports to a real Snapbug instance, so they are saved as tickets in its database. The form contains intentional bugs.
 
 ## Structure
 
