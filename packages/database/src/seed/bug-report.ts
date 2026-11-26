@@ -306,7 +306,23 @@ export async function seedBugReport(projects: ProjectRow[], users: UserRow[]) {
   const seededIds = bugReportData.map((bugReport) => bugReport.id);
   await db.delete(bugReportTable).where(notInArray(bugReportTable.id, seededIds));
   await db.delete(commentTable).where(inArray(commentTable.bugReportId, seededIds));
-  await db.insert(bugReportTable).values(bugReportData).onConflictDoNothing({ target: bugReportTable.id });
+  for (const bugReport of bugReportData) {
+    await db
+      .insert(bugReportTable)
+      .values(bugReport)
+      .onConflictDoUpdate({
+        target: bugReportTable.id,
+        set: {
+          shortId: bugReport.shortId,
+          status: bugReport.status,
+          severity: bugReport.severity,
+          title: bugReport.title,
+          description: bugReport.description,
+          boardOrder: bugReport.boardOrder ?? 0,
+          updatedAt: bugReport.updatedAt,
+        },
+      });
+  }
 
   return db.select().from(bugReportTable).where(inArray(bugReportTable.id, seededIds));
 }
