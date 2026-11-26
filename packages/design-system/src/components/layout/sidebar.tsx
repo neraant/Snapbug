@@ -30,6 +30,7 @@ import {
   SidebarSeparator,
   useSidebar,
 } from "@workspace/design-system/components/ui/sidebar";
+import { Spinner } from "@workspace/design-system/components/ui/spinner";
 import { Typography } from "@workspace/design-system/components/ui/typography";
 import { BugIcon, EllipsisVerticalIcon, LogOutIcon, MonitorIcon, MoonIcon, SunIcon } from "lucide-react";
 import { createElement, type ElementType, type PropsWithChildren, type ReactNode } from "react";
@@ -61,6 +62,7 @@ type SidebarLayoutProps = PropsWithChildren<{
   pathname: string;
   user: SidebarUser;
   signOutLabel: string;
+  signingOut?: boolean;
   onSignOut: VoidFunction;
   menuLabel?: string;
   themeLabel?: string;
@@ -148,6 +150,7 @@ function SidebarUserMenu({
   theme = "system",
   onThemeChange,
   signOutLabel,
+  signingOut = false,
   onSignOut,
 }: {
   user: SidebarUser;
@@ -156,6 +159,7 @@ function SidebarUserMenu({
   theme?: string;
   onThemeChange?: (value: string) => void;
   signOutLabel: string;
+  signingOut?: boolean;
   onSignOut: VoidFunction;
 }) {
   const { isMobile } = useSidebar();
@@ -172,6 +176,7 @@ function SidebarUserMenu({
           variant="text-sm"
           color="inherit"
           truncate
+          title={user.name}
           data-sidebar="menu-label"
           className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden"
         >
@@ -199,8 +204,8 @@ function SidebarUserMenu({
           </DropdownMenuRadioGroup>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem variant="destructive" onClick={onSignOut}>
-          <LogOutIcon />
+        <DropdownMenuItem variant="destructive" disabled={signingOut} onClick={onSignOut}>
+          {signingOut ? <Spinner /> : <LogOutIcon />}
           {signOutLabel}
         </DropdownMenuItem>
       </DropdownMenuContent>
@@ -219,6 +224,7 @@ export function SidebarLayout({
   user,
   linkAs,
   signOutLabel,
+  signingOut = false,
   onSignOut,
   menuLabel = "More options",
   themeLabel = "Theme",
@@ -312,6 +318,7 @@ export function SidebarLayout({
                 theme={theme}
                 onThemeChange={onThemeChange}
                 signOutLabel={signOutLabel}
+                signingOut={signingOut}
                 onSignOut={onSignOut}
               />
             </SidebarMenuItem>

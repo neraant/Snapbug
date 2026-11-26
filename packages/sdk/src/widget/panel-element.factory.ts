@@ -28,6 +28,7 @@ export function createPanelElements(trigger: HTMLButtonElement, options: Resolve
   const subtitle = document.createElement("p");
   const title = document.createElement("input");
   const description = createDescriptionEditor();
+  const titleHint = document.createElement("p");
   const titleError = document.createElement("p");
   const descriptionError = document.createElement("p");
   const descriptionCounter = document.createElement("span");
@@ -38,7 +39,7 @@ export function createPanelElements(trigger: HTMLButtonElement, options: Resolve
 
   configurePanelShell(panel, options);
   configureFormIntro(form, header, intro, closeButton, body, heading, subtitle);
-  configureFormFields(title, titleError, descriptionError, descriptionCounter, steps, actions, submit, cancel);
+  configureFormFields(title, titleHint, titleError, descriptionError, descriptionCounter, steps, actions, submit, cancel);
 
   const success = createSuccessBlock();
   const error = createErrorBlock();
@@ -56,6 +57,7 @@ export function createPanelElements(trigger: HTMLButtonElement, options: Resolve
     heading,
     subtitle,
     title,
+    titleHint,
     titleError,
     description,
     descriptionError,
@@ -124,6 +126,7 @@ function configureFormIntro(
 
 function configureFormFields(
   title: HTMLInputElement,
+  titleHint: HTMLParagraphElement,
   titleError: HTMLParagraphElement,
   descriptionError: HTMLParagraphElement,
   descriptionCounter: HTMLSpanElement,
@@ -135,6 +138,8 @@ function configureFormFields(
   title.className = "snapbug-input";
   title.placeholder = COPY.titlePlaceholder;
   title.required = true;
+  titleHint.className = "snapbug-hint";
+  titleHint.textContent = COPY.titleRequired;
   titleError.className = "snapbug-field-error";
   titleError.id = PANEL_TITLE_ERROR_ID;
   titleError.hidden = true;

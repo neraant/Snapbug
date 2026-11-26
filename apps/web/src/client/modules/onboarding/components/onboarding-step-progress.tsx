@@ -29,7 +29,11 @@ export function OnboardingStepProgress({ currentStep, totalSteps, stepLabel }: O
           {percent}%
         </Typography>
       </Row>
-      <Progress value={percent} aria-label={`Onboarding progress, ${percent} percent`} />
+      <Progress
+        value={percent}
+        label={`${texts.progress.label}, ${texts.progress.value(percent)}`}
+        getAriaValueText={() => texts.progress.value(percent)}
+      />
     </Column>
   );
 }

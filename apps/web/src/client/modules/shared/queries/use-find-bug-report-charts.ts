@@ -6,6 +6,7 @@ import { orpcQuery } from "@/client/modules/shared/orpc/query-utils";
 type UseFindBugReportChartsInputType = {
   projectId?: string;
   periodDays: BugReportStatPeriodDaysType;
+  timeZone?: string;
 };
 
 export function useFindBugReportCharts(input: UseFindBugReportChartsInputType) {

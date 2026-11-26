@@ -4,8 +4,10 @@ import { BugReportStatus } from "@workspace/validation/modules/bug-report/consts
 import { localize } from "@/client/modules/shared/locale/interface-language";
 
 const en = {
+  documentTitle: (shortId: string) => `Ticket ${shortId}`,
   issue: {
     descriptionTitle: "Issue description",
+    stepsTitle: "Steps to reproduce",
     emptyDescription: "No description provided.",
   },
   comments: {
@@ -55,8 +57,8 @@ const en = {
     console: "Console",
     network: "Network",
     customContext: "Custom context",
-    emptyConsole: "No console logs captured.",
-    emptyNetwork: "No network logs captured.",
+    emptyConsole: "No console warnings or errors were captured.",
+    emptyNetwork: "No failed requests were captured.",
     emptyCustomContext: "No custom context provided.",
     ariaLabel: "Diagnostics view",
   },
@@ -112,8 +114,10 @@ const en = {
 } as const;
 
 const ru = {
+  documentTitle: (shortId: string) => `Тикет ${shortId}`,
   issue: {
     descriptionTitle: "Описание проблемы",
+    stepsTitle: "Шаги воспроизведения",
     emptyDescription: "Описание не указано.",
   },
   comments: {
@@ -163,8 +167,8 @@ const ru = {
     console: "Консоль",
     network: "Сеть",
     customContext: "Пользовательский контекст",
-    emptyConsole: "Логи консоли не записаны.",
-    emptyNetwork: "Сетевые логи не записаны.",
+    emptyConsole: "Предупреждения и ошибки консоли не записаны.",
+    emptyNetwork: "Неудачные запросы не записаны.",
     emptyCustomContext: "Пользовательский контекст не передан.",
     ariaLabel: "Вид диагностики",
   },

@@ -137,7 +137,7 @@ export function TicketDetailHeader({ shortId }: TicketDetailHeaderProps) {
         </Row>
       </Row>
 
-      <Typography variant="heading-md" font="heading" weight="semibold" truncate>
+      <Typography variant="heading-md" font="heading" weight="semibold" className="max-w-full [overflow-wrap:anywhere]">
         {ticket.title}
       </Typography>
     </Column>

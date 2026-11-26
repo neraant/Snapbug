@@ -6,7 +6,7 @@ export type OverviewStatCardId = "newReport" | "openIssue" | "criticalHighOpen" 
 export type OverviewStatItem = {
   id: OverviewStatCardId;
   value: string;
-  changePercent: number;
+  changePercent: number | null;
   polarity: StatTrendPolarity;
   sparkline: StatCardSparklinePoint[];
   sparklineStroke: string;

@@ -4,7 +4,6 @@ import type { ResetPasswordRepository } from "@workspace/server/modules/auth/rep
 import type { AuthService } from "@workspace/server/modules/auth/service/auth.service";
 import type { WithTransactionType } from "@workspace/server/shared/database/transaction.util";
 import type { EmailService } from "@workspace/server/shared/email/service/email.service";
-import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import { describe, expect, it, vi } from "vitest";
 
 const input = { email: "ada@example.com" };
@@ -59,10 +58,10 @@ describe("RequestPasswordResetUseCase", () => {
     );
   });
 
-  it("throws when no user exists for the email", async () => {
+  it("returns success without sending mail when no user exists for the email", async () => {
     const resetPasswordRepository = { withTx: vi.fn() };
     const userPort = { findByEmail: vi.fn().mockResolvedValue(null) };
-    const authService = { generatePasswordResetToken: vi.fn() };
+    const authService = { generatePasswordResetToken: vi.fn().mockResolvedValue("unused-token") };
     const emailService = { send: vi.fn() };
     const withTransaction = vi.fn();
 
@@ -74,11 +73,9 @@ describe("RequestPasswordResetUseCase", () => {
       withTransaction as WithTransactionType,
     );
 
-    await expect(useCase.execute(input)).rejects.toMatchObject({
-      errorCode: ERROR_CODES.USER_NOT_FOUND,
-    });
+    await expect(useCase.execute(input)).resolves.toBeUndefined();
 
-    expect(authService.generatePasswordResetToken).not.toHaveBeenCalled();
+    expect(authService.generatePasswordResetToken).toHaveBeenCalledOnce();
     expect(withTransaction).not.toHaveBeenCalled();
     expect(emailService.send).not.toHaveBeenCalled();
   });

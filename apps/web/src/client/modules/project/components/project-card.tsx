@@ -36,7 +36,11 @@ import { texts } from "@/client/modules/project/consts/texts.const";
 import { useProjectDangerActions } from "@/client/modules/project/hooks/use-project-danger-actions";
 import type { ProjectListItem } from "@/client/modules/project/types/project-list-item.type";
 import { formatProjectCreatedDate } from "@/client/modules/project/utils/format-project-created-date.util";
-import { formatProjectLastTicketRelative } from "@/client/modules/project/utils/format-project-last-ticket.util";
+import {
+  formatProjectLastTicketRelative,
+  formatProjectLastTicketStable,
+} from "@/client/modules/project/utils/format-project-last-ticket.util";
+import { useIsClient } from "@/client/modules/shared/hooks/use-is-client";
 import { formatProjectSlugLabel } from "@/client/modules/project/utils/format-project-slug-label.util";
 import { getProjectInitials } from "@/client/modules/project/utils/get-project-initials.util";
 import { useConfirmDialog } from "@/client/modules/shared/hooks/use-confirm-dialog";
@@ -64,7 +68,11 @@ export function ProjectCard({ project }: ProjectCardProps) {
 
   const ticketsHref = buildPathWithProjectScopeSearchParam(url.ticketsBoard(), project.id);
   const sdkHref = buildPathWithProjectScopeSearchParam(url.sdk(), project.id);
-  const lastTicketLabel = formatProjectLastTicketRelative(project.lastTicketAt, texts.card.noTicketsYet);
+  const isClient = useIsClient();
+  const lastTicketRelative = isClient
+    ? formatProjectLastTicketRelative(project.lastTicketAt, texts.card.noTicketsYet)
+    : formatProjectLastTicketStable(project.lastTicketAt, texts.card.noTicketsYet);
+  const lastTicketLabel = lastTicketRelative;
 
   const openSdkSetup = useCallback(() => {
     router.push(sdkHref);

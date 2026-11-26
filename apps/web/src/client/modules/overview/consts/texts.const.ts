@@ -59,7 +59,7 @@ const en = {
     },
     busiestHours: {
       title: "Busiest Hours Heatmap",
-      description: "Distribution of report arrival times by day of week and hour of day (UTC)",
+      description: "Distribution of report arrival times by day of week and hour of day in your time zone",
       weekdayLabels: {
         1: "Mon",
         2: "Tue",
@@ -71,9 +71,9 @@ const en = {
       },
       formatHourLabel: (hour: number) => `${hour}:00`,
       formatTooltip: (weekdayLabel: string, hour: number, count: number) =>
-        `${weekdayLabel}, ${hour}:00 UTC — ${count} ${count === 1 ? "report" : "reports"}`,
+        `${weekdayLabel}, ${hour}:00 — ${count} ${count === 1 ? "report" : "reports"}`,
       formatAccessibleName: (weekdayLabel: string, hour: number, count: number) =>
-        `${weekdayLabel}, ${hour}:00 UTC, ${count} ${count === 1 ? "report" : "reports"}`,
+        `${weekdayLabel}, ${hour}:00, ${count} ${count === 1 ? "report" : "reports"}`,
       legendFewer: "Fewer reports",
       legendMore: "More reports",
     },
@@ -192,7 +192,7 @@ const ru = {
     },
     busiestHours: {
       title: "Тепловая карта часов",
-      description: "Когда приходят отчёты: день недели и час (UTC)",
+      description: "Когда приходят отчёты: день недели и час в вашем часовом поясе",
       weekdayLabels: {
         1: "Пн",
         2: "Вт",
@@ -204,9 +204,9 @@ const ru = {
       },
       formatHourLabel: (hour: number) => `${hour}:00`,
       formatTooltip: (weekdayLabel: string, hour: number, count: number) =>
-        `${weekdayLabel}, ${hour}:00 UTC — ${count} ${count === 1 ? "отчёт" : "отчётов"}`,
+        `${weekdayLabel}, ${hour}:00 — ${count} ${count === 1 ? "отчёт" : "отчётов"}`,
       formatAccessibleName: (weekdayLabel: string, hour: number, count: number) =>
-        `${weekdayLabel}, ${hour}:00 UTC, ${count} ${count === 1 ? "отчёт" : "отчётов"}`,
+        `${weekdayLabel}, ${hour}:00, ${count} ${count === 1 ? "отчёт" : "отчётов"}`,
       legendFewer: "Меньше отчётов",
       legendMore: "Больше отчётов",
     },

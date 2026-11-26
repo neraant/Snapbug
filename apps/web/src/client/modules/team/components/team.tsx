@@ -109,15 +109,15 @@ export function Team() {
                 return (
                   <Table.Row key={member.id}>
                     <Table.Cell>
-                      <Row gap="sm" wrap={false}>
+                      <Row gap="sm" wrap={false} minWidth="0">
                         <Avatar>
                           <AvatarFallback>{getTeamMemberInitials(member.name, member.email)}</AvatarFallback>
                         </Avatar>
                         <Column gap="none" minWidth="0">
-                          <Typography variant="text-sm" weight="medium">
+                          <Typography variant="text-sm" weight="medium" truncate title={displayName}>
                             {displayName}
                           </Typography>
-                          <Typography variant="text-xs" color="muted">
+                          <Typography variant="text-xs" color="muted" truncate title={member.email}>
                             {member.email}
                           </Typography>
                         </Column>

@@ -12,7 +12,8 @@ import { texts } from "@/client/modules/ticket-board/consts/texts.const";
 import { useTicketBoardFilters } from "@/client/modules/ticket-board/hooks/use-ticket-board-filters";
 
 export default function Page() {
-  const { projectId } = useProjectScopeSearchParam();
+  const { projectId, scopeStatus } = useProjectScopeSearchParam();
+  const scopeReady = scopeStatus === "all" || scopeStatus === "ready";
   const { filters, setFilters, clearFilters } = useTicketBoardFilters();
 
   return (
@@ -20,9 +21,17 @@ export default function Page() {
       <Column gap="lg" minWidth="0" width="full" className="flex min-h-0 flex-1 flex-col overflow-hidden">
         <TicketBoardFiltersBar filters={filters} onFiltersChange={setFilters} onClearFilters={clearFilters} />
         <Column minWidth="0" width="full" className="min-h-0 flex-1">
-          <Suspense fallback={<TicketBoard.Fallback />}>
-            <TicketBoardBody projectId={projectId} filters={filters} onClearFilters={clearFilters} />
-          </Suspense>
+          {scopeReady ? (
+            <Suspense fallback={<TicketBoard.Fallback />}>
+              <TicketBoardBody
+                projectId={scopeStatus === "ready" ? projectId : null}
+                filters={filters}
+                onClearFilters={clearFilters}
+              />
+            </Suspense>
+          ) : (
+            <TicketBoard.Fallback />
+          )}
         </Column>
       </Column>
     </PageContainer>

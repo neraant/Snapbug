@@ -17,21 +17,27 @@ export function useProjectScopeSearchParam() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { data: projects = [] } = useQuery(orpcQuery.project.findProjects.queryOptions());
+  const { data: projects = [], isPending } = useQuery(orpcQuery.project.findProjects.queryOptions());
 
   const scopeToken = parseProjectScopeSearchParam(searchParams.get(projectScopeSearchParamKey));
   const projectLookups = useMemo(() => projects.map((project) => ({ id: project.id, slug: project.slug })), [projects]);
   const projectId = useMemo(() => resolveProjectScopeToken(scopeToken, projectLookups), [scopeToken, projectLookups]);
+  const scopeStatus = useMemo(() => {
+    if (scopeToken == null) return "all" as const;
+    if (isPending) return "pending" as const;
+    if (projectId) return "ready" as const;
+    return "missing" as const;
+  }, [isPending, projectId, scopeToken]);
 
   useEffect(() => {
-    if (!searchParams.has(projectScopeSearchParamKey)) {
+    if (isPending || !searchParams.has(projectScopeSearchParamKey)) {
       return;
     }
 
     const token = parseProjectScopeSearchParam(searchParams.get(projectScopeSearchParamKey));
     const resolved = resolveProjectScopeToken(token, projectLookups);
-    writeStoredProjectScope(resolved);
-  }, [projectLookups, searchParams]);
+    if (resolved) writeStoredProjectScope(resolved);
+  }, [isPending, projectLookups, searchParams]);
 
   const setProjectId = useCallback(
     (nextProjectId: string | null) => {
@@ -52,5 +58,5 @@ export function useProjectScopeSearchParam() {
     [pathname, projectLookups, router, searchParams],
   );
 
-  return { projectId, setProjectId };
+  return { projectId, scopeStatus, setProjectId };
 }

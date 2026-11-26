@@ -32,7 +32,14 @@ type PageProps = PropsWithChildren<{
 
 export function PageContainer({ title, description, badge, actions, children }: PageProps) {
   return (
-    <Column gap="none" padding="none" width="full" minWidth="0" className="min-h-0 flex-1 overflow-hidden">
+    <Column
+      gap="none"
+      padding="none"
+      width="full"
+      minWidth="0"
+      data-page-title={title}
+      className="min-h-0 flex-1 overflow-hidden"
+    >
       <Column gap="md" padding="lg" className="shrink-0">
         <ToolbarRow
           trailingAlign="end"

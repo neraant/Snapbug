@@ -30,14 +30,14 @@ test("an administrator reads the activity log after changing the organization", 
   await expect(page.getByRole("heading", { name: "Activity log" })).toBeVisible();
   await expect(page.getByRole("columnheader", { name: "Event" })).toBeVisible();
 
-  const change = page.getByRole("button", { name: /Update organization/i }).first();
+  const change = page.getByRole("button", { name: /Updated organization/i }).first();
   await expect(change).toBeVisible();
   await expect(change).toContainText("Acme Studio");
   await expect(change).toContainText("Organization");
 
   await change.click();
-  const detail = page.getByRole("dialog", { name: /Update organization Acme Studio/i });
-  await expect(detail.getByRole("heading", { name: /Update organization Acme Studio/i })).toBeVisible();
+  const detail = page.getByRole("dialog", { name: /Updated organization Acme Studio/i });
+  await expect(detail.getByRole("heading", { name: /Updated organization Acme Studio/i })).toBeVisible();
   await expect(detail.getByRole("cell", { name: "name", exact: true })).toBeVisible();
   await expect(detail.getByRole("cell", { name: "Acme", exact: true })).toBeVisible();
   await expect(detail.getByRole("cell", { name: "Acme Studio", exact: true })).toBeVisible();

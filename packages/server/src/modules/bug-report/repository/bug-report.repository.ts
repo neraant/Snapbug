@@ -258,6 +258,15 @@ export class BugReportRepository {
     }
   }
 
+  /** Side-effect reorder. Does not touch updatedAt and does not write an audit row. */
+  async updateBoardOrder(id: string, boardOrder: number): Promise<void> {
+    try {
+      await this.db.update(bugReportTable).set({ boardOrder }).where(eq(bugReportTable.id, id));
+    } catch (error) {
+      throw new InternalServerError(ERROR_CODES.INTERNAL_SERVER_ERROR, undefined, { cause: error });
+    }
+  }
+
   async countCreatedBetween(projectIds: string[], from: Date, to: Date): Promise<number> {
     const [row] = await this.db
       .select({ count: count() })
@@ -293,9 +302,14 @@ export class BugReportRepository {
     return rows.map((row) => ({ day: row.day, value: Number(row.value) }));
   }
 
-  async countCreatedByWeekdayHour(projectIds: string[], from: Date, to: Date): Promise<WeekdayHourCountRow[]> {
-    const weekdayBucket = sql<number>`extract(isodow from ${bugReportTable.createdAt} AT TIME ZONE 'UTC')`;
-    const hourBucket = sql<number>`extract(hour from ${bugReportTable.createdAt} AT TIME ZONE 'UTC')`;
+  async countCreatedByWeekdayHour(
+    projectIds: string[],
+    from: Date,
+    to: Date,
+    timeZone = "UTC",
+  ): Promise<WeekdayHourCountRow[]> {
+    const weekdayBucket = sql<number>`extract(isodow from ${bugReportTable.createdAt} AT TIME ZONE ${timeZone})`;
+    const hourBucket = sql<number>`extract(hour from ${bugReportTable.createdAt} AT TIME ZONE ${timeZone})`;
     const rows = await this.db
       .select({
         weekday: weekdayBucket,
