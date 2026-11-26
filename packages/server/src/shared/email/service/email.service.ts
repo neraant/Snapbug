@@ -16,6 +16,11 @@ export class EmailService {
   constructor(private readonly resend: Resend) {}
 
   async send({ to, subject, react }: SendParamsType) {
+    if (env.EMAIL_TRANSPORT === "log") {
+      console.info(`[email:log] to=${to} subject=${JSON.stringify(subject)}`);
+      return;
+    }
+
     if (env.RESEND_API_KEY === PLACEHOLDER_RESEND_API_KEY) {
       return;
     }

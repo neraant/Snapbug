@@ -1,4 +1,4 @@
-# Task briefs (P-30 … P-53)
+# Task briefs (P-30 … P-55)
 
 A brief is the detailed result description for one task in `docs/STATUS.md`. The STATUS line names the file: `docs/tasks/P-NN.md`. **Read the brief before you write code.** The brief says what the user sees and how it behaves. The brief wins over the one-line PLAN row when they differ in UI detail. A brief does not override `docs/SPEC.md` or `docs/decisions/`.
 
@@ -31,7 +31,9 @@ Shared building blocks come first; later tasks reuse them.
 21. P-50 ticket assignee, comments, token dialog
 22. P-51 sidebar order, one table style, notification item (after P-49)
 23. P-52 remove the retention setting (independent)
-24. P-53 e2e coverage (last, after P-49 to P-51)
+24. P-53 e2e coverage (after P-49 to P-51; happy-path smokes)
+25. P-54 fix QA defects (independent of P-53; can run in parallel with remaining P-48 / P-52 work)
+26. P-55 e2e coverage beyond the happy path (after P-53, and after P-54 for the regression specs)
 
 ## Reference products
 

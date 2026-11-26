@@ -76,6 +76,8 @@ Do not start tasks marked TBD: an implementer agent must not take them.
 - P-48 Refactor: unit tests stay only for application use-cases; tests of utils, services, adapters, wiring, and anything in `apps/web` and `packages/design-system` are removed, with business rules moved into the owning use-case test. Brief: `docs/tasks/P-48.md`. Read it first; shared rules are in `docs/tasks/README.md`.
 - P-52 Remove the retention setting: no data is deleted by age for now; the `reports_retention_days` column, DTO fields, and the Retention section of Organization settings are removed. Brief: `docs/tasks/P-52.md`. Read it first; shared rules are in `docs/tasks/README.md`.
 - P-53 E2E coverage: add the missing Playwright smoke specs (sign-up, onboarding, reset password, sign-out, ticket status and filters, ticket open, delete comment, project create, update and delete, team invitations, role and removal, token revoke, organization switch, notification archive, profile, not-found, a member's view) and shared seed and sign-in helpers. Brief: `docs/tasks/P-53.md`. Read it first; shared rules are in `docs/tasks/README.md`.
+- P-54 Fix QA defects from the local UI pass (D-01–D-35), grouped, with four items waiting on a product decision. Brief: `docs/tasks/P-54.md`. Read it first; shared rules are in `docs/tasks/README.md`.
+- P-55 E2E coverage of main flows beyond the happy path (auth, access control, the public SDK API, tickets, project scope, and P-54 regressions), without duplicating the P-53 smokes. Brief: `docs/tasks/P-55.md`. Read it first; shared rules are in `docs/tasks/README.md`.
 
 ## TBD
 
