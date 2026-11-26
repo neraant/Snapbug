@@ -1,10 +1,11 @@
-const projectCreatedDateFormat = new Intl.DateTimeFormat("en-US", {
-  month: "short",
-  day: "numeric",
-  year: "numeric",
-  timeZone: "UTC",
-});
+import { getInterfaceLanguage } from "@/client/modules/shared/locale/interface-language";
 
 export function formatProjectCreatedDate(createdAt: string): string {
-  return projectCreatedDateFormat.format(new Date(createdAt));
+  const locale = getInterfaceLanguage() === "ru" ? "ru-RU" : "en-US";
+  return new Intl.DateTimeFormat(locale, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(createdAt));
 }

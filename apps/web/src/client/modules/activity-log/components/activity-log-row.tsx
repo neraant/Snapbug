@@ -67,7 +67,7 @@ export function ActivityLogRow({ entry, selected, onOpen }: ActivityLogRowProps)
           <Avatar size="xs">
             <AvatarFallback>{getActivityActorInitials(entry)}</AvatarFallback>
           </Avatar>
-          <Typography variant="text-sm" color={isSystem ? "muted" : undefined} truncate>
+          <Typography variant="text-sm" color={isSystem ? "muted" : undefined} truncate title={actorName}>
             {actorName}
           </Typography>
         </Row>

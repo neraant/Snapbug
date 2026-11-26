@@ -8,6 +8,7 @@ export class WidgetState {
   privacy: ProjectWidgetSettingModelType["privacy"] | null = null;
   preview: ((capture: WidgetPreviewCapture) => void) | null = null;
   identifiedEmail: string | null = null;
+  collectVisitorEmail = true;
   customContext: Record<string, unknown> | null = null;
   outsideClick: ((event: MouseEvent) => void) | null = null;
   openPanel: (() => void) | null = null;
@@ -32,6 +33,7 @@ export class WidgetState {
     this.privacy = null;
     this.preview = null;
     this.identifiedEmail = null;
+    this.collectVisitorEmail = true;
     this.customContext = null;
   }
 }

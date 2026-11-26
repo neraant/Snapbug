@@ -17,6 +17,7 @@ export type PanelSession = {
   heading: HTMLHeadingElement;
   subtitle: HTMLParagraphElement;
   title: HTMLInputElement;
+  titleHint: HTMLParagraphElement;
   titleError: HTMLParagraphElement;
   description: DescriptionEditorControl;
   descriptionError: HTMLParagraphElement;

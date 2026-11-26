@@ -5,7 +5,7 @@ import { formatConsoleArgs } from "./collector-format.util";
 
 type ConsoleLevel = BugReportConsoleLogEntryType["level"];
 
-const CONSOLE_LEVELS: ConsoleLevel[] = ["log", "info", "warn", "error"];
+const CONSOLE_LEVELS: ConsoleLevel[] = ["warn", "error"];
 
 let consoleMethods: Partial<Record<ConsoleLevel, typeof console.log>> | null = null;
 

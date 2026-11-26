@@ -1,8 +1,9 @@
+import { emailSchema } from "@workspace/validation/shared/email.schema";
 import { invitationTokenSchema } from "@workspace/validation/shared/invitation-token.schema";
 import { z } from "zod";
 
 export const requestResetPasswordInputDtoSchema = z.object({
-  email: z.email(),
+  email: emailSchema,
   invitation: invitationTokenSchema.optional(),
 });
 

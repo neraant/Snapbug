@@ -10,6 +10,7 @@ import { TicketDetailIssueSection } from "@/client/modules/ticket-detail/compone
 import { TicketDetailReplaySection } from "@/client/modules/ticket-detail/components/ticket-detail-replay-section";
 import { TicketDetailScreenshotSection } from "@/client/modules/ticket-detail/components/ticket-detail-screenshot-section";
 import { TicketDetailSidebar } from "@/client/modules/ticket-detail/components/ticket-detail-sidebar";
+import { texts } from "@/client/modules/ticket-detail/consts/texts.const";
 import { useFollowTicketOrganization } from "@/client/modules/ticket-detail/hooks/use-follow-ticket-organization";
 import { TICKET_DETAIL_REPLAY_PLAYER_SKELETON_HEIGHT } from "@/client/modules/ticket-detail/utils/build-ticket-detail-replay-player-props.util";
 
@@ -21,7 +22,13 @@ export function TicketDetail({ shortId }: TicketDetailProps) {
   const { showActiveOrganizationData } = useFollowTicketOrganization(shortId);
 
   return (
-    <Column gap="none" width="full" minWidth="0" className="min-h-0 flex-1 overflow-y-auto">
+    <Column
+      gap="none"
+      width="full"
+      minWidth="0"
+      data-page-title={texts.documentTitle(shortId)}
+      className="min-h-0 flex-1 overflow-y-auto"
+    >
       <Column gap="lg" padding="lg" width="full" minWidth="0">
         <TicketDetailHeader shortId={shortId} />
       </Column>

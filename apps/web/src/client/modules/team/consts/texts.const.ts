@@ -21,6 +21,7 @@ const en = {
     cancel: "Cancel",
     submit: "Send invitations",
     validationError: "Add between 1 and 10 valid email addresses.",
+    invalidEmail: "Enter a valid email address",
     success: "Invitations sent.",
     successSummary: (summary: { sent: number; skipped: number; skippedAlreadyMember: number; resent: number }) => {
       const parts: string[] = [];
@@ -155,6 +156,7 @@ const ru = {
     cancel: "Отмена",
     submit: "Отправить приглашения",
     validationError: "Добавьте от 1 до 10 корректных адресов email.",
+    invalidEmail: "Введите корректный адрес email",
     success: "Приглашения отправлены.",
     successSummary: (summary: { sent: number; skipped: number; skippedAlreadyMember: number; resent: number }) => {
       const parts: string[] = [];

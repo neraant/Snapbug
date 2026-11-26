@@ -47,7 +47,7 @@ export function RequestPasswordResetForm({ invitationToken }: RequestPasswordRes
   };
 
   return (
-    <Column as="form" gap="none" width="full" onSubmit={handleSubmit(onSubmit)}>
+    <Column as="form" gap="none" width="full" noValidate onSubmit={handleSubmit(onSubmit)}>
       <FieldGroup>
         <TextField
           control={control}

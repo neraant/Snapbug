@@ -3,6 +3,7 @@ import { localize } from "@/client/modules/shared/locale/interface-language";
 const en = {
   signOut: {
     label: "Sign out",
+    pending: "Signing out…",
   },
   sidebarUserMenu: {
     themeLabel: "Theme",
@@ -34,6 +35,7 @@ const en = {
 const ru = {
   signOut: {
     label: "Выйти",
+    pending: "Выход…",
   },
   sidebarUserMenu: {
     themeLabel: "Тема",

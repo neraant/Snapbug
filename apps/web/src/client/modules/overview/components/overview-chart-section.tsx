@@ -5,15 +5,18 @@ import { OverviewBySeverityCard } from "@/client/modules/overview/components/ove
 import { OverviewReportsOverTimeCard } from "@/client/modules/overview/components/overview-reports-over-time-card";
 import type { OverviewStatFilters } from "@/client/modules/overview/types/overview-stat-filter.type";
 import { useFindBugReportCharts } from "@/client/modules/shared/queries/use-find-bug-report-charts";
+import { useFindUserPreference } from "@/client/modules/shared/queries/use-find-user-preference";
 
 type OverviewChartSectionProps = {
   filters: OverviewStatFilters;
 };
 
 export function OverviewChartSection({ filters }: OverviewChartSectionProps) {
+  const { data: preference } = useFindUserPreference();
   const { data: charts } = useFindBugReportCharts({
     projectId: filters.projectId ?? undefined,
     periodDays: filters.periodDays,
+    timeZone: preference.timeZone,
   });
 
   return (

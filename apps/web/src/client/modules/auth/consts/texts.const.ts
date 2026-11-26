@@ -145,6 +145,8 @@ const en = {
     email: {
       label: "Email",
       placeholder: "Email",
+      invalid: "Enter a valid email",
+      tooLong: "Work Email must be at most 254 characters",
     },
     workEmail: {
       label: "Work Email",
@@ -153,6 +155,7 @@ const en = {
     name: {
       label: "Full Name",
       placeholder: "Sarah Jenkins",
+      tooLong: "Full Name must be at most 80 characters",
     },
     signUpWorkEmail: {
       label: "Work Email",
@@ -199,7 +202,7 @@ const en = {
     footerLink: "Log in",
     emailPlaceholder: "alex@company.com",
     toast: {
-      success: "Password recovery link sent",
+      success: "If an account exists for that email, we sent a reset link",
       genericError: "Something went wrong",
     },
   },
@@ -420,6 +423,8 @@ const ru = {
     email: {
       label: "Email",
       placeholder: "Email",
+      invalid: "Введите корректный email",
+      tooLong: "Рабочий email: не больше 254 символов",
     },
     workEmail: {
       label: "Рабочий email",
@@ -428,6 +433,7 @@ const ru = {
     name: {
       label: "Полное имя",
       placeholder: "Sarah Jenkins",
+      tooLong: "Полное имя: не больше 80 символов",
     },
     signUpWorkEmail: {
       label: "Рабочий email",
@@ -473,7 +479,7 @@ const ru = {
     footerLink: "Войти",
     emailPlaceholder: "alex@company.com",
     toast: {
-      success: "Ссылка для восстановления отправлена",
+      success: "Если аккаунт с таким email есть, мы отправили ссылку для сброса",
       genericError: "Что-то пошло не так",
     },
   },

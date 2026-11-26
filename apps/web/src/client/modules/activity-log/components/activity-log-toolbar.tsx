@@ -61,7 +61,12 @@ export function ActivityLogToolbar({
         }}
       >
         <SelectTrigger aria-label={texts.actor.label} className="w-[180px]">
-          <SelectValue placeholder={texts.actor.all} />
+          <SelectValue placeholder={texts.actor.all}>
+            {(value) => {
+              if (!value || value === "all") return texts.actor.all;
+              return actorOptions.find((option) => option.value === value)?.label ?? value;
+            }}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">{texts.actor.all}</SelectItem>
@@ -83,7 +88,13 @@ export function ActivityLogToolbar({
         }}
       >
         <SelectTrigger aria-label={texts.objectType.label} className="w-[160px]">
-          <SelectValue placeholder={texts.objectType.all} />
+          <SelectValue placeholder={texts.objectType.all}>
+            {(value) => {
+              if (!value || value === "all") return texts.objectType.all;
+              if (value in texts.entityBadge) return texts.entityBadge[value as keyof typeof texts.entityBadge];
+              return value;
+            }}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">{texts.objectType.all}</SelectItem>
@@ -102,7 +113,9 @@ export function ActivityLogToolbar({
         }}
       >
         <SelectTrigger aria-label={texts.range.label} className="w-[150px]">
-          <SelectValue placeholder={texts.range.all} />
+          <SelectValue placeholder={texts.range.all}>
+            {(value) => (value && value in texts.range ? texts.range[value as ActivityLogDateRangeType] : texts.range.all)}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           {rangeOptions.map((range) => (

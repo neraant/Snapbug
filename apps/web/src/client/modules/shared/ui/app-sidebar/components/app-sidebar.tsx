@@ -5,7 +5,7 @@ import { Column } from "@workspace/design-system/components/layout/column";
 import { SidebarLayout } from "@workspace/design-system/components/layout/sidebar";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { type PropsWithChildren, type ReactNode, Suspense, useMemo } from "react";
+import { type PropsWithChildren, type ReactNode, Suspense, useMemo, useState } from "react";
 
 import { useUserTheme } from "@/client/modules/preference/hooks/use-user-theme";
 import { ActiveOrganizationProvider } from "@/client/modules/shared/components/active-organization-provider";
@@ -43,6 +43,7 @@ export function AppSidebar({
   children,
 }: AppSidebarProps) {
   const pathname = usePathname();
+  const [signingOut, setSigningOut] = useState(false);
   const { theme, setTheme } = useUserTheme();
   const language = useInterfaceLanguage();
   const { projectId } = useProjectScopeSearchParam();
@@ -72,8 +73,13 @@ export function AppSidebar({
         pathname={pathname}
         user={{ name: user?.name ?? user?.email ?? "User", image: user?.image }}
         linkAs={Link}
-        signOutLabel={sharedTexts.signOut.label}
-        onSignOut={signOutUser}
+        signOutLabel={signingOut ? sharedTexts.signOut.pending : sharedTexts.signOut.label}
+        signingOut={signingOut}
+        onSignOut={() => {
+          if (signingOut) return;
+          setSigningOut(true);
+          void signOutUser();
+        }}
         theme={theme}
         onThemeChange={setTheme}
         themeLabel={sharedTexts.sidebarUserMenu.themeLabel}

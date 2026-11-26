@@ -68,7 +68,7 @@ export function presetScopes(
 
   switch (preset) {
     case "readOnly":
-      return readScopes.filter((scope) => scope !== "activity:read");
+      return readScopes;
     case "readAndComment":
       return [...presetScopes("readOnly", options), "comments:write"];
     case "fullAccess":

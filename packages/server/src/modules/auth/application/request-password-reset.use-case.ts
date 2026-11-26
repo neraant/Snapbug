@@ -5,8 +5,6 @@ import type { ResetPasswordRepository } from "@workspace/server/modules/auth/rep
 import type { AuthService } from "@workspace/server/modules/auth/service/auth.service";
 import type { WithTransactionType } from "@workspace/server/shared/database/transaction.util";
 import type { EmailService } from "@workspace/server/shared/email/service/email.service";
-import { NotFoundError } from "@workspace/server/shared/error/app-errors";
-import { ERROR_CODES } from "@workspace/server/shared/error/error-codes";
 import type {
   RequestResetPasswordInputDtoType,
   RequestResetPasswordOutputDtoType,
@@ -26,7 +24,9 @@ export class RequestPasswordResetUseCase {
   async execute(input: RequestResetPasswordInputDtoType): Promise<RequestResetPasswordOutputDtoType> {
     const user = await this.userPort.findByEmail(input.email);
     if (!user) {
-      throw new NotFoundError(ERROR_CODES.USER_NOT_FOUND);
+      // Spend a similar amount of time as the success path so the response does not reveal the account.
+      await this.authService.generatePasswordResetToken();
+      return;
     }
 
     const token = await this.authService.generatePasswordResetToken();

@@ -32,9 +32,9 @@ const ru = {
   },
   language: {
     sectionTitle: "Язык интерфейса",
-    sectionDescription: "English и Russian. Интерфейс использует выбранный язык.",
+    sectionDescription: "Английский и русский. Интерфейс использует выбранный язык.",
     options: {
-      en: "English",
+      en: "Английский",
       ru: "Русский",
     },
     toast: {

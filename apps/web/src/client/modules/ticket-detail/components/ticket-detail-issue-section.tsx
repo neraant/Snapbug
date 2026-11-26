@@ -14,6 +14,7 @@ type TicketDetailIssueSectionProps = {
 export function TicketDetailIssueSection({ shortId }: TicketDetailIssueSectionProps) {
   const { data: ticket } = useFindBugReport({ shortId });
   const description = ticket.description.trim();
+  const steps = ticket.stepsToReproduce?.trim() ?? "";
 
   return (
     <Column gap="lg" width="full" minWidth="0">
@@ -29,6 +30,16 @@ export function TicketDetailIssueSection({ shortId }: TicketDetailIssueSectionPr
           )}
         </Panel.Content>
       </Panel>
+      {steps ? (
+        <Panel width="full" minWidth="0">
+          <Panel.Header title={texts.issue.stepsTitle} icon={FileTextIcon} />
+          <Panel.Content>
+            <Typography variant="text-sm" className="whitespace-pre-wrap [overflow-wrap:anywhere]">
+              {steps}
+            </Typography>
+          </Panel.Content>
+        </Panel>
+      ) : null}
     </Column>
   );
 }

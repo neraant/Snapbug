@@ -76,7 +76,8 @@ export function mergeWidgetConfig(init: WidgetConfig, remote: RemoteWidgetConfig
     mutedText: init.mutedText ?? remote.mutedText,
     font: init.font ?? remote.font,
     privacy: init.privacy ?? remote.privacy,
-    collectVisitorEmail: init.collectVisitorEmail ?? remote.collectVisitorEmail,
+    collectVisitorEmail:
+      typeof remote.collectVisitorEmail === "boolean" ? remote.collectVisitorEmail : init.collectVisitorEmail,
   };
 }
 
