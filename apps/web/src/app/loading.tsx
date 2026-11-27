@@ -1,10 +1,10 @@
-import { Center } from "@workspace/design-system/components/layout/center";
+import { Column } from "@workspace/design-system/components/layout/column";
 import { Spinner } from "@workspace/design-system/components/ui/spinner";
 
 export default function Loading() {
   return (
-    <Center>
+    <Column align="center" justify="center" width="full" className="min-h-dvh">
       <Spinner />
-    </Center>
+    </Column>
   );
 }
